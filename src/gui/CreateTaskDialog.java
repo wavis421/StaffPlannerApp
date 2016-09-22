@@ -10,20 +10,17 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Time;
-import java.time.DayOfWeek;
-import java.util.Calendar;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
@@ -36,7 +33,7 @@ public class CreateTaskDialog extends JDialog {
 	private JComboBox<String> dayOfWeekCombo;
 	private JTextField timeTextField;
 	private JTextField locationTextField;
-	private JCheckBox weekOfMonth;
+	private JRadioButton[] weekOfMonthButtons;
 	private Color taskColor;
 
 	public CreateTaskDialog(JFrame parent, Controller controller) {
@@ -46,22 +43,31 @@ public class CreateTaskDialog extends JDialog {
 		dayOfWeekCombo = new JComboBox<String>();
 		timeTextField = new JTextField(10);
 		locationTextField = new JTextField(10);
-		weekOfMonth = new JCheckBox ();
 		taskColor = Color.BLACK;
 
 		okButton = new JButton("OK");
 		cancelButton = new JButton("Cancel");
 
 		createDayOfWeekCombo();
+		createWeekOfMonthButtons();
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					// Validate that time field is correct format
 					Time time = Time.valueOf(timeTextField.getText() + ":00");
+
+					// Create weeks of month array
+					int numWeeksInMonth = weekOfMonthButtons.length;
+					boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
+					for (int i = 0; i < numWeeksInMonth; i++) {
+						if (weekOfMonthButtons[i].isSelected())
+							weeksOfMonthSelected[i] = true;
+					}
 					
 					// Create TaskEvent and send to controller to add to database
-					TaskEvent ev = new TaskEvent(this, taskName.getText(),  locationTextField.getText(), dayOfWeekCombo.getSelectedIndex(), Calendar.DAY_OF_MONTH, time);
+					TaskEvent ev = new TaskEvent(this, taskName.getText(), locationTextField.getText(),
+							dayOfWeekCombo.getSelectedIndex() + 1, weeksOfMonthSelected, time);
 					controller.addTask(ev);
 					setVisible(false);
 
@@ -100,7 +106,7 @@ public class CreateTaskDialog extends JDialog {
 		gc.weightx = gc.weighty = 1;
 		gc.fill = GridBagConstraints.NONE;
 
-		// First row
+		// Task name row
 		gc.gridx = gc.gridy = 0;
 		gc.anchor = GridBagConstraints.EAST;
 		gc.insets = new Insets(0, 0, 0, 15);
@@ -110,7 +116,7 @@ public class CreateTaskDialog extends JDialog {
 		gc.insets = new Insets(0, 0, 0, 0);
 		controlsPanel.add(taskName, gc);
 
-		// Next row
+		// Day of week row
 		gc.gridy++;
 		gc.gridx = 0;
 		gc.anchor = GridBagConstraints.EAST;
@@ -121,7 +127,7 @@ public class CreateTaskDialog extends JDialog {
 		gc.insets = new Insets(0, 0, 0, 0);
 		controlsPanel.add(dayOfWeekCombo, gc);
 
-		// Next row
+		// Time row
 		gc.gridy++;
 		gc.gridx = 0;
 		gc.anchor = GridBagConstraints.EAST;
@@ -132,18 +138,20 @@ public class CreateTaskDialog extends JDialog {
 		gc.insets = new Insets(0, 0, 0, 0);
 		controlsPanel.add(timeTextField, gc);
 
-		// Next row
+		// Weeks of the month row
 		gc.gridy++;
 		gc.gridx = 0;
 		gc.anchor = GridBagConstraints.EAST;
 		gc.insets = new Insets(0, 0, 0, 15);
 		controlsPanel.add(new JLabel("Weeks of the Month: "), gc);
-		gc.gridx++;
 		gc.anchor = GridBagConstraints.WEST;
 		gc.insets = new Insets(0, 0, 0, 0);
-		controlsPanel.add(weekOfMonth, gc);
-		
-		// Next row
+		for (int i = 0; i < weekOfMonthButtons.length; i++) {
+			gc.gridx++;
+			controlsPanel.add(weekOfMonthButtons[i], gc);
+		}
+
+		// Location row
 		gc.gridy++;
 		gc.gridx = 0;
 		gc.anchor = GridBagConstraints.EAST;
@@ -183,7 +191,13 @@ public class CreateTaskDialog extends JDialog {
 		dayOfWeekModel.addElement(new String("Saturday"));
 
 		dayOfWeekCombo = new JComboBox<String>(dayOfWeekModel);
-		dayOfWeekCombo.setSelectedIndex(0);
+		dayOfWeekCombo.setSelectedIndex(1);
 		dayOfWeekCombo.setBorder(BorderFactory.createEtchedBorder());
+	}
+	
+	private void createWeekOfMonthButtons() {
+		weekOfMonthButtons = new JRadioButton[6];
+		for (int i = 0; i < 6; i++)
+			weekOfMonthButtons[i] = new JRadioButton();
 	}
 }

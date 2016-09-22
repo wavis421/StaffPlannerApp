@@ -14,15 +14,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import acm.gui.VPanel;
 import controller.Controller;
-import model.Task;
+import model.TaskModel;
 
 public class MainFrame extends JFrame {
 	/* Private constants */
@@ -44,8 +44,8 @@ public class MainFrame extends JFrame {
 		setBackground(Color.WHITE);
 
 		// Create components
-		calPanel = new CalendarPanel();
 		controller = new Controller();
+		calPanel = new CalendarPanel(controller);
 		popupMenu = new JPopupMenu();
 		selectTaskItem = new JMenuItem("Select task");
 
@@ -55,25 +55,28 @@ public class MainFrame extends JFrame {
 		// Set up Calendar Panel and day Listener
 		calPanel.setPreferredSize(new Dimension(PREF_FRAME_WIDTH - 15, PREF_FRAME_HEIGHT - 60));
 		calPanel.setDayBoxListener(new DayBoxListener() {
-			public void dayBoxClicked(VPanel dayPanel, Calendar calendar, int day, Point point) {
+			public void dayBoxClicked(Calendar calendar, Point point) {
 				selectedCalendar = calendar;
-				System.out.println(calPanel.getMonthName(calendar.get(Calendar.MONTH)) + " " + day + ", "
-						+ calendar.get(Calendar.YEAR));
-
+				
 				// Create pop-up menu
-				popupMenu.show(calPanel, dayPanel.getX() + point.x, dayPanel.getY() + point.y);
+				popupMenu.show(calPanel, point.x, point.y); 
 			}
 		});
 		selectTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Task Menu Item action for " + selectedCalendar.get(Calendar.MONTH) + "/"
+				System.out.println("Select tasks for: " + selectedCalendar.get(Calendar.MONTH) + "/"
 						+ selectedCalendar.get(Calendar.DAY_OF_MONTH) + "/" + selectedCalendar.get(Calendar.YEAR)
-						+ "!");
-				Task task = controller.findTask(selectedCalendar);
+						+ ", DOW = " + selectedCalendar.get(Calendar.DAY_OF_WEEK) + ", WOM = "
+						+ selectedCalendar.get(Calendar.WEEK_OF_MONTH));
+
+				TaskModel task = controller.findTasksByDay(selectedCalendar);
+
 				if (task == null)
 					System.out.println("Task not found");
-				else
+				else {
 					System.out.println("Task found: " + task.getTaskName());
+					calPanel.addTaskToDayBox(task, selectedCalendar);
+				}
 			}
 		});
 
@@ -114,6 +117,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create Task Menu Item clicked!");
 				new CreateTaskDialog(MainFrame.this, controller);
+				calPanel.refresh();
 			}
 		});
 

@@ -13,30 +13,35 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Database {
-	private List<Task> taskList;
+	private List<TaskModel> taskList;
 
 	public Database() {
-		taskList = new LinkedList<Task>();
+		taskList = new LinkedList<TaskModel>();
 	}
 
-	public void addTask(Task task) {
+	public void addTask(TaskModel task) {
 		System.out.println("Added task to database: " + task.getTaskName() + ", location - " + task.getLocation()
-						+ "DOW = " + task.getDayOfWeek() + "WOM = " + task.getWeekOfMonth() + ", time - " + task.getTime());
+				+ ", DOW = " + task.getDayOfWeek() + ", time - " + task.getTime());
 		taskList.add(task);
 	}
 
-	public Task findTask(Calendar calendar) {
-		for (Task t : taskList)
-		{
-			if (false)
-			{
+	public TaskModel findTasksByDay(Calendar calendar) {
+		int weekOfMonthIdx = calendar.get(Calendar.WEEK_OF_MONTH) - 1;
+
+		System.out.println(
+				"Searching database for: " + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.DAY_OF_MONTH)
+						+ "/" + calendar.get(Calendar.YEAR) + ", DOW = " + calendar.get(Calendar.DAY_OF_WEEK));
+
+		for (TaskModel t : taskList) {
+			System.out.println("Task: " + t.getTaskName() + ", DOW = " + t.getDayOfWeek());
+			if ((t.getDayOfWeek() == calendar.get(Calendar.DAY_OF_WEEK)) && (t.getWeekOfMonth()[weekOfMonthIdx])) {
 				return t;
 			}
 		}
 		return null;
 	}
 
-	public List<Task> getTasks() {
+	public List<TaskModel> getTasks() {
 		return Collections.unmodifiableList(taskList);
 	}
 
@@ -45,7 +50,7 @@ public class Database {
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
 
 		// Convert to array
-		Task[] tasks = taskList.toArray(new Task[taskList.size()]);
+		TaskModel[] tasks = taskList.toArray(new TaskModel[taskList.size()]);
 
 		oos.writeObject(tasks);
 		oos.close();
@@ -57,7 +62,7 @@ public class Database {
 
 		try {
 			// Convert from array to people
-			Task[] tasks = (Task[]) ois.readObject();
+			TaskModel[] tasks = (TaskModel[]) ois.readObject();
 			taskList.clear();
 			taskList.addAll(Arrays.asList(tasks));
 

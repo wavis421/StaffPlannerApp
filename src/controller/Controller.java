@@ -6,19 +6,19 @@ import java.util.Calendar;
 
 import gui.TaskEvent;
 import model.Database;
-import model.Task;
+import model.TaskModel;
 
 public class Controller {
 	Database db = new Database();
 
 	public void addTask(TaskEvent ev) {
-		Task task = new Task(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime());
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime());
 		db.addTask(task);
 	}
 
-	public Task findTask (Calendar calendar)
+	public TaskModel findTasksByDay (Calendar calendar)
 	{
-		return db.findTask(calendar);
+		return db.findTasksByDay(calendar);
 	}
 	
 	public void saveToFile(File file) throws IOException {

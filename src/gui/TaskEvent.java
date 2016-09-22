@@ -8,14 +8,14 @@ public class TaskEvent extends EventObject {
 	private String taskName;
 	private String location;
 	private int dayOfWeek;
-	private int weekOfMonth;
+	private boolean[] weekOfMonth;
 	private Time time;
 	
 	public TaskEvent(Object source) {
 		super(source);
 	}
 	
-	public TaskEvent(Object source, String taskName, String location, int dayOfWeek, int weekOfMonth, Time time) {
+	public TaskEvent(Object source, String taskName, String location, int dayOfWeek, boolean[] weekOfMonth, Time time) {
 		super(source);
 		
 		this.taskName = taskName;
@@ -37,7 +37,7 @@ public class TaskEvent extends EventObject {
 		return dayOfWeek;
 	}
 
-	public int getWeekOfMonth() {
+	public boolean[] getWeekOfMonth() {
 		return weekOfMonth;
 	}
 	

@@ -3,14 +3,14 @@ package model;
 import java.io.Serializable;
 import java.sql.Time;
 
-public class Task implements Serializable {
+public class TaskModel implements Serializable {
 	private String taskName;
 	private Time time;
 	private String location;
 	private int dayOfWeek;
-	private int weekOfMonth;
+	private boolean[] weekOfMonth;
 	
-	public Task (String taskName, String location, int dayOfWeek, int weekOfMonth, Time time) {
+	public TaskModel (String taskName, String location, int dayOfWeek, boolean[] weekOfMonth, Time time) {
 		this.taskName = taskName;
 		this.location = location;
 		this.dayOfWeek = dayOfWeek;
@@ -34,7 +34,7 @@ public class Task implements Serializable {
 		return dayOfWeek;
 	}
 
-	public int getWeekOfMonth() {
+	public boolean[] getWeekOfMonth() {
 		return weekOfMonth;
 	}
 }
