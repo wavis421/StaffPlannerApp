@@ -13,8 +13,8 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
+import java.util.LinkedList;
 
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -31,7 +31,7 @@ public class MainFrame extends JFrame {
 
 	/* Private instance variables */
 	private CalendarPanel calPanel;
-	private Controller controller;
+	private static Controller controller;
 	private JPopupMenu popupMenu;
 	private JMenuItem selectTaskItem;
 
@@ -45,21 +45,26 @@ public class MainFrame extends JFrame {
 
 		// Create components
 		controller = new Controller();
-		calPanel = new CalendarPanel(controller);
+		calPanel = new CalendarPanel();
 		popupMenu = new JPopupMenu();
 		selectTaskItem = new JMenuItem("Select task");
 
 		setJMenuBar(createMenuBar());
 		popupMenu.add(selectTaskItem);
 
-		// Set up Calendar Panel and day Listener
+		// Set up Calendar Panel, update listener and day Listener
 		calPanel.setPreferredSize(new Dimension(PREF_FRAME_WIDTH - 15, PREF_FRAME_HEIGHT - 60));
+		calPanel.setUpdateCalendarListener(new UpdateCalendarListener() {
+			public void updateCalendar(Calendar calendar) {
+				updateMonth(calendar);
+			}
+		});
 		calPanel.setDayBoxListener(new DayBoxListener() {
 			public void dayBoxClicked(Calendar calendar, Point point) {
 				selectedCalendar = calendar;
-				
-				// Create pop-up menu
-				popupMenu.show(calPanel, point.x, point.y); 
+
+				// Display pop-up menu
+				popupMenu.show(calPanel, point.x, point.y);
 			}
 		});
 		selectTaskItem.addActionListener(new ActionListener() {
@@ -69,14 +74,7 @@ public class MainFrame extends JFrame {
 						+ ", DOW = " + selectedCalendar.get(Calendar.DAY_OF_WEEK) + ", WOM = "
 						+ selectedCalendar.get(Calendar.WEEK_OF_MONTH));
 
-				TaskModel task = controller.findTasksByDay(selectedCalendar);
-
-				if (task == null)
-					System.out.println("Task not found");
-				else {
-					System.out.println("Task found: " + task.getTaskName());
-					calPanel.addTaskToDayBox(task, selectedCalendar);
-				}
+				// TBD
 			}
 		});
 
@@ -110,17 +108,34 @@ public class MainFrame extends JFrame {
 		// Set up listeners
 		exitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Exit Menu Item clicked!");
+				dispose();
+				System.gc();
 			}
 		});
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Create Task Menu Item clicked!");
-				new CreateTaskDialog(MainFrame.this, controller);
-				calPanel.refresh();
+				CreateTaskDialog taskEvent = new CreateTaskDialog(MainFrame.this);
+				TaskEvent dialogResponse = taskEvent.getDialogResponse();
+				System.out.println("Task Create listener: name = " + dialogResponse.getTaskName());
+
+				// Update task list and refresh calendar
+				if (dialogResponse != null) {
+					controller.addTask(dialogResponse);
+					updateMonth ((Calendar) calPanel.getCurrentCalendar().clone());
+				}
 			}
 		});
 
 		return menuBar;
+	}
+	
+	private void updateMonth(Calendar calendar) {
+		LinkedList<TaskModel> tasks;
+		for (int i = 0; i < 31; i++) {
+			calendar.set(Calendar.DAY_OF_MONTH, i + 1);
+			tasks = controller.findTasksByDay(calendar);
+			calPanel.updateTasksByDay(i, tasks);
+		}
+		calPanel.refresh();
 	}
 }

@@ -17,22 +17,20 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 import acm.gui.TableLayout;
 import acm.gui.VPanel;
 import acm.util.JTFTools;
-import controller.Controller;
 import model.TaskModel;
 
 /*
@@ -46,7 +44,6 @@ public class CalendarPanel extends JPanel {
 	private static final String DATE_FONT = "Serif-18";
 
 	/* Private instance variables */
-	private static Controller myController;
 	private Calendar currentCalendar;
 	private Locale locale;
 	private DateFormatSymbols symbols;
@@ -55,58 +52,61 @@ public class CalendarPanel extends JPanel {
 	private int firstDayOfWeek;
 	private JButton leftButton, rightButton;
 	private DayBoxListener dayListener;
-	private TaskModel[] dayBoxTask;
+	private UpdateCalendarListener updateListener;
+	private LinkedList<TaskModel>[] dayBoxTaskList;
 
-	public CalendarPanel(Controller controller) {
+	public CalendarPanel() {
 		// Create borders
 		Border innerBorder = BorderFactory.createTitledBorder("Calendar");
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 
 		// Initialize calendar parameters
-		myController = controller;
 		locale = new Locale("en", "US", "");
 		currentCalendar = Calendar.getInstance(locale);
 		symbols = new DateFormatSymbols(locale);
 		weekdayNames = symbols.getWeekdays();
 		monthNames = symbols.getMonths();
 		firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
-		
+
+		dayBoxTaskList = new LinkedList[31];
 		updateCalendarDisplay(currentCalendar);
 	}
-	
+
+	/*
+	 * public String getMonthName (int month) { return
+	 * capitalize(monthNames[month]); }
+	 */
+
+	/* Listen to mouse action on calendar day boxes */
 	public void setDayBoxListener(DayBoxListener listener) {
 		this.dayListener = listener;
 	}
-	
-	public String getMonthName (int month)
-	{
-		return capitalize(monthNames[month]);	
+
+	/* Initialize listener for updating of calendar */
+	public void setUpdateCalendarListener(UpdateCalendarListener listener) {
+		this.updateListener = listener;
 	}
 
-	public void refresh () 
-	{
+	/* Update the tasks for the indicated calendar day */
+	public void updateTasksByDay(int dayIdx, LinkedList<TaskModel> tasks) {
+		dayBoxTaskList[dayIdx] = tasks;
+	}
+
+	/* Refresh calendar */
+	public void refresh() {
 		updateCalendarDisplay(currentCalendar);
 	}
-	
-	public void addTaskToDayBox (TaskModel task, Calendar calendarDay) {
-		int dayBoxIdx = calendarDay.get(Calendar.DAY_OF_MONTH) - 1;
-		System.out.println("Adding task " + task.getTaskName() + " to day " + calendarDay.get(Calendar.DAY_OF_MONTH));
-		if (dayBoxTask[dayBoxIdx] == null) {
-			dayBoxTask[dayBoxIdx] = task;
-			System.out.println("Adding task to idx " + dayBoxIdx);
-		}
-		// For testing; should wait until all tasks added!
-		//updateCalendarDisplay(currentCalendar);
+
+	/* Get current calendar */
+	public Calendar getCurrentCalendar() {
+		return currentCalendar;
 	}
-	
-	/* Update the calendar display when a new month is selected */
+
+	/* Update the calendar display for the indicated month */
 	private void updateCalendarDisplay(Calendar calendar) {
 		// Remove components from the calendar table
 		removeAll();
-		
-		// Reset tasks for the month
-		dayBoxTask = new TaskModel[31];
 
 		// Set up new table layout
 		TableLayout layout = new TableLayout();
@@ -157,13 +157,15 @@ public class CalendarPanel extends JPanel {
 		leftButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				currentCalendar.add(Calendar.MONTH, -1);
-				updateCalendarDisplay(currentCalendar);
+				if (updateListener != null)
+					updateListener.updateCalendar((Calendar) currentCalendar.clone());
 			}
 		});
 		rightButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				currentCalendar.add(Calendar.MONTH, 1);
-				updateCalendarDisplay(currentCalendar);
+				if (updateListener != null)
+					updateListener.updateCalendar((Calendar) currentCalendar.clone());
 			}
 		});
 	}
@@ -211,23 +213,21 @@ public class CalendarPanel extends JPanel {
 
 	/* Create a box for a calendar day containing the specified text */
 	private Component createDayBox(String text) {
-		VPanel vbox = new VPanel();    // Single table panel
-		
+		VPanel vbox = new VPanel(); // Single table panel
+
 		if (text == null) {
 			vbox.setBackground(EMPTY_BACKGROUND);
 		} else {
 			JLabel label;
 			int dayIdx = Integer.parseInt(text) - 1;
-			
-			// Get tasks for this day
-			Calendar calendar = (Calendar) currentCalendar.clone();
-			calendar.set(Calendar.DAY_OF_MONTH, dayIdx + 1);
-			dayBoxTask[dayIdx] = myController.findTasksByDay(calendar);
-			System.out.println("dayBoxTask[" + dayIdx + "] = " + dayBoxTask[dayIdx]);
-			
-			if (dayBoxTask[dayIdx] != null)
-				label = new JLabel (text + dayBoxTask[dayIdx].getTaskName());
-			else 
+
+			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
+				String lblText = text;
+				for (int i = 0; i < dayBoxTaskList[dayIdx].size(); i++) {
+					lblText += dayBoxTaskList[dayIdx].get(i).getTaskName() + " ";
+				}
+				label = new JLabel(lblText);
+			} else
 				label = new JLabel(text);
 			label.setFont(JTFTools.decodeFont(DATE_FONT));
 			vbox.add(label, "anchor=NORTHEAST top=2 right=2");
@@ -236,14 +236,13 @@ public class CalendarPanel extends JPanel {
 
 			vbox.addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent e) {
-					if (e.getButton() == MouseEvent.BUTTON3) { 
+					if (e.getButton() == MouseEvent.BUTTON3) {
 						// Right mouse button event
-						if (dayListener != null) 
-						{
+						if (dayListener != null) {
 							// Clone the calendar, update with the selected day
 							Calendar calendar = (Calendar) currentCalendar.clone();
 							calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(e.getComponent().getName()));
-							
+
 							Point point = new Point();
 							point.setLocation(vbox.getX() + e.getPoint().getX(), vbox.getY() + e.getPoint().getY());
 							dayListener.dayBoxClicked(calendar, point);
@@ -262,6 +261,7 @@ public class CalendarPanel extends JPanel {
 		return word.substring(0, 1).toUpperCase() + word.substring(1);
 	}
 
+	/* Create icon from indicated image file */
 	private ImageIcon createIcon(String path) {
 		URL url = getClass().getResource(path);
 		ImageIcon icon = new ImageIcon(url);

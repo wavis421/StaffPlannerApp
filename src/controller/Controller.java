@@ -3,6 +3,7 @@ package controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.LinkedList;
 
 import gui.TaskEvent;
 import model.Database;
@@ -16,7 +17,7 @@ public class Controller {
 		db.addTask(task);
 	}
 
-	public TaskModel findTasksByDay (Calendar calendar)
+	public LinkedList<TaskModel> findTasksByDay (Calendar calendar)
 	{
 		return db.findTasksByDay(calendar);
 	}

@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -24,8 +23,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
-import controller.Controller;
-
 public class CreateTaskDialog extends JDialog {
 	private JButton okButton;
 	private JButton cancelButton;
@@ -34,23 +31,23 @@ public class CreateTaskDialog extends JDialog {
 	private JTextField timeTextField;
 	private JTextField locationTextField;
 	private JRadioButton[] weekOfMonthButtons;
-	private Color taskColor;
+	
+	private TaskEvent dialogResponse;
 
-	public CreateTaskDialog(JFrame parent, Controller controller) {
+	public CreateTaskDialog(JFrame parent) {
 		super(parent, "Create task...", true);
 
 		taskName = new JTextField(20);
 		dayOfWeekCombo = new JComboBox<String>();
 		timeTextField = new JTextField(10);
 		locationTextField = new JTextField(10);
-		taskColor = Color.BLACK;
 
 		okButton = new JButton("OK");
 		cancelButton = new JButton("Cancel");
 
 		createDayOfWeekCombo();
 		createWeekOfMonthButtons();
-
+		
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -65,11 +62,12 @@ public class CreateTaskDialog extends JDialog {
 							weeksOfMonthSelected[i] = true;
 					}
 					
-					// Create TaskEvent and send to controller to add to database
+					// Create TaskEvent and set response
 					TaskEvent ev = new TaskEvent(this, taskName.getText(), locationTextField.getText(),
 							dayOfWeekCombo.getSelectedIndex() + 1, weeksOfMonthSelected, time);
-					controller.addTask(ev);
+					dialogResponse = ev;
 					setVisible(false);
+					dispose();
 
 				} catch (IllegalArgumentException ev) {
 					JOptionPane.showMessageDialog(okButton, "Please enter Time as hh:mm");
@@ -77,18 +75,22 @@ public class CreateTaskDialog extends JDialog {
 			}
 		});
 		cancelButton.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
+				dialogResponse = null;
 				setVisible(false);
+				dispose();
 			}
-
 		});
 
 		setTaskLayout();
-		setSize(500, 375);
+		setSize(550, 375);
 		setVisible(true);
 	}
 
+	public TaskEvent getDialogResponse () {
+		return dialogResponse; 	
+	}
+	
 	private void setTaskLayout() {
 		JPanel controlsPanel = new JPanel();
 		JPanel buttonsPanel = new JPanel();

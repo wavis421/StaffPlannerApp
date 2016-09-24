@@ -25,20 +25,17 @@ public class Database {
 		taskList.add(task);
 	}
 
-	public TaskModel findTasksByDay(Calendar calendar) {
+	public LinkedList<TaskModel> findTasksByDay(Calendar calendar) {
 		int weekOfMonthIdx = calendar.get(Calendar.WEEK_OF_MONTH) - 1;
 
-		System.out.println(
-				"Searching database for: " + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.DAY_OF_MONTH)
-						+ "/" + calendar.get(Calendar.YEAR) + ", DOW = " + calendar.get(Calendar.DAY_OF_WEEK));
-
+		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
 		for (TaskModel t : taskList) {
 			System.out.println("Task: " + t.getTaskName() + ", DOW = " + t.getDayOfWeek());
 			if ((t.getDayOfWeek() == calendar.get(Calendar.DAY_OF_WEEK)) && (t.getWeekOfMonth()[weekOfMonthIdx])) {
-				return t;
+				thisMonthTasks.add(t);
 			}
 		}
-		return null;
+		return thisMonthTasks;
 	}
 
 	public List<TaskModel> getTasks() {
