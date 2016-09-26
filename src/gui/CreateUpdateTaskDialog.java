@@ -26,43 +26,19 @@ import javax.swing.border.Border;
 import model.TaskModel;
 
 public class CreateUpdateTaskDialog extends JDialog {
-	private static JButton okButton;
-	private static JButton cancelButton;
+	private static JButton okButton = new JButton("OK");;
+	private static JButton cancelButton = new JButton("Cancel");
 	private static JTextField taskName = new JTextField(20);
-	private static JComboBox<String> dayOfWeekCombo = new JComboBox<String>();
 	private static JTextField timeTextField = new JTextField(10);
 	private static JTextField locationTextField = new JTextField(10);
-	private static JRadioButton[] weekOfMonthButtons = new JRadioButton[6];
+	private static JComboBox<String> dayOfWeekCombo;
+	private static JRadioButton[] weekOfMonthButtons;
 	
 	private TaskEvent dialogResponse;
 
 	public CreateUpdateTaskDialog(JFrame parent) {
-		super(parent, "Create task...", true);
+		super(parent, "Create/Update task...", true);
 		
-		taskName.setText(null);
-		//dayOfWeekCombo.setSelectedIndex(0);
-		timeTextField.setText(null);
-		locationTextField.setText(null);
-
-		setupTaskDialog();
-	}
-	
-	public CreateUpdateTaskDialog (JFrame parent, TaskModel task) {
-		super(parent, "Update task...", true);
-		
-		taskName.setText(task.getTaskName());
-		dayOfWeekCombo.setSelectedItem(task.getDayOfWeek());
-		weekOfMonthButtons.equals(task.getWeekOfMonth());
-		timeTextField.setText(task.getTime().toString());
-		locationTextField.setText(task.getLocation());
-		
-		setupTaskDialog();
-	}
-	
-	private void setupTaskDialog () {
-		okButton = new JButton("OK");
-		cancelButton = new JButton("Cancel");
-
 		createDayOfWeekCombo();
 		createWeekOfMonthButtons();
 		
@@ -103,9 +79,29 @@ public class CreateUpdateTaskDialog extends JDialog {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); 
 		setTaskLayout();
 		setSize(550, 375);
-		setVisible(true);
+		setVisible(false);
 	}
 
+	public void createTaskDialog () {		
+		taskName.setText(null);
+		timeTextField.setText("00:00");
+		locationTextField.setText(null);
+		dayOfWeekCombo.setSelectedItem(0);
+		clearWeekOfMonthButtons();
+		
+		setVisible(true);
+	}
+	
+	public void updateTaskDialog (TaskModel task) {		
+		taskName.setText(task.getTaskName());
+		timeTextField.setText(task.getTime().toString());
+		locationTextField.setText(task.getLocation());
+		dayOfWeekCombo.setSelectedItem(task.getDayOfWeek());
+		weekOfMonthButtons.equals(task.getWeekOfMonth());
+		
+		setVisible(true);
+	}
+	
 	public TaskEvent getDialogResponse () {
 		return dialogResponse; 	
 	}
@@ -220,5 +216,10 @@ public class CreateUpdateTaskDialog extends JDialog {
 		weekOfMonthButtons = new JRadioButton[6];
 		for (int i = 0; i < 6; i++)
 			weekOfMonthButtons[i] = new JRadioButton();
+	}
+	
+	private void clearWeekOfMonthButtons() {
+		for (JRadioButton w : weekOfMonthButtons)
+			w.setSelected(false);
 	}
 }
