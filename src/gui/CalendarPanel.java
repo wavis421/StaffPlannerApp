@@ -1,5 +1,7 @@
 package gui;
 
+import java.awt.BorderLayout;
+
 /**
  * File: CalendarPanel.java
  * -----------------------
@@ -9,6 +11,7 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,15 +24,17 @@ import java.util.LinkedList;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 import acm.gui.TableLayout;
-import acm.gui.VPanel;
 import acm.util.JTFTools;
 import model.TaskModel;
 
@@ -37,23 +42,26 @@ import model.TaskModel;
  ** http://cs.stanford.edu/people/eroberts/jtf/tutorial/GraphicalUserInterfaces.html
  */
 public class CalendarPanel extends JPanel {
-	/* Private constants */
+	// Private constants
 	private static final Color EMPTY_BACKGROUND = new Color(0xDDDDDD);
 	private static final String TITLE_FONT = "Serif-36";
 	private static final String LABEL_FONT = "Serif-bold-14";
-	private static final String DATE_FONT = "Serif-18";
+	private static final String DATE_FONT = "Serif-11";
 
-	/* Private instance variables */
-	private Calendar currentCalendar;
-	private Locale locale;
-	private DateFormatSymbols symbols;
-	private String[] monthNames;
-	private String[] weekdayNames;
-	private int firstDayOfWeek;
+	// Private instance variables
 	private JButton leftButton, rightButton;
 	private DayBoxListener dayListener;
 	private UpdateCalendarListener updateListener;
 	private LinkedList<TaskModel>[] dayBoxTaskList;
+	private static TableLayout layout = new TableLayout();
+	private static Locale locale = new Locale("en", "US", "");
+	private static DateFormatSymbols symbols = new DateFormatSymbols(locale);
+
+	// Private calendar variables
+	private Calendar currentCalendar;
+	private int firstDayOfWeek;
+	private static String[] monthNames = symbols.getMonths();
+	private static String[] weekdayNames = symbols.getWeekdays();
 
 	public CalendarPanel() {
 		// Create borders
@@ -61,56 +69,45 @@ public class CalendarPanel extends JPanel {
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 
-		// Initialize calendar parameters
-		locale = new Locale("en", "US", "");
+		// Initialize calendar parameters and display this month's calendar
 		currentCalendar = Calendar.getInstance(locale);
-		symbols = new DateFormatSymbols(locale);
-		weekdayNames = symbols.getWeekdays();
-		monthNames = symbols.getMonths();
 		firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
-
+		layout.setColumnCount(7);
 		dayBoxTaskList = new LinkedList[31];
 		updateCalendarDisplay(currentCalendar);
 	}
 
-	/*
-	 * public String getMonthName (int month) { return
-	 * capitalize(monthNames[month]); }
-	 */
-
-	/* Listen to mouse action on calendar day boxes */
+	// Set listener for mouse action on calendar day boxes
 	public void setDayBoxListener(DayBoxListener listener) {
 		this.dayListener = listener;
 	}
 
-	/* Initialize listener for updating of calendar */
+	// Set listener for updating calendar month
 	public void setUpdateCalendarListener(UpdateCalendarListener listener) {
 		this.updateListener = listener;
 	}
 
-	/* Update the tasks for the indicated calendar day */
+	// Update the tasks for the indicated calendar day
 	public void updateTasksByDay(int dayIdx, LinkedList<TaskModel> tasks) {
 		dayBoxTaskList[dayIdx] = tasks;
 	}
-
-	/* Refresh calendar */
+	
+	// Refresh calendar
 	public void refresh() {
 		updateCalendarDisplay(currentCalendar);
 	}
 
-	/* Get current calendar */
+	// Get current calendar
 	public Calendar getCurrentCalendar() {
 		return currentCalendar;
 	}
 
-	/* Update the calendar display for the indicated month */
+	// Update the calendar display for the indicated month
 	private void updateCalendarDisplay(Calendar calendar) {
 		// Remove components from the calendar table
 		removeAll();
 
-		// Set up new table layout
-		TableLayout layout = new TableLayout();
-		layout.setColumnCount(7);
+		// Set table layout
 		setLayout(layout);
 
 		// Add month set buttons and month label
@@ -145,7 +142,7 @@ public class CalendarPanel extends JPanel {
 		validate();
 	}
 
-	/* Create right/left month update buttons */
+	// Create right/left month update buttons
 	private void CreateMonthButtons() {
 		leftButton = new JButton();
 		rightButton = new JButton();
@@ -170,7 +167,7 @@ public class CalendarPanel extends JPanel {
 		});
 	}
 
-	/* Generate the header label for a particular month */
+	// Generate the header label for a particular month
 	private JLabel createMonthLabel(Calendar calendar) {
 		int month = calendar.get(Calendar.MONTH);
 		int year = calendar.get(Calendar.YEAR);
@@ -181,7 +178,7 @@ public class CalendarPanel extends JPanel {
 		return label;
 	}
 
-	/* Create a label for the weekday header at the specified index */
+	// Create a label for the weekday header at the specified index
 	private JLabel createWeekdayLabel(int index) {
 		int weekday = (firstDayOfWeek + index + 6) % 7 + 1;
 		JLabel label = new JLabel(capitalize(weekdayNames[weekday]));
@@ -190,7 +187,7 @@ public class CalendarPanel extends JPanel {
 		return label;
 	}
 
-	/* Compute the number of days in the current month */
+	// Compute the number of days in the current month
 	private int getDaysInMonth(Calendar calendar) {
 		calendar = (Calendar) calendar.clone();
 		int current = calendar.get(Calendar.DAY_OF_MONTH);
@@ -203,7 +200,7 @@ public class CalendarPanel extends JPanel {
 		return current;
 	}
 
-	/* Compute the index of the first weekday for the current Locale */
+	// Compute the index of the first weekday for the current Locale
 	private int getFirstWeekdayIndex(Calendar calendar) {
 		int day = calendar.get(Calendar.DAY_OF_MONTH);
 		int weekday = calendar.get(Calendar.DAY_OF_WEEK);
@@ -211,57 +208,74 @@ public class CalendarPanel extends JPanel {
 		return ((5 * 7 + 1) + weekdayIndex - day) % 7;
 	}
 
-	/* Create a box for a calendar day containing the specified text */
+	// Create a box for a calendar day containing the specified text
 	private Component createDayBox(String text) {
-		VPanel vbox = new VPanel(); // Single table panel
+		// Single table panel
+		// VPanel vbox = new VPanel();
+		JPanel dayBox = new JPanel(new BorderLayout());
+		JScrollPane scrollPane;
 
 		if (text == null) {
-			vbox.setBackground(EMPTY_BACKGROUND);
+			dayBox.setBackground(EMPTY_BACKGROUND);
 		} else {
-			JLabel label;
+			JLabel label = new JLabel(text);
 			int dayIdx = Integer.parseInt(text) - 1;
 
-			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
-				String lblText = text;
-				for (int i = 0; i < dayBoxTaskList[dayIdx].size(); i++) {
-					lblText += dayBoxTaskList[dayIdx].get(i).getTaskName() + " ";
-				}
-				label = new JLabel(lblText);
-			} else
-				label = new JLabel(text);
 			label.setFont(JTFTools.decodeFont(DATE_FONT));
-			vbox.add(label, "anchor=NORTHEAST top=2 right=2");
-			vbox.setBackground(Color.WHITE);
-			vbox.setName(text);
+			dayBox.setBackground(Color.WHITE);
+			dayBox.add(label, BorderLayout.BEFORE_FIRST_LINE);
 
-			vbox.addMouseListener(new MouseAdapter() {
+			DefaultListModel<String> taskListModel = new DefaultListModel<String>();
+			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
+				for (int i = 0; i < dayBoxTaskList[dayIdx].size(); i++) {
+					taskListModel.addElement(new String(dayBoxTaskList[dayIdx].get(i).getTaskName()));
+				}
+			}
+			JList<String> taskList = new JList<String>(taskListModel);
+			taskList.setName(text);
+			scrollPane = new JScrollPane(taskList);
+			scrollPane.setPreferredSize(
+					new Dimension((int) dayBox.getMinimumSize().getWidth(), (int) dayBox.getMinimumSize().getHeight()));
+			scrollPane.setBackground(Color.WHITE);
+			dayBox.add(scrollPane, BorderLayout.CENTER);
+
+			taskList.addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent e) {
 					if (e.getButton() == MouseEvent.BUTTON3) {
 						// Right mouse button event
 						if (dayListener != null) {
-							// Clone the calendar, update with the selected day
-							Calendar calendar = (Calendar) currentCalendar.clone();
-							calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(e.getComponent().getName()));
+							// Check whether a list item has been selected
+							int listIdx = ((JList<String>) e.getComponent().getComponentAt(e.getPoint())).getSelectedIndex();
+							if (listIdx != -1) {	
+								// Clone the calendar, update with selected day
+								Calendar calendar = (Calendar) currentCalendar.clone();
+								calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(e.getComponent().getName()));
 
-							Point point = new Point();
-							point.setLocation(vbox.getX() + e.getPoint().getX(), vbox.getY() + e.getPoint().getY());
-							dayListener.dayBoxClicked(calendar, point);
+								// Compute location for pop-up menu
+								Point point = new Point();
+								point.setLocation(dayBox.getX() + e.getPoint().getX(),
+										dayBox.getY() + e.getPoint().getY());
+								
+								// Get task model and invoke listener
+								int dayIdx = Integer.parseInt(e.getComponent().getName()) - 1;
+								dayListener.dayBoxClicked(calendar, point, dayBoxTaskList[dayIdx].get(listIdx));
+							}
 						}
 					}
 				}
 			});
 		}
-		vbox.setOpaque(true);
-		vbox.setBorder(new LineBorder(Color.BLACK));
-		return vbox;
+		dayBox.setOpaque(true);
+		dayBox.setBorder(new LineBorder(Color.BLACK));
+		return dayBox;
 	}
 
-	/* Capitalize the first letter of a word */
+	// Capitalize the first letter of a word
 	private String capitalize(String word) {
 		return word.substring(0, 1).toUpperCase() + word.substring(1);
 	}
 
-	/* Create icon from indicated image file */
+	// Create icon from indicated image file
 	private ImageIcon createIcon(String path) {
 		URL url = getClass().getResource(path);
 		ImageIcon icon = new ImageIcon(url);

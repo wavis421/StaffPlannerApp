@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 public class Database {
 	private List<TaskModel> taskList;
 
@@ -25,7 +27,31 @@ public class Database {
 		taskList.add(task);
 	}
 
-	public LinkedList<TaskModel> findTasksByDay(Calendar calendar) {
+	public void updateTask(TaskModel task) {
+		System.out.println("Update task: " + task.getTaskName() + ", location - " + task.getLocation() + ", DOW = "
+				+ task.getDayOfWeek() + ", time - " + task.getTime());
+
+		int taskIdx = getIndexByName(task.getTaskName());
+		if (taskIdx != -1)
+			taskList.set(taskIdx, task);
+		else
+			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!");
+	}
+
+	public void removeTaskFromDay (Calendar calendar, String taskName) {
+		// TBD
+	}
+	
+	public TaskModel getTaskByName(String taskName) {
+		for (TaskModel t : taskList) {
+			if (t.getTaskName().equals(taskName)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	public LinkedList<TaskModel> getTasksByDay(Calendar calendar) {
 		int weekOfMonthIdx = calendar.get(Calendar.WEEK_OF_MONTH) - 1;
 
 		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
@@ -38,8 +64,18 @@ public class Database {
 		return thisMonthTasks;
 	}
 
-	public List<TaskModel> getTasks() {
+	public List<TaskModel> getAllTasks() {
 		return Collections.unmodifiableList(taskList);
+	}
+
+	private int getIndexByName(String taskName) {
+		int i = 0;
+		for (TaskModel t : taskList) {
+			if (t.getTaskName().equals(taskName))
+				return i;
+			i++;
+		}
+		return -1;
 	}
 
 	public void saveToFile(File file) throws IOException {
@@ -69,5 +105,4 @@ public class Database {
 		}
 		ois.close();
 	}
-
 }

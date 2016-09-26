@@ -23,25 +23,43 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
-public class CreateTaskDialog extends JDialog {
-	private JButton okButton;
-	private JButton cancelButton;
-	private JTextField taskName;
-	private JComboBox<String> dayOfWeekCombo;
-	private JTextField timeTextField;
-	private JTextField locationTextField;
-	private JRadioButton[] weekOfMonthButtons;
+import model.TaskModel;
+
+public class CreateUpdateTaskDialog extends JDialog {
+	private static JButton okButton;
+	private static JButton cancelButton;
+	private static JTextField taskName = new JTextField(20);
+	private static JComboBox<String> dayOfWeekCombo = new JComboBox<String>();
+	private static JTextField timeTextField = new JTextField(10);
+	private static JTextField locationTextField = new JTextField(10);
+	private static JRadioButton[] weekOfMonthButtons = new JRadioButton[6];
 	
 	private TaskEvent dialogResponse;
 
-	public CreateTaskDialog(JFrame parent) {
+	public CreateUpdateTaskDialog(JFrame parent) {
 		super(parent, "Create task...", true);
+		
+		taskName.setText(null);
+		//dayOfWeekCombo.setSelectedIndex(0);
+		timeTextField.setText(null);
+		locationTextField.setText(null);
 
-		taskName = new JTextField(20);
-		dayOfWeekCombo = new JComboBox<String>();
-		timeTextField = new JTextField(10);
-		locationTextField = new JTextField(10);
-
+		setupTaskDialog();
+	}
+	
+	public CreateUpdateTaskDialog (JFrame parent, TaskModel task) {
+		super(parent, "Update task...", true);
+		
+		taskName.setText(task.getTaskName());
+		dayOfWeekCombo.setSelectedItem(task.getDayOfWeek());
+		weekOfMonthButtons.equals(task.getWeekOfMonth());
+		timeTextField.setText(task.getTime().toString());
+		locationTextField.setText(task.getLocation());
+		
+		setupTaskDialog();
+	}
+	
+	private void setupTaskDialog () {
 		okButton = new JButton("OK");
 		cancelButton = new JButton("Cancel");
 
@@ -82,6 +100,7 @@ public class CreateTaskDialog extends JDialog {
 			}
 		});
 
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); 
 		setTaskLayout();
 		setSize(550, 375);
 		setVisible(true);
@@ -99,7 +118,7 @@ public class CreateTaskDialog extends JDialog {
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
 		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		Border titleBorder = BorderFactory.createTitledBorder("Create/Edit Task");
+		Border titleBorder = BorderFactory.createTitledBorder("Create/Update Task");
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
 		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, titleBorder));
 
@@ -193,7 +212,7 @@ public class CreateTaskDialog extends JDialog {
 		dayOfWeekModel.addElement(new String("Saturday"));
 
 		dayOfWeekCombo = new JComboBox<String>(dayOfWeekModel);
-		dayOfWeekCombo.setSelectedIndex(1);
+		dayOfWeekCombo.setSelectedIndex(0);
 		dayOfWeekCombo.setBorder(BorderFactory.createEtchedBorder());
 	}
 	

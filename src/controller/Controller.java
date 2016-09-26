@@ -16,10 +16,23 @@ public class Controller {
 		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime());
 		db.addTask(task);
 	}
-
-	public LinkedList<TaskModel> findTasksByDay (Calendar calendar)
+	
+	public void updateTask(TaskEvent ev) {
+		TaskModel task = new TaskModel (ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime());
+		db.updateTask(task);
+	}
+	
+	public void removeTaskFromDay (Calendar calendar, String taskName) {
+		db.removeTaskFromDay (calendar, taskName);
+	}
+	
+	public TaskModel getTaskByName (String taskName) {
+		return db.getTaskByName(taskName);
+	}
+	
+	public LinkedList<TaskModel> getTasksByDay (Calendar calendar)
 	{
-		return db.findTasksByDay(calendar);
+		return db.getTasksByDay(calendar);
 	}
 	
 	public void saveToFile(File file) throws IOException {
