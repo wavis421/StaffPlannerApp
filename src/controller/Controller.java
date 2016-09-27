@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.List;
+
+import javax.swing.JList;
 
 import gui.TaskEvent;
 import model.Database;
@@ -33,6 +36,16 @@ public class Controller {
 	public LinkedList<TaskModel> getTasksByDay (Calendar calendar)
 	{
 		return db.getTasksByDay(calendar);
+	}
+	
+	public List<TaskModel> getAllTasks () 
+	{
+		return db.getAllTasks();
+	}
+	
+	public JList<String> getAllTasksAsString ()
+	{
+		return db.getAllTasksAsString();
 	}
 	
 	public void saveToFile(File file) throws IOException {

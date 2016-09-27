@@ -50,12 +50,12 @@ public class CalendarPanel extends JPanel {
 
 	// Private instance variables
 	private JButton leftButton, rightButton;
-	private DayBoxListener dayListener;
-	private UpdateCalendarListener updateListener;
 	private LinkedList<TaskModel>[] dayBoxTaskList;
 	private static TableLayout layout = new TableLayout();
 	private static Locale locale = new Locale("en", "US", "");
 	private static DateFormatSymbols symbols = new DateFormatSymbols(locale);
+	private DayBoxListener dayListener;
+	private UpdateCalendarListener updateListener;
 
 	// Private calendar variables
 	private Calendar currentCalendar;
@@ -142,7 +142,7 @@ public class CalendarPanel extends JPanel {
 		validate();
 	}
 
-	// Create right/left month update buttons
+	// Create right/left month update buttons and listeners
 	private void CreateMonthButtons() {
 		leftButton = new JButton();
 		rightButton = new JButton();
@@ -211,7 +211,6 @@ public class CalendarPanel extends JPanel {
 	// Create a box for a calendar day containing the specified text
 	private Component createDayBox(String text) {
 		// Single table panel
-		// VPanel vbox = new VPanel();
 		JPanel dayBox = new JPanel(new BorderLayout());
 		JScrollPane scrollPane;
 
@@ -221,14 +220,16 @@ public class CalendarPanel extends JPanel {
 			JLabel label = new JLabel(text);
 			int dayIdx = Integer.parseInt(text) - 1;
 
+			// Add day of month
 			label.setFont(JTFTools.decodeFont(DATE_FONT));
 			dayBox.setBackground(Color.WHITE);
 			dayBox.add(label, BorderLayout.BEFORE_FIRST_LINE);
 
+			// Create a list of task names assigned to this day
 			DefaultListModel<String> taskListModel = new DefaultListModel<String>();
 			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
-				for (int i = 0; i < dayBoxTaskList[dayIdx].size(); i++) {
-					taskListModel.addElement(new String(dayBoxTaskList[dayIdx].get(i).getTaskName()));
+				for (TaskModel t : dayBoxTaskList[dayIdx]) {
+					taskListModel.addElement(new String(t.getTaskName()));
 				}
 			}
 			JList<String> taskList = new JList<String>(taskListModel);
@@ -239,6 +240,7 @@ public class CalendarPanel extends JPanel {
 			scrollPane.setBackground(Color.WHITE);
 			dayBox.add(scrollPane, BorderLayout.CENTER);
 
+			// Add listener to task list
 			taskList.addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent e) {
 					if (e.getButton() == MouseEvent.BUTTON3) {

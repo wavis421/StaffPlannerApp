@@ -12,16 +12,23 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.List;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import controller.Controller;
 import model.TaskModel;
@@ -35,6 +42,7 @@ public class MainFrame extends JFrame {
 	private static Controller controller;
 	private CalendarPanel calPanel;
 	private JFileChooser fileChooser;
+	private TaskFileFilter fileFilter;
 
 	// Store parameters for selected day box
 	private TaskModel selectedTask;
@@ -49,10 +57,12 @@ public class MainFrame extends JFrame {
 		controller = new Controller();
 		calPanel = new CalendarPanel();
 		fileChooser = new JFileChooser();
+		fileFilter = new TaskFileFilter();
 
 		setJMenuBar(createMenuBar());
 		setCalendarPopupMenu();
-		fileChooser.addChoosableFileFilter(new TaskFileFilter());
+		fileChooser.addChoosableFileFilter(fileFilter);
+		fileChooser.setFileFilter(fileFilter);
 
 		// Set up Calendar Panel and update month listener
 		calPanel.setPreferredSize(new Dimension(PREF_FRAME_WIDTH - 15, PREF_FRAME_HEIGHT - 60));
@@ -92,9 +102,11 @@ public class MainFrame extends JFrame {
 
 		// Add task sub-menus
 		JMenuItem taskCreateItem = new JMenuItem("Create task");
+		JMenuItem taskEditItem = new JMenuItem("Edit task");
 		taskMenu.add(taskCreateItem);
+		taskMenu.add(taskEditItem);
 
-		// Set up listeners
+		// Set up listeners for FILE menu
 		exportDataItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
@@ -128,6 +140,8 @@ public class MainFrame extends JFrame {
 				System.gc();
 			}
 		});
+
+		// Set up listeners for TASK menu
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this);
@@ -141,14 +155,42 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+		
+		taskEditItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPopupMenu editTaskPopup = new JPopupMenu();
+				JList<String> nameList = controller.getAllTasksAsString();
+				
+				editTaskPopup.add(nameList);
+				editTaskPopup.setSize(100, 200);  // TBD
+				editTaskPopup.show(taskMenu, taskMenu.getX(), taskMenu.getY());
+				
+				nameList.addMouseListener(new MouseAdapter() {
+					public void mousePressed(MouseEvent e) {
+						System.out.println("Task Update listener: name = " + nameList.getSelectedValue());
+						CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, 
+								controller.getTaskByName(nameList.getSelectedValue()));
+						TaskEvent dialogResponse = taskEvent.getDialogResponse();
+
+						// Update task list and refresh calendar
+						if (dialogResponse != null) {
+							controller.updateTask(dialogResponse);
+							updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
+						}
+						editTaskPopup.setVisible(false);
+						nameList.removeAll();
+						editTaskPopup.removeAll();
+					}
+				});
+			}
+		});
+
 		return menuBar;
 	}
 
 	private void setCalendarPopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 		JMenuItem removeTaskItem = new JMenuItem("Remove task");
-		JMenuItem editTaskItem = new JMenuItem("Edit task");
-		popupMenu.add(editTaskItem);
 		popupMenu.add(removeTaskItem);
 
 		// Day Box listener
@@ -164,30 +206,14 @@ public class MainFrame extends JFrame {
 			}
 		});
 		// Day Box pop-up sub-menus
-		editTaskItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("Update task: " + selectedCalendar.get(Calendar.MONTH) + "/"
-						+ selectedCalendar.get(Calendar.DAY_OF_MONTH) + "/" + selectedCalendar.get(Calendar.YEAR)
-						+ ", Room = " + selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
-
-				CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, selectedTask);
-				TaskEvent dialogResponse = taskEvent.getDialogResponse();
-				System.out.println("Task Update listener: name = " + dialogResponse.getTaskName());
-
-				// Update task list and refresh calendar
-				if (dialogResponse != null) {
-					controller.updateTask(dialogResponse);
-					updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
-				}
-			}
-		});
 		removeTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Remove task: " + selectedCalendar.get(Calendar.MONTH) + "/"
 						+ selectedCalendar.DAY_OF_MONTH + "/" + selectedCalendar.YEAR + ", Room = "
 						+ selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
 
-				// Remove task from selected day box (TBD: also remove from database)
+				// Remove task from selected day box (TBD: also remove from
+				// database)
 				controller.removeTaskFromDay(selectedCalendar, selectedTask.getTaskName());
 				calPanel.updateTasksByDay(selectedCalendar.DAY_OF_MONTH - 1,
 						controller.getTasksByDay(selectedCalendar));

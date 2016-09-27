@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 
 public class Database {
@@ -38,10 +40,10 @@ public class Database {
 			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!");
 	}
 
-	public void removeTaskFromDay (Calendar calendar, String taskName) {
+	public void removeTaskFromDay(Calendar calendar, String taskName) {
 		// TBD
 	}
-	
+
 	public TaskModel getTaskByName(String taskName) {
 		for (TaskModel t : taskList) {
 			if (t.getTaskName().equals(taskName)) {
@@ -56,7 +58,6 @@ public class Database {
 
 		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
 		for (TaskModel t : taskList) {
-			System.out.println("Task: " + t.getTaskName() + ", DOW = " + t.getDayOfWeek());
 			if ((t.getDayOfWeek() == calendar.get(Calendar.DAY_OF_WEEK)) && (t.getWeekOfMonth()[weekOfMonthIdx])) {
 				thisMonthTasks.add(t);
 			}
@@ -66,6 +67,16 @@ public class Database {
 
 	public List<TaskModel> getAllTasks() {
 		return Collections.unmodifiableList(taskList);
+	}
+
+	public JList<String> getAllTasksAsString() {
+		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+
+		for (TaskModel t : taskList) {
+			nameModel.addElement(new String(t.getTaskName()));
+		}
+		JList<String> nameList = new JList<String>(nameModel);
+		return nameList;
 	}
 
 	private int getIndexByName(String taskName) {
