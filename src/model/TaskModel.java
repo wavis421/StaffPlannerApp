@@ -22,6 +22,10 @@ public class TaskModel implements Serializable {
 		return taskName;
 	}
 
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
 	public Time getTime() {
 		return time;
 	}

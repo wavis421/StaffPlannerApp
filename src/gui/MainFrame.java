@@ -26,6 +26,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -144,15 +145,7 @@ public class MainFrame extends JFrame {
 		// Set up listeners for TASK menu
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this);
-				TaskEvent dialogResponse = taskEvent.getDialogResponse();
-				System.out.println("Task Create listener: name = " + dialogResponse.getTaskName());
-
-				// Update task list and refresh calendar
-				if (dialogResponse != null) {
-					controller.addTask(dialogResponse);
-					updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
-				}
+				createTask();
 			}
 		});
 
@@ -162,21 +155,16 @@ public class MainFrame extends JFrame {
 				JList<String> nameList = controller.getAllTasksAsString();
 
 				editTaskPopup.add(nameList);
-				editTaskPopup.setSize(100, 200); // TBD
+				editTaskPopup.setSize(300, 200); // TBD
 				editTaskPopup.show(taskMenu, taskMenu.getX(), taskMenu.getY());
 
 				nameList.addMouseListener(new MouseAdapter() {
 					public void mousePressed(MouseEvent e) {
-						System.out.println("Task Update listener: name = " + nameList.getSelectedValue());
-						CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this,
-								controller.getTaskByName(nameList.getSelectedValue()));
-						TaskEvent dialogResponse = taskEvent.getDialogResponse();
+						String origName = nameList.getSelectedValue();
+						System.out.println("Task Update listener: name = " + origName);
 
-						// Update task list and refresh calendar
-						if (dialogResponse != null) {
-							controller.updateTask(dialogResponse);
-							updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
-						}
+						editTask(origName);
+						
 						editTaskPopup.setVisible(false);
 						nameList.removeAll();
 						editTaskPopup.removeAll();
@@ -186,6 +174,53 @@ public class MainFrame extends JFrame {
 		});
 
 		return menuBar;
+	}
+
+	private void createTask() {
+		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this);
+		processCreateTaskDialog(taskEvent);
+	}
+	
+	private void createTaskRetry(TaskEvent ev) {
+		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, ev);
+		processCreateTaskDialog(taskEvent);
+	}
+	
+	private void processCreateTaskDialog (CreateUpdateTaskDialog taskEvent) {
+		TaskEvent dialogResponse = taskEvent.getDialogResponse();
+
+		if (dialogResponse != null) {
+			if (controller.getTaskByName(dialogResponse.getTaskName()) != null) {
+				// Task already exists!
+				int confirm = JOptionPane.showConfirmDialog(MainFrame.this,
+						"Task " + dialogResponse.getTaskName() + " already exists. Do you want to edit existing task?");
+				if (confirm == JOptionPane.OK_OPTION)
+					editTask(dialogResponse.getTaskName());
+				else if (confirm == JOptionPane.NO_OPTION) 
+					createTaskRetry(dialogResponse);
+				
+			} else {
+				// Add task and refresh calendar
+				System.out.println("Task Create listener: name = " + dialogResponse.getTaskName());
+				controller.addTask(dialogResponse);
+				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
+			}
+		}
+	}
+	
+	private void editTask(String origName) {
+		System.out.println("Task EDIT: name = " + origName);
+		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this,
+				controller.getTaskByName(origName));
+		TaskEvent dialogResponse = taskEvent.getDialogResponse();
+
+		if (dialogResponse != null) {
+			// Update task list and refresh calendar
+			if (!origName.equals(dialogResponse.getTaskName()))
+				controller.renameTask(origName, dialogResponse.getTaskName());
+			controller.updateTask(dialogResponse);
+			updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
+		}
 	}
 
 	private void setCalendarPopupMenu() {

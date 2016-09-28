@@ -44,6 +44,18 @@ public class Database {
 			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!");
 	}
 
+	public void renameTask (String oldName, String newName) {
+		System.out.println("Rename task: " + oldName + " to " + newName);;
+		int taskIdx = getIndexByName(oldName);
+		if (taskIdx == -1)
+			JOptionPane.showMessageDialog(null, "Task '" + oldName + "' not found!");
+		else {
+			TaskModel task = taskList.get(taskIdx);
+			task.setTaskName(newName);
+			taskList.set(taskIdx, task);
+		}
+	}
+	
 	public void removeTaskFromDay(Calendar calendar, String taskName) {
 		// TBD
 	}

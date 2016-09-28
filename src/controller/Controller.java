@@ -27,6 +27,10 @@ public class Controller {
 		db.updateTask(task);
 	}
 
+	public void renameTask(String oldName, String newName) {
+		db.renameTask (oldName, newName);
+	}
+	
 	public void removeTaskFromDay(Calendar calendar, String taskName) {
 		db.removeTaskFromDay(calendar, taskName);
 	}

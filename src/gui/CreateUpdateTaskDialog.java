@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -26,14 +27,23 @@ import javax.swing.border.Border;
 import model.TaskModel;
 
 public class CreateUpdateTaskDialog extends JDialog {
-	private JButton okButton = new JButton("OK");;
+	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
+
 	private JTextField taskName = new JTextField(20);
 	private JTextField timeTextField = new JTextField(10);
 	private JTextField locationTextField = new JTextField(10);
 	private JComboBox<String> dayOfWeekCombo = new JComboBox<String>();
 	private JRadioButton[] weekOfMonthButtons = new JRadioButton[5];
+
+	private JLabel taskNameLabel = new JLabel("Task Name: ");
+	private JLabel timeLabel = new JLabel("Time: ");
+	private JLabel locationLabel = new JLabel("Location: ");
+	private JLabel dayOfWeekLabel = new JLabel("Day of Week: ");
 	private JLabel weekOfMonthLabel = new JLabel();
+
+	private JPanel controlsPanel;
+	private JPanel buttonsPanel;
 
 	private TaskEvent dialogResponse;
 	private TaskModel currentTask;
@@ -54,8 +64,19 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		setupTaskDialog();
 	}
-	
-	private String getTimeString (String timeString) {
+
+	public CreateUpdateTaskDialog(JFrame parent, TaskEvent event) {
+		super(parent, "Create task...", true);
+		
+		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getDayOfWeek(),
+				event.getWeekOfMonth(), event.getTime());
+		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
+		locationTextField.setText(currentTask.getLocation());
+
+		setupTaskDialog();
+	}
+
+	private String getTimeString(String timeString) {
 		int firstColon = timeString.indexOf(":");
 		return timeString.substring(0, firstColon + 3);
 	}
@@ -63,27 +84,33 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private void setupTaskDialog() {
 		createDayOfWeekCombo();
 		createWeekOfMonthButtons();
+		timeTextField.setToolTipText("Enter start time as hh:mm");
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					// Validate that time field is correct format
-					Time time = Time.valueOf(timeTextField.getText() + ":00");
+					// Make sure that task name has been entered
+					if (taskName.getText().equals("")) {
+						JOptionPane.showMessageDialog(okButton, "Task name field is required");
+					} else {
+						// Validate that time field is correct format
+						Time time = Time.valueOf(timeTextField.getText() + ":00");
 
-					// Create weeks of month array
-					int numWeeksInMonth = weekOfMonthButtons.length;
-					boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
-					for (int i = 0; i < numWeeksInMonth; i++) {
-						if (weekOfMonthButtons[i].isSelected())
-							weeksOfMonthSelected[i] = true;
+						// Create weeks of month array
+						int numWeeksInMonth = weekOfMonthButtons.length;
+						boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
+						for (int i = 0; i < numWeeksInMonth; i++) {
+							if (weekOfMonthButtons[i].isSelected())
+								weeksOfMonthSelected[i] = true;
+						}
+
+						// Create TaskEvent and set response
+						TaskEvent ev = new TaskEvent(this, taskName.getText(), locationTextField.getText(),
+								dayOfWeekCombo.getSelectedIndex() + 1, weeksOfMonthSelected, time);
+						dialogResponse = ev;
+						setVisible(false);
+						dispose();
 					}
-
-					// Create TaskEvent and set response
-					TaskEvent ev = new TaskEvent(this, taskName.getText(), locationTextField.getText(),
-							dayOfWeekCombo.getSelectedIndex() + 1, weeksOfMonthSelected, time);
-					dialogResponse = ev;
-					setVisible(false);
-					dispose();
 
 				} catch (IllegalArgumentException ev) {
 					JOptionPane.showMessageDialog(okButton, "Please enter Time as hh:mm");
@@ -109,8 +136,9 @@ public class CreateUpdateTaskDialog extends JDialog {
 	}
 
 	private void setTaskLayout() {
-		JPanel controlsPanel = new JPanel();
-		JPanel buttonsPanel = new JPanel();
+		int gridY = 0;
+		controlsPanel = new JPanel();
+		buttonsPanel = new JPanel();
 
 		controlsPanel.setLayout(new GridBagLayout());
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -125,65 +153,29 @@ public class CreateUpdateTaskDialog extends JDialog {
 		gc.weightx = gc.weighty = 1;
 		gc.fill = GridBagConstraints.NONE;
 
-		// Task name row
-		gc.gridx = gc.gridy = 0;
-		gc.anchor = GridBagConstraints.EAST;
-		gc.insets = new Insets(0, 0, 0, 15);
-		controlsPanel.add(new JLabel("Task Name: "), gc);
-		gc.gridx++;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.insets = new Insets(0, 0, 0, 0);
-		controlsPanel.add(taskName, gc);
+		addRowToControlPanel(gc, taskNameLabel, taskName, gridY++);
+		addRowToControlPanel(gc, locationLabel, locationTextField, gridY++);
+		addRowToControlPanel(gc, dayOfWeekLabel, dayOfWeekCombo, gridY++);
+		addRowToControlPanel(gc, timeLabel, timeTextField, gridY++);
 
-		// Day of week row
-		gc.gridy++;
+		// Weeks of the month row: requires special handling
+		gc.weighty = 0.1;
 		gc.gridx = 0;
+		gc.gridy = gridY;
 		gc.anchor = GridBagConstraints.EAST;
 		gc.insets = new Insets(0, 0, 0, 15);
-		controlsPanel.add(new JLabel("Day of Week: "), gc);
-		gc.gridx++;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.insets = new Insets(0, 0, 0, 0);
-		controlsPanel.add(dayOfWeekCombo, gc);
-
-		// Time row
-		gc.gridy++;
-		gc.gridx = 0;
-		gc.anchor = GridBagConstraints.EAST;
-		gc.insets = new Insets(0, 0, 0, 15);
-		controlsPanel.add(new JLabel("Time: "), gc);
-		gc.gridx++;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.insets = new Insets(0, 0, 0, 0);
-		controlsPanel.add(timeTextField, gc);
-
-		// Weeks of the month row
-		gc.gridy++;
-		gc.gridx = 0;
-		gc.anchor = GridBagConstraints.EAST;
-		gc.insets = new Insets(0, 0, 0, 15);
-		weekOfMonthLabel.setText(dayOfWeekCombo.getSelectedItem().toString() + "s of the Month");
 		controlsPanel.add(weekOfMonthLabel, gc);
 		gc.anchor = GridBagConstraints.WEST;
 		gc.insets = new Insets(0, 0, 0, 0);
+		gc.gridx = 1;
 		for (int i = 0; i < weekOfMonthButtons.length; i++) {
-			gc.gridx++;
+			gc.gridy = gridY++;
 			controlsPanel.add(weekOfMonthButtons[i], gc);
 		}
 
-		// Location row
-		gc.gridy++;
-		gc.gridx = 0;
-		gc.anchor = GridBagConstraints.EAST;
-		gc.insets = new Insets(0, 0, 0, 15);
-		controlsPanel.add(new JLabel("Location: "), gc);
-		gc.gridx++;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.insets = new Insets(0, 0, 0, 0);
-		controlsPanel.add(locationTextField, gc);
-
 		// Buttons row
-		gc.gridy++;
+		gc.weightx = gc.weighty = 1;
+		gc.gridy = gridY++;
 		gc.gridx = 0;
 		buttonsPanel.add(okButton);
 		gc.gridx++;
@@ -197,6 +189,18 @@ public class CreateUpdateTaskDialog extends JDialog {
 		// make OK & cancel buttons the same size
 		Dimension btnSize = cancelButton.getPreferredSize();
 		okButton.setPreferredSize(btnSize);
+	}
+
+	private void addRowToControlPanel(GridBagConstraints gcon, JLabel lbl, Component value, int gridY) {
+		gcon.gridx = 0;
+		gcon.gridy = gridY;
+		gcon.anchor = GridBagConstraints.EAST;
+		gcon.insets = new Insets(0, 0, 0, 15);
+		controlsPanel.add(lbl, gcon);
+		gcon.gridx++;
+		gcon.anchor = GridBagConstraints.WEST;
+		gcon.insets = new Insets(0, 0, 0, 0);
+		controlsPanel.add(value, gcon);
 	}
 
 	private void createDayOfWeekCombo() {
@@ -215,25 +219,27 @@ public class CreateUpdateTaskDialog extends JDialog {
 			dayOfWeekCombo.setSelectedIndex(currentTask.getDayOfWeek() - 1);
 		else
 			dayOfWeekCombo.setSelectedIndex(0);
-		weekOfMonthLabel.setText(dayOfWeekCombo.getSelectedItem().toString() + "s of the Month");
+		weekOfMonthLabel.setText(dayOfWeekCombo.getSelectedItem().toString() + "s of the Month:");
 		dayOfWeekCombo.setBorder(BorderFactory.createEtchedBorder());
-		
+
 		// Add listener
 		dayOfWeekCombo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				weekOfMonthLabel.setText(dayOfWeekCombo.getSelectedItem().toString() + "s of the Month");
+				weekOfMonthLabel.setText(dayOfWeekCombo.getSelectedItem().toString() + "s of the Month:");
 			}
 		});
 	}
 
 	private void createWeekOfMonthButtons() {
+		String[] weekName = { "1st", "2nd", "3rd", "4th", "5th" };
+
 		if (currentTask == null) {
 			for (int i = 0; i < weekOfMonthButtons.length; i++)
-				weekOfMonthButtons[i] = new JRadioButton();
+				weekOfMonthButtons[i] = new JRadioButton(weekName[i]);
 		} else {
 			boolean[] currentWeekOfMonth = currentTask.getWeekOfMonth();
 			for (int i = 0; i < weekOfMonthButtons.length; i++) {
-				weekOfMonthButtons[i] = new JRadioButton();
+				weekOfMonthButtons[i] = new JRadioButton(weekName[i]);
 				weekOfMonthButtons[i].setSelected(currentWeekOfMonth[i]);
 			}
 		}
