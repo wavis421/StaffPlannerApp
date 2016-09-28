@@ -32,7 +32,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private JTextField timeTextField = new JTextField(10);
 	private JTextField locationTextField = new JTextField(10);
 	private JComboBox<String> dayOfWeekCombo = new JComboBox<String>();
-	private JRadioButton[] weekOfMonthButtons = new JRadioButton[6];
+	private JRadioButton[] weekOfMonthButtons = new JRadioButton[5];
+	private JLabel weekOfMonthLabel = new JLabel();
 
 	private TaskEvent dialogResponse;
 	private TaskModel currentTask;
@@ -48,10 +49,15 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		currentTask = task;
 		taskName.setText(task.getTaskName());
-		timeTextField.setText(task.getTime().toString());
+		timeTextField.setText(getTimeString(task.getTime().toString()));
 		locationTextField.setText(task.getLocation());
 
 		setupTaskDialog();
+	}
+	
+	private String getTimeString (String timeString) {
+		int firstColon = timeString.indexOf(":");
+		return timeString.substring(0, firstColon + 3);
 	}
 
 	private void setupTaskDialog() {
@@ -156,7 +162,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 		gc.gridx = 0;
 		gc.anchor = GridBagConstraints.EAST;
 		gc.insets = new Insets(0, 0, 0, 15);
-		controlsPanel.add(new JLabel("Weeks of the Month: "), gc);
+		weekOfMonthLabel.setText(dayOfWeekCombo.getSelectedItem().toString() + "s of the Month");
+		controlsPanel.add(weekOfMonthLabel, gc);
 		gc.anchor = GridBagConstraints.WEST;
 		gc.insets = new Insets(0, 0, 0, 0);
 		for (int i = 0; i < weekOfMonthButtons.length; i++) {
@@ -208,16 +215,24 @@ public class CreateUpdateTaskDialog extends JDialog {
 			dayOfWeekCombo.setSelectedIndex(currentTask.getDayOfWeek() - 1);
 		else
 			dayOfWeekCombo.setSelectedIndex(0);
+		weekOfMonthLabel.setText(dayOfWeekCombo.getSelectedItem().toString() + "s of the Month");
 		dayOfWeekCombo.setBorder(BorderFactory.createEtchedBorder());
+		
+		// Add listener
+		dayOfWeekCombo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				weekOfMonthLabel.setText(dayOfWeekCombo.getSelectedItem().toString() + "s of the Month");
+			}
+		});
 	}
 
 	private void createWeekOfMonthButtons() {
 		if (currentTask == null) {
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < weekOfMonthButtons.length; i++)
 				weekOfMonthButtons[i] = new JRadioButton();
 		} else {
 			boolean[] currentWeekOfMonth = currentTask.getWeekOfMonth();
-			for (int i = 0; i < 6; i++) {
+			for (int i = 0; i < weekOfMonthButtons.length; i++) {
 				weekOfMonthButtons[i] = new JRadioButton();
 				weekOfMonthButtons[i].setSelected(currentWeekOfMonth[i]);
 			}

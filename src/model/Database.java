@@ -9,12 +9,16 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+
+import gui.NameComparator;
+import gui.TimeComparator;
 
 public class Database {
 	private List<TaskModel> taskList;
@@ -54,11 +58,13 @@ public class Database {
 	}
 
 	public LinkedList<TaskModel> getTasksByDay(Calendar calendar) {
-		int weekOfMonthIdx = calendar.get(Calendar.WEEK_OF_MONTH) - 1;
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
 		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
+		Collections.sort(taskList, new TimeComparator());
 		for (TaskModel t : taskList) {
-			if ((t.getDayOfWeek() == calendar.get(Calendar.DAY_OF_WEEK)) && (t.getWeekOfMonth()[weekOfMonthIdx])) {
+			if ((t.getDayOfWeek() == dayOfWeek) && (t.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
 				thisMonthTasks.add(t);
 			}
 		}
@@ -70,12 +76,13 @@ public class Database {
 	}
 
 	public JList<String> getAllTasksAsString() {
-		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+		Collections.sort(taskList, new NameComparator());
 
+		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+		JList<String> nameList = new JList<String>(nameModel);
 		for (TaskModel t : taskList) {
 			nameModel.addElement(new String(t.getTaskName()));
 		}
-		JList<String> nameList = new JList<String>(nameModel);
 		return nameList;
 	}
 

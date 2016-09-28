@@ -155,20 +155,20 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
-		
+
 		taskEditItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JPopupMenu editTaskPopup = new JPopupMenu();
 				JList<String> nameList = controller.getAllTasksAsString();
-				
+
 				editTaskPopup.add(nameList);
-				editTaskPopup.setSize(100, 200);  // TBD
+				editTaskPopup.setSize(100, 200); // TBD
 				editTaskPopup.show(taskMenu, taskMenu.getX(), taskMenu.getY());
-				
+
 				nameList.addMouseListener(new MouseAdapter() {
 					public void mousePressed(MouseEvent e) {
 						System.out.println("Task Update listener: name = " + nameList.getSelectedValue());
-						CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, 
+						CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this,
 								controller.getTaskByName(nameList.getSelectedValue()));
 						TaskEvent dialogResponse = taskEvent.getDialogResponse();
 
@@ -209,13 +209,13 @@ public class MainFrame extends JFrame {
 		removeTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Remove task: " + selectedCalendar.get(Calendar.MONTH) + "/"
-						+ selectedCalendar.DAY_OF_MONTH + "/" + selectedCalendar.YEAR + ", Room = "
-						+ selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
+						+ selectedCalendar.get(Calendar.DAY_OF_MONTH) + "/" + selectedCalendar.get(Calendar.YEAR)
+						+ ", Room = " + selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
 
 				// Remove task from selected day box (TBD: also remove from
 				// database)
 				controller.removeTaskFromDay(selectedCalendar, selectedTask.getTaskName());
-				calPanel.updateTasksByDay(selectedCalendar.DAY_OF_MONTH - 1,
+				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1,
 						controller.getTasksByDay(selectedCalendar));
 				calPanel.refresh();
 			}

@@ -91,7 +91,7 @@ public class CalendarPanel extends JPanel {
 	public void updateTasksByDay(int dayIdx, LinkedList<TaskModel> tasks) {
 		dayBoxTaskList[dayIdx] = tasks;
 	}
-	
+
 	// Refresh calendar
 	public void refresh() {
 		updateCalendarDisplay(currentCalendar);
@@ -247,8 +247,9 @@ public class CalendarPanel extends JPanel {
 						// Right mouse button event
 						if (dayListener != null) {
 							// Check whether a list item has been selected
-							int listIdx = ((JList<String>) e.getComponent().getComponentAt(e.getPoint())).getSelectedIndex();
-							if (listIdx != -1) {	
+							int listIdx = ((JList<String>) e.getComponent().getComponentAt(e.getPoint()))
+									.getSelectedIndex();
+							if (listIdx != -1) {
 								// Clone the calendar, update with selected day
 								Calendar calendar = (Calendar) currentCalendar.clone();
 								calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(e.getComponent().getName()));
@@ -257,7 +258,7 @@ public class CalendarPanel extends JPanel {
 								Point point = new Point();
 								point.setLocation(dayBox.getX() + e.getPoint().getX(),
 										dayBox.getY() + e.getPoint().getY());
-								
+
 								// Get task model and invoke listener
 								int dayIdx = Integer.parseInt(e.getComponent().getName()) - 1;
 								dayListener.dayBoxClicked(calendar, point, dayBoxTaskList[dayIdx].get(listIdx));
