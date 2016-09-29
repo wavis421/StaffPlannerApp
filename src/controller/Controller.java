@@ -17,13 +17,13 @@ public class Controller {
 
 	public void addTask(TaskEvent ev) {
 		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(), ev.getWeekOfMonth(),
-				ev.getTime());
+				ev.getTime(), ev.getEndDate());
 		db.addTask(task);
 	}
 
 	public void updateTask(TaskEvent ev) {
 		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(), ev.getWeekOfMonth(),
-				ev.getTime());
+				ev.getTime(), ev.getEndDate());
 		db.updateTask(task);
 	}
 

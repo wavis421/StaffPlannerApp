@@ -10,6 +10,11 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -24,52 +29,68 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
+
 import model.TaskModel;
 
 public class CreateUpdateTaskDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
+	// Private instance variables
 	private JTextField taskName = new JTextField(20);
 	private JTextField timeTextField = new JTextField(10);
 	private JTextField locationTextField = new JTextField(10);
 	private JComboBox<String> dayOfWeekCombo = new JComboBox<String>();
 	private JRadioButton[] weekOfMonthButtons = new JRadioButton[5];
+	private JRadioButton enableEndDateButton = new JRadioButton("Set end-date ");
+	private JDatePickerImpl endDatePicker;
 
+	// Label variables
 	private JLabel taskNameLabel = new JLabel("Task Name: ");
 	private JLabel timeLabel = new JLabel("Time: ");
 	private JLabel locationLabel = new JLabel("Location: ");
 	private JLabel dayOfWeekLabel = new JLabel("Day of Week: ");
 	private JLabel weekOfMonthLabel = new JLabel();
+	private JLabel endDateLabel = new JLabel("End-date: ");
 
+	// Dialog panels
 	private JPanel controlsPanel;
 	private JPanel buttonsPanel;
-
 	private TaskEvent dialogResponse;
+
+	// Track current task
 	private TaskModel currentTask;
 
+	// Constructor for creating new task
 	public CreateUpdateTaskDialog(JFrame parent) {
 		super(parent, "Create task...", true);
 		currentTask = null;
 		setupTaskDialog();
 	}
 
+	// Constructor for updating existing task, TaskModel contains task values
 	public CreateUpdateTaskDialog(JFrame parent, TaskModel task) {
 		super(parent, "Update task...", true);
 
 		currentTask = task;
-		taskName.setText(task.getTaskName());
-		timeTextField.setText(getTimeString(task.getTime().toString()));
-		locationTextField.setText(task.getLocation());
+		taskName.setText(currentTask.getTaskName());
+		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
+		locationTextField.setText(currentTask.getLocation());
 
 		setupTaskDialog();
 	}
 
+	// Constructor for re-try of task create, TaskEvent content re-loaded
 	public CreateUpdateTaskDialog(JFrame parent, TaskEvent event) {
 		super(parent, "Create task...", true);
-		
+
+		// Set up task, but leave name field empty since it was found to be a
+		// duplicate
 		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getDayOfWeek(),
-				event.getWeekOfMonth(), event.getTime());
+				event.getWeekOfMonth(), event.getTime(), event.getEndDate());
 		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
 		locationTextField.setText(currentTask.getLocation());
 
@@ -84,6 +105,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private void setupTaskDialog() {
 		createDayOfWeekCombo();
 		createWeekOfMonthButtons();
+		createEndDatePicker();
+
 		timeTextField.setToolTipText("Enter start time as hh:mm");
 
 		okButton.addActionListener(new ActionListener() {
@@ -106,7 +129,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 						// Create TaskEvent and set response
 						TaskEvent ev = new TaskEvent(this, taskName.getText(), locationTextField.getText(),
-								dayOfWeekCombo.getSelectedIndex() + 1, weeksOfMonthSelected, time);
+								dayOfWeekCombo.getSelectedIndex() + 1, weeksOfMonthSelected, time,
+								endDatePicker.getJFormattedTextField().getText());
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -127,7 +151,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTaskLayout();
-		setSize(550, 375);
+		setSize(575, 450);
 		setVisible(true);
 	}
 
@@ -173,8 +197,15 @@ public class CreateUpdateTaskDialog extends JDialog {
 			controlsPanel.add(weekOfMonthButtons[i], gc);
 		}
 
-		// Buttons row
+		// End-date row: requires special handling
 		gc.weightx = gc.weighty = 1;
+		gc.gridx = 0;
+		gc.gridy = gridY++;
+		gc.anchor = GridBagConstraints.EAST;
+		controlsPanel.add(enableEndDateButton, gc);
+		addRowToControlPanel(gc, endDateLabel, endDatePicker, gridY++);
+
+		// Buttons row
 		gc.gridy = gridY++;
 		gc.gridx = 0;
 		buttonsPanel.add(okButton);
@@ -243,5 +274,47 @@ public class CreateUpdateTaskDialog extends JDialog {
 				weekOfMonthButtons[i].setSelected(currentWeekOfMonth[i]);
 			}
 		}
+	}
+
+	private void createEndDatePicker() {
+		UtilDateModel dateModel = new UtilDateModel();
+		Properties prop = new Properties();
+		JDatePanelImpl datePanel;
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+
+		prop.put("text.today", "today");
+		prop.put("text.month", "month");
+		prop.put("text.year", "year");
+
+		datePanel = new JDatePanelImpl(dateModel, prop);
+		endDatePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+
+		if (currentTask != null && currentTask.getEndDate() != null) {
+			try {
+				// Initialize date picker using database date string
+				Date date = dateFormatter.parse(currentTask.getEndDate());
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(date);
+				endDatePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
+						cal.get(Calendar.DAY_OF_MONTH));
+
+				// Select button and date picker
+				enableEndDateButton.setSelected(true);
+				endDatePicker.getModel().setSelected(true);
+			} catch (ParseException ex) {
+				System.out.println("Exception " + ex);
+			}
+		}
+
+		// Add listener to enable end-date button
+		enableEndDateButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (enableEndDateButton.isSelected()) {
+					endDatePicker.setTextEditable(true);
+				} else {
+					endDatePicker.setTextEditable(false);
+				}
+			}
+		});
 	}
 }

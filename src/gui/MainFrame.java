@@ -17,9 +17,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
-import java.util.List;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -28,8 +26,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import controller.Controller;
 import model.TaskModel;
@@ -164,7 +160,7 @@ public class MainFrame extends JFrame {
 						System.out.println("Task Update listener: name = " + origName);
 
 						editTask(origName);
-						
+
 						editTaskPopup.setVisible(false);
 						nameList.removeAll();
 						editTaskPopup.removeAll();
@@ -180,13 +176,13 @@ public class MainFrame extends JFrame {
 		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this);
 		processCreateTaskDialog(taskEvent);
 	}
-	
+
 	private void createTaskRetry(TaskEvent ev) {
 		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, ev);
 		processCreateTaskDialog(taskEvent);
 	}
-	
-	private void processCreateTaskDialog (CreateUpdateTaskDialog taskEvent) {
+
+	private void processCreateTaskDialog(CreateUpdateTaskDialog taskEvent) {
 		TaskEvent dialogResponse = taskEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
@@ -196,9 +192,9 @@ public class MainFrame extends JFrame {
 						"Task " + dialogResponse.getTaskName() + " already exists. Do you want to edit existing task?");
 				if (confirm == JOptionPane.OK_OPTION)
 					editTask(dialogResponse.getTaskName());
-				else if (confirm == JOptionPane.NO_OPTION) 
+				else if (confirm == JOptionPane.NO_OPTION)
 					createTaskRetry(dialogResponse);
-				
+
 			} else {
 				// Add task and refresh calendar
 				System.out.println("Task Create listener: name = " + dialogResponse.getTaskName());
@@ -207,7 +203,7 @@ public class MainFrame extends JFrame {
 			}
 		}
 	}
-	
+
 	private void editTask(String origName) {
 		System.out.println("Task EDIT: name = " + origName);
 		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this,
