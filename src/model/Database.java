@@ -29,13 +29,13 @@ public class Database {
 
 	public void addTask(TaskModel task) {
 		System.out.println("Added task to database: " + task.getTaskName() + ", location - " + task.getLocation()
-				+ ", DOW = " + task.getDayOfWeek() + ", time - " + task.getTime());
+				+ ", DOW - " + task.getDayOfWeek() + ", time - " + task.getTime() + ", colorIdx - " + task.getColor());
 		taskList.add(task);
 	}
 
 	public void updateTask(TaskModel task) {
-		System.out.println("Update task: " + task.getTaskName() + ", location - " + task.getLocation() + ", DOW = "
-				+ task.getDayOfWeek() + ", time - " + task.getTime());
+		System.out.println("Update task: " + task.getTaskName() + ", location - " + task.getLocation() + ", DOW - "
+				+ task.getDayOfWeek() + ", time - " + task.getTime() + ", color - " + task.getColor());
 
 		int taskIdx = getIndexByName(task.getTaskName());
 		if (taskIdx != -1)

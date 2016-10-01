@@ -3,9 +3,6 @@ package gui;
 import java.sql.Time;
 import java.util.EventObject;
 
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
-
 public class TaskEvent extends EventObject {
 
 	private String taskName;
@@ -14,13 +11,14 @@ public class TaskEvent extends EventObject {
 	private boolean[] weekOfMonth;
 	private Time time;
 	private String endDate;
+	private int color;
 
 	public TaskEvent(Object source) {
 		super(source);
 	}
 
 	public TaskEvent(Object source, String taskName, String location, int dayOfWeek, boolean[] weekOfMonth, Time time,
-			String endDate) {
+			String endDate, int color) {
 		super(source);
 
 		this.taskName = taskName;
@@ -29,6 +27,7 @@ public class TaskEvent extends EventObject {
 		this.weekOfMonth = weekOfMonth;
 		this.time = time;
 		this.endDate = endDate;
+		this.color = color;
 	}
 
 	public String getTaskName() {
@@ -53,5 +52,9 @@ public class TaskEvent extends EventObject {
 
 	public String getEndDate() {
 		return endDate;
+	}
+
+	public int getColor() {
+		return color;
 	}
 }

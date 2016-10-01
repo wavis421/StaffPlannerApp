@@ -224,7 +224,7 @@ public class CalendarPanel extends JPanel {
 			label.setFont(JTFTools.decodeFont(DATE_FONT));
 			dayBox.setBackground(Color.WHITE);
 			dayBox.add(label, BorderLayout.BEFORE_FIRST_LINE);
-
+			
 			// Create a list of task names assigned to this day
 			DefaultListModel<String> taskListModel = new DefaultListModel<String>();
 			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
@@ -232,6 +232,7 @@ public class CalendarPanel extends JPanel {
 					taskListModel.addElement(new String(t.getTaskName()));
 				}
 			}
+			
 			JList<String> taskList = new JList<String>(taskListModel);
 			taskList.setName(text);
 			scrollPane = new JScrollPane(taskList);

@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -47,6 +49,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private JRadioButton[] weekOfMonthButtons = new JRadioButton[5];
 	private JRadioButton enableEndDateButton = new JRadioButton("Set end-date ");
 	private JDatePickerImpl endDatePicker;
+	private JPanel colorPanel = new JPanel();
+	private ButtonGroup colorGroup;
 
 	// Label variables
 	private JLabel taskNameLabel = new JLabel("Task Name: ");
@@ -55,6 +59,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private JLabel dayOfWeekLabel = new JLabel("Day of Week: ");
 	private JLabel weekOfMonthLabel = new JLabel();
 	private JLabel endDateLabel = new JLabel("End-date: ");
+	private JLabel colorChooserLabel = new JLabel("Select task color: ");
 
 	// Dialog panels
 	private JPanel controlsPanel;
@@ -90,7 +95,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		// Set up task, but leave name field empty since it was found to be a
 		// duplicate
 		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getDayOfWeek(),
-				event.getWeekOfMonth(), event.getTime(), event.getEndDate());
+				event.getWeekOfMonth(), event.getTime(), event.getEndDate(), event.getColor());
 		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
 		locationTextField.setText(currentTask.getLocation());
 
@@ -106,6 +111,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		createDayOfWeekCombo();
 		createWeekOfMonthButtons();
 		createEndDatePicker();
+		createColorSelector();
 
 		timeTextField.setToolTipText("Enter start time as hh:mm");
 
@@ -130,7 +136,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 						// Create TaskEvent and set response
 						TaskEvent ev = new TaskEvent(this, taskName.getText(), locationTextField.getText(),
 								dayOfWeekCombo.getSelectedIndex() + 1, weeksOfMonthSelected, time,
-								endDatePicker.getJFormattedTextField().getText());
+								endDatePicker.getJFormattedTextField().getText(),
+								Integer.parseInt(colorGroup.getSelection().getActionCommand()));
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -204,6 +211,9 @@ public class CreateUpdateTaskDialog extends JDialog {
 		gc.anchor = GridBagConstraints.EAST;
 		controlsPanel.add(enableEndDateButton, gc);
 		addRowToControlPanel(gc, endDateLabel, endDatePicker, gridY++);
+
+		// Color chooser row
+		addRowToControlPanel(gc, colorChooserLabel, colorPanel, gridY++);
 
 		// Buttons row
 		gc.gridy = gridY++;
@@ -316,5 +326,34 @@ public class CreateUpdateTaskDialog extends JDialog {
 				}
 			}
 		});
+	}
+
+	private void createColorSelector() {
+		colorGroup = new ButtonGroup();
+		int[] colorSelections = { 0x000000, 0xFF0000, 0x00FF00, 0x0000FF };
+		JRadioButton[] buttons = new JRadioButton[colorSelections.length];
+
+		int taskColor, colorMatchIdx = -1;
+		if (currentTask != null)
+			taskColor = currentTask.getColor();
+		else
+			taskColor = colorSelections[0];
+
+		for (int idx = 0; idx < colorSelections.length; idx++) {
+			buttons[idx] = new JRadioButton();
+
+			buttons[idx].setBackground(Color.decode(Integer.toString(colorSelections[idx])));
+			buttons[idx].setActionCommand(Integer.toString(colorSelections[idx]));
+
+			colorGroup.add(buttons[idx]);
+			colorPanel.add(buttons[idx]);
+
+			if (taskColor == colorSelections[idx])
+				colorMatchIdx = idx;
+		}
+
+		// If color match found in color table, than highlight the selection
+		if (colorMatchIdx != -1)
+			buttons[colorMatchIdx].setSelected(true);
 	}
 }

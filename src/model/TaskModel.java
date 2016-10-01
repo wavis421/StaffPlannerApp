@@ -3,9 +3,6 @@ package model;
 import java.io.Serializable;
 import java.sql.Time;
 
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
-
 public class TaskModel implements Serializable {
 	private String taskName;
 	private Time time;
@@ -13,15 +10,17 @@ public class TaskModel implements Serializable {
 	private int dayOfWeek;
 	private boolean[] weekOfMonth;
 	private String endDate;
+	private int color;
 
-	public TaskModel(String taskName, String location, int dayOfWeek, boolean[] weekOfMonth, Time time,
-			String endDate) {
+	public TaskModel(String taskName, String location, int dayOfWeek, boolean[] weekOfMonth, Time time, String endDate,
+			int color) {
 		this.taskName = taskName;
 		this.location = location;
 		this.dayOfWeek = dayOfWeek;
 		this.weekOfMonth = weekOfMonth;
 		this.time = time;
 		this.endDate = endDate;
+		this.color = color;
 	}
 
 	public String getTaskName() {
@@ -50,5 +49,9 @@ public class TaskModel implements Serializable {
 
 	public boolean[] getWeekOfMonth() {
 		return weekOfMonth;
+	}
+
+	public int getColor() {
+		return color;
 	}
 }
