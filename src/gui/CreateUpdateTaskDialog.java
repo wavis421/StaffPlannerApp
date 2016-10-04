@@ -66,39 +66,46 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private JPanel buttonsPanel;
 	private TaskEvent dialogResponse;
 
-	// Track current task
+	// Track current program and task
+	private String currentProgramName;
 	private TaskModel currentTask;
+	private String borderTitle;
 
 	// Constructor for creating new task
-	public CreateUpdateTaskDialog(JFrame parent) {
-		super(parent, "Create task...", true);
+	public CreateUpdateTaskDialog(JFrame parent, String programName) {
+		super(parent, programName, true);
+		currentProgramName = new String(programName);
 		currentTask = null;
+		borderTitle = new String("Create new task");
 		setupTaskDialog();
 	}
 
 	// Constructor for updating existing task, TaskModel contains task values
-	public CreateUpdateTaskDialog(JFrame parent, TaskModel task) {
-		super(parent, "Update task...", true);
+	public CreateUpdateTaskDialog(JFrame parent, String programName, TaskModel task) {
+		super(parent, programName, true);
 
+		currentProgramName = programName;
 		currentTask = task;
 		taskName.setText(currentTask.getTaskName());
 		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
 		locationTextField.setText(currentTask.getLocation());
 
+		borderTitle = new String("Edit task");
 		setupTaskDialog();
 	}
 
 	// Constructor for re-try of task create, TaskEvent content re-loaded
 	public CreateUpdateTaskDialog(JFrame parent, TaskEvent event) {
-		super(parent, "Create task...", true);
+		super(parent, event.getProgramName(), true);
 
-		// Set up task, but leave name field empty since it was found to be a
-		// duplicate
-		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getDayOfWeek(),
-				event.getWeekOfMonth(), event.getTime(), event.getEndDate(), event.getColor());
+		// Set up task, but leave name field empty since it was found to be a duplicate
+		currentProgramName = event.getProgramName();
+		currentTask = new TaskModel(event.getTaskName(), event.getLocation(),
+				event.getDayOfWeek(), event.getWeekOfMonth(), event.getTime(), event.getEndDate(), event.getColor());
 		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
 		locationTextField.setText(currentTask.getLocation());
 
+		borderTitle = new String("Create new task");
 		setupTaskDialog();
 	}
 
@@ -134,9 +141,9 @@ public class CreateUpdateTaskDialog extends JDialog {
 						}
 
 						// Create TaskEvent and set response
-						TaskEvent ev = new TaskEvent(this, taskName.getText(), locationTextField.getText(),
-								dayOfWeekCombo.getSelectedIndex() + 1, weeksOfMonthSelected, time,
-								endDatePicker.getJFormattedTextField().getText(),
+						TaskEvent ev = new TaskEvent(this, currentProgramName, taskName.getText(),
+								locationTextField.getText(), dayOfWeekCombo.getSelectedIndex() + 1,
+								weeksOfMonthSelected, time, endDatePicker.getJFormattedTextField().getText(),
 								Integer.parseInt(colorGroup.getSelection().getActionCommand()));
 						dialogResponse = ev;
 						setVisible(false);
@@ -158,7 +165,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTaskLayout();
-		setSize(575, 450);
+		setSize(500, 450);
 		setVisible(true);
 	}
 
@@ -175,7 +182,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
 		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		Border titleBorder = BorderFactory.createTitledBorder("Create/Update Task");
+		Border titleBorder = BorderFactory.createTitledBorder(borderTitle);
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
 		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, titleBorder));
 

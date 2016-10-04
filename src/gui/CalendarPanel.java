@@ -45,12 +45,14 @@ public class CalendarPanel extends JPanel {
 	// Private constants
 	private static final Color EMPTY_BACKGROUND = new Color(0xDDDDDD);
 	private static final String TITLE_FONT = "Serif-36";
+	private static final String PROGRAM_FONT = "Serif-italic-22";
 	private static final String LABEL_FONT = "Serif-bold-14";
 	private static final String DATE_FONT = "Serif-11";
 
 	// Private instance variables
 	private JButton leftButton, rightButton;
 	private LinkedList<TaskModel>[] dayBoxTaskList;
+	private JLabel programLabel = new JLabel("   ");
 	private static TableLayout layout = new TableLayout();
 	private static Locale locale = new Locale("en", "US", "");
 	private static DateFormatSymbols symbols = new DateFormatSymbols(locale);
@@ -65,7 +67,7 @@ public class CalendarPanel extends JPanel {
 
 	public CalendarPanel() {
 		// Create borders
-		Border innerBorder = BorderFactory.createTitledBorder("Calendar");
+		Border innerBorder = BorderFactory.createEtchedBorder();
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 
@@ -77,6 +79,10 @@ public class CalendarPanel extends JPanel {
 		updateCalendarDisplay(currentCalendar);
 	}
 
+	public void setProgramName (String name) {
+		programLabel.setText(name);;
+	}
+	
 	// Set listener for mouse action on calendar day boxes
 	public void setDayBoxListener(DayBoxListener listener) {
 		this.dayListener = listener;
@@ -113,9 +119,14 @@ public class CalendarPanel extends JPanel {
 		// Add month set buttons and month label
 		CreateMonthButtons();
 		add(leftButton, "weightx=0.1 weighty=0.1");
-		add(createMonthLabel(calendar), "gridwidth=5 bottom=3");
+		//add(createMonthLabel(calendar), "gridwidth=5 bottom=3");
+		add(createMonthLabel(calendar), "gridwidth=5 bottom=0");
 		add(rightButton, "weightx=0.1 weighty=0.1");
 
+		programLabel.setHorizontalAlignment(JLabel.CENTER);
+		programLabel.setFont(JTFTools.decodeFont(PROGRAM_FONT));
+		add(programLabel, "gridwidth=7 weightx=1 bottom=12");
+		
 		// Add weekday labels
 		for (int i = 0; i < 7; i++) {
 			add(createWeekdayLabel(i), "weightx=1 width=1 bottom=2");

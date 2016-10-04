@@ -5,6 +5,7 @@ import java.util.EventObject;
 
 public class TaskEvent extends EventObject {
 
+	private String programName;
 	private String taskName;
 	private String location;
 	private int dayOfWeek;
@@ -17,10 +18,11 @@ public class TaskEvent extends EventObject {
 		super(source);
 	}
 
-	public TaskEvent(Object source, String taskName, String location, int dayOfWeek, boolean[] weekOfMonth, Time time,
-			String endDate, int color) {
+	public TaskEvent(Object source, String programName, String taskName, String location, int dayOfWeek,
+			boolean[] weekOfMonth, Time time, String endDate, int color) {
 		super(source);
 
+		this.programName = programName;
 		this.taskName = taskName;
 		this.location = location;
 		this.dayOfWeek = dayOfWeek;
@@ -28,6 +30,10 @@ public class TaskEvent extends EventObject {
 		this.time = time;
 		this.endDate = endDate;
 		this.color = color;
+	}
+
+	public String getProgramName() {
+		return programName;
 	}
 
 	public String getTaskName() {

@@ -4,53 +4,75 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.JList;
 
+import gui.ProgramEvent;
 import gui.TaskEvent;
 import model.Database;
+import model.ProgramModel;
 import model.TaskModel;
 
 public class Controller {
 	Database db = new Database();
 
+	/*
+	 * ------- Programs -------
+	 */
+	public void addProgram(ProgramEvent ev) {
+		db.addProgram(ev.getProgramName(), ev.getDefaultColor());
+	}
+
+	public ProgramModel getProgramByName(String programName) {
+		return db.getProgramByName(programName);
+	}
+
+	public JList<String> getAllProgramsAsString() {
+		return db.getAllProgramsAsString();
+	}
+
+	/*
+	 * ------- Task data -------
+	 */
 	public void addTask(TaskEvent ev) {
-		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(), ev.getWeekOfMonth(),
-				ev.getTime(), ev.getEndDate(), ev.getColor());
-		db.addTask(task);
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(),
+				ev.getWeekOfMonth(), ev.getTime(), ev.getEndDate(), ev.getColor());
+		db.addTask(ev.getProgramName(), task);
 	}
 
 	public void updateTask(TaskEvent ev) {
-		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(), ev.getWeekOfMonth(),
-				ev.getTime(), ev.getEndDate(), ev.getColor());
-		db.updateTask(task);
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(),
+				ev.getWeekOfMonth(), ev.getTime(), ev.getEndDate(), ev.getColor());
+		db.updateTask(ev.getProgramName(), task);
 	}
 
-	public void renameTask(String oldName, String newName) {
-		db.renameTask (oldName, newName);
+	public void renameTask(String programName, String oldName, String newName) {
+		db.renameTask(programName, oldName, newName);
 	}
-	
+
 	public void removeTaskFromDay(Calendar calendar, String taskName) {
 		db.removeTaskFromDay(calendar, taskName);
 	}
 
-	public TaskModel getTaskByName(String taskName) {
-		return db.getTaskByName(taskName);
+	public TaskModel getTaskByName(String programName, String taskName) {
+		return db.getTaskByName(programName, taskName);
 	}
 
 	public LinkedList<TaskModel> getTasksByDay(Calendar calendar) {
 		return db.getTasksByDay(calendar);
 	}
 
-	public List<TaskModel> getAllTasks() {
-		return db.getAllTasks();
+	/*
+	 * public List<TaskModel> getAllTasks() { return db.getAllTasks(); }
+	 */
+
+	public JList<String> getAllTasksAsString(String programName) {
+		return db.getAllTasksAsString(programName);
 	}
 
-	public JList<String> getAllTasksAsString() {
-		return db.getAllTasksAsString();
-	}
-
+	/*
+	 * ------- File save/restore items -------
+	 */
 	public void saveToFile(File file) throws IOException {
 		db.saveToFile(file);
 	}

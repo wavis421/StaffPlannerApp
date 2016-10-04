@@ -28,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import controller.Controller;
+import model.ProgramModel;
 import model.TaskModel;
 
 public class MainFrame extends JFrame {
@@ -42,6 +43,7 @@ public class MainFrame extends JFrame {
 	private TaskFileFilter fileFilter;
 
 	// Store parameters for selected day box
+	private String selectedProgramName;
 	private TaskModel selectedTask;
 	private Calendar selectedCalendar;
 
@@ -84,8 +86,10 @@ public class MainFrame extends JFrame {
 
 		// Set up top level menus and add to menu bar
 		JMenu fileMenu = new JMenu("File");
+		JMenu programMenu = new JMenu("Program");
 		JMenu taskMenu = new JMenu("Task");
 		menuBar.add(fileMenu);
+		menuBar.add(programMenu);
 		menuBar.add(taskMenu);
 
 		// Add file sub-menus
@@ -96,6 +100,14 @@ public class MainFrame extends JFrame {
 		fileMenu.add(importDataItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
+
+		// Add program sub-menus
+		JMenuItem programCreateItem = new JMenuItem("Create new program");
+		JMenuItem programEditItem = new JMenuItem("Edit program properties");
+		JMenuItem programSelectItem = new JMenuItem("Select active program");
+		programMenu.add(programCreateItem);
+		programMenu.add(programEditItem);
+		programMenu.add(programSelectItem);
 
 		// Add task sub-menus
 		JMenuItem taskCreateItem = new JMenuItem("Create task");
@@ -138,43 +150,106 @@ public class MainFrame extends JFrame {
 			}
 		});
 
+		// Set up listeners for PROGRAM menu
+		programCreateItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				CreateUpdateProgramDialog programEvent = new CreateUpdateProgramDialog(MainFrame.this);
+				ProgramEvent dialogResponse = programEvent.getDialogResponse();
+
+				if (dialogResponse != null) {
+					if (controller.getProgramByName(dialogResponse.getProgramName()) != null) {
+						// Program already exists!
+						JOptionPane.showMessageDialog(MainFrame.this,
+								"Program " + dialogResponse.getProgramName() + " already exists.");
+
+					} else {
+						// Add program to database
+						controller.addProgram(dialogResponse);
+						if (!dialogResponse.getProgramName().equals(selectedProgramName)) {
+							if (JOptionPane.showConfirmDialog(MainFrame.this, "Do you want to set active program to "
+									+ dialogResponse.getProgramName() + "?") == JOptionPane.OK_OPTION) {
+								selectedProgramName = dialogResponse.getProgramName();
+								calPanel.setProgramName(selectedProgramName);
+							}
+						}
+						System.out.println("Program Create listener: name = " + dialogResponse.getProgramName());
+					}
+				}
+			}
+		});
+		programEditItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+		programSelectItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPopupMenu selectProgramPopup = new JPopupMenu();
+				JList<String> programList = controller.getAllProgramsAsString();
+
+				selectProgramPopup.add(programList);
+				selectProgramPopup.setSize(300, 200); // TBD
+				selectProgramPopup.show(programMenu, programMenu.getX(), programMenu.getY());
+
+				programList.addMouseListener(new MouseAdapter() {
+					public void mousePressed(MouseEvent e) {
+						selectedProgramName = programList.getSelectedValue();
+						calPanel.setProgramName(selectedProgramName);
+
+						selectProgramPopup.setVisible(false);
+						programList.removeAll();
+						selectProgramPopup.removeAll();
+					}
+
+				});
+			}
+		});
+
 		// Set up listeners for TASK menu
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				createTask();
 			}
 		});
-
 		taskEditItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JPopupMenu editTaskPopup = new JPopupMenu();
-				JList<String> nameList = controller.getAllTasksAsString();
+				if (selectedProgramName == null) {
+					JOptionPane.showMessageDialog(MainFrame.this, "Select Program first!");
+				} else {
+					JPopupMenu editTaskPopup = new JPopupMenu();
+					JList<String> nameList = controller.getAllTasksAsString(selectedProgramName);
 
-				editTaskPopup.add(nameList);
-				editTaskPopup.setSize(300, 200); // TBD
-				editTaskPopup.show(taskMenu, taskMenu.getX(), taskMenu.getY());
+					editTaskPopup.add(nameList);
+					editTaskPopup.setSize(300, 200); // TBD
+					editTaskPopup.show(taskMenu, taskMenu.getX(), taskMenu.getY());
 
-				nameList.addMouseListener(new MouseAdapter() {
-					public void mousePressed(MouseEvent e) {
-						String origName = nameList.getSelectedValue();
-						System.out.println("Task Update listener: name = " + origName);
+					nameList.addMouseListener(new MouseAdapter() {
+						public void mousePressed(MouseEvent e) {
+							String origName = nameList.getSelectedValue();
+							System.out.println("Task Update listener: name = " + origName);
 
-						editTask(origName);
+							editTask(origName);
 
-						editTaskPopup.setVisible(false);
-						nameList.removeAll();
-						editTaskPopup.removeAll();
-					}
-				});
+							editTaskPopup.setVisible(false);
+							nameList.removeAll();
+							editTaskPopup.removeAll();
+						}
+
+					});
+				}
 			}
 		});
-
 		return menuBar;
 	}
 
 	private void createTask() {
-		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this);
-		processCreateTaskDialog(taskEvent);
+		System.out.println("Create task: program name = " + selectedProgramName);
+		if (selectedProgramName == null)
+			JOptionPane.showMessageDialog(MainFrame.this, "Select Program before assigning tasks!");
+		else {
+			CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, selectedProgramName);
+			processCreateTaskDialog(taskEvent);
+		}
 	}
 
 	private void createTaskRetry(TaskEvent ev) {
@@ -186,7 +261,7 @@ public class MainFrame extends JFrame {
 		TaskEvent dialogResponse = taskEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
-			if (controller.getTaskByName(dialogResponse.getTaskName()) != null) {
+			if (controller.getTaskByName(dialogResponse.getProgramName(), dialogResponse.getTaskName()) != null) {
 				// Task already exists!
 				int confirm = JOptionPane.showConfirmDialog(MainFrame.this,
 						"Task " + dialogResponse.getTaskName() + " already exists. Do you want to edit existing task?");
@@ -206,14 +281,14 @@ public class MainFrame extends JFrame {
 
 	private void editTask(String origName) {
 		System.out.println("Task EDIT: name = " + origName);
-		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this,
-				controller.getTaskByName(origName));
+		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, selectedProgramName,
+				controller.getTaskByName(selectedProgramName, origName));
 		TaskEvent dialogResponse = taskEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
 			// Update task list and refresh calendar
 			if (!origName.equals(dialogResponse.getTaskName()))
-				controller.renameTask(origName, dialogResponse.getTaskName());
+				controller.renameTask(selectedProgramName, origName, dialogResponse.getTaskName());
 			controller.updateTask(dialogResponse);
 			updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 		}
@@ -228,7 +303,7 @@ public class MainFrame extends JFrame {
 		calPanel.setDayBoxListener(new DayBoxListener() {
 			public void dayBoxClicked(Calendar calendar, Point point, TaskModel task) {
 				selectedCalendar = calendar;
-				selectedTask = controller.getTaskByName(task.getTaskName());
+				selectedTask = controller.getTaskByName(selectedProgramName, task.getTaskName());
 				System.out.println("day box clicked: day = " + calendar.get(Calendar.DAY_OF_MONTH) + ", room = "
 						+ task.getLocation() + ", task name = " + task.getTaskName());
 
@@ -243,8 +318,8 @@ public class MainFrame extends JFrame {
 						+ selectedCalendar.get(Calendar.DAY_OF_MONTH) + "/" + selectedCalendar.get(Calendar.YEAR)
 						+ ", Room = " + selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
 
-				// Remove task from selected day box (TBD: also remove from
-				// database)
+				// Remove task from selected day box 
+				// (TBD: also remove from database)
 				controller.removeTaskFromDay(selectedCalendar, selectedTask.getTaskName());
 				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1,
 						controller.getTasksByDay(selectedCalendar));
