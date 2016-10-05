@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -26,9 +27,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.ListCellRenderer;
 
 import controller.Controller;
-import model.ProgramModel;
 import model.TaskModel;
 
 public class MainFrame extends JFrame {
@@ -217,21 +218,22 @@ public class MainFrame extends JFrame {
 					JOptionPane.showMessageDialog(MainFrame.this, "Select Program first!");
 				} else {
 					JPopupMenu editTaskPopup = new JPopupMenu();
-					JList<String> nameList = controller.getAllTasksAsString(selectedProgramName);
+					JList<TaskModel> taskList = controller.getAllTasks(selectedProgramName);
+					taskList.setCellRenderer(new TaskRenderer());
 
-					editTaskPopup.add(nameList);
+					editTaskPopup.add(taskList);
 					editTaskPopup.setSize(300, 200); // TBD
 					editTaskPopup.show(taskMenu, taskMenu.getX(), taskMenu.getY());
 
-					nameList.addMouseListener(new MouseAdapter() {
+					taskList.addMouseListener(new MouseAdapter() {
 						public void mousePressed(MouseEvent e) {
-							String origName = nameList.getSelectedValue();
+							String origName = taskList.getSelectedValue().getTaskName();
 							System.out.println("Task Update listener: name = " + origName);
 
 							editTask(origName);
 
 							editTaskPopup.setVisible(false);
-							nameList.removeAll();
+							taskList.removeAll();
 							editTaskPopup.removeAll();
 						}
 

@@ -165,7 +165,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTaskLayout();
-		setSize(500, 450);
+		setSize(550, 450);
 		setVisible(true);
 	}
 
@@ -337,7 +337,19 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 	private void createColorSelector() {
 		colorGroup = new ButtonGroup();
-		int[] colorSelections = { 0x000000, 0xFF0000, 0x00FF00, 0x0000FF };
+		int[] colorSelections = { 
+				0x000000, // Black 
+				0xDC143C, // Crimson
+				0xF28500, // Tangerine
+				0x008000, // Green
+				0x7CFC00, // Lawn green
+				0x003399, // Dark powder blue
+				0x5082B6, // Moderate blue
+				0x8B008B, // Dark magenta
+				0x966FD6, // Dark Pastel purple
+				0x988344, // Dark Khaki
+				0x7D7D7D  // Dark gray
+				};
 		JRadioButton[] buttons = new JRadioButton[colorSelections.length];
 
 		int taskColor, colorMatchIdx = -1;

@@ -66,9 +66,15 @@ public class Controller {
 	 * public List<TaskModel> getAllTasks() { return db.getAllTasks(); }
 	 */
 
+	public JList<TaskModel> getAllTasks(String programName) {
+		return db.getAllTasks(programName);
+	}
+	
+	/*
 	public JList<String> getAllTasksAsString(String programName) {
 		return db.getAllTasksAsString(programName);
 	}
+	*/
 
 	/*
 	 * ------- File save/restore items -------

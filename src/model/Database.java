@@ -123,6 +123,18 @@ public class Database {
 	 * }
 	 */
 
+	public JList<TaskModel> getAllTasks(String programName) {
+		DefaultListModel<TaskModel> taskModel = new DefaultListModel<>();
+		JList<TaskModel> taskList = new JList<>(taskModel);
+		ProgramModel program = getProgramByName(programName);
+
+		for (TaskModel t : program.getTaskList()) {
+			taskModel.addElement(t);
+		}
+		return taskList;
+	}
+	
+	/*
 	public JList<String> getAllTasksAsString(String programName) {
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
 		JList<String> nameList = new JList<String>(nameModel);
@@ -133,6 +145,7 @@ public class Database {
 		}
 		return nameList;
 	}
+	*/
 
 	private int getTaskIndexByName(ProgramModel program, String taskName) {
 		int i = 0;

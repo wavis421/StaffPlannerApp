@@ -237,14 +237,15 @@ public class CalendarPanel extends JPanel {
 			dayBox.add(label, BorderLayout.BEFORE_FIRST_LINE);
 			
 			// Create a list of task names assigned to this day
-			DefaultListModel<String> taskListModel = new DefaultListModel<String>();
+			DefaultListModel<TaskModel> taskListModel = new DefaultListModel<TaskModel>();
 			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
 				for (TaskModel t : dayBoxTaskList[dayIdx]) {
-					taskListModel.addElement(new String(t.getTaskName()));
+					taskListModel.addElement(t);
 				}
 			}
 			
-			JList<String> taskList = new JList<String>(taskListModel);
+			JList<TaskModel> taskList = new JList<>(taskListModel);
+			taskList.setCellRenderer(new TaskRenderer());
 			taskList.setName(text);
 			scrollPane = new JScrollPane(taskList);
 			scrollPane.setPreferredSize(
