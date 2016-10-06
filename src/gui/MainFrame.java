@@ -17,8 +17,9 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.List;
 
-import javax.swing.DefaultListCellRenderer;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -27,7 +28,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.ListCellRenderer;
 
 import controller.Controller;
 import model.TaskModel;
@@ -89,9 +89,11 @@ public class MainFrame extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu programMenu = new JMenu("Program");
 		JMenu taskMenu = new JMenu("Task");
+		JMenu calendarMenu = new JMenu("Calendar");
 		menuBar.add(fileMenu);
 		menuBar.add(programMenu);
 		menuBar.add(taskMenu);
+		menuBar.add(calendarMenu);
 
 		// Add file sub-menus
 		JMenuItem exportDataItem = new JMenuItem("Export...");
@@ -103,8 +105,8 @@ public class MainFrame extends JFrame {
 		fileMenu.add(exitItem);
 
 		// Add program sub-menus
-		JMenuItem programCreateItem = new JMenuItem("Create new program");
-		JMenuItem programEditItem = new JMenuItem("Edit program properties");
+		JMenuItem programCreateItem = new JMenuItem("New program");
+		JMenuItem programEditItem = new JMenuItem("Edit program");
 		JMenuItem programSelectItem = new JMenuItem("Select active program");
 		programMenu.add(programCreateItem);
 		programMenu.add(programEditItem);
@@ -115,6 +117,12 @@ public class MainFrame extends JFrame {
 		JMenuItem taskEditItem = new JMenuItem("Edit task");
 		taskMenu.add(taskCreateItem);
 		taskMenu.add(taskEditItem);
+
+		// Add calendar sub-menus
+		JMenu calendarFilterMenu = new JMenu("Filter");
+		calendarMenu.add(calendarFilterMenu);
+		JMenuItem filterByProgramItem = new JMenuItem("by Program");
+		calendarFilterMenu.add(filterByProgramItem);
 
 		// Set up listeners for FILE menu
 		exportDataItem.addActionListener(new ActionListener() {
@@ -189,11 +197,12 @@ public class MainFrame extends JFrame {
 				JList<String> programList = controller.getAllProgramsAsString();
 
 				selectProgramPopup.add(programList);
-				selectProgramPopup.setSize(300, 200); // TBD
-				selectProgramPopup.show(programMenu, programMenu.getX(), programMenu.getY());
+				selectProgramPopup.show(programMenu, 0, 0);
+				System.out.println("menuSelected: programList = " + programList);
+				selectProgramPopup.setOpaque(true);
 
 				programList.addMouseListener(new MouseAdapter() {
-					public void mousePressed(MouseEvent e) {
+					public void mousePressed(MouseEvent ev) {
 						selectedProgramName = programList.getSelectedValue();
 						calPanel.setProgramName(selectedProgramName);
 
@@ -201,7 +210,6 @@ public class MainFrame extends JFrame {
 						programList.removeAll();
 						selectProgramPopup.removeAll();
 					}
-
 				});
 			}
 		});
@@ -241,6 +249,25 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+
+		// Set up listeners for CALENDAR menu
+		filterByProgramItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JList<String> programList = controller.getAllProgramsAsString();
+				FilterCalendarDialog ev = new FilterCalendarDialog(MainFrame.this, "program", programList);
+				JList<String> dialogResponse = ev.getDialogResponse();
+				
+				if (dialogResponse != null) {
+					int numItems = dialogResponse.getModel().getSize();
+					System.out.println("Program filter: #items selected = " + numItems);
+					for (int i = 0; i < numItems; i++)
+						System.out.println("    " + dialogResponse.getModel().getElementAt(i));
+				}
+				else
+					System.out.println("No program filter items selected");
+			}
+		});
+		
 		return menuBar;
 	}
 
@@ -320,7 +347,7 @@ public class MainFrame extends JFrame {
 						+ selectedCalendar.get(Calendar.DAY_OF_MONTH) + "/" + selectedCalendar.get(Calendar.YEAR)
 						+ ", Room = " + selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
 
-				// Remove task from selected day box 
+				// Remove task from selected day box
 				// (TBD: also remove from database)
 				controller.removeTaskFromDay(selectedCalendar, selectedTask.getTaskName());
 				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1,

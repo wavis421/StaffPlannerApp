@@ -44,11 +44,10 @@ public class Database {
 
 	public JList<String> getAllProgramsAsString() {
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
-		JList<String> nameList = new JList<String>(nameModel);
 		for (ProgramModel p : programList) {
 			nameModel.addElement(new String(p.getProgramName()));
 		}
-		return nameList;
+		return (new JList<String>(nameModel));
 	}
 
 	/*
