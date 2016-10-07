@@ -100,7 +100,24 @@ public class Database {
 		return null;
 	}
 
-	public LinkedList<TaskModel> getTasksByDay(Calendar calendar) {
+	public LinkedList<TaskModel> getTasksByDayByProgram(Calendar calendar, JList<String> pList) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
+		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
+		for (int i = 0; i < pList.getModel().getSize(); i++) {
+			ProgramModel p = getProgramByName(pList.getModel().getElementAt(i));
+			for (TaskModel t : p.getTaskList()) {
+				if ((t.getDayOfWeek() == dayOfWeek) && (t.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
+					thisMonthTasks.add(t);
+				}
+			}
+		}
+		Collections.sort(thisMonthTasks, new TimeComparator());
+		return thisMonthTasks;
+	}
+
+	public LinkedList<TaskModel> getAllTasksByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
@@ -117,9 +134,8 @@ public class Database {
 	}
 
 	/*
-	 * public List<TaskModel> getAllTasks() { 
-	 * 	return Collections.unmodifiableList(taskList); 
-	 * }
+	 * public List<TaskModel> getAllTasks() { return
+	 * Collections.unmodifiableList(taskList); }
 	 */
 
 	public JList<TaskModel> getAllTasks(String programName) {
@@ -132,19 +148,16 @@ public class Database {
 		}
 		return taskList;
 	}
-	
-	/*
-	public JList<String> getAllTasksAsString(String programName) {
-		DefaultListModel<String> nameModel = new DefaultListModel<String>();
-		JList<String> nameList = new JList<String>(nameModel);
-		ProgramModel program = getProgramByName(programName);
 
-		for (TaskModel t : program.getTaskList()) {
-			nameModel.addElement(new String(t.getTaskName()));
-		}
-		return nameList;
-	}
-	*/
+	/*
+	 * public JList<String> getAllTasksAsString(String programName) {
+	 * DefaultListModel<String> nameModel = new DefaultListModel<String>();
+	 * JList<String> nameList = new JList<String>(nameModel); ProgramModel
+	 * program = getProgramByName(programName);
+	 * 
+	 * for (TaskModel t : program.getTaskList()) { nameModel.addElement(new
+	 * String(t.getTaskName())); } return nameList; }
+	 */
 
 	private int getTaskIndexByName(ProgramModel program, String taskName) {
 		int i = 0;
