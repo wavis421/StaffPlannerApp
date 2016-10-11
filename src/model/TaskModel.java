@@ -7,19 +7,16 @@ public class TaskModel implements Serializable {
 	private String taskName;
 	private Time time;
 	private String location;
-	private int dayOfWeek;
+	private boolean[] dayOfWeek;
 	private boolean[] weekOfMonth;
-	private String endDate;
 	private int color;
 
-	public TaskModel(String taskName, String location, int dayOfWeek, boolean[] weekOfMonth, Time time, String endDate,
-			int color) {
+	public TaskModel(String taskName, String location, boolean[] dayOfWeek, boolean[] weekOfMonth, Time time, int color) {
 		this.taskName = taskName;
 		this.location = location;
 		this.dayOfWeek = dayOfWeek;
 		this.weekOfMonth = weekOfMonth;
 		this.time = time;
-		this.endDate = endDate;
 		this.color = color;
 	}
 
@@ -39,11 +36,7 @@ public class TaskModel implements Serializable {
 		return location;
 	}
 
-	public String getEndDate() {
-		return endDate;
-	}
-
-	public int getDayOfWeek() {
+	public boolean[] getDayOfWeek() {
 		return dayOfWeek;
 	}
 

@@ -1,0 +1,205 @@
+package gui;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.Border;
+
+import model.PersonModel;
+
+public class CreateUpdatePersonDialog extends JDialog {
+	private JButton okButton = new JButton("OK");
+	private JButton cancelButton = new JButton("Cancel");
+	
+	// Private instance variables
+	private JTextField personName = new JTextField(20);
+	private JTextField phone = new JTextField(20);
+	private JTextField email = new JTextField(20);
+	private JRadioButton staffButton = new JRadioButton("Staff");
+	private JRadioButton volunteerButton = new JRadioButton("Volunteer");
+	private ButtonGroup staffGroup = new ButtonGroup ();
+	private JPanel staffPanel = new JPanel();
+	private JTextArea notesArea = new JTextArea(3, 20);
+	
+	// Labels
+	private JLabel nameLabel = new JLabel ("Person's name: ");
+	private JLabel phoneLabel = new JLabel ("Phone #: ");
+	private JLabel emailLabel = new JLabel ("Email: ");
+	private JLabel staffLabel = new JLabel ("Staff or volunteer: ");
+	private JLabel notesLabel = new JLabel ("Notes: ");
+	
+	// Dialog panels
+	private JPanel controlsPanel;
+	private JPanel buttonsPanel;
+	private PersonEvent dialogResponse;
+	
+	public CreateUpdatePersonDialog (JFrame parent) {
+		super(parent, "Add person...", true);
+		staffButton.setSelected(true);
+		setupPersonDialog();
+	}
+	
+	// Constructor for updating existing person, PersonModel contains values
+	public CreateUpdatePersonDialog(JFrame parent, PersonModel person) {
+		super(parent, "Edit person...", true);
+
+		personName.setText(person.getName());
+		phone.setText(person.getPhone());
+		email.setText(person.getEmail());
+		notesArea.setText(person.getNotes());
+		if (person.isStaff())
+			staffButton.setSelected(true);
+		else
+			volunteerButton.setSelected(true);
+
+		setupPersonDialog();
+	}
+
+	public PersonEvent getDialogResponse() {
+		return dialogResponse;
+	}
+	
+	private void setupPersonDialog () {
+		createStaffSelector ();
+		
+		// Force the text area not to expand when user types more than 3 lines!!
+		notesArea.setBorder(BorderFactory.createEtchedBorder());
+		notesArea.setLineWrap(true);
+		notesArea.setRows(3);
+		notesArea.setMargin(new Insets(20, 20, 20, 20));
+		notesArea.setAutoscrolls(false);
+		notesArea.setPreferredSize(notesArea.getPreferredSize());
+		
+		okButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					// Make sure that program name has been entered
+					if (personName.getText().equals("")) {
+						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
+					} else {
+						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), 
+								email.getText(), staffButton.isSelected() ? true : false, 
+								processNotesArea());
+						dialogResponse = ev;
+						setVisible(false);
+						dispose();
+					}
+
+				} catch (IllegalArgumentException ev) {
+					JOptionPane.showMessageDialog(okButton, "TBD exception message");
+				}
+			}
+		});
+		cancelButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dialogResponse = null;
+				setVisible(false);
+				dispose();
+			}
+		});
+
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setPersonLayout();
+		setSize(450, 300);
+		setVisible(true);	
+	}
+	
+	private void setPersonLayout() {
+		int gridY = 0;
+		controlsPanel = new JPanel();
+		buttonsPanel = new JPanel();
+
+		controlsPanel.setLayout(new GridBagLayout());
+		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+
+		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		Border titleBorder = BorderFactory.createRaisedSoftBevelBorder();
+		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
+		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, titleBorder));
+
+		GridBagConstraints gc = new GridBagConstraints();
+
+		gc.weightx = gc.weighty = 1;
+		gc.fill = GridBagConstraints.NONE;
+
+		// Add name, phone, email and notes fields
+		addRowToControlPanel(gc, nameLabel, personName, gridY++);
+		addRowToControlPanel(gc, phoneLabel, phone, gridY++);
+		addRowToControlPanel(gc, emailLabel, email, gridY++);
+		addRowToControlPanel(gc, staffLabel, staffPanel, gridY++);
+		addRowToControlPanel(gc, notesLabel, notesArea, gridY++);
+
+		// Buttons row
+		gc.gridy++;
+		gc.gridx = 0;
+		buttonsPanel.add(okButton);
+		gc.gridx++;
+		buttonsPanel.add(cancelButton);
+
+		// Add to panel
+		setLayout(new BorderLayout());
+		add(controlsPanel, BorderLayout.CENTER);
+		add(buttonsPanel, BorderLayout.SOUTH);
+
+		// make OK & cancel buttons the same size
+		Dimension btnSize = cancelButton.getPreferredSize();
+		okButton.setPreferredSize(btnSize);
+	}
+	
+	// Generic method to add row with label and component 
+	private void addRowToControlPanel(GridBagConstraints gcon, Component value1, Component value2, int gridY) {
+		gcon.gridx = 0;
+		gcon.gridy = gridY;
+		gcon.anchor = GridBagConstraints.EAST;
+		gcon.insets = new Insets(0, 0, 0, 15);
+		controlsPanel.add(value1, gcon);
+		gcon.gridx++;
+		gcon.anchor = GridBagConstraints.WEST;
+		gcon.insets = new Insets(0, 0, 0, 0);
+		controlsPanel.add(value2, gcon);
+	}
+
+	private void createStaffSelector () {
+		staffButton.setActionCommand("staff");
+		volunteerButton.setActionCommand("volunteer");
+		
+		staffPanel.add(staffButton);
+		staffPanel.add(volunteerButton);
+		
+		staffGroup.add(staffButton);
+		staffGroup.add(volunteerButton);
+	}
+	
+	private String processNotesArea () {
+		int numRows = 0, currIdx = 0, currLength = 0;
+		for (int i = 0; i < 3 && notesArea.getText().length() > currLength; i++) {
+			currIdx = notesArea.getText().indexOf("\n", currLength);
+			if (currIdx != -1) {   // Found new-line
+				currLength = currIdx + 1;
+				numRows = i + 1;
+			}
+		}
+		int remainLength = notesArea.getText().length() - currLength;
+		if (remainLength > (31 * (3 - numRows)))
+			remainLength = 31 * (3 - numRows);
+		return (notesArea.getText().substring(0,  currLength + remainLength));
+	}
+}

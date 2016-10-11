@@ -80,7 +80,7 @@ public class CalendarPanel extends JPanel {
 	}
 
 	public void setProgramName (String name) {
-		programLabel.setText(name);;
+		programLabel.setText(name);
 	}
 	
 	// Set listener for mouse action on calendar day boxes
@@ -119,7 +119,6 @@ public class CalendarPanel extends JPanel {
 		// Add month set buttons and month label
 		CreateMonthButtons();
 		add(leftButton, "weightx=0.1 weighty=0.1");
-		//add(createMonthLabel(calendar), "gridwidth=5 bottom=3");
 		add(createMonthLabel(calendar), "gridwidth=5 bottom=0");
 		add(rightButton, "weightx=0.1 weighty=0.1");
 

@@ -28,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import controller.Controller;
+import model.PersonModel;
 import model.TaskModel;
 
 public class MainFrame extends JFrame {
@@ -90,10 +91,12 @@ public class MainFrame extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu programMenu = new JMenu("Program");
 		JMenu taskMenu = new JMenu("Task");
+		JMenu personMenu = new JMenu("Staff/Volunteers");
 		JMenu calendarMenu = new JMenu("Calendar");
 		menuBar.add(fileMenu);
 		menuBar.add(programMenu);
 		menuBar.add(taskMenu);
+		menuBar.add(personMenu);
 		menuBar.add(calendarMenu);
 
 		// Add file sub-menus
@@ -119,11 +122,19 @@ public class MainFrame extends JFrame {
 		taskMenu.add(taskCreateItem);
 		taskMenu.add(taskEditItem);
 
+		// Add persons sub-menus
+		JMenuItem personAddItem = new JMenuItem("Add person");
+		JMenuItem personEditItem = new JMenuItem("Edit person");
+		personMenu.add(personAddItem);
+		personMenu.add(personEditItem);
+		
 		// Add calendar sub-menus
 		JMenu calendarFilterMenu = new JMenu("Filter");
 		calendarMenu.add(calendarFilterMenu);
 		JMenuItem filterByProgramItem = new JMenuItem("by Program");
+		JMenuItem filterByPersonItem = new JMenuItem("by Person");
 		calendarFilterMenu.add(filterByProgramItem);
+		calendarFilterMenu.add(filterByPersonItem);
 
 		// Set up listeners for FILE menu
 		exportDataItem.addActionListener(new ActionListener() {
@@ -251,6 +262,59 @@ public class MainFrame extends JFrame {
 			}
 		});
 
+		// Set up listeners for PERSONS menu
+		personAddItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this);
+				PersonEvent dialogResponse = personEvent.getDialogResponse();
+
+				if (dialogResponse != null) {
+					if (controller.getPersonByName(dialogResponse.getName()) != null) {
+						// Person already exists!
+						int confirm = JOptionPane.showConfirmDialog(MainFrame.this,
+								"Person " + dialogResponse.getName() + " already exists. Do you want to edit existing person?");
+						/*
+						if (confirm == JOptionPane.OK_OPTION)
+							editTask(dialogResponse.getName());
+						else if (confirm == JOptionPane.NO_OPTION)
+							createTaskRetry(dialogResponse);
+							*/
+
+					} else {
+						// Add person to database 
+						controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(),
+								dialogResponse.getEmail(), dialogResponse.isStaff(), dialogResponse.getNotes());
+					}
+				}
+				else
+					System.out.println("Add person is null");
+			}
+		});
+		personEditItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPopupMenu editPersonPopup = new JPopupMenu();
+				JList<PersonModel> personList = controller.getAllPersons();
+
+				editPersonPopup.add(personList);
+				editPersonPopup.setSize(300, 200); // TBD
+				editPersonPopup.show(personMenu, personMenu.getX(), personMenu.getY());
+
+				personList.addMouseListener(new MouseAdapter() {
+					public void mousePressed(MouseEvent e) {
+						String origName = personList.getSelectedValue().getName();
+						System.out.println("Person Edit listener: name = " + origName);
+
+						editPerson(origName);
+
+						editPersonPopup.setVisible(false);
+						personList.removeAll();
+						editPersonPopup.removeAll();
+					}
+
+				});
+			}
+		});
+		
 		// Set up listeners for CALENDAR menu
 		filterByProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -260,6 +324,12 @@ public class MainFrame extends JFrame {
 
 				programFilter = dialogResponse;
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
+			}
+		});
+		// TBD: filter by person, by Staff/volunteer, by tasks that require more people
+		filterByPersonItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
 			}
 		});
 
@@ -318,6 +388,20 @@ public class MainFrame extends JFrame {
 		}
 	}
 
+	private void editPerson(String origName) {
+		System.out.println("Person EDIT: name = " + origName);
+		CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog (MainFrame.this, 
+				controller.getPersonByName(origName));
+		PersonEvent dialogResponse = personEvent.getDialogResponse();
+
+		if (dialogResponse != null) {
+			// Update task list and refresh calendar
+			if (!origName.equals(dialogResponse.getName()))
+				controller.renamePerson(origName, dialogResponse.getName());
+			controller.updatePerson(dialogResponse);
+		}
+	}
+	
 	private void setCalendarPopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 		JMenuItem editTaskItem = new JMenuItem("Edit task");

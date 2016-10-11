@@ -7,9 +7,11 @@ import java.util.LinkedList;
 
 import javax.swing.JList;
 
+import gui.PersonEvent;
 import gui.ProgramEvent;
 import gui.TaskEvent;
 import model.Database;
+import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
 
@@ -20,7 +22,7 @@ public class Controller {
 	 * ------- Programs -------
 	 */
 	public void addProgram(ProgramEvent ev) {
-		db.addProgram(ev.getProgramName(), ev.getDefaultColor());
+		db.addProgram(ev.getProgramName(), ev.getEndDate(), ev.getDefaultColor());
 	}
 
 	public ProgramModel getProgramByName(String programName) {
@@ -36,22 +38,18 @@ public class Controller {
 	 */
 	public void addTask(TaskEvent ev) {
 		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(),
-				ev.getWeekOfMonth(), ev.getTime(), ev.getEndDate(), ev.getColor());
+				ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 		db.addTask(ev.getProgramName(), task);
 	}
 
 	public void updateTask(TaskEvent ev) {
 		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(),
-				ev.getWeekOfMonth(), ev.getTime(), ev.getEndDate(), ev.getColor());
+				ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 		db.updateTask(ev.getProgramName(), task);
 	}
 
 	public void renameTask(String programName, String oldName, String newName) {
 		db.renameTask(programName, oldName, newName);
-	}
-
-	public void removeTaskFromDay(Calendar calendar, String taskName) {
-		db.removeTaskFromDay(calendar, taskName);
 	}
 
 	public TaskModel getTaskByName(String programName, String taskName) {
@@ -80,6 +78,34 @@ public class Controller {
 	}
 	*/
 
+	/*
+	 * ------- Persons -------
+	 */
+	public void addPerson(String name, String phone, String email, boolean staff, String notes) {
+		db.addPerson(name, phone, email, staff, notes);	
+	}
+	
+	public void updatePerson(PersonEvent ev) {
+		PersonModel person = new PersonModel(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isStaff(), ev.getNotes());
+		db.updatePerson(person);
+	}
+	
+	public void renamePerson(String oldName, String newName) {
+		db.renamePerson(oldName, newName);
+	}
+	
+	public PersonModel getPersonByName (String name) {
+		return db.getPersonByName(name);
+	}
+	
+	public JList<String> getAllPersonsAsString() {
+		return db.getAllPersonsAsString();
+	}
+	
+	public JList<PersonModel> getAllPersons() {
+		return db.getAllPersons();
+	}
+	
 	/*
 	 * ------- File save/restore items -------
 	 */
