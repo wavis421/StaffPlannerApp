@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JList;
 
 import gui.PersonEvent;
 import gui.ProgramEvent;
 import gui.TaskEvent;
+import model.AssignedTasksModel;
 import model.Database;
 import model.PersonModel;
 import model.ProgramModel;
@@ -31,6 +33,10 @@ public class Controller {
 
 	public JList<String> getAllProgramsAsString() {
 		return db.getAllProgramsAsString();
+	}
+	
+	public LinkedList<ProgramModel> getAllPrograms() {
+		return db.getAllPrograms();
 	}
 
 	/*
@@ -81,12 +87,14 @@ public class Controller {
 	/*
 	 * ------- Persons -------
 	 */
-	public void addPerson(String name, String phone, String email, boolean staff, String notes) {
-		db.addPerson(name, phone, email, staff, notes);	
+	public void addPerson(String name, String phone, String email, boolean staff, String notes,
+			LinkedList<AssignedTasksModel> assignedTasks) {
+		db.addPerson(name, phone, email, staff, notes, assignedTasks);	
 	}
 	
 	public void updatePerson(PersonEvent ev) {
-		PersonModel person = new PersonModel(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isStaff(), ev.getNotes());
+		PersonModel person = new PersonModel(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isStaff(), ev.getNotes(),
+				ev.getAssignedTasks());
 		db.updatePerson(person);
 	}
 	

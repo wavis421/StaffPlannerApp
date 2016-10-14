@@ -26,9 +26,13 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import controller.Controller;
+import model.AssignedTasksModel;
 import model.PersonModel;
+import model.ProgramModel;
 import model.TaskModel;
 
 public class MainFrame extends JFrame {
@@ -46,7 +50,7 @@ public class MainFrame extends JFrame {
 	private String selectedProgramName;
 	private TaskModel selectedTask;
 	private Calendar selectedCalendar;
-	
+
 	// Calendar filter
 	JList<String> programFilter = null;
 
@@ -127,7 +131,7 @@ public class MainFrame extends JFrame {
 		JMenuItem personEditItem = new JMenuItem("Edit person");
 		personMenu.add(personAddItem);
 		personMenu.add(personEditItem);
-		
+
 		// Add calendar sub-menus
 		JMenu calendarFilterMenu = new JMenu("Filter");
 		calendarMenu.add(calendarFilterMenu);
@@ -265,28 +269,29 @@ public class MainFrame extends JFrame {
 		// Set up listeners for PERSONS menu
 		personAddItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this);
+				CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this,
+						createAssignedTasksTree(null), createTaskTree());
 				PersonEvent dialogResponse = personEvent.getDialogResponse();
 
 				if (dialogResponse != null) {
 					if (controller.getPersonByName(dialogResponse.getName()) != null) {
 						// Person already exists!
-						int confirm = JOptionPane.showConfirmDialog(MainFrame.this,
-								"Person " + dialogResponse.getName() + " already exists. Do you want to edit existing person?");
+						int confirm = JOptionPane.showConfirmDialog(MainFrame.this, "Person " + dialogResponse.getName()
+								+ " already exists. Do you want to edit existing person?");
 						/*
-						if (confirm == JOptionPane.OK_OPTION)
-							editTask(dialogResponse.getName());
-						else if (confirm == JOptionPane.NO_OPTION)
-							createTaskRetry(dialogResponse);
-							*/
+						 * if (confirm == JOptionPane.OK_OPTION)
+						 * editTask(dialogResponse.getName()); else if (confirm
+						 * == JOptionPane.NO_OPTION)
+						 * createTaskRetry(dialogResponse);
+						 */
 
 					} else {
-						// Add person to database 
+						// Add person to database
 						controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(),
-								dialogResponse.getEmail(), dialogResponse.isStaff(), dialogResponse.getNotes());
+								dialogResponse.getEmail(), dialogResponse.isStaff(), dialogResponse.getNotes(),
+								dialogResponse.getAssignedTasks());
 					}
-				}
-				else
+				} else
 					System.out.println("Add person is null");
 			}
 		});
@@ -314,7 +319,7 @@ public class MainFrame extends JFrame {
 				});
 			}
 		});
-		
+
 		// Set up listeners for CALENDAR menu
 		filterByProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -326,7 +331,8 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
-		// TBD: filter by person, by Staff/volunteer, by tasks that require more people
+		// TBD: filter by person, by Staff/volunteer, by tasks that require more
+		// people
 		filterByPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -390,8 +396,10 @@ public class MainFrame extends JFrame {
 
 	private void editPerson(String origName) {
 		System.out.println("Person EDIT: name = " + origName);
-		CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog (MainFrame.this, 
-				controller.getPersonByName(origName));
+
+		PersonModel person = controller.getPersonByName(origName);
+		CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this, person,
+				createAssignedTasksTree(person), createTaskTree());
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
@@ -401,7 +409,7 @@ public class MainFrame extends JFrame {
 			controller.updatePerson(dialogResponse);
 		}
 	}
-	
+
 	private void setCalendarPopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 		JMenuItem editTaskItem = new JMenuItem("Edit task");
@@ -438,12 +446,50 @@ public class MainFrame extends JFrame {
 		LinkedList<TaskModel> tasks;
 		for (int i = 0; i < 31; i++) {
 			calendar.set(Calendar.DAY_OF_MONTH, i + 1);
-			if (programFilter == null) 
+			if (programFilter == null)
 				tasks = controller.getAllTasksByDay(calendar);
 			else
 				tasks = controller.getTasksByDayByProgram(calendar, programFilter);
 			calPanel.updateTasksByDay(i, tasks);
 		}
 		calPanel.refresh();
+	}
+
+	private JTree createTaskTree() {
+		DefaultMutableTreeNode top = new DefaultMutableTreeNode("Add new task");
+		LinkedList<ProgramModel> programList = controller.getAllPrograms();
+
+		for (int i = 0; i < programList.size(); i++) {
+			ProgramModel p = programList.get(i);
+			DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(p);
+			top.add(pNode);
+
+			JList<TaskModel> taskList = controller.getAllTasks(p.getProgramName());
+
+			for (int j = 0; j < taskList.getModel().getSize(); j++) {
+				TaskModel task = taskList.getModel().getElementAt(j);
+				pNode.add(new DefaultMutableTreeNode(task));
+			}
+		}
+		JTree tree = new JTree(top);
+		tree.setCellRenderer(new TaskTreeRenderer());
+		return (tree);
+	}
+
+	private JTree createAssignedTasksTree(PersonModel person) {
+		DefaultMutableTreeNode top = new DefaultMutableTreeNode("Assigned tasks");
+
+		if (person != null) {
+			for (AssignedTasksModel item : person.getAssignedTasks()) {
+				ProgramModel p = controller.getProgramByName(item.getProgramName());
+				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(p);
+				top.add(pNode);
+				pNode.add(new DefaultMutableTreeNode(
+						controller.getTaskByName(item.getProgramName(), item.getTaskName())));
+			}
+		}
+		JTree tree = new JTree(top);
+		tree.setCellRenderer(new TaskTreeRenderer());
+		return (tree);
 	}
 }

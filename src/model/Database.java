@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -50,6 +51,11 @@ public class Database {
 			nameModel.addElement(new String(p.getProgramName()));
 		}
 		return (new JList<String>(nameModel));
+	}
+	
+	public LinkedList<ProgramModel> getAllPrograms() {
+		//return (List<ProgramModel>) Collections.unmodifiableList(programList);
+		return programList;
 	}
 
 	/*
@@ -102,7 +108,6 @@ public class Database {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 
-		System.out.println("getTasksByDayByProgram: dow = " + dayOfWeekIdx);
 		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
 		for (int i = 0; i < pList.getModel().getSize(); i++) {
 			ProgramModel p = getProgramByName(pList.getModel().getElementAt(i));
@@ -120,7 +125,6 @@ public class Database {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 
-		System.out.println("getAllTasksByDay: dow = " + dayOfWeekIdx);
 		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
 		for (ProgramModel p : programList) {
 			for (TaskModel t : p.getTaskList()) {
@@ -163,10 +167,11 @@ public class Database {
 	/*
 	 * ------- Person -------
 	 */
-	public void addPerson(String name, String phone, String email, boolean staff, String notes) {
+	public void addPerson(String name, String phone, String email, boolean staff, String notes,
+			LinkedList<AssignedTasksModel> assignedTasks) {
 		System.out.println("Added person to database: " + name + ", " + phone + ", "
-				+ email + ", " + staff + ", "+ notes);
-		personList.add(new PersonModel(name, phone, email, staff, notes));
+				+ email + ", " + staff + ", "+ notes + ", " + assignedTasks);
+		personList.add(new PersonModel(name, phone, email, staff, notes, assignedTasks));
 	}
 
 	public void updatePerson(PersonModel person) {

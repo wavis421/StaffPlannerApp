@@ -17,6 +17,10 @@ public class ProgramModel implements Serializable {
 		this.taskList = taskList;
 	}
 
+	public String toString () {
+		return programName;
+	}
+	
 	public String getProgramName() {
 		return programName;
 	}

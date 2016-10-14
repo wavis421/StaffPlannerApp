@@ -9,6 +9,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -19,10 +20,13 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTree;
 import javax.swing.border.Border;
 
+import model.AssignedTasksModel;
 import model.PersonModel;
 
 public class CreateUpdatePersonDialog extends JDialog {
@@ -38,6 +42,9 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private ButtonGroup staffGroup = new ButtonGroup ();
 	private JPanel staffPanel = new JPanel();
 	private JTextArea notesArea = new JTextArea(3, 20);
+	private LinkedList<AssignedTasksModel> assignedTasks;
+	private JScrollPane assignedTasksScrollPane;
+	private JScrollPane taskTreeScrollPane;
 	
 	// Labels
 	private JLabel nameLabel = new JLabel ("Person's name: ");
@@ -51,15 +58,17 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JPanel buttonsPanel;
 	private PersonEvent dialogResponse;
 	
-	public CreateUpdatePersonDialog (JFrame parent) {
+	public CreateUpdatePersonDialog (JFrame parent, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Add person...", true);
+		createTrees (assignedTasksTree, taskTree);
 		staffButton.setSelected(true);
 		setupPersonDialog();
 	}
 	
 	// Constructor for updating existing person, PersonModel contains values
-	public CreateUpdatePersonDialog(JFrame parent, PersonModel person) {
+	public CreateUpdatePersonDialog(JFrame parent, PersonModel person, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
+		createTrees(assignedTasksTree, taskTree);
 
 		personName.setText(person.getName());
 		phone.setText(person.getPhone());
@@ -69,6 +78,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 			staffButton.setSelected(true);
 		else
 			volunteerButton.setSelected(true);
+		assignedTasks = person.getAssignedTasks();
 
 		setupPersonDialog();
 	}
@@ -97,7 +107,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 					} else {
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), 
 								email.getText(), staffButton.isSelected() ? true : false, 
-								processNotesArea());
+								processNotesArea(), assignedTasks);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -118,7 +128,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setPersonLayout();
-		setSize(450, 300);
+		setSize(550, 450);
 		setVisible(true);	
 	}
 	
@@ -146,6 +156,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		addRowToControlPanel(gc, emailLabel, email, gridY++);
 		addRowToControlPanel(gc, staffLabel, staffPanel, gridY++);
 		addRowToControlPanel(gc, notesLabel, notesArea, gridY++);
+		addRowToControlPanel(gc, assignedTasksScrollPane, taskTreeScrollPane, gridY++);
 
 		// Buttons row
 		gc.gridy++;
@@ -201,5 +212,15 @@ public class CreateUpdatePersonDialog extends JDialog {
 		if (remainLength > (31 * (3 - numRows)))
 			remainLength = 31 * (3 - numRows);
 		return (notesArea.getText().substring(0,  currLength + remainLength));
+	}
+	
+	private void createTrees (JTree assignedTasksTree, JTree taskTree) {
+		assignedTasksScrollPane = new JScrollPane (assignedTasksTree);
+		assignedTasksScrollPane.setPreferredSize(new Dimension((int)notesArea.getPreferredSize().getWidth(), 
+				(int)notesArea.getPreferredSize().getHeight() * 2));
+		
+		taskTreeScrollPane = new JScrollPane(taskTree);
+		taskTreeScrollPane.setPreferredSize(new Dimension((int)notesArea.getPreferredSize().getWidth(), 
+				(int)notesArea.getPreferredSize().getHeight() * 2));
 	}
 }

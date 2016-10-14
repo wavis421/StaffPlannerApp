@@ -1,6 +1,9 @@
 package gui;
 
 import java.util.EventObject;
+import java.util.LinkedList;
+
+import model.AssignedTasksModel;
 
 public class PersonEvent extends EventObject {
 	private String name;
@@ -8,12 +11,14 @@ public class PersonEvent extends EventObject {
 	private String email;
 	private boolean staff;
 	private String notes;
+	private LinkedList<AssignedTasksModel> assignedTasks;
 	
 	public PersonEvent(Object source) {
 		super(source);
 	}
 
-	public PersonEvent(Object source, String name, String phone, String email, boolean staff, String notes) {
+	public PersonEvent(Object source, String name, String phone, String email, boolean staff, String notes,
+			LinkedList<AssignedTasksModel> assignedTasks) {
 		super(source);
 
 		this.name = name;
@@ -21,6 +26,7 @@ public class PersonEvent extends EventObject {
 		this.email = email;
 		this.staff = staff;
 		this.notes = notes;
+		this.assignedTasks = assignedTasks;
 	}
 
 	public String getName() {
@@ -41,5 +47,9 @@ public class PersonEvent extends EventObject {
 
 	public String getNotes() {
 		return notes;
+	}
+
+	public LinkedList<AssignedTasksModel> getAssignedTasks() {
+		return assignedTasks;
 	}
 }

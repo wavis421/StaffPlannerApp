@@ -1,20 +1,28 @@
 package model;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 
 public class PersonModel implements Serializable {
 	private String name;
 	private String phone;
 	private String email;
-	private boolean staff;  // Staff or volunteer
+	private boolean staff; // Staff or volunteer
 	private String notes;
-	
-	public PersonModel (String name, String phone, String email, boolean staff, String notes) {
+	private LinkedList<AssignedTasksModel> assignedTasks;
+
+	public PersonModel(String name, String phone, String email, boolean staff, String notes,
+			LinkedList<AssignedTasksModel> assignedTasks) {
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
 		this.staff = staff;
 		this.notes = notes;
+		this.assignedTasks = assignedTasks;
+	}
+
+	public String toString() {
+		return name;
 	}
 
 	public String getName() {
@@ -39,5 +47,9 @@ public class PersonModel implements Serializable {
 
 	public String getNotes() {
 		return notes;
+	}
+
+	public LinkedList<AssignedTasksModel> getAssignedTasks() {
+		return assignedTasks;
 	}
 }
