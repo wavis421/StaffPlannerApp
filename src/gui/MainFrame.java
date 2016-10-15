@@ -472,7 +472,7 @@ public class MainFrame extends JFrame {
 			}
 		}
 		JTree tree = new JTree(top);
-		tree.setCellRenderer(new TaskTreeRenderer());
+		tree.setCellRenderer(new TaskTreeRenderer());		
 		return (tree);
 	}
 

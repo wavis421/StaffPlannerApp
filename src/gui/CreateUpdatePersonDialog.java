@@ -25,6 +25,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.border.Border;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
 
 import model.AssignedTasksModel;
 import model.PersonModel;
@@ -218,9 +222,41 @@ public class CreateUpdatePersonDialog extends JDialog {
 		assignedTasksScrollPane = new JScrollPane (assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(new Dimension((int)notesArea.getPreferredSize().getWidth(), 
 				(int)notesArea.getPreferredSize().getHeight() * 2));
+		assignedTasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		
+		/* Add tree listener */
+		assignedTasksTree.addTreeSelectionListener(new TreeSelectionListener() {
+		    public void valueChanged(TreeSelectionEvent e) {
+		        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+		        		assignedTasksTree.getLastSelectedPathComponent();
+ 
+		        if (node == null) return;
+
+		        /* retrieve the node that was selected */ 
+		        Object nodeInfo = node.getUserObject();		        
+		        System.out.println("Tree Selection Listener: " + nodeInfo + ", path: " + e.getPath() +
+		        		", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot());   
+		    }
+		});
 		
 		taskTreeScrollPane = new JScrollPane(taskTree);
 		taskTreeScrollPane.setPreferredSize(new Dimension((int)notesArea.getPreferredSize().getWidth(), 
 				(int)notesArea.getPreferredSize().getHeight() * 2));
+		taskTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		
+		/* Add tree listener */
+		taskTree.addTreeSelectionListener(new TreeSelectionListener() {
+		    public void valueChanged(TreeSelectionEvent e) {
+		        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+		        		taskTree.getLastSelectedPathComponent();
+ 
+		        if (node == null) return;
+
+		        /* retrieve the node that was selected */ 
+		        Object nodeInfo = node.getUserObject();	
+		        System.out.println("Tree Selection Listener: " + nodeInfo + ", path: " + e.getPath() +
+		        		", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot());
+		    }
+		});
 	}
 }
