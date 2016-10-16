@@ -226,7 +226,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		
 		/* Add tree listener */
 		assignedTasksTree.addTreeSelectionListener(new TreeSelectionListener() {
-		    public void valueChanged(TreeSelectionEvent e) {
+		    public void valueChanged(TreeSelectionEvent evt) {
 		        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
 		        		assignedTasksTree.getLastSelectedPathComponent();
  
@@ -234,8 +234,9 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 		        /* retrieve the node that was selected */ 
 		        Object nodeInfo = node.getUserObject();		        
-		        System.out.println("Tree Selection Listener: " + nodeInfo + ", path: " + e.getPath() +
-		        		", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot());   
+		        System.out.println("Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath() +
+		        		", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + 
+		        		", path length: " + evt.getPath().getPathCount());   
 		    }
 		});
 		
@@ -246,7 +247,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		
 		/* Add tree listener */
 		taskTree.addTreeSelectionListener(new TreeSelectionListener() {
-		    public void valueChanged(TreeSelectionEvent e) {
+		    public void valueChanged(TreeSelectionEvent evt) {
 		        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
 		        		taskTree.getLastSelectedPathComponent();
  
@@ -254,8 +255,9 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 		        /* retrieve the node that was selected */ 
 		        Object nodeInfo = node.getUserObject();	
-		        System.out.println("Tree Selection Listener: " + nodeInfo + ", path: " + e.getPath() +
-		        		", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot());
+		        System.out.println("Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath() +
+		        		", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + 
+		        		", path length: " + evt.getPath().getPathCount()); 
 		    }
 		});
 	}
