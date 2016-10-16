@@ -34,15 +34,18 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 			setClosedIcon(calIcon);
 			setOpenIcon(calIcon);
 			setLeafIcon(calIcon);
-		} else {
+		} else if (tree.getPathForRow(row).getPathCount() == 2) {
 			setClosedIcon(calPlusIcon);
 			setOpenIcon(calPlusIcon);
-			setLeafIcon(null);
+			setLeafIcon(calPlusIcon);
 		}
+		else {
+			setLeafIcon(null);
+		}	
 
 		textSelectionColor = Color.black;
 		textNonSelectionColor = Color.black;
-		if (value != null && row != 0 && isLeaf) {
+		if (value != null && tree.getPathForRow(row).getPathCount() == 3) {
 			TaskModel task = (TaskModel) (((DefaultMutableTreeNode) value).getUserObject());
 			textSelectionColor = new Color(task.getColor());
 			textNonSelectionColor = new Color(task.getColor());
