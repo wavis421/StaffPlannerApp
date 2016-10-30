@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
+import model.AssignedTasksModel;
 import model.TaskModel;
 
 public class AssignTaskDialog extends JDialog {
@@ -43,44 +44,64 @@ public class AssignTaskDialog extends JDialog {
 	// Track current program and task
 	private String programName;
 	private TaskModel task;
-	private JDialog parent;
+
+	public AssignTaskDialog(JDialog parent, AssignTaskEvent taskEvent) {
+		super(parent, "Assign task...", true);
+		// setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+		// setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
+
+		initAssignTaskDialog(taskEvent.getProgramName(), taskEvent.getTask(), taskEvent.getDaysOfWeek(),
+				taskEvent.getWeeksOfMonth());
+	}
 
 	public AssignTaskDialog(JDialog parent, String programName, TaskModel task) {
 		super(parent, "Assign task...", true);
-		//setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
-		//setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
-		
+		// setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+		// setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
+
+		boolean[] daysOfWeek = { false, false, false, false, false, false, false };
+		boolean[] weeksOfMonth = { false, false, false, false, false };
+
+		initAssignTaskDialog(programName, task, daysOfWeek, weeksOfMonth);
+	}
+
+	public AssignTaskEvent getDialogResponse() {
+		return dialogResponse;
+	}
+
+	private void initAssignTaskDialog(String programName, TaskModel task, boolean[] daysOfWeek,
+			boolean[] weeksOfMonth) {
 		this.programName = programName;
 		this.task = task;
-		this.parent = parent;
 
-		createDayOfWeekButtons();
-		createWeekOfMonthButtons();
+		createDayOfWeekButtons(daysOfWeek);
+		createWeekOfMonthButtons(weeksOfMonth);
+
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-						// Create days of week array
-						int numDaysInWeek = dayOfWeekButtons.length;
-						boolean[] daysOfWeekSelected = new boolean[numDaysInWeek];
-						for (int i = 0; i < numDaysInWeek; i++) {
-							if (dayOfWeekButtons[i].isSelected())
-								daysOfWeekSelected[i] = true;
-						}
+					// Create days of week array
+					int numDaysInWeek = dayOfWeekButtons.length;
+					boolean[] daysOfWeekSelected = new boolean[numDaysInWeek];
+					for (int i = 0; i < numDaysInWeek; i++) {
+						if (dayOfWeekButtons[i].isSelected())
+							daysOfWeekSelected[i] = true;
+					}
 
-						// Create weeks of month array
-						int numWeeksInMonth = weekOfMonthButtons.length;
-						boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
-						for (int i = 0; i < numWeeksInMonth; i++) {
-							if (weekOfMonthButtons[i].isSelected())
-								weeksOfMonthSelected[i] = true;
-						}
+					// Create weeks of month array
+					int numWeeksInMonth = weekOfMonthButtons.length;
+					boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
+					for (int i = 0; i < numWeeksInMonth; i++) {
+						if (weekOfMonthButtons[i].isSelected())
+							weeksOfMonthSelected[i] = true;
+					}
 
-						// Create TaskEvent and set response
-						AssignTaskEvent ev = new AssignTaskEvent(this, programName, task.getTaskName(),
-								daysOfWeekSelected, weeksOfMonthSelected);
-						dialogResponse = ev;
-						setVisible(false);
-						dispose();
+					// Create TaskEvent and set response
+					AssignTaskEvent ev = new AssignTaskEvent(this, programName, task, daysOfWeekSelected,
+							weeksOfMonthSelected);
+					dialogResponse = ev;
+					setVisible(false);
+					dispose();
 
 				} catch (IllegalArgumentException ev) {
 					JOptionPane.showMessageDialog(okButton, "TBD Exception");
@@ -95,15 +116,10 @@ public class AssignTaskDialog extends JDialog {
 			}
 		});
 
-		
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setLayout();
 		setSize(580, 250);
 		setVisible(true);
-	}
-
-	public AssignTaskEvent getDialogResponse() {
-		return dialogResponse;
 	}
 
 	private void setLayout() {
@@ -131,7 +147,7 @@ public class AssignTaskDialog extends JDialog {
 
 		gc.weightx = gc.weighty = 1;
 		gc.fill = GridBagConstraints.NONE;
-		
+
 		// Add DOW/WOM selectors
 		addRowToControlPanel(gc, dayOfWeekLabel, dayOfWeekPanel, gridY++);
 		addRowToControlPanel(gc, weekOfMonthLabel, weekOfMonthPanel, gridY++);
@@ -153,7 +169,7 @@ public class AssignTaskDialog extends JDialog {
 		okButton.setPreferredSize(btnSize);
 	}
 
-	// Generic method to add row with label and component 
+	// Generic method to add row with label and component
 	private void addRowToControlPanel(GridBagConstraints gcon, Component value1, Component value2, int gridY) {
 		gcon.gridx = 0;
 		gcon.gridy = gridY;
@@ -166,27 +182,27 @@ public class AssignTaskDialog extends JDialog {
 		controlsPanel.add(value2, gcon);
 	}
 
-	private void createDayOfWeekButtons() {
+	private void createDayOfWeekButtons(boolean[] currentDayOfWeek) {
 		String[] dayName = { "Sun", "Mon", "Tue", "Wed", "Th", "Fri", "Sat" };
 
-		boolean[] currentDayOfWeek = task.getDayOfWeek();
 		for (int i = 0; i < dayOfWeekButtons.length; i++) {
 			dayOfWeekButtons[i] = new JRadioButton(dayName[i]);
-			if (currentDayOfWeek[i] == false)
+			if (task.getDayOfWeek()[i] == false)
 				dayOfWeekButtons[i].setEnabled(false);
-			//dayOfWeekButtons[i].setSelected(currentDayOfWeek[i]);
+			else
+				dayOfWeekButtons[i].setSelected(currentDayOfWeek[i]);
 		}
 	}
 
-	private void createWeekOfMonthButtons() {
+	private void createWeekOfMonthButtons(boolean[] currentWeekOfMonth) {
 		String[] weekName = { "1st", "2nd", "3rd", "4th", "5th" };
 
-		boolean[] currentWeekOfMonth = task.getWeekOfMonth();
 		for (int i = 0; i < weekOfMonthButtons.length; i++) {
 			weekOfMonthButtons[i] = new JRadioButton(weekName[i]);
-			if (currentWeekOfMonth[i] == false)
+			if (task.getWeekOfMonth()[i] == false)
 				weekOfMonthButtons[i].setEnabled(false);
-			//weekOfMonthButtons[i].setSelected(currentWeekOfMonth[i]);
+			else
+				weekOfMonthButtons[i].setSelected(currentWeekOfMonth[i]);
 		}
 	}
 }

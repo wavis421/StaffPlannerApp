@@ -38,18 +38,20 @@ import model.PersonModel;
 import model.TaskModel;
 
 public class CreateUpdatePersonDialog extends JDialog {
+	// Constants
+	private static final int TEXT_FIELD_SIZE = 30;
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
 	// Private instance variables
-	private JTextField personName = new JTextField(20);
-	private JTextField phone = new JTextField(20);
-	private JTextField email = new JTextField(20);
+	private JTextField personName = new JTextField(TEXT_FIELD_SIZE);
+	private JTextField phone = new JTextField(TEXT_FIELD_SIZE);
+	private JTextField email = new JTextField(TEXT_FIELD_SIZE);
 	private JRadioButton staffButton = new JRadioButton("Staff");
 	private JRadioButton volunteerButton = new JRadioButton("Volunteer");
 	private ButtonGroup staffGroup = new ButtonGroup();
 	private JPanel staffPanel = new JPanel();
-	private JTextArea notesArea = new JTextArea(3, 20);
+	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
 	private LinkedList<AssignedTasksModel> assignedTasks;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
@@ -101,10 +103,10 @@ public class CreateUpdatePersonDialog extends JDialog {
 		return dialogResponse;
 	}
 
-	public boolean getOkToSaveStatus () {
+	public boolean getOkToSaveStatus() {
 		return okToSave;
 	}
-	
+
 	private void setupPersonDialog() {
 		createStaffSelector();
 
@@ -146,7 +148,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setPersonLayout();
-		setSize(550, 450);
+		setSize(750, 475);
 		setVisible(true);
 	}
 
@@ -159,10 +161,10 @@ public class CreateUpdatePersonDialog extends JDialog {
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
 		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		Border lineBorder = BorderFactory.createLineBorder(Color.black);
-		//Border titleBorder = BorderFactory.createRaisedSoftBevelBorder();
+		// Border titleBorder = BorderFactory.createRaisedSoftBevelBorder();
+		Border etchedBorder = BorderFactory.createEtchedBorder();
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
-		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, lineBorder));
+		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, etchedBorder));
 
 		GridBagConstraints gc = new GridBagConstraints();
 
@@ -236,14 +238,13 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private void createTrees(JTree assignedTasksTree, JTree taskTree) {
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
-				(int) notesArea.getPreferredSize().getHeight() * 2));
+				(int) notesArea.getPreferredSize().getHeight() * 3));
 		assignedTasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 		/* Add tree listener */
 		assignedTasksTree.addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent evt) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) assignedTasksTree.getLastSelectedPathComponent();
-
 				if (node == null)
 					return;
 
@@ -252,19 +253,40 @@ public class CreateUpdatePersonDialog extends JDialog {
 				System.out.println("Assigned Task Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath()
 						+ ", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + ", path length: "
 						+ evt.getPath().getPathCount());
+
+				if (node.getLevel() == 2) {
+					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+					AssignTaskDialog event = new AssignTaskDialog(CreateUpdatePersonDialog.this,
+							(AssignTaskEvent) nodeInfo);
+
+					AssignTaskEvent eventResponse = event.getDialogResponse();
+					if (eventResponse != null) {
+						// Update assigned task model with new node info
+						AssignedTasksModel taskModel = new AssignedTasksModel(eventResponse.getProgramName(), 
+								eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
+								eventResponse.getWeeksOfMonth());
+						assignedTasks.removeLast();
+						assignedTasks.add(taskModel);
+
+						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks);
+						dialogResponse = ev;
+						setVisible(false);
+						dispose();
+					}
+				}
 			}
 		});
 
 		taskTreeScrollPane = new JScrollPane(taskTree);
 		taskTreeScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
-				(int) notesArea.getPreferredSize().getHeight() * 2));
+				(int) notesArea.getPreferredSize().getHeight() * 3));
 		taskTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 		/* Add tree listener */
 		taskTree.addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent evt) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) taskTree.getLastSelectedPathComponent();
-
 				if (node == null)
 					return;
 
@@ -276,26 +298,23 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 				if (node.getLevel() == 2) {
 					TreePath parentPath = taskTree.getSelectionPath();
-					if (parentPath != null) {
-						DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (parentPath.getLastPathComponent());
-						setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+					DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (parentPath.getLastPathComponent());
+					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 
-						AssignTaskDialog event = new AssignTaskDialog(CreateUpdatePersonDialog.this,
-								node.getParent().toString(), (TaskModel) nodeInfo);
+					AssignTaskDialog event = new AssignTaskDialog(CreateUpdatePersonDialog.this,
+							node.getParent().toString(), (TaskModel) nodeInfo);
 
-						AssignTaskEvent eventResponse = event.getDialogResponse();
-						if (eventResponse != null) {
-							AssignedTasksModel taskModel = new AssignedTasksModel(node.getParent().toString(),
-									childNode.toString(), eventResponse.getDaysOfWeek(),
-									eventResponse.getWeeksOfMonth());
-							assignedTasks.add(taskModel);
-							
-							PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-									staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks);
-							dialogResponse = ev;
-							setVisible(false);
-							dispose();
-						}
+					AssignTaskEvent eventResponse = event.getDialogResponse();
+					if (eventResponse != null) {
+						AssignedTasksModel taskModel = new AssignedTasksModel(node.getParent().toString(),
+								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
+						assignedTasks.add(taskModel);
+
+						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks);
+						dialogResponse = ev;
+						setVisible(false);
+						dispose();
 					}
 				}
 			}

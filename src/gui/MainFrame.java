@@ -482,7 +482,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private JTree createTaskTree() {
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Add new task");
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Select task to assign");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
 		LinkedList<ProgramModel> programList = controller.getAllPrograms();
 
@@ -521,7 +521,10 @@ public class MainFrame extends JFrame {
 				if (path != null) {
 					pathFound = true;
 					tree.setSelectionPath(path);
-					treeModel.insertNodeInto(new DefaultMutableTreeNode(item),
+					AssignTaskEvent taskEvent = new AssignTaskEvent (MainFrame.this, item.getProgramName(), 
+							controller.getTaskByName(item.getProgramName(), item.getTaskName()), 
+							item.getDaysOfWeek(), item.getWeeksOfMonth());
+					treeModel.insertNodeInto(new DefaultMutableTreeNode(taskEvent),
 							(DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent(), row);
 					break;
 				}
@@ -530,8 +533,11 @@ public class MainFrame extends JFrame {
 				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(item.getProgramName());
 				tree.setSelectionPath(tree.getPathForRow(0));
 				treeModel.insertNodeInto(pNode, (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent(), 0);
-
-				pNode.add(new DefaultMutableTreeNode(item));
+				
+				AssignTaskEvent taskEvent = new AssignTaskEvent (MainFrame.this, item.getProgramName(), 
+						controller.getTaskByName(item.getProgramName(), item.getTaskName()), 
+						item.getDaysOfWeek(), item.getWeeksOfMonth());
+				pNode.add(new DefaultMutableTreeNode(taskEvent));
 				tree.expandRow(0);
 			}
 		}

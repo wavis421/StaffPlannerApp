@@ -2,29 +2,35 @@ package gui;
 
 import java.util.EventObject;
 
+import model.TaskModel;
+
 public class AssignTaskEvent extends EventObject {
 	private String programName;
-	private String taskName;
+	private TaskModel task;
 	private boolean[] daysOfWeek;
 	private boolean[] weeksOfMonth;
 	
-	public AssignTaskEvent(Object source, String programName, String taskName, boolean[] daysOfWeek,
+	public AssignTaskEvent(Object source, String programName, TaskModel task, boolean[] daysOfWeek,
 			boolean[] weeksOfMonth) {
 		
 		super(source);
 
 		this.programName = programName;
-		this.taskName = taskName;
+		this.task = task;
 		this.daysOfWeek = daysOfWeek;
 		this.weeksOfMonth = weeksOfMonth;
 	}
 
+	public String toString () {
+		return task.getTaskName();
+	}
+	
 	public String getProgramName() {
 		return programName;
 	}
 
-	public String getTaskName() {
-		return taskName;
+	public TaskModel getTask() {
+		return task;
 	}
 
 	public boolean[] getDaysOfWeek() {
