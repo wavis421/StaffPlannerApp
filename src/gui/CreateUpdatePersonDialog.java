@@ -1,7 +1,9 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -28,61 +30,69 @@ import javax.swing.border.Border;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import model.AssignedTasksModel;
 import model.PersonModel;
+import model.TaskModel;
 
 public class CreateUpdatePersonDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
-	
+
 	// Private instance variables
 	private JTextField personName = new JTextField(20);
 	private JTextField phone = new JTextField(20);
 	private JTextField email = new JTextField(20);
 	private JRadioButton staffButton = new JRadioButton("Staff");
 	private JRadioButton volunteerButton = new JRadioButton("Volunteer");
-	private ButtonGroup staffGroup = new ButtonGroup ();
+	private ButtonGroup staffGroup = new ButtonGroup();
 	private JPanel staffPanel = new JPanel();
 	private JTextArea notesArea = new JTextArea(3, 20);
 	private LinkedList<AssignedTasksModel> assignedTasks;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
-	
+
 	// Labels
-	private JLabel nameLabel = new JLabel ("Person's name: ");
-	private JLabel phoneLabel = new JLabel ("Phone #: ");
-	private JLabel emailLabel = new JLabel ("Email: ");
-	private JLabel staffLabel = new JLabel ("Staff or volunteer: ");
-	private JLabel notesLabel = new JLabel ("Notes: ");
-	
+	private JLabel nameLabel = new JLabel("Person's name: ");
+	private JLabel phoneLabel = new JLabel("Phone #: ");
+	private JLabel emailLabel = new JLabel("Email: ");
+	private JLabel staffLabel = new JLabel("Staff or volunteer: ");
+	private JLabel notesLabel = new JLabel("Notes: ");
+
 	// Dialog panels
 	private JPanel controlsPanel;
 	private JPanel buttonsPanel;
 	private PersonEvent dialogResponse;
-	
-	public CreateUpdatePersonDialog (JFrame parent, JTree assignedTasksTree, JTree taskTree) {
-		super(parent, "Add person...", true);
-		createTrees (assignedTasksTree, taskTree);
-		staffButton.setSelected(true);
+	private boolean okToSave = false;
+
+	public CreateUpdatePersonDialog(JFrame parent, JTree assignedTasksTree, JTree taskTree) {
+		// super(parent, "Add person...", true);
+		super(parent, "Add person...");
+		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
+		createTrees(assignedTasksTree, taskTree);
+		this.staffButton.setSelected(true);
+		this.assignedTasks = new LinkedList<AssignedTasksModel>();
+
 		setupPersonDialog();
 	}
-	
+
 	// Constructor for updating existing person, PersonModel contains values
 	public CreateUpdatePersonDialog(JFrame parent, PersonModel person, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
+		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
 
-		personName.setText(person.getName());
-		phone.setText(person.getPhone());
-		email.setText(person.getEmail());
-		notesArea.setText(person.getNotes());
+		this.personName.setText(person.getName());
+		this.phone.setText(person.getPhone());
+		this.email.setText(person.getEmail());
+		this.notesArea.setText(person.getNotes());
 		if (person.isStaff())
-			staffButton.setSelected(true);
+			this.staffButton.setSelected(true);
 		else
-			volunteerButton.setSelected(true);
-		assignedTasks = person.getAssignedTasks();
+			this.volunteerButton.setSelected(true);
+		this.assignedTasks = person.getAssignedTasks();
 
 		setupPersonDialog();
 	}
@@ -90,10 +100,14 @@ public class CreateUpdatePersonDialog extends JDialog {
 	public PersonEvent getDialogResponse() {
 		return dialogResponse;
 	}
+
+	public boolean getOkToSaveStatus () {
+		return okToSave;
+	}
 	
-	private void setupPersonDialog () {
-		createStaffSelector ();
-		
+	private void setupPersonDialog() {
+		createStaffSelector();
+
 		// Force the text area not to expand when user types more than 3 lines!!
 		notesArea.setBorder(BorderFactory.createEtchedBorder());
 		notesArea.setLineWrap(true);
@@ -101,7 +115,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		notesArea.setMargin(new Insets(20, 20, 20, 20));
 		notesArea.setAutoscrolls(false);
 		notesArea.setPreferredSize(notesArea.getPreferredSize());
-		
+
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -109,9 +123,9 @@ public class CreateUpdatePersonDialog extends JDialog {
 					if (personName.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 					} else {
-						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), 
-								email.getText(), staffButton.isSelected() ? true : false, 
-								processNotesArea(), assignedTasks);
+						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks);
+						okToSave = true;
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -133,9 +147,9 @@ public class CreateUpdatePersonDialog extends JDialog {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setPersonLayout();
 		setSize(550, 450);
-		setVisible(true);	
+		setVisible(true);
 	}
-	
+
 	private void setPersonLayout() {
 		int gridY = 0;
 		controlsPanel = new JPanel();
@@ -145,9 +159,10 @@ public class CreateUpdatePersonDialog extends JDialog {
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
 		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		Border titleBorder = BorderFactory.createRaisedSoftBevelBorder();
+		Border lineBorder = BorderFactory.createLineBorder(Color.black);
+		//Border titleBorder = BorderFactory.createRaisedSoftBevelBorder();
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
-		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, titleBorder));
+		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, lineBorder));
 
 		GridBagConstraints gc = new GridBagConstraints();
 
@@ -160,7 +175,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		addRowToControlPanel(gc, emailLabel, email, gridY++);
 		addRowToControlPanel(gc, staffLabel, staffPanel, gridY++);
 		addRowToControlPanel(gc, notesLabel, notesArea, gridY++);
-		addRowToControlPanel(gc, assignedTasksScrollPane, taskTreeScrollPane, gridY++);
+		addRowToControlPanel(gc, taskTreeScrollPane, assignedTasksScrollPane, gridY++);
 
 		// Buttons row
 		gc.gridy++;
@@ -178,8 +193,8 @@ public class CreateUpdatePersonDialog extends JDialog {
 		Dimension btnSize = cancelButton.getPreferredSize();
 		okButton.setPreferredSize(btnSize);
 	}
-	
-	// Generic method to add row with label and component 
+
+	// Generic method to add row with label and component
 	private void addRowToControlPanel(GridBagConstraints gcon, Component value1, Component value2, int gridY) {
 		gcon.gridx = 0;
 		gcon.gridy = gridY;
@@ -192,22 +207,22 @@ public class CreateUpdatePersonDialog extends JDialog {
 		controlsPanel.add(value2, gcon);
 	}
 
-	private void createStaffSelector () {
+	private void createStaffSelector() {
 		staffButton.setActionCommand("staff");
 		volunteerButton.setActionCommand("volunteer");
-		
+
 		staffPanel.add(staffButton);
 		staffPanel.add(volunteerButton);
-		
+
 		staffGroup.add(staffButton);
 		staffGroup.add(volunteerButton);
 	}
-	
-	private String processNotesArea () {
+
+	private String processNotesArea() {
 		int numRows = 0, currIdx = 0, currLength = 0;
 		for (int i = 0; i < 3 && notesArea.getText().length() > currLength; i++) {
 			currIdx = notesArea.getText().indexOf("\n", currLength);
-			if (currIdx != -1) {   // Found new-line
+			if (currIdx != -1) { // Found new-line
 				currLength = currIdx + 1;
 				numRows = i + 1;
 			}
@@ -215,50 +230,75 @@ public class CreateUpdatePersonDialog extends JDialog {
 		int remainLength = notesArea.getText().length() - currLength;
 		if (remainLength > (31 * (3 - numRows)))
 			remainLength = 31 * (3 - numRows);
-		return (notesArea.getText().substring(0,  currLength + remainLength));
+		return (notesArea.getText().substring(0, currLength + remainLength));
 	}
-	
-	private void createTrees (JTree assignedTasksTree, JTree taskTree) {
-		assignedTasksScrollPane = new JScrollPane (assignedTasksTree);
-		assignedTasksScrollPane.setPreferredSize(new Dimension((int)notesArea.getPreferredSize().getWidth(), 
-				(int)notesArea.getPreferredSize().getHeight() * 2));
+
+	private void createTrees(JTree assignedTasksTree, JTree taskTree) {
+		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
+		assignedTasksScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
+				(int) notesArea.getPreferredSize().getHeight() * 2));
 		assignedTasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		
+
 		/* Add tree listener */
 		assignedTasksTree.addTreeSelectionListener(new TreeSelectionListener() {
-		    public void valueChanged(TreeSelectionEvent evt) {
-		        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-		        		assignedTasksTree.getLastSelectedPathComponent();
- 
-		        if (node == null) return;
+			public void valueChanged(TreeSelectionEvent evt) {
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) assignedTasksTree.getLastSelectedPathComponent();
 
-		        /* retrieve the node that was selected */ 
-		        Object nodeInfo = node.getUserObject();		        
-		        System.out.println("Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath() +
-		        		", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + 
-		        		", path length: " + evt.getPath().getPathCount());   
-		    }
+				if (node == null)
+					return;
+
+				/* retrieve the node that was selected */
+				Object nodeInfo = node.getUserObject();
+				System.out.println("Assigned Task Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath()
+						+ ", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + ", path length: "
+						+ evt.getPath().getPathCount());
+			}
 		});
-		
+
 		taskTreeScrollPane = new JScrollPane(taskTree);
-		taskTreeScrollPane.setPreferredSize(new Dimension((int)notesArea.getPreferredSize().getWidth(), 
-				(int)notesArea.getPreferredSize().getHeight() * 2));
+		taskTreeScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
+				(int) notesArea.getPreferredSize().getHeight() * 2));
 		taskTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		
+
 		/* Add tree listener */
 		taskTree.addTreeSelectionListener(new TreeSelectionListener() {
-		    public void valueChanged(TreeSelectionEvent evt) {
-		        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-		        		taskTree.getLastSelectedPathComponent();
- 
-		        if (node == null) return;
+			public void valueChanged(TreeSelectionEvent evt) {
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) taskTree.getLastSelectedPathComponent();
 
-		        /* retrieve the node that was selected */ 
-		        Object nodeInfo = node.getUserObject();	
-		        System.out.println("Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath() +
-		        		", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + 
-		        		", path length: " + evt.getPath().getPathCount()); 
-		    }
+				if (node == null)
+					return;
+
+				/* retrieve the node that was selected */
+				Object nodeInfo = node.getUserObject();
+				System.out.println("Task Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath()
+						+ ", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + ", path length: "
+						+ evt.getPath().getPathCount() + ", level: " + node.getLevel());
+
+				if (node.getLevel() == 2) {
+					TreePath parentPath = taskTree.getSelectionPath();
+					if (parentPath != null) {
+						DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (parentPath.getLastPathComponent());
+						setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+
+						AssignTaskDialog event = new AssignTaskDialog(CreateUpdatePersonDialog.this,
+								node.getParent().toString(), (TaskModel) nodeInfo);
+
+						AssignTaskEvent eventResponse = event.getDialogResponse();
+						if (eventResponse != null) {
+							AssignedTasksModel taskModel = new AssignedTasksModel(node.getParent().toString(),
+									childNode.toString(), eventResponse.getDaysOfWeek(),
+									eventResponse.getWeeksOfMonth());
+							assignedTasks.add(taskModel);
+							
+							PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
+									staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks);
+							dialogResponse = ev;
+							setVisible(false);
+							dispose();
+						}
+					}
+				}
+			}
 		});
 	}
 }

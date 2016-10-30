@@ -1,24 +1,24 @@
-package model;
+package gui;
 
-import java.io.Serializable;
+import java.util.EventObject;
 
-public class AssignedTasksModel implements Serializable {
+public class AssignTaskEvent extends EventObject {
 	private String programName;
 	private String taskName;
 	private boolean[] daysOfWeek;
 	private boolean[] weeksOfMonth;
 	
-	public AssignedTasksModel (String programName, String taskName, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+	public AssignTaskEvent(Object source, String programName, String taskName, boolean[] daysOfWeek,
+			boolean[] weeksOfMonth) {
+		
+		super(source);
+
 		this.programName = programName;
 		this.taskName = taskName;
 		this.daysOfWeek = daysOfWeek;
 		this.weeksOfMonth = weeksOfMonth;
 	}
 
-	public String toString () {
-		return taskName;
-	}
-	
 	public String getProgramName() {
 		return programName;
 	}
