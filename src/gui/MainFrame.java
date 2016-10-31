@@ -482,7 +482,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private JTree createTaskTree() {
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Select task to assign");
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Select task to assign  >>>");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
 		LinkedList<ProgramModel> programList = controller.getAllPrograms();
 
@@ -537,12 +537,13 @@ public class MainFrame extends JFrame {
 				AssignTaskEvent taskEvent = new AssignTaskEvent (MainFrame.this, item.getProgramName(), 
 						controller.getTaskByName(item.getProgramName(), item.getTaskName()), 
 						item.getDaysOfWeek(), item.getWeeksOfMonth());
+	
 				pNode.add(new DefaultMutableTreeNode(taskEvent));
 				tree.expandRow(0);
 			}
 		}
 
-		// tree.setCellRenderer(new TaskTreeRenderer());
+		tree.setCellRenderer(new AssignTaskTreeRenderer());
 		return (tree);
 	}
 }

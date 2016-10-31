@@ -30,6 +30,10 @@ public class TaskEvent extends EventObject {
 		this.color = color;
 	}
 
+	public String toString() {
+		return taskName;
+	}
+	
 	public String getProgramName() {
 		return programName;
 	}

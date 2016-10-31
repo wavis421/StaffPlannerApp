@@ -10,20 +10,19 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import acm.util.JTFTools;
-import model.TaskModel;
 
-public class TaskTreeRenderer extends DefaultTreeCellRenderer {
+public class AssignTaskTreeRenderer extends DefaultTreeCellRenderer {
 	private static ImageIcon calIcon;
 	private static ImageIcon calPlusIcon;
 	private static final String BASIC_FONT = "Arial-12";
 	private static final String BOLD_FONT = "Arial-bold-12";
 	private static final String ITALIC_FONT = "Arial-italic-12";
 
-	public TaskTreeRenderer() {
+	public AssignTaskTreeRenderer() {
 		super();
-		
-		setOpaque(true);
 
+		setOpaque(true);
+		
 		URL url = getClass().getResource("../images/calendar_16x16.png");
 		calIcon = new ImageIcon(url);
 		url = getClass().getResource("../images/calendar_plus_16x16.png");
@@ -43,7 +42,8 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 			setClosedIcon(calIcon);
 			setOpenIcon(calIcon);
 			setLeafIcon(calIcon);
-		} else if (tree.getPathForRow(row).getPathCount() == 2) {
+		}
+		else if (tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 2) {
 			setClosedIcon(calPlusIcon);
 			setOpenIcon(calPlusIcon);
 			setLeafIcon(calPlusIcon);
@@ -51,16 +51,16 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 		else {
 			setLeafIcon(null);
 		}	
-		
+
 		textSelectionColor = Color.black;
 		textNonSelectionColor = Color.black;
-		if (value != null && tree.getPathForRow(row).getPathCount() == 3) {
-			TaskModel task = (TaskModel) (((DefaultMutableTreeNode) value).getUserObject());
-			setText (task.getTaskName());
-
+		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
+			AssignTaskEvent taskEvent = (AssignTaskEvent) (((DefaultMutableTreeNode) value).getUserObject());
+			setText (taskEvent.getTask().getTaskName());
+			
 			setFont(JTFTools.decodeFont(BOLD_FONT));
-			textSelectionColor = new Color(task.getColor());
-			textNonSelectionColor = new Color(task.getColor());
+			textSelectionColor = new Color(taskEvent.getTask().getColor());
+			textNonSelectionColor = new Color(taskEvent.getTask().getColor());
 		}
 		super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, isLeaf, row, hasFocus);
 		return this;
