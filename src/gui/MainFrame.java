@@ -12,8 +12,6 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -27,6 +25,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.Position;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -119,22 +119,22 @@ public class MainFrame extends JFrame {
 		// Add program sub-menus
 		JMenuItem programCreateItem = new JMenuItem("New program");
 		JMenuItem programEditItem = new JMenuItem("Edit program");
-		JMenuItem programSelectItem = new JMenuItem("Select active program");
+		JMenu programSelectMenu = new JMenu("Select active program");
 		programMenu.add(programCreateItem);
 		programMenu.add(programEditItem);
-		programMenu.add(programSelectItem);
+		programMenu.add(programSelectMenu);
 
 		// Add task sub-menus
 		JMenuItem taskCreateItem = new JMenuItem("Create task");
-		JMenuItem taskEditItem = new JMenuItem("Edit task");
+		JMenu taskEditMenu = new JMenu("Edit task");
 		taskMenu.add(taskCreateItem);
-		taskMenu.add(taskEditItem);
+		taskMenu.add(taskEditMenu);
 
 		// Add persons sub-menus
 		JMenuItem personAddItem = new JMenuItem("Add person");
-		JMenuItem personEditItem = new JMenuItem("Edit person");
+		JMenu personEditMenu = new JMenu("Edit person");
 		personMenu.add(personAddItem);
-		personMenu.add(personEditItem);
+		personMenu.add(personEditMenu);
 
 		// Add calendar sub-menus
 		JMenu calendarFilterMenu = new JMenu("Filter");
@@ -211,26 +211,25 @@ public class MainFrame extends JFrame {
 
 			}
 		});
-		programSelectItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JPopupMenu selectProgramPopup = new JPopupMenu();
+		programSelectMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				programSelectMenu.removeAll();
 				JList<String> programList = controller.getAllProgramsAsString();
 
-				selectProgramPopup.add(programList);
-				selectProgramPopup.show(programMenu, 0, 0);
-				System.out.println("menuSelected: programList = " + programList);
-				selectProgramPopup.setOpaque(true);
+				for (int i = 0; i < programList.getModel().getSize(); i++) {
+					JMenuItem programItem = new JMenuItem(programList.getModel().getElementAt(i).toString());
+					programSelectMenu.add(programItem);
 
-				programList.addMouseListener(new MouseAdapter() {
-					public void mousePressed(MouseEvent ev) {
-						selectedProgramName = programList.getSelectedValue();
-						calPanel.setProgramName(selectedProgramName);
+					programItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent ev) {
+							selectedProgramName = programItem.getText();
+							calPanel.setProgramName(selectedProgramName);
 
-						selectProgramPopup.setVisible(false);
-						programList.removeAll();
-						selectProgramPopup.removeAll();
-					}
-				});
+							programList.removeAll();
+							programSelectMenu.removeAll();
+						}
+					});
+				}
 			}
 		});
 
@@ -240,32 +239,33 @@ public class MainFrame extends JFrame {
 				createTask();
 			}
 		});
-		taskEditItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		taskEditMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				taskEditMenu.removeAll();
+
 				if (selectedProgramName == null) {
 					JOptionPane.showMessageDialog(MainFrame.this, "Select Program first!");
+
 				} else {
-					JPopupMenu editTaskPopup = new JPopupMenu();
 					JList<TaskModel> taskList = controller.getAllTasks(selectedProgramName);
 					taskList.setCellRenderer(new TaskRenderer());
 
-					editTaskPopup.add(taskList);
-					editTaskPopup.setSize(300, 200); // TBD
-					editTaskPopup.show(taskMenu, taskMenu.getX(), taskMenu.getY());
+					for (int i = 0; i < taskList.getModel().getSize(); i++) {
+						JMenuItem taskItem = new JMenuItem(taskList.getModel().getElementAt(i).toString());
+						taskEditMenu.add(taskItem);
 
-					taskList.addMouseListener(new MouseAdapter() {
-						public void mousePressed(MouseEvent e) {
-							String origName = taskList.getSelectedValue().getTaskName();
-							System.out.println("Task Update listener: name = " + origName);
+						taskItem.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								String origName = taskItem.getText();
+								System.out.println("Task Update listener: name = " + origName);
 
-							editTask(origName);
+								editTask(origName);
 
-							editTaskPopup.setVisible(false);
-							taskList.removeAll();
-							editTaskPopup.removeAll();
-						}
-
-					});
+								taskList.removeAll();
+								taskEditMenu.removeAll();
+							}
+						});
+					}
 				}
 			}
 		});
@@ -278,27 +278,27 @@ public class MainFrame extends JFrame {
 				processAddPersonDialog(personEvent);
 			}
 		});
-		personEditItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JPopupMenu editPersonPopup = new JPopupMenu();
+		personEditMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				personEditMenu.removeAll();
 				JList<PersonModel> personList = controller.getAllPersons();
 
-				editPersonPopup.add(personList);
-				editPersonPopup.setSize(300, 200); // TBD
-				editPersonPopup.show(personMenu, personMenu.getX(), personMenu.getY());
+				for (int i = 0; i < personList.getModel().getSize(); i++) {
+					JMenuItem personItem = new JMenuItem(personList.getModel().getElementAt(i).toString());
+					personEditMenu.add(personItem);
 
-				personList.addMouseListener(new MouseAdapter() {
-					public void mousePressed(MouseEvent e) {
-						String origName = personList.getSelectedValue().getName();
-						System.out.println("Person Edit listener: name = " + origName);
+					personItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent ev) {
+							String origName = personItem.getText();
+							System.out.println("Person Edit listener: name = " + origName);
 
-						editPerson(origName);
+							editPerson(origName);
 
-						editPersonPopup.setVisible(false);
-						personList.removeAll();
-						editPersonPopup.removeAll();
-					}
-				});
+							personList.removeAll();
+							personEditMenu.removeAll();
+						}
+					});
+				}
 			}
 		});
 
@@ -313,8 +313,7 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
-		// TBD: filter by person, by Staff/volunteer, by tasks that require more
-		// people
+		// TBD: filter by person, by Staff/volunteer, by tasks that require more people
 		filterByPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -521,9 +520,9 @@ public class MainFrame extends JFrame {
 				if (path != null) {
 					pathFound = true;
 					tree.setSelectionPath(path);
-					AssignTaskEvent taskEvent = new AssignTaskEvent (MainFrame.this, item.getProgramName(), 
-							controller.getTaskByName(item.getProgramName(), item.getTaskName()), 
-							item.getDaysOfWeek(), item.getWeeksOfMonth());
+					AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(),
+							controller.getTaskByName(item.getProgramName(), item.getTaskName()), item.getDaysOfWeek(),
+							item.getWeeksOfMonth());
 					treeModel.insertNodeInto(new DefaultMutableTreeNode(taskEvent),
 							(DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent(), row);
 					break;
@@ -532,12 +531,13 @@ public class MainFrame extends JFrame {
 			if (pathFound == false) {
 				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(item.getProgramName());
 				tree.setSelectionPath(tree.getPathForRow(0));
-				treeModel.insertNodeInto(pNode, (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent(), 0);
-				
-				AssignTaskEvent taskEvent = new AssignTaskEvent (MainFrame.this, item.getProgramName(), 
-						controller.getTaskByName(item.getProgramName(), item.getTaskName()), 
-						item.getDaysOfWeek(), item.getWeeksOfMonth());
-	
+				treeModel.insertNodeInto(pNode, (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent(),
+						0);
+
+				AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(),
+						controller.getTaskByName(item.getProgramName(), item.getTaskName()), item.getDaysOfWeek(),
+						item.getWeeksOfMonth());
+
 				pNode.add(new DefaultMutableTreeNode(taskEvent));
 				tree.expandRow(0);
 			}
