@@ -46,14 +46,14 @@ public class Controller {
 	 * ------- Task data -------
 	 */
 	public void addTask(TaskEvent ev) {
-		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(),
-				ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumStaffReqd(), ev.getTotalPersonsReqd(),
+				ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 		db.addTask(ev.getProgramName(), task);
 	}
 
 	public void updateTask(TaskEvent ev) {
-		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getDayOfWeek(),
-				ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumStaffReqd(), ev.getTotalPersonsReqd(),
+				ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 		db.updateTask(ev.getProgramName(), task);
 	}
 

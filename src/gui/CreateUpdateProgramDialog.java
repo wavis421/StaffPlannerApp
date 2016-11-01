@@ -106,9 +106,9 @@ public class CreateUpdateProgramDialog extends JDialog {
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
 		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		Border bevelBorder = BorderFactory.createRaisedSoftBevelBorder();
+		Border etchedBorder = BorderFactory.createEtchedBorder();
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
-		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, bevelBorder));
+		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, etchedBorder));
 
 		GridBagConstraints gc = new GridBagConstraints();
 

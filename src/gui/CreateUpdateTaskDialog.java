@@ -21,19 +21,26 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import model.TaskModel;
 
 public class CreateUpdateTaskDialog extends JDialog {
+	private static final int TEXT_FIELD_WIDTH = 30;
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
 	// Private instance variables
-	private JTextField taskName = new JTextField(20);
+	private JTextField taskNameField = new JTextField(TEXT_FIELD_WIDTH);
 	private JTextField timeTextField = new JTextField(10);
-	private JTextField locationTextField = new JTextField(10);
+	private JTextField locationTextField = new JTextField(TEXT_FIELD_WIDTH);
+	private JSpinner numStaffSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
+	private JSpinner totalPersonsSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
 	private JRadioButton[] dayOfWeekButtons = new JRadioButton[7];
 	private JRadioButton[] weekOfMonthButtons = new JRadioButton[5];
 	private JPanel colorPanel = new JPanel();
@@ -74,9 +81,11 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		currentProgramName = programName;
 		currentTask = task;
-		taskName.setText(currentTask.getTaskName());
+		taskNameField.setText(currentTask.getTaskName());
 		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
 		locationTextField.setText(currentTask.getLocation());
+		numStaffSpinner.setValue(currentTask.getNumStaffReqd());
+		totalPersonsSpinner.setValue(currentTask.getTotalPersonsReqd());
 
 		borderTitle = new String("Edit task");
 		setupTaskDialog();
@@ -86,12 +95,16 @@ public class CreateUpdateTaskDialog extends JDialog {
 	public CreateUpdateTaskDialog(JFrame parent, TaskEvent event) {
 		super(parent, event.getProgramName(), true);
 
-		// Set up task, but leave name field empty since it was found to be a duplicate
+		// Set up task, but leave name field empty since it was found to be a
+		// duplicate
 		currentProgramName = event.getProgramName();
-		currentTask = new TaskModel(event.getTaskName(), event.getLocation(),
-				event.getDayOfWeek(), event.getWeekOfMonth(), event.getTime(), event.getColor());
+		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getNumStaffReqd(),
+				event.getTotalPersonsReqd(), event.getDayOfWeek(), event.getWeekOfMonth(), event.getTime(),
+				event.getColor());
 		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
 		locationTextField.setText(currentTask.getLocation());
+		numStaffSpinner.setValue(currentTask.getNumStaffReqd());
+		totalPersonsSpinner.setValue(currentTask.getTotalPersonsReqd());
 
 		borderTitle = new String("Create new task");
 		setupTaskDialog();
@@ -106,6 +119,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		createDayOfWeekButtons();
 		createWeekOfMonthButtons();
 		createColorSelector();
+		createSpinnerListeners();
 
 		timeTextField.setToolTipText("Enter start time as hh:mm");
 
@@ -113,7 +127,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					// Make sure that task name has been entered
-					if (taskName.getText().equals("")) {
+					if (taskNameField.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Task name field is required");
 					} else {
 						// Validate that time field is correct format
@@ -134,12 +148,12 @@ public class CreateUpdateTaskDialog extends JDialog {
 							if (weekOfMonthButtons[i].isSelected())
 								weeksOfMonthSelected[i] = true;
 						}
-
+						
 						// Create TaskEvent and set response
-						TaskEvent ev = new TaskEvent(this, currentProgramName, taskName.getText(),
-								locationTextField.getText(), daysOfWeekSelected,
-								weeksOfMonthSelected, time, 
-								Integer.parseInt(colorGroup.getSelection().getActionCommand()));
+						TaskEvent ev = new TaskEvent(this, currentProgramName, taskNameField.getText(),
+								locationTextField.getText(), (Integer) numStaffSpinner.getValue(),
+								(Integer) totalPersonsSpinner.getValue(), daysOfWeekSelected, weeksOfMonthSelected,
+								time, Integer.parseInt(colorGroup.getSelection().getActionCommand()));
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -160,7 +174,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTaskLayout();
-		setSize(580, 430);
+		setSize(625, 400);
 		setVisible(true);
 	}
 
@@ -188,19 +202,21 @@ public class CreateUpdateTaskDialog extends JDialog {
 		Border titleBorder = BorderFactory.createTitledBorder(borderTitle);
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
 		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, titleBorder));
+		dayOfWeekPanel.setBorder(BorderFactory.createEtchedBorder());
+		weekOfMonthPanel.setBorder(BorderFactory.createEtchedBorder());
 
 		GridBagConstraints gc = new GridBagConstraints();
 
 		gc.weightx = gc.weighty = 1;
 		gc.fill = GridBagConstraints.NONE;
-		
+
 		// Add task name, location, time, DOW/WOM selectors and color picker
-		addRowToControlPanel(gc, taskNameLabel, taskName, gridY++);
+		addRowToControlPanel(gc, taskNameLabel, taskNameField, gridY++);
 		addRowToControlPanel(gc, locationLabel, locationTextField, gridY++);
 		addRowToControlPanel(gc, timeLabel, timeTextField, gridY++);
-		gc.weighty = 0.1;
+		addRowToControlPanel(gc, new JLabel("Minimum # staff req'd: "), numStaffSpinner, gridY++);
+		addRowToControlPanel(gc, new JLabel("Total staff/volunteers req'd: "), totalPersonsSpinner, gridY++);
 		addRowToControlPanel(gc, dayOfWeekLabel, dayOfWeekPanel, gridY++);
-		gc.weighty = 1;
 		addRowToControlPanel(gc, weekOfMonthLabel, weekOfMonthPanel, gridY++);
 		addRowToControlPanel(gc, colorChooserLabel, colorPanel, gridY++);
 
@@ -221,7 +237,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		okButton.setPreferredSize(btnSize);
 	}
 
-	// Generic method to add row with label and component 
+	// Generic method to add row with label and component
 	private void addRowToControlPanel(GridBagConstraints gcon, Component value1, Component value2, int gridY) {
 		gcon.gridx = 0;
 		gcon.gridy = gridY;
@@ -266,8 +282,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 	private void createColorSelector() {
 		colorGroup = new ButtonGroup();
-		int[] colorSelections = { 
-				0x000000, // Black 
+		int[] colorSelections = { 0x000000, // Black
 				0xDC143C, // Crimson
 				0xF28500, // Tangerine
 				0x008000, // Green
@@ -277,8 +292,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 				0x8B008B, // Dark magenta
 				0x966FD6, // Dark Pastel purple
 				0x988344, // Dark Khaki
-				0x7D7D7D  // Dark gray
-				};
+				0x7D7D7D // Dark gray
+		};
 		JRadioButton[] buttons = new JRadioButton[colorSelections.length];
 
 		int taskColor, colorMatchIdx = -1;
@@ -303,5 +318,23 @@ public class CreateUpdateTaskDialog extends JDialog {
 		// If color match found in color table, than highlight the selection
 		if (colorMatchIdx != -1)
 			buttons[colorMatchIdx].setSelected(true);
+	}
+	
+	private void createSpinnerListeners () {
+		numStaffSpinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				checkSpinnerValues ();
+			}
+		});
+		totalPersonsSpinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				checkSpinnerValues ();
+			}
+		});
+	}
+	
+	private void checkSpinnerValues () {
+		if ((Integer)numStaffSpinner.getValue() > (Integer)totalPersonsSpinner.getValue())
+			totalPersonsSpinner.setValue((Integer)numStaffSpinner.getValue());
 	}
 }

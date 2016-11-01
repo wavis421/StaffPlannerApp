@@ -86,9 +86,9 @@ public class selectActiveProgramDialog extends JDialog {
 	}
 
 	private void setFilterLayout() {
-		Border titleBorder = BorderFactory.createRaisedSoftBevelBorder();
+		Border etchedBorder = BorderFactory.createEtchedBorder();
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
-		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, titleBorder));
+		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, etchedBorder));
 
 		// Add to dialog
 		setLayout(new BorderLayout());
