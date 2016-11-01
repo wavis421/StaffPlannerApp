@@ -43,7 +43,7 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 			setClosedIcon(calIcon);
 			setOpenIcon(calIcon);
 			setLeafIcon(calIcon);
-		} else if (tree.getPathForRow(row).getPathCount() == 2) {
+		} else if (tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 2) {
 			setClosedIcon(calPlusIcon);
 			setOpenIcon(calPlusIcon);
 			setLeafIcon(calPlusIcon);
@@ -54,7 +54,7 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 		
 		textSelectionColor = Color.black;
 		textNonSelectionColor = Color.black;
-		if (value != null && tree.getPathForRow(row).getPathCount() == 3) {
+		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
 			TaskModel task = (TaskModel) (((DefaultMutableTreeNode) value).getUserObject());
 			setText (task.getTaskName());
 

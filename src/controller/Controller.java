@@ -69,6 +69,10 @@ public class Controller {
 		return db.getTasksByDayByProgram(calendar, programs);
 	}
 	
+	public LinkedList<TaskModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
+		return db.getTasksByDayByPerson(calendar, personList);
+	}
+	
 	public LinkedList<TaskModel> getAllTasksByDay(Calendar calendar) {
 		return db.getAllTasksByDay(calendar);
 	}

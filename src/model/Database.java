@@ -52,13 +52,13 @@ public class Database {
 		}
 		return (new JList<String>(nameModel));
 	}
-	
+
 	public LinkedList<ProgramModel> getAllPrograms() {
 		//return (List<ProgramModel>) Collections.unmodifiableList(programList);
 		return programList;
 	}
-	
-	public int getNumPrograms () {
+
+	public int getNumPrograms() {
 		return programList.size();
 	}
 
@@ -108,15 +108,36 @@ public class Database {
 		return null;
 	}
 
-	public LinkedList<TaskModel> getTasksByDayByProgram(Calendar calendar, JList<String> pList) {
+	public LinkedList<TaskModel> getTasksByDayByProgram(Calendar calendar, JList<String> programList) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 
 		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
-		for (int i = 0; i < pList.getModel().getSize(); i++) {
-			ProgramModel p = getProgramByName(pList.getModel().getElementAt(i));
-			for (TaskModel t : p.getTaskList()) {
+		for (int i = 0; i < programList.getModel().getSize(); i++) {
+			ProgramModel pModel = getProgramByName(programList.getModel().getElementAt(i));
+			for (TaskModel t : pModel.getTaskList()) {
 				if ((t.getDayOfWeek()[dayOfWeekIdx]) && (t.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
+					thisMonthTasks.add(t);
+				}
+			}
+		}
+		Collections.sort(thisMonthTasks, new TimeComparator());
+		return thisMonthTasks;
+	}
+
+	public LinkedList<TaskModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
+		for (int i = 0; i < personList.getModel().getSize(); i++) {
+			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i));
+			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
+				boolean[] daysOfWeek = pModel.getAssignedTasks().get(j).getDaysOfWeek();
+				boolean[] weeksOfMonth = pModel.getAssignedTasks().get(j).getWeeksOfMonth();
+				TaskModel t = getTaskByName(pModel.getAssignedTasks().get(j).getProgramName(),
+						pModel.getAssignedTasks().get(j).getTaskName());
+				if ((daysOfWeek[dayOfWeekIdx]) && (weeksOfMonth[dayOfWeekInMonthIdx])) {
 					thisMonthTasks.add(t);
 				}
 			}
@@ -142,8 +163,9 @@ public class Database {
 	}
 
 	/*
-	 * public List<TaskModel> getAllTasks() { return
-	 * Collections.unmodifiableList(taskList); }
+	 * public List<TaskModel> getAllTasks() { 
+	 *    return Collections.unmodifiableList(taskList); 
+	 * }
 	 */
 
 	public JList<TaskModel> getAllTasks(String programName) {
@@ -173,8 +195,8 @@ public class Database {
 	 */
 	public void addPerson(String name, String phone, String email, boolean staff, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks) {
-		System.out.println("Added person to database: " + name + ", " + phone + ", "
-				+ email + ", " + staff + ", "+ notes + ", " + assignedTasks);
+		System.out.println("Added person to database: " + name + ", " + phone + ", " + email + ", " + staff + ", "
+				+ notes + ", " + assignedTasks);
 		personList.add(new PersonModel(name, phone, email, staff, notes, assignedTasks));
 	}
 
@@ -183,7 +205,7 @@ public class Database {
 
 		int personIdx = getPersonIndexByName(person.getName());
 		if (personIdx != -1)
-			personList.set (personIdx, person);
+			personList.set(personIdx, person);
 		else
 			JOptionPane.showMessageDialog(null, "Person '" + person.getName() + "' not found!");
 	}
@@ -198,8 +220,8 @@ public class Database {
 		} else
 			JOptionPane.showMessageDialog(null, "Person '" + oldName + "' not found!");
 	}
-	
-	public PersonModel getPersonByName (String name) {
+
+	public PersonModel getPersonByName(String name) {
 		for (PersonModel p : personList) {
 			if (p.getName().equals(name)) {
 				return p;
@@ -207,7 +229,7 @@ public class Database {
 		}
 		return null;
 	}
-	
+
 	public JList<String> getAllPersonsAsString() {
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
 
@@ -216,7 +238,7 @@ public class Database {
 		}
 		return (new JList<String>(nameModel));
 	}
-	
+
 	public JList<PersonModel> getAllPersons() {
 		DefaultListModel<PersonModel> personModel = new DefaultListModel<>();
 		for (PersonModel p : personList) {
@@ -225,7 +247,7 @@ public class Database {
 		JList<PersonModel> list = new JList<>(personModel);
 		return list;
 	}
-	
+
 	private int getPersonIndexByName(String personName) {
 		int i = 0;
 

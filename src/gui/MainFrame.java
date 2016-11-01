@@ -55,8 +55,9 @@ public class MainFrame extends JFrame {
 	private TaskModel selectedTask;
 	private Calendar selectedCalendar;
 
-	// Calendar filter
+	// Calendar filters
 	JList<String> programFilter = null;
+	JList<String> personFilter = null;
 
 	public MainFrame() {
 		super("Staff Planner");
@@ -323,7 +324,10 @@ public class MainFrame extends JFrame {
 				FilterCalendarDialog ev = new FilterCalendarDialog(MainFrame.this, "program", programList);
 				JList<String> dialogResponse = ev.getDialogResponse();
 
+				// Only one filter can be active
 				programFilter = dialogResponse;
+				if (programFilter != null)
+					personFilter = null;
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
@@ -331,7 +335,15 @@ public class MainFrame extends JFrame {
 		// people
 		filterByPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				JList<String> personList = controller.getAllPersonsAsString();
+				FilterCalendarDialog ev = new FilterCalendarDialog(MainFrame.this, "person", personList);
+				JList<String> dialogResponse = ev.getDialogResponse();
 
+				// Only one filter can be active
+				personFilter = dialogResponse;
+				if (personFilter != null)
+					programFilter = null;
+				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
 
@@ -486,10 +498,13 @@ public class MainFrame extends JFrame {
 		LinkedList<TaskModel> tasks;
 		for (int i = 0; i < 31; i++) {
 			calendar.set(Calendar.DAY_OF_MONTH, i + 1);
-			if (programFilter == null)
-				tasks = controller.getAllTasksByDay(calendar);
-			else
+			if (programFilter != null)
 				tasks = controller.getTasksByDayByProgram(calendar, programFilter);
+			else if (personFilter != null)
+				tasks = controller.getTasksByDayByPerson(calendar, personFilter);
+			else
+				tasks = controller.getAllTasksByDay(calendar);
+				
 			calPanel.updateTasksByDay(i, tasks);
 		}
 		calPanel.refresh();
