@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.JList;
 
@@ -24,7 +23,7 @@ public class Controller {
 	 * ------- Programs -------
 	 */
 	public void addProgram(ProgramEvent ev) {
-		db.addProgram(ev.getProgramName(), ev.getEndDate(), ev.getDefaultColor());
+		db.addProgram(ev.getProgramName(), ev.getEndDate());
 	}
 
 	public ProgramModel getProgramByName(String programName) {
@@ -37,6 +36,10 @@ public class Controller {
 	
 	public LinkedList<ProgramModel> getAllPrograms() {
 		return db.getAllPrograms();
+	}
+	
+	public int getNumPrograms () {
+		return db.getNumPrograms();
 	}
 
 	/*

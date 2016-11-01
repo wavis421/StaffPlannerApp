@@ -165,6 +165,22 @@ public class MainFrame extends JFrame {
 						controller.loadFromFile(fileChooser.getSelectedFile());
 						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 
+						int numPrograms = controller.getNumPrograms();
+						if (numPrograms == 1) {
+							JList<String> programList = controller.getAllProgramsAsString();
+							selectedProgramName = programList.getModel().getElementAt(0);
+							calPanel.setProgramName(selectedProgramName);
+						} else if (numPrograms > 1) {
+							JList<String> programList = controller.getAllProgramsAsString();
+							selectActiveProgramDialog ev = new selectActiveProgramDialog(MainFrame.this, programList);
+							String dialogResponse = ev.getDialogResponse();
+							if (dialogResponse != null) {
+								System.out.println("Select active program: " + dialogResponse);
+								selectedProgramName = dialogResponse;
+								calPanel.setProgramName(selectedProgramName);
+							}
+						}
+
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -182,7 +198,8 @@ public class MainFrame extends JFrame {
 		// Set up listeners for PROGRAM menu
 		programCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				CreateUpdateProgramDialog programEvent = new CreateUpdateProgramDialog(MainFrame.this);
+				CreateUpdateProgramDialog programEvent = new CreateUpdateProgramDialog(MainFrame.this,
+						controller.getNumPrograms());
 				ProgramEvent dialogResponse = programEvent.getDialogResponse();
 
 				if (dialogResponse != null) {
@@ -194,12 +211,9 @@ public class MainFrame extends JFrame {
 					} else {
 						// Add program to database
 						controller.addProgram(dialogResponse);
-						if (!dialogResponse.getProgramName().equals(selectedProgramName)) {
-							if (JOptionPane.showConfirmDialog(MainFrame.this, "Do you want to set active program to "
-									+ dialogResponse.getProgramName() + "?") == JOptionPane.OK_OPTION) {
-								selectedProgramName = dialogResponse.getProgramName();
-								calPanel.setProgramName(selectedProgramName);
-							}
+						if (dialogResponse.isSelectedActive()) {
+							selectedProgramName = dialogResponse.getProgramName();
+							calPanel.setProgramName(selectedProgramName);
 						}
 						System.out.println("Program Create listener: name = " + dialogResponse.getProgramName());
 					}
@@ -313,7 +327,8 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
-		// TBD: filter by person, by Staff/volunteer, by tasks that require more people
+		// TBD: filter by person, by Staff/volunteer, by tasks that require more
+		// people
 		filterByPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 

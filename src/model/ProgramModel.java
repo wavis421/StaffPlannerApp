@@ -6,14 +6,12 @@ import java.util.LinkedList;
 public class ProgramModel implements Serializable {
 	private String programName;
 	private String endDate;
-	private int defaultColor;
 	private LinkedList<TaskModel> taskList;
 	
 	// Create new program with null task list
-	public ProgramModel(String programName, String endDate, int defaultColor, LinkedList<TaskModel> taskList) {
+	public ProgramModel(String programName, String endDate, LinkedList<TaskModel> taskList) {
 		this.programName = programName;
 		this.endDate = endDate;
-		this.defaultColor = defaultColor;
 		this.taskList = taskList;
 	}
 
@@ -29,10 +27,6 @@ public class ProgramModel implements Serializable {
 		return endDate;
 	}
 
-	public int getDefaultColor () {
-		return defaultColor;
-	}
-	
 	public LinkedList<TaskModel> getTaskList() {
 		return taskList;
 	}

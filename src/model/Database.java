@@ -30,10 +30,10 @@ public class Database {
 	/*
 	 * ------- Programs -------
 	 */
-	public void addProgram(String programName, String endDate, int defaultColor) {
-		System.out.println("Added program to database: " + programName + ", end date " + endDate + ", color " + defaultColor);
+	public void addProgram(String programName, String endDate) {
+		System.out.println("Added program to database: " + programName + ", end date " + endDate);
 		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
-		programList.add(new ProgramModel(programName, endDate, defaultColor, taskList));
+		programList.add(new ProgramModel(programName, endDate, taskList));
 	}
 
 	public ProgramModel getProgramByName(String programName) {
@@ -56,6 +56,10 @@ public class Database {
 	public LinkedList<ProgramModel> getAllPrograms() {
 		//return (List<ProgramModel>) Collections.unmodifiableList(programList);
 		return programList;
+	}
+	
+	public int getNumPrograms () {
+		return programList.size();
 	}
 
 	/*

@@ -36,9 +36,10 @@ public class CreateUpdateProgramDialog extends JDialog {
 	
 	// Private instance variables
 	private JTextField programName = new JTextField(20);
-	private JLabel programLabel = new JLabel ("Program name: ");
 	private JRadioButton enableEndDateButton = new JRadioButton("Set end-date ");
+	private JRadioButton selectActiveProgramButton = new JRadioButton ();
 	private JDatePickerImpl endDatePicker;
+	private int numPrograms;
 	
 	// Dialog panels
 	private JPanel controlsPanel;
@@ -48,8 +49,9 @@ public class CreateUpdateProgramDialog extends JDialog {
 	// Track last program edited
 	private static ProgramEvent lastProgram;
 	
-	public CreateUpdateProgramDialog(JFrame parent) {
+	public CreateUpdateProgramDialog(JFrame parent, int numPrograms) {
 		super(parent, "Create program...", true);
+		this.numPrograms = numPrograms;
 		setupProgramDialog();
 	}
 	
@@ -59,6 +61,8 @@ public class CreateUpdateProgramDialog extends JDialog {
 	
 	private void setupProgramDialog() {
 		createEndDatePicker();
+		if (numPrograms == 0)
+			selectActiveProgramButton.setSelected(true);
 		
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -67,7 +71,8 @@ public class CreateUpdateProgramDialog extends JDialog {
 					if (programName.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Program name field is required");
 					} else {
-						ProgramEvent ev = new ProgramEvent(this, programName.getText(), endDatePicker.getJFormattedTextField().getText(), 0);
+						ProgramEvent ev = new ProgramEvent(this, programName.getText(), endDatePicker.getJFormattedTextField().getText(), 
+								selectActiveProgramButton.isSelected() ? true : false);
 						dialogResponse = lastProgram = ev;
 						setVisible(false);
 						dispose();
@@ -88,7 +93,7 @@ public class CreateUpdateProgramDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setProgramLayout();
-		setSize(450, 180);
+		setSize(450, 200);
 		setVisible(true);
 	}
 	
@@ -101,9 +106,9 @@ public class CreateUpdateProgramDialog extends JDialog {
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
 		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		Border titleBorder = BorderFactory.createRaisedSoftBevelBorder();
+		Border bevelBorder = BorderFactory.createRaisedSoftBevelBorder();
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
-		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, titleBorder));
+		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, bevelBorder));
 
 		GridBagConstraints gc = new GridBagConstraints();
 
@@ -111,8 +116,10 @@ public class CreateUpdateProgramDialog extends JDialog {
 		gc.fill = GridBagConstraints.NONE;
 
 		// Add program name and end-date rows
-		addRowToControlPanel(gc, programLabel, programName, gridY++);
+		addRowToControlPanel(gc, new JLabel ("Program name: "), programName, gridY++);
 		addRowToControlPanel(gc, enableEndDateButton, endDatePicker, gridY++);
+		if (numPrograms > 0)
+			addRowToControlPanel(gc, selectActiveProgramButton, new JLabel ("Select as ACTIVE Program"), gridY++);
 
 		// Buttons row
 		gc.gridy++;

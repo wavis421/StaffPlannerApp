@@ -5,20 +5,20 @@ import java.util.EventObject;
 public class ProgramEvent extends EventObject {
 	private String programName;
 	private String endDate;
-	private int defaultColor;
+	private boolean selectAsActive;
 	
-	public ProgramEvent(Object source) {
-		super(source);
-	}
-
-	public ProgramEvent(Object source, String programName, String endDate, int defaultColor) {
+	public ProgramEvent(Object source, String programName, String endDate, boolean selectAsActive) {
 		super(source);
 
 		this.programName = programName;
 		this.endDate = endDate;
-		this.defaultColor = defaultColor;
+		this.selectAsActive = selectAsActive;
 	}
 
+	public String toString () {
+		return programName;
+	}
+	
 	public String getProgramName() {
 		return programName;
 	}
@@ -27,7 +27,7 @@ public class ProgramEvent extends EventObject {
 		return endDate;
 	}
 
-	public int getDefaultColor() {
-		return defaultColor;
+	public boolean isSelectedActive() {
+		return selectAsActive;
 	}
 }
