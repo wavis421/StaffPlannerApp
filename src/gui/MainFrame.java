@@ -108,12 +108,18 @@ public class MainFrame extends JFrame {
 		menuBar.add(personMenu);
 		menuBar.add(calendarMenu);
 
+		taskMenu.setEnabled(false);
+
 		// Add file sub-menus
-		JMenuItem exportDataItem = new JMenuItem("Export...");
-		JMenuItem importDataItem = new JMenuItem("Import...");
+		JMenuItem exportProgramItem = new JMenuItem("Export program...  ");
+		JMenuItem exportStaffItem = new JMenuItem("Export staff...  ");
+		JMenuItem importProgramItem = new JMenuItem("Import program...  ");
+		JMenuItem importStaffItem = new JMenuItem("Import staff...  ");
 		JMenuItem exitItem = new JMenuItem("Exit");
-		fileMenu.add(exportDataItem);
-		fileMenu.add(importDataItem);
+		fileMenu.add(importProgramItem);
+		fileMenu.add(exportProgramItem);
+		fileMenu.add(importStaffItem);
+		fileMenu.add(exportStaffItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 
@@ -140,32 +146,38 @@ public class MainFrame extends JFrame {
 		// Add calendar sub-menus
 		JMenu calendarFilterMenu = new JMenu("Filter");
 		calendarMenu.add(calendarFilterMenu);
-		JMenuItem filterNoneItem = new JMenuItem("none");
+		JMenuItem filterNoneItem = new JMenuItem("None");
 		JMenuItem filterByProgramItem = new JMenuItem("by Program");
 		JMenuItem filterByPersonItem = new JMenuItem("by Person");
+		calendarFilterMenu.add(filterNoneItem);
 		calendarFilterMenu.add(filterByProgramItem);
 		calendarFilterMenu.add(filterByPersonItem);
-		calendarFilterMenu.add(filterNoneItem);
 
 		// Set up listeners for FILE menu
-		exportDataItem.addActionListener(new ActionListener() {
+		exportProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
-					try {
-						controller.saveToFile(fileChooser.getSelectedFile());
+				JList<String> programList = controller.getAllProgramsAsString();
+				FilterCalendarDialog ev = new FilterCalendarDialog(MainFrame.this, "FILTER", programList);
+				JList<String> dialogResponse = ev.getDialogResponse();
 
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+				if (dialogResponse != null) {
+					if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+						try {
+							controller.saveProgramToFile(dialogResponse, fileChooser.getSelectedFile());
+
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					}
 				}
 			}
 		});
-		importDataItem.addActionListener(new ActionListener() {
+		importProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
-						controller.loadFromFile(fileChooser.getSelectedFile());
+						controller.loadProgramFromFile(fileChooser.getSelectedFile());
 						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 
 						int numPrograms = controller.getNumPrograms();
@@ -173,14 +185,15 @@ public class MainFrame extends JFrame {
 							JList<String> programList = controller.getAllProgramsAsString();
 							selectedProgramName = programList.getModel().getElementAt(0);
 							calPanel.setProgramName(selectedProgramName);
-						} else if (numPrograms > 1) {
+							taskMenu.setEnabled(true);
+						} else if (numPrograms > 1 && selectedProgramName == null) {
 							JList<String> programList = controller.getAllProgramsAsString();
 							selectActiveProgramDialog ev = new selectActiveProgramDialog(MainFrame.this, programList);
 							String dialogResponse = ev.getDialogResponse();
 							if (dialogResponse != null) {
-								System.out.println("Select active program: " + dialogResponse);
 								selectedProgramName = dialogResponse;
 								calPanel.setProgramName(selectedProgramName);
+								taskMenu.setEnabled(true);
 							}
 						}
 
@@ -189,6 +202,38 @@ public class MainFrame extends JFrame {
 						e1.printStackTrace();
 					}
 				}
+			}
+		});
+		exportStaffItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+					try {
+						controller.saveStaffToFile(fileChooser.getSelectedFile());
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		importStaffItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+					try {
+						controller.loadStaffFromFile(fileChooser.getSelectedFile());
+						
+						// Clear person filter if selected
+						if (personFilter != null) {
+							personFilter = null;
+							updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
+						}
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}	
 			}
 		});
 		exitItem.addActionListener(new ActionListener() {
@@ -217,8 +262,8 @@ public class MainFrame extends JFrame {
 						if (dialogResponse.isSelectedActive()) {
 							selectedProgramName = dialogResponse.getProgramName();
 							calPanel.setProgramName(selectedProgramName);
+							taskMenu.setEnabled(true);
 						}
-						System.out.println("Program Create listener: name = " + dialogResponse.getProgramName());
 					}
 				}
 			}
@@ -241,6 +286,7 @@ public class MainFrame extends JFrame {
 						public void actionPerformed(ActionEvent ev) {
 							selectedProgramName = programItem.getText();
 							calPanel.setProgramName(selectedProgramName);
+							taskMenu.setEnabled(true);
 
 							programList.removeAll();
 							programSelectMenu.removeAll();
@@ -260,29 +306,22 @@ public class MainFrame extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				taskEditMenu.removeAll();
 
-				if (selectedProgramName == null) {
-					JOptionPane.showMessageDialog(MainFrame.this, "Select Program first!");
+				JList<TaskModel> taskList = controller.getAllTasks(selectedProgramName);
+				taskList.setCellRenderer(new TaskRenderer());
 
-				} else {
-					JList<TaskModel> taskList = controller.getAllTasks(selectedProgramName);
-					taskList.setCellRenderer(new TaskRenderer());
+				for (int i = 0; i < taskList.getModel().getSize(); i++) {
+					JMenuItem taskItem = new JMenuItem(taskList.getModel().getElementAt(i).toString());
+					taskEditMenu.add(taskItem);
 
-					for (int i = 0; i < taskList.getModel().getSize(); i++) {
-						JMenuItem taskItem = new JMenuItem(taskList.getModel().getElementAt(i).toString());
-						taskEditMenu.add(taskItem);
+					taskItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							String origName = taskItem.getText();
+							editTask(origName);
 
-						taskItem.addActionListener(new ActionListener() {
-							public void actionPerformed(ActionEvent e) {
-								String origName = taskItem.getText();
-								System.out.println("Task Update listener: name = " + origName);
-
-								editTask(origName);
-
-								taskList.removeAll();
-								taskEditMenu.removeAll();
-							}
-						});
-					}
+							taskList.removeAll();
+							taskEditMenu.removeAll();
+						}
+					});
 				}
 			}
 		});
@@ -307,8 +346,6 @@ public class MainFrame extends JFrame {
 					personItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent ev) {
 							String origName = personItem.getText();
-							System.out.println("Person Edit listener: name = " + origName);
-
 							editPerson(origName);
 
 							personList.removeAll();
@@ -354,19 +391,14 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
-		// TBD: filter by Staff/volunteer, by tasks that require more people
+		// TBD: add more filters
 
 		return menuBar;
 	}
 
 	private void createTask() {
-		System.out.println("Create task: program name = " + selectedProgramName);
-		if (selectedProgramName == null)
-			JOptionPane.showMessageDialog(MainFrame.this, "Select Program before assigning tasks!");
-		else {
-			CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, selectedProgramName);
-			processCreateTaskDialog(taskEvent);
-		}
+		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, selectedProgramName);
+		processCreateTaskDialog(taskEvent);
 	}
 
 	private void createTaskRetry(TaskEvent ev) {
@@ -389,7 +421,6 @@ public class MainFrame extends JFrame {
 
 			} else {
 				// Add task and refresh calendar
-				System.out.println("Task Create listener: name = " + dialogResponse.getTaskName());
 				controller.addTask(dialogResponse);
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
@@ -397,7 +428,6 @@ public class MainFrame extends JFrame {
 	}
 
 	private void editTask(String origName) {
-		System.out.println("Task EDIT: name = " + origName);
 		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, selectedProgramName,
 				controller.getTaskByName(selectedProgramName, origName));
 		TaskEvent dialogResponse = taskEvent.getDialogResponse();
@@ -459,8 +489,6 @@ public class MainFrame extends JFrame {
 	}
 
 	private void editPerson(String origName) {
-		System.out.println("Person EDIT: name = " + origName);
-
 		PersonModel person = controller.getPersonByName(origName);
 		if (person == null)
 			JOptionPane.showMessageDialog(null, "Person does not exist");
@@ -513,7 +541,7 @@ public class MainFrame extends JFrame {
 				tasks = controller.getTasksByDayByPerson(calendar, personFilter);
 			else
 				tasks = controller.getAllTasksByDay(calendar);
-				
+
 			calPanel.updateTasksByDay(i, tasks);
 		}
 		calPanel.refresh();

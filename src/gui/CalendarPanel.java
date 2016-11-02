@@ -13,8 +13,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
@@ -26,11 +24,11 @@ import java.util.Locale;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
@@ -45,12 +43,13 @@ public class CalendarPanel extends JPanel {
 	// Private constants
 	private static final Color EMPTY_BACKGROUND = new Color(0xDDDDDD);
 	private static final String TITLE_FONT = "Serif-36";
+	private static final String TITLE_BOLD_FONT = "Serif-bold-36";
 	private static final String PROGRAM_FONT = "Serif-italic-22";
 	private static final String LABEL_FONT = "Serif-bold-14";
 	private static final String DATE_FONT = "Serif-11";
 
 	// Private instance variables
-	private JButton leftButton, rightButton;
+	private JLabel leftLabel, rightLabel;
 	private LinkedList<TaskModel>[] dayBoxTaskList;
 	private JLabel programLabel = new JLabel("   ");
 	private static TableLayout layout = new TableLayout();
@@ -117,10 +116,10 @@ public class CalendarPanel extends JPanel {
 		setLayout(layout);
 
 		// Add month set buttons and month label
-		CreateMonthButtons();
-		add(leftButton, "weightx=0.1 weighty=0.1");
+		CreateMonthUpdateLabels();
+		add(leftLabel);
 		add(createMonthLabel(calendar), "gridwidth=5 bottom=0");
-		add(rightButton, "weightx=0.1 weighty=0.1");
+		add(rightLabel);
 
 		programLabel.setHorizontalAlignment(JLabel.CENTER);
 		programLabel.setFont(JTFTools.decodeFont(PROGRAM_FONT));
@@ -152,24 +151,23 @@ public class CalendarPanel extends JPanel {
 		validate();
 	}
 
-	// Create right/left month update buttons and listeners
-	private void CreateMonthButtons() {
-		leftButton = new JButton();
-		rightButton = new JButton();
+	// Create right/left month update labels and listeners
+	private void CreateMonthUpdateLabels() {
+		leftLabel = new JLabel("<<", SwingConstants.RIGHT);
+		rightLabel = new JLabel(">>");
+		leftLabel.setFont(JTFTools.decodeFont(TITLE_BOLD_FONT));
+		rightLabel.setFont(JTFTools.decodeFont(TITLE_BOLD_FONT));
 
-		leftButton.setIcon(createIcon("/images/arrow-left-16.png"));
-		rightButton.setIcon(createIcon("/images/arrow-right-16.png"));
-
-		// ADD button listeners
-		leftButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		// ADD listeners
+		leftLabel.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
 				currentCalendar.add(Calendar.MONTH, -1);
 				if (updateListener != null)
 					updateListener.updateCalendar((Calendar) currentCalendar.clone());
 			}
 		});
-		rightButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		rightLabel.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
 				currentCalendar.add(Calendar.MONTH, 1);
 				if (updateListener != null)
 					updateListener.updateCalendar((Calendar) currentCalendar.clone());
@@ -288,12 +286,5 @@ public class CalendarPanel extends JPanel {
 	// Capitalize the first letter of a word
 	private String capitalize(String word) {
 		return word.substring(0, 1).toUpperCase() + word.substring(1);
-	}
-
-	// Create icon from indicated image file
-	private ImageIcon createIcon(String path) {
-		URL url = getClass().getResource(path);
-		ImageIcon icon = new ImageIcon(url);
-		return icon;
 	}
 }

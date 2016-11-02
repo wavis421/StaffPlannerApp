@@ -124,11 +124,19 @@ public class Controller {
 	/*
 	 * ------- File save/restore items -------
 	 */
-	public void saveToFile(File file) throws IOException {
-		db.saveToFile(file);
+	public void saveProgramToFile(JList<String> programNameList, File file) throws IOException {
+		db.saveProgramToFile(programNameList, file);
 	}
 
-	public void loadFromFile(File file) throws IOException {
-		db.loadFromFile(file);
+	public void loadProgramFromFile(File file) throws IOException {
+		db.loadProgramFromFile(file);
+	}
+	
+	public void saveStaffToFile(File file) throws IOException {
+		db.saveStaffToFile(file);
+	}
+
+	public void loadStaffFromFile(File file) throws IOException {
+		db.loadStaffFromFile(file);
 	}
 }

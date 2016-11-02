@@ -31,7 +31,6 @@ public class Database {
 	 * ------- Programs -------
 	 */
 	public void addProgram(String programName, String endDate) {
-		System.out.println("Added program to database: " + programName + ", end date " + endDate);
 		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
 		programList.add(new ProgramModel(programName, endDate, taskList));
 	}
@@ -62,21 +61,27 @@ public class Database {
 	public int getNumPrograms() {
 		return programList.size();
 	}
+	
+	private int getProgramIndexByName(String programName) {
+		int i = 0;
+
+		for (ProgramModel p : programList) {
+			if (p.getProgramName().equals(programName))
+				return i;
+			i++;
+		}
+		return -1;
+	}
 
 	/*
 	 * ------- Task data -------
 	 */
 	public void addTask(String programName, TaskModel task) {
-		System.out.println("Added task to database: " + task.getTaskName() + ", location - " + task.getLocation()
-				+ ", DOW - " + task.getDayOfWeek() + ", time - " + task.getTime() + ", colorIdx - " + task.getColor());
 		ProgramModel program = getProgramByName(programName);
 		program.getTaskList().add(task);
 	}
 
 	public void updateTask(String programName, TaskModel task) {
-		System.out.println("Update task: " + task.getTaskName() + ", location - " + task.getLocation() + ", DOW - "
-				+ task.getDayOfWeek() + ", time - " + task.getTime() + ", color - " + task.getColor());
-
 		ProgramModel program = getProgramByName(programName);
 		int taskIdx = getTaskIndexByName(program, task.getTaskName());
 		if (taskIdx != -1)
@@ -86,7 +91,6 @@ public class Database {
 	}
 
 	public void renameTask(String programName, String oldName, String newName) {
-		System.out.println("Rename task: " + oldName + " to " + newName);
 		int taskIdx;
 
 		ProgramModel program = getProgramByName(programName);
@@ -206,14 +210,10 @@ public class Database {
 	 */
 	public void addPerson(String name, String phone, String email, boolean staff, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks) {
-		System.out.println("Added person to database: " + name + ", " + phone + ", " + email + ", " + staff + ", "
-				+ notes + ", " + assignedTasks);
 		personList.add(new PersonModel(name, phone, email, staff, notes, assignedTasks));
 	}
 
 	public void updatePerson(PersonModel person) {
-		System.out.println("Update person: " + person.getName());
-
 		int personIdx = getPersonIndexByName(person.getName());
 		if (personIdx != -1)
 			personList.set(personIdx, person);
@@ -222,8 +222,6 @@ public class Database {
 	}
 
 	public void renamePerson(String oldName, String newName) {
-		System.out.println("Rename person: " + oldName + " to " + newName);
-
 		int personIdx = getPersonIndexByName(oldName);
 		if (personIdx != -1) {
 			PersonModel person = personList.get(personIdx);
@@ -273,26 +271,66 @@ public class Database {
 	/*
 	 * ------- File save/restore items -------
 	 */
-	public void saveToFile(File file) throws IOException {
+	public void saveProgramToFile(JList<String> programNameList, File file) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
 
+		// Create linked list of selected programs
+		LinkedList<ProgramModel> pList = new LinkedList<ProgramModel>();
+		for (int i = 0; i < programNameList.getModel().getSize(); i++) {
+			pList.add(getProgramByName(programNameList.getModel().getElementAt(i)));
+		}
+		
 		// Convert to array
-		ProgramModel[] programs = programList.toArray(new ProgramModel[programList.size()]);
+		ProgramModel[] programs = pList.toArray(new ProgramModel[pList.size()]);
 
 		oos.writeObject(programs);
 		oos.close();
 	}
 
-	public void loadFromFile(File file) throws IOException {
+	public void loadProgramFromFile(File file) throws IOException {
 		FileInputStream fis = new FileInputStream(file);
 		ObjectInputStream ois = new ObjectInputStream(fis);
 
 		try {
-			// Convert from array to people
+			// Convert from array to program 
 			ProgramModel[] programs = (ProgramModel[]) ois.readObject();
-			programList.clear();
+			for (ProgramModel p : programs)
+			{
+				// Check if program already exists, if so then replace it
+				int index = getProgramIndexByName(p.getProgramName());
+				if (index >= 0) 
+					programList.remove(index);
+			}
 			programList.addAll(Arrays.asList(programs));
+
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ois.close();
+	}
+	
+	public void saveStaffToFile(File file) throws IOException {
+		FileOutputStream fos = new FileOutputStream(file);
+		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		
+		// Convert to array
+		PersonModel[] staff = personList.toArray(new PersonModel[personList.size()]);
+
+		oos.writeObject(staff);
+		oos.close();
+	}
+	
+	public void loadStaffFromFile(File file) throws IOException {
+		FileInputStream fis = new FileInputStream(file);
+		ObjectInputStream ois = new ObjectInputStream(fis);
+
+		try {
+			// Convert from array
+			PersonModel[] staff = (PersonModel[]) ois.readObject();
+			personList.clear();
+			personList.addAll(Arrays.asList(staff));
 
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
