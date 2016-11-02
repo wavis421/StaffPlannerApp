@@ -17,7 +17,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 
-public class FilterCalendarDialog extends JDialog {
+public class FilterListDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
@@ -27,8 +27,8 @@ public class FilterCalendarDialog extends JDialog {
 	private JList<JCheckBox> cbList = new JList<JCheckBox>();
 	private JList<String> dialogResponse = null;
 
-	public FilterCalendarDialog(JFrame parent, String filterName, JList<String> filterList) {
-		super(parent, "Filter Calendar by " + filterName + "...", true);
+	public FilterListDialog(JFrame parent, String filterName, JList<String> filterList) {
+		super(parent, filterName + "...", true);
 		DefaultListModel<JCheckBox> filterModel = new DefaultListModel<JCheckBox>();
 
 		// Set layout for control and button panels

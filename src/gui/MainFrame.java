@@ -153,11 +153,24 @@ public class MainFrame extends JFrame {
 		calendarFilterMenu.add(filterByProgramItem);
 		calendarFilterMenu.add(filterByPersonItem);
 
+		// Create listeners 
+		createFileMenuListeners(taskMenu, exportProgramItem, exportStaffItem, importProgramItem, importStaffItem,
+				exitItem);
+		createProgramMenuListeners(taskMenu, programCreateItem, programEditItem, programSelectMenu);
+		createTaskMenuListeners(taskCreateItem, taskEditMenu);
+		createPersonMenuListeners(personAddItem, personEditMenu);
+		createCalendarMenuListeners(filterNoneItem, filterByProgramItem, filterByPersonItem);
+
+		return menuBar;
+	}
+
+	private void createFileMenuListeners(JMenu taskMenu, JMenuItem exportProgramItem, JMenuItem exportStaffItem,
+			JMenuItem importProgramItem, JMenuItem importStaffItem, JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		exportProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JList<String> programList = controller.getAllProgramsAsString();
-				FilterCalendarDialog ev = new FilterCalendarDialog(MainFrame.this, "FILTER", programList);
+				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select Program(s) to export", programList);
 				JList<String> dialogResponse = ev.getDialogResponse();
 
 				if (dialogResponse != null) {
@@ -186,6 +199,7 @@ public class MainFrame extends JFrame {
 							selectedProgramName = programList.getModel().getElementAt(0);
 							calPanel.setProgramName(selectedProgramName);
 							taskMenu.setEnabled(true);
+							
 						} else if (numPrograms > 1 && selectedProgramName == null) {
 							JList<String> programList = controller.getAllProgramsAsString();
 							selectActiveProgramDialog ev = new selectActiveProgramDialog(MainFrame.this, programList);
@@ -242,7 +256,10 @@ public class MainFrame extends JFrame {
 				System.gc();
 			}
 		});
+	}
 
+	private void createProgramMenuListeners(JMenu taskMenu, JMenuItem programCreateItem, JMenuItem programEditItem,
+			JMenu programSelectMenu) {
 		// Set up listeners for PROGRAM menu
 		programCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -295,7 +312,9 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+	}
 
+	private void createTaskMenuListeners(JMenuItem taskCreateItem, JMenu taskEditMenu) {
 		// Set up listeners for TASK menu
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -325,7 +344,9 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+	}
 
+	private void createPersonMenuListeners(JMenuItem personAddItem, JMenu personEditMenu) {
 		// Set up listeners for PERSONS menu
 		personAddItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -355,12 +376,15 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+	}
 
+	private void createCalendarMenuListeners(JMenuItem filterNoneItem, JMenuItem filterByProgramItem,
+			JMenuItem filterByPersonItem) {
 		// Set up listeners for CALENDAR menu
 		filterByProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JList<String> programList = controller.getAllProgramsAsString();
-				FilterCalendarDialog ev = new FilterCalendarDialog(MainFrame.this, "program", programList);
+				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by program", programList);
 				JList<String> dialogResponse = ev.getDialogResponse();
 
 				// Only one filter can be active
@@ -373,7 +397,7 @@ public class MainFrame extends JFrame {
 		filterByPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JList<String> personList = controller.getAllPersonsAsString();
-				FilterCalendarDialog ev = new FilterCalendarDialog(MainFrame.this, "person", personList);
+				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by person", personList);
 				JList<String> dialogResponse = ev.getDialogResponse();
 
 				// Only one filter can be active
@@ -392,8 +416,6 @@ public class MainFrame extends JFrame {
 			}
 		});
 		// TBD: add more filters
-
-		return menuBar;
 	}
 
 	private void createTask() {
