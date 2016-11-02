@@ -54,7 +54,8 @@ public class Database {
 	}
 
 	public LinkedList<ProgramModel> getAllPrograms() {
-		//return (List<ProgramModel>) Collections.unmodifiableList(programList);
+		// return (List<ProgramModel>)
+		// Collections.unmodifiableList(programList);
 		return programList;
 	}
 
@@ -133,12 +134,23 @@ public class Database {
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i));
 			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
-				boolean[] daysOfWeek = pModel.getAssignedTasks().get(j).getDaysOfWeek();
-				boolean[] weeksOfMonth = pModel.getAssignedTasks().get(j).getWeeksOfMonth();
-				TaskModel t = getTaskByName(pModel.getAssignedTasks().get(j).getProgramName(),
-						pModel.getAssignedTasks().get(j).getTaskName());
-				if ((daysOfWeek[dayOfWeekIdx]) && (weeksOfMonth[dayOfWeekInMonthIdx])) {
-					thisMonthTasks.add(t);
+				AssignedTasksModel task = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
+
+				boolean alreadyInList = false;
+				for (int k = 0; k < thisMonthTasks.size(); k++) {
+					if (thisMonthTasks.get(k).getTaskName().equals(task.getTaskName())) {
+						alreadyInList = true;
+						break;
+					}
+				}
+
+				if (!alreadyInList) {
+					boolean[] daysOfWeek = task.getDaysOfWeek();
+					boolean[] weeksOfMonth = task.getWeeksOfMonth();
+					TaskModel t = getTaskByName(task.getProgramName(), task.getTaskName());
+					if ((daysOfWeek[dayOfWeekIdx]) && (weeksOfMonth[dayOfWeekInMonthIdx])) {
+						thisMonthTasks.add(t);
+					}
 				}
 			}
 		}
@@ -163,9 +175,8 @@ public class Database {
 	}
 
 	/*
-	 * public List<TaskModel> getAllTasks() { 
-	 *    return Collections.unmodifiableList(taskList); 
-	 * }
+	 * public List<TaskModel> getAllTasks() { return
+	 * Collections.unmodifiableList(taskList); }
 	 */
 
 	public JList<TaskModel> getAllTasks(String programName) {

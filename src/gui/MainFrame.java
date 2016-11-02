@@ -140,10 +140,12 @@ public class MainFrame extends JFrame {
 		// Add calendar sub-menus
 		JMenu calendarFilterMenu = new JMenu("Filter");
 		calendarMenu.add(calendarFilterMenu);
+		JMenuItem filterNoneItem = new JMenuItem("none");
 		JMenuItem filterByProgramItem = new JMenuItem("by Program");
 		JMenuItem filterByPersonItem = new JMenuItem("by Person");
 		calendarFilterMenu.add(filterByProgramItem);
 		calendarFilterMenu.add(filterByPersonItem);
+		calendarFilterMenu.add(filterNoneItem);
 
 		// Set up listeners for FILE menu
 		exportDataItem.addActionListener(new ActionListener() {
@@ -331,8 +333,6 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
-		// TBD: filter by person, by Staff/volunteer, by tasks that require more
-		// people
 		filterByPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JList<String> personList = controller.getAllPersonsAsString();
@@ -346,6 +346,15 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
+		filterNoneItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				personFilter = null;
+				programFilter = null;
+
+				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
+			}
+		});
+		// TBD: filter by Staff/volunteer, by tasks that require more people
 
 		return menuBar;
 	}
