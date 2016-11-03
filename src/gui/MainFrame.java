@@ -329,7 +329,9 @@ public class MainFrame extends JFrame {
 				taskList.setCellRenderer(new TaskRenderer());
 
 				for (int i = 0; i < taskList.getModel().getSize(); i++) {
-					JMenuItem taskItem = new JMenuItem(taskList.getModel().getElementAt(i).toString());
+					TaskModel task = taskList.getModel().getElementAt(i);
+					JMenuItem taskItem = new JMenuItem(task.toString());
+					taskItem.setForeground(new Color(task.getColor()));
 					taskEditMenu.add(taskItem);
 
 					taskItem.addActionListener(new ActionListener() {
