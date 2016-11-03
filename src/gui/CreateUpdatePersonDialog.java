@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -121,12 +120,12 @@ public class CreateUpdatePersonDialog extends JDialog {
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					// Make sure that program name has been entered
+					// Make sure that person name has been entered
 					if (personName.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 					} else {
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks);
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, null);
 						okToSave = true;
 						dialogResponse = ev;
 						setVisible(false);
@@ -250,9 +249,6 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 				/* retrieve the node that was selected */
 				Object nodeInfo = node.getUserObject();
-				System.out.println("Assigned Task Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath()
-						+ ", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + ", path length: "
-						+ evt.getPath().getPathCount());
 
 				if (node.getLevel() == 2) {
 					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
@@ -269,7 +265,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 						assignedTasks.add(taskModel);
 
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks);
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, taskModel);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -292,9 +288,6 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 				/* retrieve the node that was selected */
 				Object nodeInfo = node.getUserObject();
-				System.out.println("Task Tree Selection Listener: " + nodeInfo + ", path: " + evt.getPath()
-						+ ", isLeaf: " + node.isLeaf() + ", root: " + node.isRoot() + ", path length: "
-						+ evt.getPath().getPathCount() + ", level: " + node.getLevel());
 
 				if (node.getLevel() == 2) {
 					TreePath parentPath = taskTree.getSelectionPath();
@@ -311,7 +304,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 						assignedTasks.add(taskModel);
 
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks);
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, taskModel);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();

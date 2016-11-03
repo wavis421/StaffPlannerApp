@@ -21,7 +21,7 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 
 	public TaskTreeRenderer() {
 		super();
-		
+
 		setOpaque(true);
 
 		URL url = getClass().getResource("../images/calendar_16x16.png");
@@ -36,7 +36,7 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean isExpanded,
 			boolean isLeaf, int row, boolean hasFocus) {
-		
+
 		setFont(JTFTools.decodeFont(BASIC_FONT));
 		if (row == 0) {
 			setFont(JTFTools.decodeFont(ITALIC_FONT));
@@ -47,16 +47,15 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 			setClosedIcon(calPlusIcon);
 			setOpenIcon(calPlusIcon);
 			setLeafIcon(calPlusIcon);
-		}
-		else {
+		} else {
 			setLeafIcon(null);
-		}	
-		
+		}
+
 		textSelectionColor = Color.black;
 		textNonSelectionColor = Color.black;
 		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
 			TaskModel task = (TaskModel) (((DefaultMutableTreeNode) value).getUserObject());
-			setText (task.getTaskName());
+			setText(task.getTaskName());
 
 			setFont(JTFTools.decodeFont(BOLD_FONT));
 			textSelectionColor = new Color(task.getColor());

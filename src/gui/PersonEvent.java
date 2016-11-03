@@ -12,13 +12,14 @@ public class PersonEvent extends EventObject {
 	private boolean staff;
 	private String notes;
 	private LinkedList<AssignedTasksModel> assignedTasks;
+	private AssignedTasksModel lastTaskAdded;
 	
 	public PersonEvent(Object source) {
 		super(source);
 	}
 
 	public PersonEvent(Object source, String name, String phone, String email, boolean staff, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks) {
+			LinkedList<AssignedTasksModel> assignedTasks, AssignedTasksModel lastTaskAdded) {
 		super(source);
 
 		this.name = name;
@@ -27,6 +28,7 @@ public class PersonEvent extends EventObject {
 		this.staff = staff;
 		this.notes = notes;
 		this.assignedTasks = assignedTasks;
+		this.lastTaskAdded = lastTaskAdded;
 	}
 
 	public String getName() {
@@ -51,5 +53,9 @@ public class PersonEvent extends EventObject {
 
 	public LinkedList<AssignedTasksModel> getAssignedTasks() {
 		return assignedTasks;
+	}
+
+	public AssignedTasksModel getLastTaskAdded() {
+		return lastTaskAdded;
 	}
 }

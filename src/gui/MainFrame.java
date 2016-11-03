@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.LinkedList;
 
 import javax.swing.JFileChooser;
@@ -27,7 +28,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.Position;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -153,7 +153,7 @@ public class MainFrame extends JFrame {
 		calendarFilterMenu.add(filterByProgramItem);
 		calendarFilterMenu.add(filterByPersonItem);
 
-		// Create listeners 
+		// Create listeners
 		createFileMenuListeners(taskMenu, exportProgramItem, exportStaffItem, importProgramItem, importStaffItem,
 				exitItem);
 		createProgramMenuListeners(taskMenu, programCreateItem, programEditItem, programSelectMenu);
@@ -199,7 +199,7 @@ public class MainFrame extends JFrame {
 							selectedProgramName = programList.getModel().getElementAt(0);
 							calPanel.setProgramName(selectedProgramName);
 							taskMenu.setEnabled(true);
-							
+
 						} else if (numPrograms > 1 && selectedProgramName == null) {
 							JList<String> programList = controller.getAllProgramsAsString();
 							selectActiveProgramDialog ev = new selectActiveProgramDialog(MainFrame.this, programList);
@@ -236,7 +236,7 @@ public class MainFrame extends JFrame {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
 						controller.loadStaffFromFile(fileChooser.getSelectedFile());
-						
+
 						// Clear person filter if selected
 						if (personFilter != null) {
 							personFilter = null;
@@ -247,7 +247,7 @@ public class MainFrame extends JFrame {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-				}	
+				}
 			}
 		});
 		exitItem.addActionListener(new ActionListener() {
@@ -350,8 +350,10 @@ public class MainFrame extends JFrame {
 		// Set up listeners for PERSONS menu
 		personAddItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				LinkedList<AssignedTasksModel> assignedList = new LinkedList<AssignedTasksModel>();
+				JTree taskTree = createTaskTree(assignedList);
 				CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this,
-						createAssignedTasksTree(new LinkedList<AssignedTasksModel>()), createTaskTree());
+						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
 				processAddPersonDialog(personEvent);
 			}
 		});
@@ -475,11 +477,13 @@ public class MainFrame extends JFrame {
 							"Person " + dialogResponse.getName() + " already exists. Please use a different name.");
 
 				// Do not save; go back and edit person
-				LinkedList<AssignedTasksModel> taskList = dialogResponse.getAssignedTasks();
+				LinkedList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTasks();
+				JTree taskTree = createTaskTree(assignedTaskList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-								dialogResponse.isStaff(), dialogResponse.getNotes(), taskList),
-						createAssignedTasksTree(taskList), createTaskTree());
+								dialogResponse.isStaff(), dialogResponse.getNotes(), assignedTaskList),
+						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
+						taskTree);
 				processAddPersonDialog(personEvent);
 
 			} else {
@@ -496,10 +500,14 @@ public class MainFrame extends JFrame {
 
 		if (dialogResponse != null) {
 			if (!isOkToSave) {
+				LinkedList<AssignedTasksModel> assignedList = dialogResponse.getAssignedTasks();
+				JTree taskTree = createTaskTree(assignedList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks()),
-						createAssignedTasksTree(dialogResponse.getAssignedTasks()), createTaskTree());
+						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree,
+								assignedList),
+						taskTree);
 				processEditPersonDialog(personEvent, origName);
 			} else {
 				// Update task list and refresh calendar
@@ -515,8 +523,10 @@ public class MainFrame extends JFrame {
 		if (person == null)
 			JOptionPane.showMessageDialog(null, "Person does not exist");
 		else {
+			LinkedList<AssignedTasksModel> assignedList = person.getAssignedTasks();
+			JTree taskTree = createTaskTree(assignedList);
 			CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this, person,
-					createAssignedTasksTree(person.getAssignedTasks()), createTaskTree());
+					createAssignedTasksTree(null, taskTree, assignedList), taskTree);
 			processEditPersonDialog(personEvent, origName);
 		}
 	}
@@ -569,7 +579,7 @@ public class MainFrame extends JFrame {
 		calPanel.refresh();
 	}
 
-	private JTree createTaskTree() {
+	private JTree createTaskTree(LinkedList<AssignedTasksModel> assignedTaskList) {
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Select task to assign  >>>");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
 		LinkedList<ProgramModel> programList = controller.getAllPrograms();
@@ -581,9 +591,11 @@ public class MainFrame extends JFrame {
 
 			JList<TaskModel> taskList = controller.getAllTasks(p.getProgramName());
 
+			// For each task in this program, add to program only if not yet assigned
 			for (int j = 0; j < taskList.getModel().getSize(); j++) {
 				TaskModel task = taskList.getModel().getElementAt(j);
-				pNode.add(new DefaultMutableTreeNode(task));
+				if (!findNodeInAssignedTaskList(assignedTaskList, task.getTaskName()))
+					pNode.add(new DefaultMutableTreeNode(task));
 			}
 		}
 		JTree tree = new JTree(treeModel);
@@ -593,46 +605,82 @@ public class MainFrame extends JFrame {
 		return (tree);
 	}
 
-	private JTree createAssignedTasksTree(LinkedList<AssignedTasksModel> taskList) {
-		boolean pathFound;
+	private JTree createAssignedTasksTree(AssignedTasksModel lastTaskAdded, JTree taskTree,
+			LinkedList<AssignedTasksModel> taskList) {
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Assigned tasks");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
-		JTree tree = new JTree(treeModel);
-		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		tree.setShowsRootHandles(true);
-		tree.expandRow(0);
+		JTree assignedTree = new JTree(treeModel);
+		TreePath path;
 
 		for (AssignedTasksModel item : taskList) {
-			pathFound = false;
-			for (int row = 1; row < tree.getRowCount(); row++) {
-				TreePath path = tree.getNextMatch(item.getProgramName(), row, Position.Bias.Forward);
-				if (path != null) {
-					pathFound = true;
-					tree.setSelectionPath(path);
-					AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(),
-							controller.getTaskByName(item.getProgramName(), item.getTaskName()), item.getDaysOfWeek(),
-							item.getWeeksOfMonth());
-					treeModel.insertNodeInto(new DefaultMutableTreeNode(taskEvent),
-							(DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent(), row);
-					break;
-				}
-			}
-			if (pathFound == false) {
-				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(item.getProgramName());
-				tree.setSelectionPath(tree.getPathForRow(0));
-				treeModel.insertNodeInto(pNode, (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent(),
-						0);
+			AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(),
+					controller.getTaskByName(item.getProgramName(), item.getTaskName()), item.getDaysOfWeek(),
+					item.getWeeksOfMonth());
 
-				AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(),
-						controller.getTaskByName(item.getProgramName(), item.getTaskName()), item.getDaysOfWeek(),
-						item.getWeeksOfMonth());
+			path = findNodeInTree((DefaultMutableTreeNode) assignedTree.getModel().getRoot(), item.getProgramName());
+			if (path != null) {
+				// Program node already exists
+				assignedTree.setSelectionPath(path);
+				treeModel.insertNodeInto(new DefaultMutableTreeNode(taskEvent),
+						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(),
+						assignedTree.getRowForPath(path));
+			} else {
+				// Create program node, then add task event
+				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(item.getProgramName());
+				assignedTree.setSelectionPath(assignedTree.getPathForRow(0));
+				treeModel.insertNodeInto(pNode,
+						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(), 0);
 
 				pNode.add(new DefaultMutableTreeNode(taskEvent));
-				tree.expandRow(0);
 			}
 		}
 
-		tree.setCellRenderer(new AssignTaskTreeRenderer());
-		return (tree);
+		// Collapse all program nodes except last inserted task
+		String programName = null;
+		if (lastTaskAdded != null)
+			programName = lastTaskAdded.getProgramName();
+		collapseTree(assignedTree, programName);
+		collapseTree(taskTree, programName);
+
+		assignedTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		assignedTree.setShowsRootHandles(true);
+		assignedTree.setCellRenderer(new AssignTaskTreeRenderer());
+		return (assignedTree);
+	}
+
+	private void collapseTree(JTree tree, String s) {
+		tree.expandRow(0);
+		int row = tree.getRowCount() - 1;
+
+		// Collapse child nodes of root
+		while (row > 0) {
+			tree.collapseRow(row);
+			row--;
+		}
+		
+		if (s != null) {
+			TreePath path = findNodeInTree((DefaultMutableTreeNode) tree.getModel().getRoot(), s);
+			tree.expandPath(path);
+		}
+	}
+
+	private TreePath findNodeInTree(DefaultMutableTreeNode root, String s) {
+		Enumeration<DefaultMutableTreeNode> e = root.depthFirstEnumeration();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode node = e.nextElement();
+			if (node.toString().equals(s)) {
+				return new TreePath(node.getPath());
+			}
+		}
+		return null;
+	}
+	
+	private boolean findNodeInAssignedTaskList (LinkedList<AssignedTasksModel> list, String taskName) {
+		for (AssignedTasksModel t : list) {
+			if (t.getTaskName().equals(taskName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
