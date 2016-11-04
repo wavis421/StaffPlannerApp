@@ -148,7 +148,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 							if (weekOfMonthButtons[i].isSelected())
 								weeksOfMonthSelected[i] = true;
 						}
-						
+
 						// Create TaskEvent and set response
 						TaskEvent ev = new TaskEvent(this, currentProgramName, taskNameField.getText(),
 								locationTextField.getText(), (Integer) numStaffSpinner.getValue(),
@@ -319,22 +319,22 @@ public class CreateUpdateTaskDialog extends JDialog {
 		if (colorMatchIdx != -1)
 			buttons[colorMatchIdx].setSelected(true);
 	}
-	
-	private void createSpinnerListeners () {
+
+	private void createSpinnerListeners() {
 		numStaffSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				checkSpinnerValues ();
+				checkSpinnerValues();
 			}
 		});
 		totalPersonsSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				checkSpinnerValues ();
+				checkSpinnerValues();
 			}
 		});
 	}
-	
-	private void checkSpinnerValues () {
-		if ((Integer)numStaffSpinner.getValue() > (Integer)totalPersonsSpinner.getValue())
-			totalPersonsSpinner.setValue((Integer)numStaffSpinner.getValue());
+
+	private void checkSpinnerValues() {
+		if ((Integer) numStaffSpinner.getValue() > (Integer) totalPersonsSpinner.getValue())
+			totalPersonsSpinner.setValue((Integer) numStaffSpinner.getValue());
 	}
 }

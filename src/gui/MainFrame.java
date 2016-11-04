@@ -134,8 +134,10 @@ public class MainFrame extends JFrame {
 		// Add task sub-menus
 		JMenuItem taskCreateItem = new JMenuItem("Create task");
 		JMenu taskEditMenu = new JMenu("Edit task");
+		JMenu taskCloneMenu = new JMenu("Clone task");
 		taskMenu.add(taskCreateItem);
 		taskMenu.add(taskEditMenu);
+		taskMenu.add(taskCloneMenu);
 
 		// Add persons sub-menus
 		JMenuItem personAddItem = new JMenuItem("Add person");
@@ -157,7 +159,7 @@ public class MainFrame extends JFrame {
 		createFileMenuListeners(taskMenu, exportProgramItem, exportStaffItem, importProgramItem, importStaffItem,
 				exitItem);
 		createProgramMenuListeners(taskMenu, programCreateItem, programEditItem, programSelectMenu);
-		createTaskMenuListeners(taskCreateItem, taskEditMenu);
+		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu);
 		createPersonMenuListeners(personAddItem, personEditMenu);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramItem, filterByPersonItem);
 
@@ -314,7 +316,7 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createTaskMenuListeners(JMenuItem taskCreateItem, JMenu taskEditMenu) {
+	private void createTaskMenuListeners(JMenuItem taskCreateItem, JMenu taskEditMenu, JMenu taskCloneMenu) {
 		// Set up listeners for TASK menu
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -341,6 +343,29 @@ public class MainFrame extends JFrame {
 
 							taskList.removeAll();
 							taskEditMenu.removeAll();
+						}
+					});
+				}
+			}
+		});
+		taskCloneMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				taskCloneMenu.removeAll();
+
+				JList<TaskModel> taskList = controller.getAllTasks(selectedProgramName);
+				taskList.setCellRenderer(new TaskRenderer());
+
+				for (int i = 0; i < taskList.getModel().getSize(); i++) {
+					TaskModel task = taskList.getModel().getElementAt(i);
+					JMenuItem taskItem = new JMenuItem(task.toString());
+					taskItem.setForeground(new Color(task.getColor()));
+					taskCloneMenu.add(taskItem);
+
+					taskItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							cloneTask(task);
+							taskList.removeAll();
+							taskCloneMenu.removeAll();
 						}
 					});
 				}
@@ -467,6 +492,15 @@ public class MainFrame extends JFrame {
 		}
 	}
 
+	private void cloneTask(TaskModel task) {
+		TaskEvent ev = new TaskEvent(MainFrame.this, selectedProgramName, null, task.getLocation(),
+				task.getNumStaffReqd(), task.getTotalPersonsReqd(), task.getDayOfWeek(), task.getWeekOfMonth(),
+				task.getTime(), task.getColor());
+
+		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, ev);
+		processCreateTaskDialog(taskEvent);
+	}
+
 	private void processAddPersonDialog(CreateUpdatePersonDialog personEvent) {
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
 		boolean okToSave = personEvent.getOkToSaveStatus();
@@ -507,9 +541,7 @@ public class MainFrame extends JFrame {
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks()),
-						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree,
-								assignedList),
-						taskTree);
+						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedList), taskTree);
 				processEditPersonDialog(personEvent, origName);
 			} else {
 				// Update task list and refresh calendar
@@ -593,7 +625,8 @@ public class MainFrame extends JFrame {
 
 			JList<TaskModel> taskList = controller.getAllTasks(p.getProgramName());
 
-			// For each task in this program, add to program only if not yet assigned
+			// For each task in this program, add to program only if not yet
+			// assigned
 			for (int j = 0; j < taskList.getModel().getSize(); j++) {
 				TaskModel task = taskList.getModel().getElementAt(j);
 				if (!findNodeInAssignedTaskList(assignedTaskList, task.getTaskName()))
@@ -659,7 +692,7 @@ public class MainFrame extends JFrame {
 			tree.collapseRow(row);
 			row--;
 		}
-		
+
 		if (s != null) {
 			TreePath path = findNodeInTree((DefaultMutableTreeNode) tree.getModel().getRoot(), s);
 			tree.expandPath(path);
@@ -676,8 +709,8 @@ public class MainFrame extends JFrame {
 		}
 		return null;
 	}
-	
-	private boolean findNodeInAssignedTaskList (LinkedList<AssignedTasksModel> list, String taskName) {
+
+	private boolean findNodeInAssignedTaskList(LinkedList<AssignedTasksModel> list, String taskName) {
 		for (AssignedTasksModel t : list) {
 			if (t.getTaskName().equals(taskName)) {
 				return true;
