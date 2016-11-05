@@ -10,12 +10,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
+import gui.PersonComparator;
+import gui.ProgramComparator;
 import gui.TimeComparator;
 
 public class Database {
@@ -33,6 +34,7 @@ public class Database {
 	public void addProgram(String programName, String endDate) {
 		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
 		programList.add(new ProgramModel(programName, endDate, taskList));
+		Collections.sort(programList, new ProgramComparator());
 	}
 
 	public ProgramModel getProgramByName(String programName) {
@@ -79,13 +81,16 @@ public class Database {
 	public void addTask(String programName, TaskModel task) {
 		ProgramModel program = getProgramByName(programName);
 		program.getTaskList().add(task);
+		Collections.sort(program.getTaskList(), new TimeComparator());
 	}
 
 	public void updateTask(String programName, TaskModel task) {
 		ProgramModel program = getProgramByName(programName);
 		int taskIdx = getTaskIndexByName(program, task.getTaskName());
-		if (taskIdx != -1)
+		if (taskIdx != -1) {
 			program.getTaskList().set(taskIdx, task);
+			Collections.sort(program.getTaskList(), new TimeComparator());
+		}
 		else
 			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!");
 	}
@@ -126,7 +131,6 @@ public class Database {
 				}
 			}
 		}
-		Collections.sort(thisMonthTasks, new TimeComparator());
 		return thisMonthTasks;
 	}
 
@@ -158,7 +162,6 @@ public class Database {
 				}
 			}
 		}
-		Collections.sort(thisMonthTasks, new TimeComparator());
 		return thisMonthTasks;
 	}
 
@@ -174,7 +177,6 @@ public class Database {
 				}
 			}
 		}
-		Collections.sort(thisMonthTasks, new TimeComparator());
 		return thisMonthTasks;
 	}
 
@@ -211,6 +213,7 @@ public class Database {
 	public void addPerson(String name, String phone, String email, boolean staff, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks) {
 		personList.add(new PersonModel(name, phone, email, staff, notes, assignedTasks));
+		Collections.sort (personList, new PersonComparator());
 	}
 
 	public void updatePerson(PersonModel person) {
@@ -226,6 +229,7 @@ public class Database {
 		if (personIdx != -1) {
 			PersonModel person = personList.get(personIdx);
 			person.setName(newName);
+			Collections.sort(personList, new PersonComparator());
 		} else
 			JOptionPane.showMessageDialog(null, "Person '" + oldName + "' not found!");
 	}

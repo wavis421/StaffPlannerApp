@@ -10,6 +10,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
@@ -124,6 +125,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 					if (personName.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 					} else {
+						Collections.sort(assignedTasks, new AssignedTaskComparator());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, null);
 						okToSave = true;
@@ -264,6 +266,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 						assignedTasks.removeLast();
 						assignedTasks.add(taskModel);
 
+						Collections.sort(assignedTasks, new AssignedTaskComparator());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, taskModel);
 						dialogResponse = ev;
@@ -303,6 +306,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
 						assignedTasks.add(taskModel);
 
+						Collections.sort(assignedTasks, new AssignedTaskComparator());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, taskModel);
 						dialogResponse = ev;

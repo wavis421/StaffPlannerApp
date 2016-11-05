@@ -648,24 +648,30 @@ public class MainFrame extends JFrame {
 		TreePath path;
 
 		for (AssignedTasksModel item : taskList) {
+			// Create the event to be added to the tree
 			AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(),
 					controller.getTaskByName(item.getProgramName(), item.getTaskName()), item.getDaysOfWeek(),
 					item.getWeeksOfMonth());
 
+			// Find if the associated Program is already in tree
 			path = findNodeInTree((DefaultMutableTreeNode) assignedTree.getModel().getRoot(), item.getProgramName());
 			if (path != null) {
 				// Program node already exists
 				assignedTree.setSelectionPath(path);
+				assignedTree.expandRow(assignedTree.getRowForPath(path));
+				int childCount = treeModel.getChildCount(assignedTree.getSelectionPath().getLastPathComponent());
+				
+				// AssignedTree is already sorted, so add to end
 				treeModel.insertNodeInto(new DefaultMutableTreeNode(taskEvent),
 						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(),
-						assignedTree.getRowForPath(path));
+						childCount);
 			} else {
 				// Create program node, then add task event
 				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(item.getProgramName());
 				assignedTree.setSelectionPath(assignedTree.getPathForRow(0));
 				treeModel.insertNodeInto(pNode,
 						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(), 0);
-
+				
 				pNode.add(new DefaultMutableTreeNode(taskEvent));
 			}
 		}
