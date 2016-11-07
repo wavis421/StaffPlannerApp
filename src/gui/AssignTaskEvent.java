@@ -22,7 +22,10 @@ public class AssignTaskEvent extends EventObject {
 	}
 
 	public String toString () {
-		return task.getTaskName();
+		if (task != null)
+			return task.getTaskName();
+		else
+			return null;
 	}
 	
 	public String getProgramName() {

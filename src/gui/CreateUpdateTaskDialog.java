@@ -51,7 +51,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private JLabel timeLabel = new JLabel("Time: ");
 	private JLabel locationLabel = new JLabel("Location: ");
 	private JLabel dayOfWeekLabel = new JLabel("Days of the Week: ");
-	private JLabel weekOfMonthLabel = new JLabel("Weeks of the Month:");
+	private JLabel weekOfMonthLabel = new JLabel("DOW in the Month:");
 	private JLabel colorChooserLabel = new JLabel("Select task color: ");
 
 	// Dialog panels

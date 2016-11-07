@@ -104,12 +104,19 @@ public class Database {
 			TaskModel task = program.getTaskList().get(taskIdx);
 			task.setTaskName(newName);
 			program.getTaskList().set(taskIdx, task);
+			
+			// Update persons' assigned tasks lists
+			updateTaskNameByPerson (oldName, newName);
+			
 		} else
 			JOptionPane.showMessageDialog(null, "Task '" + oldName + "' not found!");
 	}
 
 	public TaskModel getTaskByName(String programName, String taskName) {
 		ProgramModel program = getProgramByName(programName);
+		if (program == null)
+			return null;
+		
 		for (TaskModel t : program.getTaskList()) {
 			if (t.getTaskName().equals(taskName)) {
 				return t;
@@ -207,6 +214,16 @@ public class Database {
 		return -1;
 	}
 
+	private void updateTaskNameByPerson (String oldTaskName, String newTaskName) {
+		for (PersonModel person : personList) {
+			for (AssignedTasksModel assignedTask : person.getAssignedTasks())
+			{
+				if (assignedTask.getTaskName().equals(oldTaskName))
+					assignedTask.setTaskName(newTaskName);
+			}
+		}
+	}
+	
 	/*
 	 * ------- Person -------
 	 */

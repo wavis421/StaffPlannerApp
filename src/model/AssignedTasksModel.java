@@ -27,6 +27,10 @@ public class AssignedTasksModel implements Serializable {
 		return taskName;
 	}
 
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
 	public boolean[] getDaysOfWeek() {
 		return daysOfWeek;
 	}

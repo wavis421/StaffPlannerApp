@@ -22,8 +22,10 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 	public TaskTreeRenderer() {
 		super();
 
-		setOpaque(true);
-
+		setOpaque(false);
+		setBackgroundNonSelectionColor(Color.WHITE);
+		setBackgroundSelectionColor(Color.decode(Integer.toString(0xDDDDDD)));
+		
 		URL url = getClass().getResource("../images/calendar_16x16.png");
 		calIcon = new ImageIcon(url);
 		url = getClass().getResource("../images/calendar_plus_16x16.png");

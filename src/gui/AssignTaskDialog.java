@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
-import model.AssignedTasksModel;
 import model.TaskModel;
 
 public class AssignTaskDialog extends JDialog {

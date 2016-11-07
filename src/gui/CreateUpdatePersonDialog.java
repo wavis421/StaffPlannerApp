@@ -259,20 +259,22 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 					AssignTaskEvent eventResponse = event.getDialogResponse();
 					if (eventResponse != null) {
-						// Update assigned task model with new node info
-						AssignedTasksModel taskModel = new AssignedTasksModel(eventResponse.getProgramName(), 
+						// Update assigned task with new node info
+						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getProgramName(),
 								eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
 								eventResponse.getWeeksOfMonth());
-						assignedTasks.removeLast();
-						assignedTasks.add(taskModel);
+						removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
+						assignedTasks.add(lastAssignedTask);
 
 						Collections.sort(assignedTasks, new AssignedTaskComparator());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, taskModel);
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
+								lastAssignedTask);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
 					}
+					assignedTasksTree.clearSelection();
 				}
 			}
 		});
@@ -302,19 +304,31 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 					AssignTaskEvent eventResponse = event.getDialogResponse();
 					if (eventResponse != null) {
-						AssignedTasksModel taskModel = new AssignedTasksModel(node.getParent().toString(),
+						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(node.getParent().toString(),
 								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
-						assignedTasks.add(taskModel);
+						assignedTasks.add(lastAssignedTask);
 
 						Collections.sort(assignedTasks, new AssignedTaskComparator());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, taskModel);
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
+								lastAssignedTask);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
 					}
+					taskTree.clearSelection();
 				}
 			}
 		});
+	}
+
+	private void removeNodeFromAssignedTaskList(String taskName) {
+		for (AssignedTasksModel t : assignedTasks) {
+			if (t.getTaskName().equals(taskName)) {
+				int idx = assignedTasks.indexOf(t);
+				assignedTasks.remove(idx);
+				return;
+			}
+		}
 	}
 }

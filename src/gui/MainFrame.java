@@ -648,6 +648,13 @@ public class MainFrame extends JFrame {
 		TreePath path;
 
 		for (AssignedTasksModel item : taskList) {
+			// Check to see if this task is currently valid; if not then leave disabled
+			if (controller.getTaskByName(item.getProgramName(), item.getTaskName()) == null)
+			{
+				System.out.println("Dropping program " + item.getProgramName() + ", task " + item.getTaskName());
+				continue;
+			}
+			
 			// Create the event to be added to the tree
 			AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(),
 					controller.getTaskByName(item.getProgramName(), item.getTaskName()), item.getDaysOfWeek(),
@@ -665,6 +672,7 @@ public class MainFrame extends JFrame {
 				treeModel.insertNodeInto(new DefaultMutableTreeNode(taskEvent),
 						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(),
 						childCount);
+				
 			} else {
 				// Create program node, then add task event
 				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(item.getProgramName());
