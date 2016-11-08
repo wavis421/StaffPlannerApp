@@ -63,7 +63,7 @@ public class Database {
 	public int getNumPrograms() {
 		return programList.size();
 	}
-	
+
 	private int getProgramIndexByName(String programName) {
 		int i = 0;
 
@@ -90,8 +90,7 @@ public class Database {
 		if (taskIdx != -1) {
 			program.getTaskList().set(taskIdx, task);
 			Collections.sort(program.getTaskList(), new TimeComparator());
-		}
-		else
+		} else
 			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!");
 	}
 
@@ -104,10 +103,10 @@ public class Database {
 			TaskModel task = program.getTaskList().get(taskIdx);
 			task.setTaskName(newName);
 			program.getTaskList().set(taskIdx, task);
-			
+
 			// Update persons' assigned tasks lists
-			updateTaskNameByPerson (oldName, newName);
-			
+			updateTaskNameByPerson(oldName, newName);
+
 		} else
 			JOptionPane.showMessageDialog(null, "Task '" + oldName + "' not found!");
 	}
@@ -116,7 +115,7 @@ public class Database {
 		ProgramModel program = getProgramByName(programName);
 		if (program == null)
 			return null;
-		
+
 		for (TaskModel t : program.getTaskList()) {
 			if (t.getTaskName().equals(taskName)) {
 				return t;
@@ -187,6 +186,31 @@ public class Database {
 		return thisMonthTasks;
 	}
 
+	public LinkedList<Boolean> getStaffStatusByTask(LinkedList<TaskModel> taskList, Calendar calendar) {
+		LinkedList<Boolean> staffStatus = new LinkedList<Boolean>();
+		JList<PersonModel> personList = getAllPersons();
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		int count;
+
+		for (TaskModel task : taskList) {
+			count = 0;
+			for (int idx = 0; idx < personList.getModel().getSize(); idx++) {
+				LinkedList<AssignedTasksModel> assignedTaskList = personList.getModel().getElementAt(idx)
+						.getAssignedTasks();
+				for (AssignedTasksModel assignedTask : assignedTaskList) {
+					if (assignedTask.getTaskName().equals(task.getTaskName())
+							&& assignedTask.getDaysOfWeek()[dayOfWeekIdx] && assignedTask.getWeeksOfMonth()[dayOfWeekInMonthIdx]) {
+						count++;
+						break;
+					}
+				}
+			}
+			staffStatus.add(task.getTotalPersonsReqd() <= count ? true : false);
+		}
+		return staffStatus;
+	}
+
 	/*
 	 * public List<TaskModel> getAllTasks() { return
 	 * Collections.unmodifiableList(taskList); }
@@ -214,23 +238,22 @@ public class Database {
 		return -1;
 	}
 
-	private void updateTaskNameByPerson (String oldTaskName, String newTaskName) {
+	private void updateTaskNameByPerson(String oldTaskName, String newTaskName) {
 		for (PersonModel person : personList) {
-			for (AssignedTasksModel assignedTask : person.getAssignedTasks())
-			{
+			for (AssignedTasksModel assignedTask : person.getAssignedTasks()) {
 				if (assignedTask.getTaskName().equals(oldTaskName))
 					assignedTask.setTaskName(newTaskName);
 			}
 		}
 	}
-	
+
 	/*
 	 * ------- Person -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean staff, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks) {
 		personList.add(new PersonModel(name, phone, email, staff, notes, assignedTasks));
-		Collections.sort (personList, new PersonComparator());
+		Collections.sort(personList, new PersonComparator());
 	}
 
 	public void updatePerson(PersonModel person) {
@@ -301,7 +324,7 @@ public class Database {
 		for (int i = 0; i < programNameList.getModel().getSize(); i++) {
 			pList.add(getProgramByName(programNameList.getModel().getElementAt(i)));
 		}
-		
+
 		// Convert to array
 		ProgramModel[] programs = pList.toArray(new ProgramModel[pList.size()]);
 
@@ -314,35 +337,34 @@ public class Database {
 		ObjectInputStream ois = new ObjectInputStream(fis);
 
 		try {
-			// Convert from array to program 
+			// Convert from array to program
 			ProgramModel[] programs = (ProgramModel[]) ois.readObject();
-			for (ProgramModel p : programs)
-			{
+			for (ProgramModel p : programs) {
 				// Check if program already exists, if so then replace it
 				int index = getProgramIndexByName(p.getProgramName());
-				if (index >= 0) 
+				if (index >= 0)
 					programList.remove(index);
 			}
 			programList.addAll(Arrays.asList(programs));
 
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Failed to load Program file -- invalid format.");
+			// e.printStackTrace();
 		}
 		ois.close();
 	}
-	
+
 	public void saveStaffToFile(File file) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		
+
 		// Convert to array
 		PersonModel[] staff = personList.toArray(new PersonModel[personList.size()]);
 
 		oos.writeObject(staff);
 		oos.close();
 	}
-	
+
 	public void loadStaffFromFile(File file) throws IOException {
 		FileInputStream fis = new FileInputStream(file);
 		ObjectInputStream ois = new ObjectInputStream(fis);
@@ -354,8 +376,8 @@ public class Database {
 			personList.addAll(Arrays.asList(staff));
 
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Failed to load Staff file -- invalid format.");
+			// e.printStackTrace();
 		}
 		ois.close();
 	}

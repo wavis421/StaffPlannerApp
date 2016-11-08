@@ -51,6 +51,7 @@ public class CalendarPanel extends JPanel {
 	// Private instance variables
 	private JLabel leftLabel, rightLabel;
 	private LinkedList<TaskModel>[] dayBoxTaskList;
+	private LinkedList<Boolean>[] staffStatusList;
 	private JLabel programLabel = new JLabel("   ");
 	private static TableLayout layout = new TableLayout();
 	private static Locale locale = new Locale("en", "US", "");
@@ -63,18 +64,23 @@ public class CalendarPanel extends JPanel {
 	private int firstDayOfWeek;
 	private static String[] monthNames = symbols.getMonths();
 	private static String[] weekdayNames = symbols.getWeekdays();
+	private Border innerDayBorder, outerDayBorder;
 
 	public CalendarPanel() {
 		// Create borders
 		Border innerBorder = BorderFactory.createEtchedBorder();
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+		
+		innerDayBorder = BorderFactory.createLineBorder(Color.decode(Integer.toString(0xDD00DD)), 2);
+		outerDayBorder = BorderFactory.createEmptyBorder(1,1,1,1);
 
 		// Initialize calendar parameters and display this month's calendar
 		currentCalendar = Calendar.getInstance(locale);
 		firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
 		layout.setColumnCount(7);
 		dayBoxTaskList = new LinkedList[31];
+		staffStatusList = new LinkedList[31];
 		updateCalendarDisplay(currentCalendar);
 	}
 
@@ -93,8 +99,9 @@ public class CalendarPanel extends JPanel {
 	}
 
 	// Update the tasks for the indicated calendar day
-	public void updateTasksByDay(int dayIdx, LinkedList<TaskModel> tasks) {
+	public void updateTasksByDay(int dayIdx, LinkedList<TaskModel> tasks, LinkedList<Boolean> staffStatus) {
 		dayBoxTaskList[dayIdx] = tasks;
+		staffStatusList[dayIdx] = staffStatus;
 	}
 
 	// Refresh calendar
@@ -221,25 +228,32 @@ public class CalendarPanel extends JPanel {
 		// Single table panel
 		JPanel dayBox = new JPanel(new BorderLayout());
 		JScrollPane scrollPane;
+		boolean highlight;
 
 		if (text == null) {
 			dayBox.setBackground(EMPTY_BACKGROUND);
 		} else {
 			JLabel label = new JLabel(text);
 			int dayIdx = Integer.parseInt(text) - 1;
+			highlight = false;
 
 			// Add day of month
 			label.setFont(JTFTools.decodeFont(DATE_FONT));
+			label.setOpaque(true);
 			dayBox.setBackground(Color.WHITE);
 			dayBox.add(label, BorderLayout.BEFORE_FIRST_LINE);
 			
 			// Create a list of task names assigned to this day
 			DefaultListModel<TaskModel> taskListModel = new DefaultListModel<TaskModel>();
 			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
-				for (TaskModel t : dayBoxTaskList[dayIdx]) {
-					taskListModel.addElement(t);
+				for (int idx = 0; idx < dayBoxTaskList[dayIdx].size(); idx++) {
+					taskListModel.addElement(dayBoxTaskList[dayIdx].get(idx));
+					if (!staffStatusList[dayIdx].get(idx))
+						highlight = true;
 				}
 			}
+			if (highlight)
+				label.setBorder(BorderFactory.createCompoundBorder(outerDayBorder, innerDayBorder));
 			
 			JList<TaskModel> taskList = new JList<>(taskListModel);
 			taskList.setCellRenderer(new TaskRenderer());

@@ -77,6 +77,10 @@ public class Controller {
 		return db.getAllTasksByDay(calendar);
 	}
 
+	public LinkedList<Boolean> getStaffStatusByTask (LinkedList<TaskModel> taskList, Calendar calendar) {
+		return db.getStaffStatusByTask(taskList, calendar);
+	}
+	
 	/*
 	 * public List<TaskModel> getAllTasks() { return db.getAllTasks(); }
 	 */

@@ -238,6 +238,7 @@ public class MainFrame extends JFrame {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
 						controller.loadStaffFromFile(fileChooser.getSelectedFile());
+						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 
 						// Clear person filter if selected
 						if (personFilter != null) {
@@ -526,6 +527,7 @@ public class MainFrame extends JFrame {
 				// Add person to database
 				controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 						dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks());
+				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		}
 	}
@@ -548,6 +550,7 @@ public class MainFrame extends JFrame {
 				if (!origName.equals(dialogResponse.getName()))
 					controller.renamePerson(origName, dialogResponse.getName());
 				controller.updatePerson(dialogResponse);
+				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		}
 	}
@@ -590,8 +593,9 @@ public class MainFrame extends JFrame {
 						+ ", Room = " + selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
 
 				// Edit task (TBD), then update calendar using filters
+				LinkedList<TaskModel> tasksByDay = controller.getAllTasksByDay(selectedCalendar);
 				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1,
-						controller.getAllTasksByDay(selectedCalendar));
+						tasksByDay, controller.getStaffStatusByTask(tasksByDay, selectedCalendar));
 				calPanel.refresh();
 			}
 		});
@@ -608,7 +612,7 @@ public class MainFrame extends JFrame {
 			else
 				tasks = controller.getAllTasksByDay(calendar);
 
-			calPanel.updateTasksByDay(i, tasks);
+			calPanel.updateTasksByDay(i, tasks, controller.getStaffStatusByTask (tasks, calendar));
 		}
 		calPanel.refresh();
 	}
@@ -667,19 +671,18 @@ public class MainFrame extends JFrame {
 				assignedTree.setSelectionPath(path);
 				assignedTree.expandRow(assignedTree.getRowForPath(path));
 				int childCount = treeModel.getChildCount(assignedTree.getSelectionPath().getLastPathComponent());
-				
+
 				// AssignedTree is already sorted, so add to end
 				treeModel.insertNodeInto(new DefaultMutableTreeNode(taskEvent),
-						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(),
-						childCount);
-				
+						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(), childCount);
+
 			} else {
 				// Create program node, then add task event
 				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(item.getProgramName());
 				assignedTree.setSelectionPath(assignedTree.getPathForRow(0));
 				treeModel.insertNodeInto(pNode,
 						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(), 0);
-				
+
 				pNode.add(new DefaultMutableTreeNode(taskEvent));
 			}
 		}
