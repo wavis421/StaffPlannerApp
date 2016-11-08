@@ -171,22 +171,7 @@ public class Database {
 		return thisMonthTasks;
 	}
 
-	public LinkedList<TaskModel> getAllTasksByDay(Calendar calendar) {
-		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
-		for (ProgramModel p : programList) {
-			for (TaskModel t : p.getTaskList()) {
-				if ((t.getDayOfWeek()[dayOfWeekIdx]) && (t.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
-					thisMonthTasks.add(t);
-				}
-			}
-		}
-		return thisMonthTasks;
-	}
-
-	public LinkedList<Boolean> getStaffStatusByTask(LinkedList<TaskModel> taskList, Calendar calendar) {
+	public LinkedList<Boolean> getStaffStatusByTaskByDay(LinkedList<TaskModel> taskList, Calendar calendar) {
 		LinkedList<Boolean> staffStatus = new LinkedList<Boolean>();
 		JList<PersonModel> personList = getAllPersons();
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
@@ -209,6 +194,21 @@ public class Database {
 			staffStatus.add(task.getTotalPersonsReqd() <= count ? true : false);
 		}
 		return staffStatus;
+	}
+	
+	public LinkedList<TaskModel> getAllTasksByDay(Calendar calendar) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+		LinkedList<TaskModel> thisMonthTasks = new LinkedList<TaskModel>();
+		for (ProgramModel p : programList) {
+			for (TaskModel t : p.getTaskList()) {
+				if ((t.getDayOfWeek()[dayOfWeekIdx]) && (t.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
+					thisMonthTasks.add(t);
+				}
+			}
+		}
+		return thisMonthTasks;
 	}
 
 	/*
