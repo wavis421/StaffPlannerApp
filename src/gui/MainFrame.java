@@ -35,6 +35,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import controller.Controller;
 import model.AssignedTasksModel;
+import model.CalendarDayModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
@@ -575,11 +576,11 @@ public class MainFrame extends JFrame {
 
 		// Day Box listener
 		calPanel.setDayBoxListener(new DayBoxListener() {
-			public void dayBoxClicked(Calendar calendar, Point point, TaskModel task) {
+			public void dayBoxClicked(Calendar calendar, Point point, CalendarDayModel task) {
 				selectedCalendar = calendar;
-				selectedTask = controller.getTaskByName(selectedProgramName, task.getTaskName());
+				selectedTask = controller.getTaskByName(selectedProgramName, task.getTask().getTaskName());
 				System.out.println("day box clicked: day = " + calendar.get(Calendar.DAY_OF_MONTH) + ", room = "
-						+ task.getLocation() + ", task name = " + task.getTaskName());
+						+ task.getTask().getLocation() + ", task name = " + task.getTask().getTaskName());
 
 				// Display pop-up menu
 				popupMenu.show(calPanel, point.x, point.y);
@@ -593,16 +594,16 @@ public class MainFrame extends JFrame {
 						+ ", Room = " + selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
 
 				// Edit task (TBD), then update calendar using filters
-				LinkedList<TaskModel> tasksByDay = controller.getAllTasksByDay(selectedCalendar);
+				LinkedList<CalendarDayModel> tasksByDay = controller.getAllTasksByDay(selectedCalendar);
 				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1,
-						tasksByDay, controller.getStaffStatusByTask(tasksByDay, selectedCalendar));
+						tasksByDay);
 				calPanel.refresh();
 			}
 		});
 	}
 
 	private void updateMonth(Calendar calendar) {
-		LinkedList<TaskModel> tasks;
+		LinkedList<CalendarDayModel> tasks;
 		for (int i = 0; i < 31; i++) {
 			calendar.set(Calendar.DAY_OF_MONTH, i + 1);
 			if (programFilter != null)
@@ -612,7 +613,7 @@ public class MainFrame extends JFrame {
 			else
 				tasks = controller.getAllTasksByDay(calendar);
 
-			calPanel.updateTasksByDay(i, tasks, controller.getStaffStatusByTask (tasks, calendar));
+			calPanel.updateTasksByDay(i, tasks);
 		}
 		calPanel.refresh();
 	}

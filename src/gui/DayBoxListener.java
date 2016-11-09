@@ -2,11 +2,9 @@ package gui;
 
 import java.awt.Point;
 import java.util.Calendar;
-import java.util.LinkedList;
 
-import acm.gui.VPanel;
-import model.TaskModel;
+import model.CalendarDayModel;
 
 public interface DayBoxListener {
-	public void dayBoxClicked (Calendar calendar, Point point, TaskModel task);
+	public void dayBoxClicked (Calendar calendar, Point point, CalendarDayModel task);
 }

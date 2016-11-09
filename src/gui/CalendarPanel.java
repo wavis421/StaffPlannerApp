@@ -32,6 +32,7 @@ import javax.swing.border.LineBorder;
 
 import acm.gui.TableLayout;
 import acm.util.JTFTools;
+import model.CalendarDayModel;
 import model.TaskModel;
 
 /*
@@ -48,8 +49,7 @@ public class CalendarPanel extends JPanel {
 
 	// Private instance variables
 	private JLabel leftLabel, rightLabel;
-	private LinkedList<TaskModel>[] dayBoxTaskList;
-	private LinkedList<Boolean>[] staffStatusList;
+	private LinkedList<CalendarDayModel>[] dayBoxTaskList;
 	private JLabel programLabel = new JLabel("   ");
 	private static TableLayout layout = new TableLayout();
 	private static Locale locale = new Locale("en", "US", "");
@@ -78,7 +78,6 @@ public class CalendarPanel extends JPanel {
 		firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
 		layout.setColumnCount(7);
 		dayBoxTaskList = new LinkedList[31];
-		staffStatusList = new LinkedList[31];
 		updateCalendarDisplay(currentCalendar);
 	}
 
@@ -97,9 +96,8 @@ public class CalendarPanel extends JPanel {
 	}
 
 	// Update the tasks for the indicated calendar day
-	public void updateTasksByDay(int dayIdx, LinkedList<TaskModel> tasks, LinkedList<Boolean> staffStatus) {
+	public void updateTasksByDay(int dayIdx, LinkedList<CalendarDayModel> tasks) {
 		dayBoxTaskList[dayIdx] = tasks;
-		staffStatusList[dayIdx] = staffStatus;
 	}
 
 	// Refresh calendar
@@ -241,20 +239,21 @@ public class CalendarPanel extends JPanel {
 			dayBox.setBackground(Color.WHITE);
 			dayBox.add(label, BorderLayout.BEFORE_FIRST_LINE);
 			
-			// Create a list of task names assigned to this day
-			DefaultListModel<TaskModel> taskListModel = new DefaultListModel<TaskModel>();
+			// Create a list of tasks assigned to this day
+			DefaultListModel<CalendarDayModel> taskListModel = new DefaultListModel<CalendarDayModel>();
 			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
 				for (int idx = 0; idx < dayBoxTaskList[dayIdx].size(); idx++) {
-					taskListModel.addElement(dayBoxTaskList[dayIdx].get(idx));
-					if (!staffStatusList[dayIdx].get(idx))
+					CalendarDayModel day = dayBoxTaskList[dayIdx].get(idx);
+					taskListModel.addElement(day);
+					if (day.getPersonCount() < day.getTask().getTotalPersonsReqd())
 						highlight = true;
 				}
 			}
 			if (highlight)
 				label.setBorder(BorderFactory.createCompoundBorder(outerDayBorder, innerDayBorder));
 			
-			JList<TaskModel> taskList = new JList<>(taskListModel);
-			taskList.setCellRenderer(new TaskRenderer());
+			JList<CalendarDayModel> taskList = new JList<>(taskListModel);
+			taskList.setCellRenderer(new CalendarDayRenderer());
 			taskList.setName(text);
 			scrollPane = new JScrollPane(taskList);
 			scrollPane.setPreferredSize(

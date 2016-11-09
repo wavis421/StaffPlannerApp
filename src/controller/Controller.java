@@ -11,6 +11,7 @@ import gui.PersonEvent;
 import gui.ProgramEvent;
 import gui.TaskEvent;
 import model.AssignedTasksModel;
+import model.CalendarDayModel;
 import model.Database;
 import model.PersonModel;
 import model.ProgramModel;
@@ -65,22 +66,18 @@ public class Controller {
 		return db.getTaskByName(programName, taskName);
 	}
 
-	public LinkedList<TaskModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
+	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
 		return db.getTasksByDayByProgram(calendar, programs);
 	}
 	
-	public LinkedList<TaskModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
+	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
 		return db.getTasksByDayByPerson(calendar, personList);
 	}
 	
-	public LinkedList<TaskModel> getAllTasksByDay(Calendar calendar) {
+	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		return db.getAllTasksByDay(calendar);
 	}
 
-	public LinkedList<Boolean> getStaffStatusByTask (LinkedList<TaskModel> taskList, Calendar calendar) {
-		return db.getStaffStatusByTaskByDay(taskList, calendar);
-	}
-	
 	/*
 	 * public List<TaskModel> getAllTasks() { return db.getAllTasks(); }
 	 */
