@@ -74,6 +74,10 @@ public class Controller {
 		return db.getTasksByDayByPerson(calendar, personList);
 	}
 	
+	public LinkedList<CalendarDayModel> getTasksByDayByStaffShortage(Calendar calendar) {
+		return db.getTasksByDayByStaffShortage(calendar);
+	}
+	
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		return db.getAllTasksByDay(calendar);
 	}
@@ -120,6 +124,10 @@ public class Controller {
 	
 	public JList<PersonModel> getAllPersons() {
 		return db.getAllPersons();
+	}
+	
+	public int getNumPersons() {
+		return db.getNumPersons();
 	}
 	
 	/*

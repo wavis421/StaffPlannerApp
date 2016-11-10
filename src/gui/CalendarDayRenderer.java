@@ -21,17 +21,21 @@ public class CalendarDayRenderer extends JLabel implements ListCellRenderer<Cale
 
 	public Component getListCellRendererComponent(JList<? extends CalendarDayModel> list, CalendarDayModel calendarDay,
 			int index, boolean isSelected, boolean cellHasFocus) {
-		setText(calendarDay.getTask().getTaskName());
+		
 		if (isSelected)
 			setBackground(new Color(0xDDDDDD));
 		else
 			setBackground(Color.WHITE);
 		setForeground(new Color(calendarDay.getTask().getColor()));
 
-		if (calendarDay.getPersonCount() < calendarDay.getTask().getTotalPersonsReqd())
+		if (calendarDay.getPersonCount() < calendarDay.getTask().getTotalPersonsReqd()) {
+			setText(calendarDay.getTask().getTaskName() + " (" + calendarDay.getPersonCount() + "/"
+					+ calendarDay.getTask().getTotalPersonsReqd() + ")");
 			setFont(JTFTools.decodeFont(ITALIC_FONT));
-		else
+		} else {
+			setText(calendarDay.getTask().getTaskName());
 			setFont(JTFTools.decodeFont(DEFAULT_FONT));
+		}
 
 		return this;
 	}

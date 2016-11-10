@@ -69,9 +69,9 @@ public class CalendarPanel extends JPanel {
 		Border innerBorder = BorderFactory.createEtchedBorder();
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
-		
+
 		innerDayBorder = BorderFactory.createLineBorder(Color.decode(Integer.toString(0xDD00DD)), 2);
-		outerDayBorder = BorderFactory.createEmptyBorder(1,1,1,1);
+		outerDayBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
 		// Initialize calendar parameters and display this month's calendar
 		currentCalendar = Calendar.getInstance(locale);
@@ -81,10 +81,10 @@ public class CalendarPanel extends JPanel {
 		updateCalendarDisplay(currentCalendar);
 	}
 
-	public void setProgramName (String name) {
+	public void setProgramName(String name) {
 		programLabel.setText(name);
 	}
-	
+
 	// Set listener for mouse action on calendar day boxes
 	public void setDayBoxListener(DayBoxListener listener) {
 		this.dayListener = listener;
@@ -127,7 +127,7 @@ public class CalendarPanel extends JPanel {
 		programLabel.setHorizontalAlignment(JLabel.CENTER);
 		programLabel.setFont(JTFTools.decodeFont(PROGRAM_FONT));
 		add(programLabel, "gridwidth=7 weightx=1 bottom=12");
-		
+
 		// Add weekday labels
 		for (int i = 0; i < 7; i++) {
 			add(createWeekdayLabel(i), "weightx=1 width=1 bottom=2");
@@ -238,7 +238,7 @@ public class CalendarPanel extends JPanel {
 			label.setOpaque(true);
 			dayBox.setBackground(Color.WHITE);
 			dayBox.add(label, BorderLayout.BEFORE_FIRST_LINE);
-			
+
 			// Create a list of tasks assigned to this day
 			DefaultListModel<CalendarDayModel> taskListModel = new DefaultListModel<CalendarDayModel>();
 			if (dayBoxTaskList[dayIdx] != null && !dayBoxTaskList[dayIdx].isEmpty()) {
@@ -251,7 +251,7 @@ public class CalendarPanel extends JPanel {
 			}
 			if (highlight)
 				label.setBorder(BorderFactory.createCompoundBorder(outerDayBorder, innerDayBorder));
-			
+
 			JList<CalendarDayModel> taskList = new JList<>(taskListModel);
 			taskList.setCellRenderer(new CalendarDayRenderer());
 			taskList.setName(text);

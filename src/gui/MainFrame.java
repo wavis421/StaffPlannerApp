@@ -57,8 +57,15 @@ public class MainFrame extends JFrame {
 	private Calendar selectedCalendar;
 
 	// Calendar filters
-	JList<String> programFilter = null;
-	JList<String> personFilter = null;
+	private final int NO_FILTER = 0;
+	private final int PROGRAM_FILTER = 1;
+	private final int PERSON_FILTER = 2;
+	private final int STAFF_FILTER = 3;
+	private int selectedFilterId = NO_FILTER;
+	private JList<String> filteredList = null;
+
+	private JMenuItem filterByProgramMenuItem;
+	private JMenuItem filterByPersonMenuItem;
 
 	public MainFrame() {
 		super("Staff Planner");
@@ -150,11 +157,17 @@ public class MainFrame extends JFrame {
 		JMenu calendarFilterMenu = new JMenu("Filter");
 		calendarMenu.add(calendarFilterMenu);
 		JMenuItem filterNoneItem = new JMenuItem("None");
-		JMenuItem filterByProgramItem = new JMenuItem("by Program");
-		JMenuItem filterByPersonItem = new JMenuItem("by Person");
+		filterByProgramMenuItem = new JMenuItem("by Program");
+		filterByPersonMenuItem = new JMenuItem("by Person");
+		JMenuItem filterByStaffShortageItem = new JMenuItem("by Staff Shortage");
 		calendarFilterMenu.add(filterNoneItem);
-		calendarFilterMenu.add(filterByProgramItem);
-		calendarFilterMenu.add(filterByPersonItem);
+		calendarFilterMenu.add(filterByProgramMenuItem);
+		calendarFilterMenu.add(filterByPersonMenuItem);
+		calendarFilterMenu.add(filterByStaffShortageItem);
+		if (controller.getNumPrograms() <= 1)
+			filterByProgramMenuItem.setEnabled(false);
+		if (controller.getNumPersons() <= 1)
+			filterByPersonMenuItem.setEnabled(false);
 
 		// Create listeners
 		createFileMenuListeners(taskMenu, exportProgramItem, exportStaffItem, importProgramItem, importStaffItem,
@@ -162,7 +175,8 @@ public class MainFrame extends JFrame {
 		createProgramMenuListeners(taskMenu, programCreateItem, programEditItem, programSelectMenu);
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu);
 		createPersonMenuListeners(personAddItem, personEditMenu);
-		createCalendarMenuListeners(filterNoneItem, filterByProgramItem, filterByPersonItem);
+		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
+				filterByStaffShortageItem);
 
 		return menuBar;
 	}
@@ -242,8 +256,8 @@ public class MainFrame extends JFrame {
 						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 
 						// Clear person filter if selected
-						if (personFilter != null) {
-							personFilter = null;
+						if (selectedFilterId == PERSON_FILTER) {
+							setCalendarFilter(NO_FILTER, null);
 							updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 						}
 
@@ -280,6 +294,9 @@ public class MainFrame extends JFrame {
 					} else {
 						// Add program to database
 						controller.addProgram(dialogResponse);
+						if (controller.getNumPrograms() > 1)
+							filterByProgramMenuItem.setEnabled(true);
+
 						if (dialogResponse.isSelectedActive()) {
 							selectedProgramName = dialogResponse.getProgramName();
 							calPanel.setProgramName(selectedProgramName);
@@ -410,7 +427,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createCalendarMenuListeners(JMenuItem filterNoneItem, JMenuItem filterByProgramItem,
-			JMenuItem filterByPersonItem) {
+			JMenuItem filterByPersonItem, JMenuItem filterByShortStaffItem) {
 		// Set up listeners for CALENDAR menu
 		filterByProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -419,9 +436,7 @@ public class MainFrame extends JFrame {
 				JList<String> dialogResponse = ev.getDialogResponse();
 
 				// Only one filter can be active
-				programFilter = dialogResponse;
-				if (programFilter != null)
-					personFilter = null;
+				setCalendarFilter(PROGRAM_FILTER, dialogResponse);
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
@@ -432,21 +447,23 @@ public class MainFrame extends JFrame {
 				JList<String> dialogResponse = ev.getDialogResponse();
 
 				// Only one filter can be active
-				personFilter = dialogResponse;
-				if (personFilter != null)
-					programFilter = null;
+				setCalendarFilter(PERSON_FILTER, dialogResponse);
+				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
+			}
+		});
+		filterByShortStaffItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Set calendar filter
+				setCalendarFilter(STAFF_FILTER, null);
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
 		filterNoneItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				personFilter = null;
-				programFilter = null;
-
+				setCalendarFilter(NO_FILTER, null);
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
-		// TBD: add more filters
 	}
 
 	private void createTask() {
@@ -528,6 +545,8 @@ public class MainFrame extends JFrame {
 				// Add person to database
 				controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 						dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks());
+				if (controller.getNumPersons() > 1)
+					filterByPersonMenuItem.setEnabled(true);
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		}
@@ -595,8 +614,7 @@ public class MainFrame extends JFrame {
 
 				// Edit task (TBD), then update calendar using filters
 				LinkedList<CalendarDayModel> tasksByDay = controller.getAllTasksByDay(selectedCalendar);
-				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1,
-						tasksByDay);
+				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1, tasksByDay);
 				calPanel.refresh();
 			}
 		});
@@ -606,10 +624,12 @@ public class MainFrame extends JFrame {
 		LinkedList<CalendarDayModel> tasks;
 		for (int i = 0; i < 31; i++) {
 			calendar.set(Calendar.DAY_OF_MONTH, i + 1);
-			if (programFilter != null)
-				tasks = controller.getTasksByDayByProgram(calendar, programFilter);
-			else if (personFilter != null)
-				tasks = controller.getTasksByDayByPerson(calendar, personFilter);
+			if (selectedFilterId == PROGRAM_FILTER)
+				tasks = controller.getTasksByDayByProgram(calendar, filteredList);
+			else if (selectedFilterId == PERSON_FILTER)
+				tasks = controller.getTasksByDayByPerson(calendar, filteredList);
+			else if (selectedFilterId == STAFF_FILTER)
+				tasks = controller.getTasksByDayByStaffShortage(calendar);
 			else
 				tasks = controller.getAllTasksByDay(calendar);
 
@@ -653,13 +673,13 @@ public class MainFrame extends JFrame {
 		TreePath path;
 
 		for (AssignedTasksModel item : taskList) {
-			// Check to see if this task is currently valid; if not then leave disabled
-			if (controller.getTaskByName(item.getProgramName(), item.getTaskName()) == null)
-			{
+			// Check to see if this task is currently valid; if not then leave
+			// disabled
+			if (controller.getTaskByName(item.getProgramName(), item.getTaskName()) == null) {
 				System.out.println("Dropping program " + item.getProgramName() + ", task " + item.getTaskName());
 				continue;
 			}
-			
+
 			// Create the event to be added to the tree
 			AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(),
 					controller.getTaskByName(item.getProgramName(), item.getTaskName()), item.getDaysOfWeek(),
@@ -735,5 +755,16 @@ public class MainFrame extends JFrame {
 			}
 		}
 		return false;
+	}
+
+	private void setCalendarFilter(int filterId, JList<String> list) {
+		if (filteredList != null)
+			filteredList.removeAll();
+
+		filteredList = list;
+		if ((filterId == PROGRAM_FILTER || filterId == PERSON_FILTER) && filteredList == null)
+			selectedFilterId = NO_FILTER;
+		else
+			selectedFilterId = filterId;
 	}
 }

@@ -3,6 +3,7 @@ package model;
 import java.io.Serializable;
 
 public class AssignedTasksModel implements Serializable {
+	private static final long serialVersionUID = 12340001L;
 	private String programName;
 	private String taskName;
 	private boolean[] daysOfWeek;

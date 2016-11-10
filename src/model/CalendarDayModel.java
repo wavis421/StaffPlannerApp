@@ -3,6 +3,7 @@ package model;
 import java.io.Serializable;
 
 public class CalendarDayModel implements Serializable {
+	private static final long serialVersionUID = 12340001L;
 	private TaskModel task;
 	private int personCount;
 	

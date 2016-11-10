@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.Time;
 
 public class TaskModel implements Serializable {
+	private static final long serialVersionUID = 12340001L;
 	private String taskName;
 	private Time time;
 	private String location;

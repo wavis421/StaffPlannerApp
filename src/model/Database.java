@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
@@ -173,6 +174,24 @@ public class Database {
 		return thisDaysTasks;
 	}
 
+	public LinkedList<CalendarDayModel> getTasksByDayByStaffShortage(Calendar calendar) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		int personCount;
+
+		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
+		for (ProgramModel prog : programList) {
+			for (TaskModel task : prog.getTaskList()) {
+				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
+					personCount = getPersonCountForTaskByDay(task, dayOfWeekIdx, dayOfWeekInMonthIdx);
+					if (personCount < task.getTotalPersonsReqd())
+						thisDaysTasks.add(new CalendarDayModel(task, personCount));
+				}
+			}
+		}
+		return thisDaysTasks;	
+	}
+	
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
@@ -224,7 +243,7 @@ public class Database {
 			}
 		}
 	}
-	
+
 	private int getPersonCountForTaskByDay(TaskModel task, int dayOfWeekIdx, int dowInMonthIdx) {
 		JList<PersonModel> personList = getAllPersons();
 		int count = 0;
@@ -244,7 +263,7 @@ public class Database {
 	}
 
 	/*
-	 * ------- Person -------
+	 * ------- Person data -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean staff, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks) {
@@ -297,6 +316,10 @@ public class Database {
 		return list;
 	}
 
+	public int getNumPersons() {
+		return personList.size();
+	}
+	
 	private int getPersonIndexByName(String personName) {
 		int i = 0;
 
@@ -344,8 +367,12 @@ public class Database {
 			programList.addAll(Arrays.asList(programs));
 
 		} catch (ClassNotFoundException e) {
-			JOptionPane.showMessageDialog(null, "Failed to load Program file -- invalid format.");
+			JOptionPane.showMessageDialog(null, "Invalid file format.", "Error Loading Program File",
+					JOptionPane.ERROR_MESSAGE);
 			// e.printStackTrace();
+		} catch (InvalidClassException e) {
+			JOptionPane.showMessageDialog(null, "File version does not match.", "Error Loading Program File",
+					JOptionPane.ERROR_MESSAGE);
 		}
 		ois.close();
 	}
@@ -372,8 +399,12 @@ public class Database {
 			personList.addAll(Arrays.asList(staff));
 
 		} catch (ClassNotFoundException e) {
-			JOptionPane.showMessageDialog(null, "Failed to load Staff file -- invalid format.");
+			JOptionPane.showMessageDialog(null, "Invalid file format.", "Error Loading Staff File",
+					JOptionPane.ERROR_MESSAGE);
 			// e.printStackTrace();
+		} catch (InvalidClassException e) {
+			JOptionPane.showMessageDialog(null, "File version does not match.", "Error Loading Staff File",
+					JOptionPane.ERROR_MESSAGE);
 		}
 		ois.close();
 	}

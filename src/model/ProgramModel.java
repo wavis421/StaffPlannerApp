@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 public class ProgramModel implements Serializable {
+	private static final long serialVersionUID = 12340001L;
 	private String programName;
 	private String endDate;
 	private LinkedList<TaskModel> taskList;
