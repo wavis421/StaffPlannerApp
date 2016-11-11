@@ -24,6 +24,10 @@ public class AssignedTasksModel implements Serializable {
 		return programName;
 	}
 
+	public void setProgramName(String programName) {
+		this.programName = programName;
+	}
+
 	public String getTaskName() {
 		return taskName;
 	}

@@ -49,11 +49,14 @@ public class Database {
 	}
 
 	public void renameProgram(String oldName, String newName) {
-		int programIdx = getProgramIndexByName(oldName);
-		if (programIdx != -1) {
-			ProgramModel program = programList.get(programIdx);
+		ProgramModel program = getProgramByName(oldName);
+		if (program != null) {
 			program.setProgramName(newName);
 			Collections.sort(programList, new ProgramComparator());
+			
+			// Update persons' assigned tasks lists
+			updateProgramNameByPerson(oldName, newName);
+			
 		} else
 			JOptionPane.showMessageDialog(null, "Program '" + oldName + "' not found!", "Error renaming program",
 					JOptionPane.ERROR_MESSAGE);
@@ -95,6 +98,15 @@ public class Database {
 			i++;
 		}
 		return -1;
+	}
+	
+	private void updateProgramNameByPerson(String oldName, String newName) {
+		for (PersonModel person : personList) {
+			for (AssignedTasksModel assignedTask : person.getAssignedTasks()) {
+				if (assignedTask.getProgramName().equals(oldName))
+					assignedTask.setProgramName(newName);
+			}
+		}
 	}
 
 	/*
