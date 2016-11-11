@@ -24,11 +24,11 @@ public class Controller {
 	 * ------- Programs -------
 	 */
 	public void addProgram(ProgramEvent ev) {
-		db.addProgram(ev.getProgramName(), ev.getEndDate());
+		db.addProgram(ev.getProgramName(), ev.getStartDate(), ev.getEndDate());
 	}
 
-	public void updateProgram(String programName, String endDate) {
-		db.updateProgram(programName, endDate);
+	public void updateProgram(String programName, String startDate, String endDate) {
+		db.updateProgram(programName, startDate, endDate);
 	}
 	
 	public void renameProgram(String oldName, String newName) {

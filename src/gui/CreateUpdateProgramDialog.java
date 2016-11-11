@@ -38,8 +38,10 @@ public class CreateUpdateProgramDialog extends JDialog {
 
 	// Private instance variables
 	private JTextField programName = new JTextField(20);
+	private JRadioButton enableStartDateButton = new JRadioButton("Set start-date ");
 	private JRadioButton enableEndDateButton = new JRadioButton("Set end-date ");
 	private JRadioButton selectActiveProgramButton = new JRadioButton();
+	private JDatePickerImpl startDatePicker;
 	private JDatePickerImpl endDatePicker;
 	private int numPrograms;
 
@@ -48,14 +50,15 @@ public class CreateUpdateProgramDialog extends JDialog {
 	private JPanel buttonsPanel;
 	private ProgramEvent dialogResponse;
 
-	// Track last end-date
+	// Track last start and end-dates
+	private static String lastStartDate;
 	private static String lastEndDate;
 
 	public CreateUpdateProgramDialog(JFrame parent, int numPrograms) {
 		super(parent, "Create program...", true);
 		this.numPrograms = numPrograms;
 
-		setupProgramDialog(false);
+		setupProgramDialog(false, false);
 	}
 
 	public CreateUpdateProgramDialog(JFrame parent, int numPrograms, ProgramModel program) {
@@ -65,22 +68,29 @@ public class CreateUpdateProgramDialog extends JDialog {
 			numPrograms--;
 		this.numPrograms = numPrograms;
 
-		boolean isSelected = false;
+		boolean isEndSelected = false, isStartSelected = false;
+		if (program.getStartDate() != null && !program.getStartDate().equals("")) {
+			this.enableStartDateButton.setSelected(true);
+			lastStartDate = program.getStartDate();
+			isStartSelected = true;
+		}
 		if (program.getEndDate() != null && !program.getEndDate().equals("")) {
 			this.enableEndDateButton.setSelected(true);
 			lastEndDate = program.getEndDate();
-			isSelected = true;
+			isEndSelected = true;
 		}
 
-		setupProgramDialog(isSelected);
+		setupProgramDialog(isStartSelected, isEndSelected);
 	}
 
 	public ProgramEvent getDialogResponse() {
 		return dialogResponse;
 	}
 
-	private void setupProgramDialog(boolean isEndDateEnabled) {
-		createEndDatePicker(isEndDateEnabled);
+	private void setupProgramDialog(boolean isStartDateEnabled, boolean isEndDateEnabled) {
+		startDatePicker = createDatePicker(isStartDateEnabled, enableStartDateButton, lastStartDate);
+		endDatePicker = createDatePicker(isEndDateEnabled, enableEndDateButton, lastEndDate);
+		
 		if (numPrograms == 0)
 			selectActiveProgramButton.setSelected(true);
 
@@ -91,13 +101,21 @@ public class CreateUpdateProgramDialog extends JDialog {
 					if (programName.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Program name field is required");
 					} else {
-						String endDate = null;
+						// Set up start/end dates for creating event
+						String startDate = null, endDate = null;
+						if (enableStartDateButton.isSelected())
+							startDate = startDatePicker.getJFormattedTextField().getText();
 						if (enableEndDateButton.isSelected())
 							endDate = endDatePicker.getJFormattedTextField().getText();
 
-						ProgramEvent ev = new ProgramEvent(this, programName.getText(), endDate,
+						ProgramEvent ev = new ProgramEvent(this, programName.getText(), startDate, endDate,
 								selectActiveProgramButton.isSelected() ? true : false);
+						
+						// Generate start/end date for tracking last used dates
 						dialogResponse = ev;
+						String startDateText = startDatePicker.getJFormattedTextField().getText();
+						if (startDateText != null && !startDateText.equals(""))
+							lastStartDate = startDateText;
 						String endDateText = endDatePicker.getJFormattedTextField().getText();
 						if (endDateText != null && !endDateText.equals(""))
 							lastEndDate = endDateText;
@@ -121,7 +139,7 @@ public class CreateUpdateProgramDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setProgramLayout();
-		setSize(450, 200);
+		setSize(450, 220);
 		setVisible(true);
 	}
 
@@ -145,6 +163,7 @@ public class CreateUpdateProgramDialog extends JDialog {
 
 		// Add program name and end-date rows
 		addRowToControlPanel(gc, new JLabel("Program name: "), programName, gridY++);
+		addRowToControlPanel(gc, enableStartDateButton, startDatePicker, gridY++);
 		addRowToControlPanel(gc, enableEndDateButton, endDatePicker, gridY++);
 		if (numPrograms > 0)
 			addRowToControlPanel(gc, selectActiveProgramButton, new JLabel("Select as ACTIVE Program"), gridY++);
@@ -179,7 +198,7 @@ public class CreateUpdateProgramDialog extends JDialog {
 		controlsPanel.add(value2, gcon);
 	}
 
-	private void createEndDatePicker(boolean isEndDateEnabled) {
+	private JDatePickerImpl createDatePicker(boolean isDateEnabled, JRadioButton enableDateButton, String lastDate) {
 		UtilDateModel dateModel = new UtilDateModel();
 		Properties prop = new Properties();
 		JDatePanelImpl datePanel;
@@ -190,22 +209,22 @@ public class CreateUpdateProgramDialog extends JDialog {
 		prop.put("text.year", "year");
 
 		datePanel = new JDatePanelImpl(dateModel, prop);
-		endDatePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
 
-		if (lastEndDate != null && !lastEndDate.equals("")) {
+		if (lastDate != null && !lastDate.equals("")) {
 			try {
 				// Initialize date picker using database date string
-				Date date = dateFormatter.parse(lastEndDate);
+				Date date = dateFormatter.parse(lastDate);
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(date);
-				endDatePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
+				datePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
 						cal.get(Calendar.DAY_OF_MONTH));
 
 				// Select button and date picker
-				endDatePicker.getModel().setSelected(true);
-				if (isEndDateEnabled) {
-					enableEndDateButton.setSelected(true);
-					endDatePicker.setTextEditable(true);
+				datePicker.getModel().setSelected(true);
+				if (isDateEnabled) {
+					enableDateButton.setSelected(true);
+					datePicker.setTextEditable(true);
 				}
 
 			} catch (ParseException ex) {
@@ -213,15 +232,17 @@ public class CreateUpdateProgramDialog extends JDialog {
 			}
 		}
 
-		// Add listener to enable end-date button
-		enableEndDateButton.addActionListener(new ActionListener() {
+		// Add listeners to enable start-date and date buttons
+		enableDateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (enableEndDateButton.isSelected()) {
-					endDatePicker.setTextEditable(true);
+				if (enableDateButton.isSelected()) {
+					datePicker.setTextEditable(true);
 				} else {
-					endDatePicker.setTextEditable(false);
+					datePicker.setTextEditable(false);
 				}
 			}
 		});
+		
+		return datePicker;
 	}
 }

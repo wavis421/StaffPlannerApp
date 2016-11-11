@@ -4,13 +4,14 @@ import java.util.EventObject;
 
 public class ProgramEvent extends EventObject {
 	private String programName;
-	private String endDate;
+	private String startDate, endDate;
 	private boolean selectAsActive;
 	
-	public ProgramEvent(Object source, String programName, String endDate, boolean selectAsActive) {
+	public ProgramEvent(Object source, String programName, String startDate, String endDate, boolean selectAsActive) {
 		super(source);
 
 		this.programName = programName;
+		this.startDate = startDate;
 		this.endDate = endDate;
 		this.selectAsActive = selectAsActive;
 	}
@@ -21,6 +22,10 @@ public class ProgramEvent extends EventObject {
 	
 	public String getProgramName() {
 		return programName;
+	}
+
+	public String getStartDate() {
+		return startDate;
 	}
 
 	public String getEndDate() {

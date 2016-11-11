@@ -36,14 +36,15 @@ public class Database {
 	/*
 	 * ------- Programs -------
 	 */
-	public void addProgram(String programName, String endDate) {
+	public void addProgram(String programName, String startDate, String endDate) {
 		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
-		programList.add(new ProgramModel(programName, endDate, taskList));
+		programList.add(new ProgramModel(programName, startDate, endDate, taskList));
 		Collections.sort(programList, new ProgramComparator());
 	}
 
-	public void updateProgram(String programName, String endDate) {
+	public void updateProgram(String programName, String startDate, String endDate) {
 		ProgramModel program = getProgramByName(programName);
+		program.setStartDate(startDate);
 		program.setEndDate(endDate);
 	}
 
@@ -310,7 +311,25 @@ public class Database {
 	}
 	
 	private boolean isProgramExpired(Date today, ProgramModel prog) {
-		if ((today != null) && (prog.getEndDate() != null) && !prog.getEndDate().equals("")) {
+		if (today == null)
+			return false;   // impossible?
+		
+		if ((prog.getStartDate() != null) && !prog.getStartDate().equals("")) {
+			try {
+				Date progDate = dateFormatter.parse(prog.getStartDate());
+				if (today.compareTo(progDate) < 0)
+					// Program expired
+					return true;
+
+			} catch (ParseException e) {
+				JOptionPane.showMessageDialog(null,
+						"Unable to parse start-date for program '" + prog.getProgramName() + "'",
+						"Error retrieving program", JOptionPane.ERROR_MESSAGE);
+				prog.setStartDate(null);
+			}
+		}
+		
+		if ((prog.getEndDate() != null) && !prog.getEndDate().equals("")) {
 			try {
 				Date progDate = dateFormatter.parse(prog.getEndDate());
 				if (today.compareTo(progDate) > 0)

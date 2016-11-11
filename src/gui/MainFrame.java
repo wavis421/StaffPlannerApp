@@ -211,7 +211,7 @@ public class MainFrame extends JFrame {
 						controller.loadProgramFromFile(fileChooser.getSelectedFile());
 						if (selectedFilterId == PROGRAM_FILTER)
 							setCalendarFilter(NO_FILTER, null);
-						
+
 						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 
 						// Select active program and enable program filter menu
@@ -263,13 +263,13 @@ public class MainFrame extends JFrame {
 						controller.loadStaffFromFile(fileChooser.getSelectedFile());
 						if (selectedFilterId == PERSON_FILTER)
 							setCalendarFilter(NO_FILTER, null);
-						
+
 						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
-						
+
 						// Enable person filter menu
 						if (controller.getNumPersons() > 1)
 							filterByPersonMenuItem.setEnabled(true);
-						
+
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -332,14 +332,16 @@ public class MainFrame extends JFrame {
 
 							if (dialogResponse != null && dialogResponse.getProgramName() != null) {
 								if (!programItem.getText().equals(dialogResponse.getProgramName())) {
-									// First rename program and updated selected program if needed
+									// First rename program and updated selected
+									// program if needed
 									controller.renameProgram(programItem.getText(), dialogResponse.getProgramName());
 									if (selectedProgramName.equals(programItem.getText())) {
 										selectedProgramName = dialogResponse.getProgramName();
 										calPanel.setProgramName(dialogResponse.getProgramName());
 									}
 								}
-								controller.updateProgram(dialogResponse.getProgramName(), dialogResponse.getEndDate());
+								controller.updateProgram(dialogResponse.getProgramName(), dialogResponse.getStartDate(),
+										dialogResponse.getEndDate());
 							}
 
 							programList.removeAll();

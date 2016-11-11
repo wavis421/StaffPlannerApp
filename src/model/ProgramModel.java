@@ -6,12 +6,13 @@ import java.util.LinkedList;
 public class ProgramModel implements Serializable {
 	private static final long serialVersionUID = 12340001L;
 	private String programName;
-	private String endDate;
+	private String startDate, endDate;
 	private LinkedList<TaskModel> taskList;
 	
 	// Create new program with null task list
-	public ProgramModel(String programName, String endDate, LinkedList<TaskModel> taskList) {
+	public ProgramModel(String programName, String startDate, String endDate, LinkedList<TaskModel> taskList) {
 		this.programName = programName;
+		this.startDate = startDate;
 		this.endDate = endDate;
 		this.taskList = taskList;
 	}
@@ -26,6 +27,14 @@ public class ProgramModel implements Serializable {
 
 	public void setProgramName(String programName) {
 		this.programName = programName;
+	}
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
 	}
 
 	public String getEndDate() {
