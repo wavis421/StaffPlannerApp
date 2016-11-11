@@ -27,6 +27,14 @@ public class Controller {
 		db.addProgram(ev.getProgramName(), ev.getEndDate());
 	}
 
+	public void updateProgram(String programName, String endDate) {
+		db.updateProgram(programName, endDate);
+	}
+	
+	public void renameProgram(String oldName, String newName) {
+		db.renameProgram(oldName, newName);
+	}
+	
 	public ProgramModel getProgramByName(String programName) {
 		return db.getProgramByName(programName);
 	}

@@ -133,10 +133,10 @@ public class MainFrame extends JFrame {
 
 		// Add program sub-menus
 		JMenuItem programCreateItem = new JMenuItem("New program");
-		JMenuItem programEditItem = new JMenuItem("Edit program");
+		JMenu programEditMenu = new JMenu("Edit program");
 		JMenu programSelectMenu = new JMenu("Select active program");
 		programMenu.add(programCreateItem);
-		programMenu.add(programEditItem);
+		programMenu.add(programEditMenu);
 		programMenu.add(programSelectMenu);
 
 		// Add task sub-menus
@@ -172,7 +172,7 @@ public class MainFrame extends JFrame {
 		// Create listeners
 		createFileMenuListeners(taskMenu, exportProgramItem, exportStaffItem, importProgramItem, importStaffItem,
 				exitItem);
-		createProgramMenuListeners(taskMenu, programCreateItem, programEditItem, programSelectMenu);
+		createProgramMenuListeners(taskMenu, programCreateItem, programEditMenu, programSelectMenu);
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu);
 		createPersonMenuListeners(personAddItem, personEditMenu);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
@@ -276,7 +276,7 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createProgramMenuListeners(JMenu taskMenu, JMenuItem programCreateItem, JMenuItem programEditItem,
+	private void createProgramMenuListeners(JMenu taskMenu, JMenuItem programCreateItem, JMenu programEditMenu,
 			JMenu programSelectMenu) {
 		// Set up listeners for PROGRAM menu
 		programCreateItem.addActionListener(new ActionListener() {
@@ -306,9 +306,38 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
-		programEditItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		programEditMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				programEditMenu.removeAll();
+				JList<String> programList = controller.getAllProgramsAsString();
 
+				for (int i = 0; i < programList.getModel().getSize(); i++) {
+					JMenuItem programItem = new JMenuItem(programList.getModel().getElementAt(i).toString());
+					programEditMenu.add(programItem);
+
+					programItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent ev) {
+							CreateUpdateProgramDialog programEvent = new CreateUpdateProgramDialog(MainFrame.this,
+									controller.getNumPrograms(), controller.getProgramByName(programItem.getText()));
+							ProgramEvent dialogResponse = programEvent.getDialogResponse();
+
+							if (dialogResponse != null && dialogResponse.getProgramName() != null) {
+								if (!programItem.getText().equals(dialogResponse.getProgramName())) {
+									// First rename program and updated selected program if needed
+									controller.renameProgram(programItem.getText(), dialogResponse.getProgramName());
+									if (selectedProgramName.equals(programItem.getText())) {
+										selectedProgramName = dialogResponse.getProgramName();
+										calPanel.setProgramName(dialogResponse.getProgramName());
+									}
+								}
+								controller.updateProgram(dialogResponse.getProgramName(), dialogResponse.getEndDate());
+							}
+
+							programList.removeAll();
+							programEditMenu.removeAll();
+						}
+					});
+				}
 			}
 		});
 		programSelectMenu.addChangeListener(new ChangeListener() {

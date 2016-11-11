@@ -191,19 +191,38 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		controlsPanel.setLayout(new GridBagLayout());
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		
+		// Add day-of-week buttons
 		for (int i = 0; i < dayOfWeekButtons.length; i++) {
 			dayOfWeekPanel.add(dayOfWeekButtons[i]);
 		}
+		
+		// Add weeks in month buttons and the "all" button
+		JPanel womSubPanel = new JPanel();
 		for (int i = 0; i < weekOfMonthButtons.length; i++) {
-			weekOfMonthPanel.add(weekOfMonthButtons[i]);
+			womSubPanel.add(weekOfMonthButtons[i]);
 		}
+		JRadioButton allWeeksButton = new JRadioButton ("All");
+		weekOfMonthPanel.add(womSubPanel);
+		weekOfMonthPanel.add(allWeeksButton);
+		
+		// Add listener to "all" button
+		allWeeksButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (allWeeksButton.isSelected()) {
+					for (int i = 0; i < weekOfMonthButtons.length; i++) {
+						weekOfMonthButtons[i].setSelected(true);
+					}
+				}
+			}
+		});
 
 		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		Border titleBorder = BorderFactory.createTitledBorder(borderTitle);
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
 		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, titleBorder));
 		dayOfWeekPanel.setBorder(BorderFactory.createEtchedBorder());
-		weekOfMonthPanel.setBorder(BorderFactory.createEtchedBorder());
+		womSubPanel.setBorder(BorderFactory.createEtchedBorder());
 
 		GridBagConstraints gc = new GridBagConstraints();
 

@@ -24,8 +24,16 @@ public class ProgramModel implements Serializable {
 		return programName;
 	}
 
+	public void setProgramName(String programName) {
+		this.programName = programName;
+	}
+
 	public String getEndDate() {
 		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
 	}
 
 	public LinkedList<TaskModel> getTaskList() {

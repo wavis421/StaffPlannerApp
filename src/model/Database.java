@@ -38,6 +38,21 @@ public class Database {
 		Collections.sort(programList, new ProgramComparator());
 	}
 
+	public void updateProgram(String programName, String endDate) {
+		ProgramModel program = getProgramByName(programName);
+		program.setEndDate(endDate);
+	}
+
+	public void renameProgram(String oldName, String newName) {
+		int programIdx = getProgramIndexByName(oldName);
+		if (programIdx != -1) {
+			ProgramModel program = programList.get(programIdx);
+			program.setProgramName(newName);
+			Collections.sort(programList, new ProgramComparator());
+		} else
+			JOptionPane.showMessageDialog(null, "Program '" + oldName + "' not found!");
+	}
+	
 	public ProgramModel getProgramByName(String programName) {
 		for (ProgramModel p : programList) {
 			if (p.getProgramName().equals(programName)) {
