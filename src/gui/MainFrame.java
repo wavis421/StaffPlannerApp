@@ -207,10 +207,17 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
+						// Load program and clear program filter
 						controller.loadProgramFromFile(fileChooser.getSelectedFile());
+						if (selectedFilterId == PROGRAM_FILTER)
+							setCalendarFilter(NO_FILTER, null);
+						
 						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 
+						// Select active program and enable program filter menu
 						int numPrograms = controller.getNumPrograms();
+						if (numPrograms > 1)
+							filterByProgramMenuItem.setEnabled(true);
 						if (numPrograms == 1) {
 							JList<String> programList = controller.getAllProgramsAsString();
 							selectedProgramName = programList.getModel().getElementAt(0);
@@ -252,15 +259,17 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
+						// Load staff and clear person filter
 						controller.loadStaffFromFile(fileChooser.getSelectedFile());
-						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
-
-						// Clear person filter if selected
-						if (selectedFilterId == PERSON_FILTER) {
+						if (selectedFilterId == PERSON_FILTER)
 							setCalendarFilter(NO_FILTER, null);
-							updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
-						}
-
+						
+						updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
+						
+						// Enable person filter menu
+						if (controller.getNumPersons() > 1)
+							filterByPersonMenuItem.setEnabled(true);
+						
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

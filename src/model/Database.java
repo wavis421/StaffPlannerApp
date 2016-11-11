@@ -7,9 +7,12 @@ import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 
 import javax.swing.DefaultListModel;
@@ -23,6 +26,7 @@ import gui.TimeComparator;
 public class Database {
 	private LinkedList<ProgramModel> programList;
 	private LinkedList<PersonModel> personList;
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 	public Database() {
 		programList = new LinkedList<ProgramModel>();
@@ -50,9 +54,10 @@ public class Database {
 			program.setProgramName(newName);
 			Collections.sort(programList, new ProgramComparator());
 		} else
-			JOptionPane.showMessageDialog(null, "Program '" + oldName + "' not found!");
+			JOptionPane.showMessageDialog(null, "Program '" + oldName + "' not found!", "Error renaming program",
+					JOptionPane.ERROR_MESSAGE);
 	}
-	
+
 	public ProgramModel getProgramByName(String programName) {
 		for (ProgramModel p : programList) {
 			if (p.getProgramName().equals(programName)) {
@@ -107,7 +112,8 @@ public class Database {
 			program.getTaskList().set(taskIdx, task);
 			Collections.sort(program.getTaskList(), new TimeComparator());
 		} else
-			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!");
+			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!", "Error updating task",
+					JOptionPane.ERROR_MESSAGE);
 	}
 
 	public void renameTask(String programName, String oldName, String newName) {
@@ -124,7 +130,8 @@ public class Database {
 			updateTaskNameByPerson(oldName, newName);
 
 		} else
-			JOptionPane.showMessageDialog(null, "Task '" + oldName + "' not found!");
+			JOptionPane.showMessageDialog(null, "Task '" + oldName + "' not found!", "Error renaming task",
+					JOptionPane.ERROR_MESSAGE);
 	}
 
 	public TaskModel getTaskByName(String programName, String taskName) {
@@ -143,11 +150,15 @@ public class Database {
 	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programList) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Date thisDay = getDay(calendar);
 
 		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
 		for (int i = 0; i < programList.getModel().getSize(); i++) {
-			ProgramModel pModel = getProgramByName(programList.getModel().getElementAt(i));
-			for (TaskModel t : pModel.getTaskList()) {
+			ProgramModel program = getProgramByName(programList.getModel().getElementAt(i));
+			if (isProgramExpired(thisDay, program))
+				continue;
+			
+			for (TaskModel t : program.getTaskList()) {
 				if ((t.getDayOfWeek()[dayOfWeekIdx]) && (t.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
 					thisDaysTasks.add(
 							new CalendarDayModel(t, getPersonCountForTaskByDay(t, dayOfWeekIdx, dayOfWeekInMonthIdx)));
@@ -160,12 +171,15 @@ public class Database {
 	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Date thisDay = getDay(calendar);
 
 		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i));
 			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
 				AssignedTasksModel task = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
+				if (isProgramExpired(thisDay, getProgramByName(task.getProgramName())))
+					continue;
 
 				boolean alreadyInList = false;
 				for (int k = 0; k < thisDaysTasks.size(); k++) {
@@ -192,10 +206,14 @@ public class Database {
 	public LinkedList<CalendarDayModel> getTasksByDayByStaffShortage(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Date thisDay = getDay(calendar);
 		int personCount;
 
 		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
 		for (ProgramModel prog : programList) {
+			if (isProgramExpired(thisDay, prog))
+				continue;
+			
 			for (TaskModel task : prog.getTaskList()) {
 				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
 					personCount = getPersonCountForTaskByDay(task, dayOfWeekIdx, dayOfWeekInMonthIdx);
@@ -204,15 +222,19 @@ public class Database {
 				}
 			}
 		}
-		return thisDaysTasks;	
+		return thisDaysTasks;
 	}
-	
+
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Date thisDay = getDay(calendar);
 
 		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
 		for (ProgramModel prog : programList) {
+			if (isProgramExpired(thisDay, prog))
+				continue;
+			
 			for (TaskModel task : prog.getTaskList()) {
 				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
 					thisDaysTasks.add(new CalendarDayModel(task,
@@ -277,6 +299,34 @@ public class Database {
 		return count;
 	}
 
+	private Date getDay(Calendar calendar) {
+		try {
+			return (dateFormatter.parse((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH)
+					+ "/" + calendar.get(Calendar.YEAR)));
+
+		} catch (ParseException e1) {
+			return null;
+		}
+	}
+	
+	private boolean isProgramExpired(Date today, ProgramModel prog) {
+		if ((today != null) && (prog.getEndDate() != null) && !prog.getEndDate().equals("")) {
+			try {
+				Date progDate = dateFormatter.parse(prog.getEndDate());
+				if (today.compareTo(progDate) > 0)
+					// Program expired
+					return true;
+
+			} catch (ParseException e) {
+				JOptionPane.showMessageDialog(null,
+						"Unable to parse end-date for program '" + prog.getProgramName() + "'",
+						"Error retrieving program", JOptionPane.ERROR_MESSAGE);
+				prog.setEndDate(null);
+			}
+		}
+		return false;
+	}
+
 	/*
 	 * ------- Person data -------
 	 */
@@ -334,7 +384,7 @@ public class Database {
 	public int getNumPersons() {
 		return personList.size();
 	}
-	
+
 	private int getPersonIndexByName(String personName) {
 		int i = 0;
 
