@@ -53,10 +53,10 @@ public class Database {
 		if (program != null) {
 			program.setProgramName(newName);
 			Collections.sort(programList, new ProgramComparator());
-			
+
 			// Update persons' assigned tasks lists
 			updateProgramNameByPerson(oldName, newName);
-			
+
 		} else
 			JOptionPane.showMessageDialog(null, "Program '" + oldName + "' not found!", "Error renaming program",
 					JOptionPane.ERROR_MESSAGE);
@@ -99,7 +99,7 @@ public class Database {
 		}
 		return -1;
 	}
-	
+
 	private void updateProgramNameByPerson(String oldName, String newName) {
 		for (PersonModel person : personList) {
 			for (AssignedTasksModel assignedTask : person.getAssignedTasks()) {
@@ -170,11 +170,11 @@ public class Database {
 			ProgramModel program = getProgramByName(programList.getModel().getElementAt(i));
 			if (isProgramExpired(thisDay, program))
 				continue;
-			
+
 			for (TaskModel t : program.getTaskList()) {
 				if ((t.getDayOfWeek()[dayOfWeekIdx]) && (t.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
-					thisDaysTasks.add(
-							new CalendarDayModel(t, getPersonCountForTaskByDay(t, dayOfWeekIdx, dayOfWeekInMonthIdx)));
+					thisDaysTasks.add(new CalendarDayModel(t,
+							getPersonCountForTaskByDay(t, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)));
 				}
 			}
 		}
@@ -189,6 +189,9 @@ public class Database {
 		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i));
+			if (!isPersonAvailable(pModel, thisDay))
+				continue;
+
 			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
 				AssignedTasksModel task = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
 				if (isProgramExpired(thisDay, getProgramByName(task.getProgramName())))
@@ -208,7 +211,7 @@ public class Database {
 					TaskModel t = getTaskByName(task.getProgramName(), task.getTaskName());
 					if ((daysOfWeek[dayOfWeekIdx]) && (weeksOfMonth[dayOfWeekInMonthIdx])) {
 						thisDaysTasks.add(new CalendarDayModel(t,
-								getPersonCountForTaskByDay(t, dayOfWeekIdx, dayOfWeekInMonthIdx)));
+								getPersonCountForTaskByDay(t, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)));
 					}
 				}
 			}
@@ -226,10 +229,10 @@ public class Database {
 		for (ProgramModel prog : programList) {
 			if (isProgramExpired(thisDay, prog))
 				continue;
-			
+
 			for (TaskModel task : prog.getTaskList()) {
 				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
-					personCount = getPersonCountForTaskByDay(task, dayOfWeekIdx, dayOfWeekInMonthIdx);
+					personCount = getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx);
 					if (personCount < task.getTotalPersonsReqd())
 						thisDaysTasks.add(new CalendarDayModel(task, personCount));
 				}
@@ -247,11 +250,11 @@ public class Database {
 		for (ProgramModel prog : programList) {
 			if (isProgramExpired(thisDay, prog))
 				continue;
-			
+
 			for (TaskModel task : prog.getTaskList()) {
 				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
 					thisDaysTasks.add(new CalendarDayModel(task,
-							getPersonCountForTaskByDay(task, dayOfWeekIdx, dayOfWeekInMonthIdx)));
+							getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)));
 				}
 			}
 		}
@@ -294,18 +297,21 @@ public class Database {
 		}
 	}
 
-	private int getPersonCountForTaskByDay(TaskModel task, int dayOfWeekIdx, int dowInMonthIdx) {
+	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
 		JList<PersonModel> personList = getAllPersons();
 		int count = 0;
 
 		for (int idx = 0; idx < personList.getModel().getSize(); idx++) {
-			LinkedList<AssignedTasksModel> assignedTaskList = personList.getModel().getElementAt(idx)
-					.getAssignedTasks();
-			for (AssignedTasksModel assignedTask : assignedTaskList) {
-				if (assignedTask.getTaskName().equals(task.getTaskName()) && assignedTask.getDaysOfWeek()[dayOfWeekIdx]
-						&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
-					count++;
-					break;
+			PersonModel person = personList.getModel().getElementAt(idx);
+			if (isPersonAvailable(person, today)) {
+				LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+				for (AssignedTasksModel assignedTask : assignedTaskList) {
+					if (assignedTask.getTaskName().equals(task.getTaskName())
+							&& assignedTask.getDaysOfWeek()[dayOfWeekIdx]
+							&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
+						count++;
+						break;
+					}
 				}
 			}
 		}
@@ -321,11 +327,11 @@ public class Database {
 			return null;
 		}
 	}
-	
+
 	private boolean isProgramExpired(Date today, ProgramModel prog) {
 		if (today == null)
-			return false;   // impossible?
-		
+			return false; // impossible?
+
 		if ((prog.getStartDate() != null) && !prog.getStartDate().equals("")) {
 			try {
 				Date progDate = dateFormatter.parse(prog.getStartDate());
@@ -340,7 +346,7 @@ public class Database {
 				prog.setStartDate(null);
 			}
 		}
-		
+
 		if ((prog.getEndDate() != null) && !prog.getEndDate().equals("")) {
 			try {
 				Date progDate = dateFormatter.parse(prog.getEndDate());
@@ -358,12 +364,37 @@ public class Database {
 		return false;
 	}
 
+	private boolean isPersonAvailable(PersonModel person, Date today) {
+		if (today == null)
+			return true; // impossible?
+
+		if (!person.getDatesUnavailable().getStartDate().equals("")) {
+			try {
+				Date startDate = dateFormatter.parse(person.getDatesUnavailable().getStartDate());
+				Date endDate = dateFormatter.parse(person.getDatesUnavailable().getEndDate());
+				if (today.compareTo(startDate) >= 0 && today.compareTo(endDate) <= 0) {
+					// Person unavailable, today is between start and end
+					return false;
+				}
+				else
+					return true;
+
+			} catch (ParseException e) {
+				JOptionPane.showMessageDialog(null,
+						"Unable to parse " + person.getName() + "'s unavailable start/end dates.",
+						"Error parsing dates", JOptionPane.ERROR_MESSAGE);
+				return true;
+			}
+		}
+		return true;
+	}
+
 	/*
 	 * ------- Person data -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean staff, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks) {
-		personList.add(new PersonModel(name, phone, email, staff, notes, assignedTasks));
+			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
+		personList.add(new PersonModel(name, phone, email, staff, notes, assignedTasks, datesUnavailable));
 		Collections.sort(personList, new PersonComparator());
 	}
 

@@ -10,8 +10,13 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -33,7 +38,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
+
 import model.AssignedTasksModel;
+import model.DateRangeModel;
 import model.PersonModel;
 import model.TaskModel;
 
@@ -51,8 +61,11 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JRadioButton volunteerButton = new JRadioButton("Volunteer");
 	private ButtonGroup staffGroup = new ButtonGroup();
 	private JPanel staffPanel = new JPanel();
+	private JPanel datePanel = new JPanel();
+	private JDatePickerImpl startDayPicker, endDayPicker;
 	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
 	private LinkedList<AssignedTasksModel> assignedTasks;
+	private DateRangeModel datesUnavailable;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
 
@@ -62,6 +75,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JLabel emailLabel = new JLabel("Email: ");
 	private JLabel staffLabel = new JLabel("Staff or volunteer: ");
 	private JLabel notesLabel = new JLabel("Notes: ");
+	private JLabel datesLabel = new JLabel("Dates Unavailable: ");
 
 	// Dialog panels
 	private JPanel controlsPanel;
@@ -76,6 +90,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		createTrees(assignedTasksTree, taskTree);
 		this.staffButton.setSelected(true);
 		this.assignedTasks = new LinkedList<AssignedTasksModel>();
+		this.datesUnavailable = new DateRangeModel("", "");
 
 		setupPersonDialog();
 	}
@@ -95,6 +110,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		else
 			this.volunteerButton.setSelected(true);
 		this.assignedTasks = person.getAssignedTasks();
+		this.datesUnavailable = person.getDatesUnavailable();
 
 		setupPersonDialog();
 	}
@@ -109,6 +125,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 	private void setupPersonDialog() {
 		createStaffSelector();
+		createDateSelectors();
 
 		// Force the text area not to expand when user types more than 3 lines!!
 		notesArea.setBorder(BorderFactory.createEtchedBorder());
@@ -126,8 +143,11 @@ public class CreateUpdatePersonDialog extends JDialog {
 						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 					} else {
 						Collections.sort(assignedTasks, new AssignedTaskComparator());
+						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
+						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, null);
+								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, null,
+								datesUnavailable);
 						okToSave = true;
 						dialogResponse = ev;
 						setVisible(false);
@@ -149,7 +169,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setPersonLayout();
-		setSize(750, 475);
+		setSize(750, 480);
 		setVisible(true);
 	}
 
@@ -177,6 +197,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		addRowToControlPanel(gc, phoneLabel, phone, gridY++);
 		addRowToControlPanel(gc, emailLabel, email, gridY++);
 		addRowToControlPanel(gc, staffLabel, staffPanel, gridY++);
+		addRowToControlPanel(gc, datesLabel, datePanel, gridY++);
 		addRowToControlPanel(gc, notesLabel, notesArea, gridY++);
 		addRowToControlPanel(gc, taskTreeScrollPane, assignedTasksScrollPane, gridY++);
 
@@ -219,6 +240,107 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 		staffGroup.add(staffButton);
 		staffGroup.add(volunteerButton);
+	}
+
+	private void createDateSelectors() {
+		startDayPicker = createDatePicker(datesUnavailable.getStartDate(), "start");
+		endDayPicker = createDatePicker(datesUnavailable.getEndDate(), "end");
+
+		datePanel.add(startDayPicker);
+		datePanel.add(new JLabel(" to "));
+		datePanel.add(endDayPicker);
+	}
+
+	private JDatePickerImpl createDatePicker(String lastDate, String name) {
+		UtilDateModel dateModel = new UtilDateModel();
+		Properties prop = new Properties();
+		JDatePanelImpl datePanel;
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+
+		prop.put("text.today", "today");
+		prop.put("text.month", "month");
+		prop.put("text.year", "year");
+
+		datePanel = new JDatePanelImpl(dateModel, prop);
+		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+
+		if (lastDate != null && !lastDate.equals("")) {
+			try {
+				// Initialize date picker using database date string
+				Date date = dateFormatter.parse(lastDate);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(date);
+				datePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
+						cal.get(Calendar.DAY_OF_MONTH));
+
+				datePicker.getModel().setSelected(true);
+
+			} catch (ParseException ex) {
+				JOptionPane.showMessageDialog(this, "Invalid date, expecting MM/dd/yyyy", "Parsing Exception",
+						JOptionPane.WARNING_MESSAGE);
+			}
+		}
+
+		// Add action listener
+		datePicker.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {				
+				String startText = startDayPicker.getJFormattedTextField().getText();
+				String endText = endDayPicker.getJFormattedTextField().getText();
+				
+				// If end date is NULL, set it to start day
+				if (name.equals("start") && !startText.equals("")) {
+					if (endText.equals("")) {
+						endDayPicker = setDate (startText, endDayPicker);
+						endDayPicker.getJFormattedTextField().setText(startText);
+						endText = startText;
+					}
+					startDayPicker.getModel().setSelected(true);
+				}
+				// If start date is NULL, set it to end day
+				if (name.equals("end") && !endText.equals("")) {
+					if (startText.equals("")) {
+						startDayPicker = setDate (endText, startDayPicker);
+						startDayPicker.getJFormattedTextField().setText(endText);
+						startText = endText;
+					}	
+					endDayPicker.getModel().setSelected(true);
+				}
+
+				if (!startText.equals("") && !endText.equals("")) {
+					// If end date is before start date, set to start date
+					try {
+						Date startDate = dateFormatter.parse(startText);
+						if (startDate.compareTo(dateFormatter.parse(endText)) > 0) {
+							endDayPicker.getJFormattedTextField().setText(startText);
+						}
+
+					} catch (ParseException ex) {
+						JOptionPane.showMessageDialog(null, "Unable to parse date.", "Parse Exception",
+								JOptionPane.WARNING_MESSAGE);
+						// e1.printStackTrace();
+					}
+				}
+			}
+		});
+		datePicker.setPreferredSize(new Dimension(150, 26));
+		datePicker.setName(name);
+		return datePicker;
+	}
+	
+	private JDatePickerImpl setDate (String dateText, JDatePickerImpl datePicker) {
+		try {
+			SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+			Date date = dateFormatter.parse(dateText);
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			datePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
+					cal.get(Calendar.DAY_OF_MONTH));
+			
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return datePicker;
 	}
 
 	private String processNotesArea() {
@@ -267,9 +389,11 @@ public class CreateUpdatePersonDialog extends JDialog {
 						assignedTasks.add(lastAssignedTask);
 
 						Collections.sort(assignedTasks, new AssignedTaskComparator());
+						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
+						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
-								lastAssignedTask);
+								lastAssignedTask, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -297,6 +421,9 @@ public class CreateUpdatePersonDialog extends JDialog {
 				if (node.getLevel() == 2) {
 					TreePath parentPath = taskTree.getSelectionPath();
 					DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (parentPath.getLastPathComponent());
+
+					// Can't keep this dialog MODAL if the AssignTaskDialog is
+					// to be MODAL
 					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 
 					AssignTaskDialog event = new AssignTaskDialog(CreateUpdatePersonDialog.this,
@@ -309,9 +436,11 @@ public class CreateUpdatePersonDialog extends JDialog {
 						assignedTasks.add(lastAssignedTask);
 
 						Collections.sort(assignedTasks, new AssignedTaskComparator());
+						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
+						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
-								lastAssignedTask);
+								lastAssignedTask, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();

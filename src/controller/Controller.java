@@ -13,6 +13,7 @@ import gui.TaskEvent;
 import model.AssignedTasksModel;
 import model.CalendarDayModel;
 import model.Database;
+import model.DateRangeModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
@@ -108,13 +109,13 @@ public class Controller {
 	 * ------- Persons -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean staff, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks) {
-		db.addPerson(name, phone, email, staff, notes, assignedTasks);	
+			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
+		db.addPerson(name, phone, email, staff, notes, assignedTasks, datesUnavailable);	
 	}
 	
 	public void updatePerson(PersonEvent ev) {
 		PersonModel person = new PersonModel(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isStaff(), ev.getNotes(),
-				ev.getAssignedTasks());
+				ev.getAssignedTasks(), ev.getDatesUnavailable());
 		db.updatePerson(person);
 	}
 	

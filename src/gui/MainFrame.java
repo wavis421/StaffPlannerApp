@@ -576,7 +576,8 @@ public class MainFrame extends JFrame {
 				JTree taskTree = createTaskTree(assignedTaskList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-								dialogResponse.isStaff(), dialogResponse.getNotes(), assignedTaskList),
+								dialogResponse.isStaff(), dialogResponse.getNotes(), assignedTaskList,
+								dialogResponse.getDatesUnavailable()),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
 				processAddPersonDialog(personEvent);
@@ -584,7 +585,8 @@ public class MainFrame extends JFrame {
 			} else {
 				// Add person to database
 				controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-						dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks());
+						dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks(),
+						dialogResponse.getDatesUnavailable());
 				if (controller.getNumPersons() > 1)
 					filterByPersonMenuItem.setEnabled(true);
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
@@ -602,7 +604,8 @@ public class MainFrame extends JFrame {
 				JTree taskTree = createTaskTree(assignedList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-								dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks()),
+								dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks(),
+								dialogResponse.getDatesUnavailable()),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedList), taskTree);
 				processEditPersonDialog(personEvent, origName);
 			} else {

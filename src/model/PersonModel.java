@@ -11,15 +11,17 @@ public class PersonModel implements Serializable {
 	private boolean staff; // Staff or volunteer
 	private String notes;
 	private LinkedList<AssignedTasksModel> assignedTasks;
+	private DateRangeModel datesUnavailable;
 
 	public PersonModel(String name, String phone, String email, boolean staff, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks) {
+			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
 		this.staff = staff;
 		this.notes = notes;
 		this.assignedTasks = assignedTasks;
+		this.datesUnavailable = datesUnavailable;
 	}
 
 	public String toString() {
@@ -52,5 +54,9 @@ public class PersonModel implements Serializable {
 
 	public LinkedList<AssignedTasksModel> getAssignedTasks() {
 		return assignedTasks;
+	}
+
+	public DateRangeModel getDatesUnavailable() {
+		return datesUnavailable;
 	}
 }

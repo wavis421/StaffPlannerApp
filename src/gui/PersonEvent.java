@@ -4,6 +4,7 @@ import java.util.EventObject;
 import java.util.LinkedList;
 
 import model.AssignedTasksModel;
+import model.DateRangeModel;
 
 public class PersonEvent extends EventObject {
 	private String name;
@@ -13,13 +14,15 @@ public class PersonEvent extends EventObject {
 	private String notes;
 	private LinkedList<AssignedTasksModel> assignedTasks;
 	private AssignedTasksModel lastTaskAdded;
-	
+	private DateRangeModel datesUnavailable;
+
 	public PersonEvent(Object source) {
 		super(source);
 	}
 
 	public PersonEvent(Object source, String name, String phone, String email, boolean staff, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, AssignedTasksModel lastTaskAdded) {
+			LinkedList<AssignedTasksModel> assignedTasks, AssignedTasksModel lastTaskAdded,
+			DateRangeModel datesUnavailable) {
 		super(source);
 
 		this.name = name;
@@ -29,6 +32,7 @@ public class PersonEvent extends EventObject {
 		this.notes = notes;
 		this.assignedTasks = assignedTasks;
 		this.lastTaskAdded = lastTaskAdded;
+		this.datesUnavailable = datesUnavailable;
 	}
 
 	public String getName() {
@@ -57,5 +61,9 @@ public class PersonEvent extends EventObject {
 
 	public AssignedTasksModel getLastTaskAdded() {
 		return lastTaskAdded;
+	}
+
+	public DateRangeModel getDatesUnavailable() {
+		return datesUnavailable;
 	}
 }

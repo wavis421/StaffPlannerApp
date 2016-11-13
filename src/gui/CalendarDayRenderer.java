@@ -28,12 +28,11 @@ public class CalendarDayRenderer extends JLabel implements ListCellRenderer<Cale
 			setBackground(Color.WHITE);
 		setForeground(new Color(calendarDay.getTask().getColor()));
 
+		setText(calendarDay.getTask().getTaskName() + " (" + calendarDay.getPersonCount() + "/"
+				+ calendarDay.getTask().getTotalPersonsReqd() + ")");
 		if (calendarDay.getPersonCount() < calendarDay.getTask().getTotalPersonsReqd()) {
-			setText(calendarDay.getTask().getTaskName() + " (" + calendarDay.getPersonCount() + "/"
-					+ calendarDay.getTask().getTotalPersonsReqd() + ")");
 			setFont(JTFTools.decodeFont(ITALIC_FONT));
 		} else {
-			setText(calendarDay.getTask().getTaskName());
 			setFont(JTFTools.decodeFont(DEFAULT_FONT));
 		}
 
