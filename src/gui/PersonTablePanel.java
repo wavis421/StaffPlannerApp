@@ -20,6 +20,7 @@ public class PersonTablePanel extends JPanel {
 	private PersonTableModel tableModel;
 	private JPopupMenu popup;
 	private JMenuItem removeItem;
+	private JMenuItem editItem;
 	private PersonTableListener personTableListener;
 
 	public PersonTablePanel(PersonTableModel tableModel) {
@@ -28,7 +29,9 @@ public class PersonTablePanel extends JPanel {
 
 		popup = new JPopupMenu();
 		removeItem = new JMenuItem("Delete row");
+		editItem = new JMenuItem("Edit row");
 		popup.add(removeItem);
+		popup.add(editItem);
 
 		// Detect right mouse click on table, then pop-up "Delete row" and select
 		// row
@@ -37,7 +40,6 @@ public class PersonTablePanel extends JPanel {
 				if (e.getButton() == MouseEvent.BUTTON3) {
 					popup.show(table, e.getX(), e.getY());
 					int row = table.rowAtPoint(e.getPoint());
-					System.out.println("Right mouse click on table row " + row);
 					table.getSelectionModel().setSelectionInterval(row, row);
 				}
 			}
@@ -49,9 +51,20 @@ public class PersonTablePanel extends JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				int row = table.getSelectedRow();
 				if (personTableListener != null) {
-					System.out.println("Removing row " + row);
 					personTableListener.rowDeleted(row);
 					tableModel.fireTableRowsDeleted(row, row);
+				}
+			}
+		});
+		
+		// When "Edit row" selected, then trigger PersonTableListener action
+		// for this row
+		editItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int row = table.getSelectedRow();
+				if (personTableListener != null) {
+					personTableListener.editRow((String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()));
+					tableModel.fireTableRowsUpdated(row,  row);
 				}
 			}
 		});

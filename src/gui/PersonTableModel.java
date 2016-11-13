@@ -46,6 +46,10 @@ public class PersonTableModel extends AbstractTableModel {
 		}
 		return null;
 	}
+	
+	public int getColumnForPersonName () {
+		return 0;
+	}
 
 	private String getDatesUnavail(PersonModel person) {
 		if (!person.getDatesUnavailable().getStartDate().equals("")

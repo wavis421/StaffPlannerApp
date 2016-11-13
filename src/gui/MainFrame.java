@@ -475,8 +475,11 @@ public class MainFrame extends JFrame {
 					
 					PersonTableListener tableListener = new PersonTableListener() {
 						public void rowDeleted(int row) {
-							// TBD
-						}		
+						}	
+						public void editRow(String personName) {
+							editPerson(personName);
+							frame.setData(controller.getAllPersonsList());
+						}
 						public void refresh() {
 							frame.setData (controller.getAllPersonsList());
 						}

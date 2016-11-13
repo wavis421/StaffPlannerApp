@@ -38,6 +38,7 @@ public class PersonTableFrame extends JFrame {
 	public void setTableListener (PersonTableListener listener)
 	{
 		this.tableListener = listener;
+		tablePanel.setPersonTableListener(listener);
 	}
 	
 	public void setData(LinkedList<PersonModel> db) {
@@ -50,23 +51,23 @@ public class PersonTableFrame extends JFrame {
 	
 	private JPanel createButtonPanel() {
 		JPanel panel = new JPanel();
-		JButton closeButton = new JButton("Close");
 		JButton refreshButton = new JButton("Refresh");
+		JButton closeButton = new JButton("Close");
 		
 		panel.add(refreshButton);
 		panel.add(closeButton);
-		
-		closeButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-			}
-		});
 		
 		refreshButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (tableListener != null) {
 					tableListener.refresh();
 				}
+			}
+		});
+		
+		closeButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
 			}
 		});
 		
