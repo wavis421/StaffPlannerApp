@@ -150,8 +150,10 @@ public class MainFrame extends JFrame {
 		// Add persons sub-menus
 		JMenuItem personAddItem = new JMenuItem("Add person");
 		JMenu personEditMenu = new JMenu("Edit person");
+		JMenuItem personViewAllItem = new JMenuItem("View All");
 		personMenu.add(personAddItem);
 		personMenu.add(personEditMenu);
+		personMenu.add(personViewAllItem);
 
 		// Add calendar sub-menus
 		JMenu calendarFilterMenu = new JMenu("Filter");
@@ -174,7 +176,7 @@ public class MainFrame extends JFrame {
 				exitItem);
 		createProgramMenuListeners(taskMenu, programCreateItem, programEditMenu, programSelectMenu);
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu);
-		createPersonMenuListeners(personAddItem, personEditMenu);
+		createPersonMenuListeners(personAddItem, personEditMenu, personViewAllItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
 				filterByStaffShortageItem);
 
@@ -432,9 +434,9 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createPersonMenuListeners(JMenuItem personAddItem, JMenu personEditMenu) {
+	private void createPersonMenuListeners(JMenuItem addPerson, JMenu editPerson, JMenuItem viewAllPersons) {
 		// Set up listeners for PERSONS menu
-		personAddItem.addActionListener(new ActionListener() {
+		addPerson.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				LinkedList<AssignedTasksModel> assignedList = new LinkedList<AssignedTasksModel>();
 				JTree taskTree = createTaskTree(assignedList);
@@ -443,14 +445,14 @@ public class MainFrame extends JFrame {
 				processAddPersonDialog(personEvent);
 			}
 		});
-		personEditMenu.addChangeListener(new ChangeListener() {
+		editPerson.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				personEditMenu.removeAll();
+				editPerson.removeAll();
 				JList<PersonModel> personList = controller.getAllPersons();
 
 				for (int i = 0; i < personList.getModel().getSize(); i++) {
 					JMenuItem personItem = new JMenuItem(personList.getModel().getElementAt(i).toString());
-					personEditMenu.add(personItem);
+					editPerson.add(personItem);
 
 					personItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent ev) {
@@ -458,9 +460,30 @@ public class MainFrame extends JFrame {
 							editPerson(origName);
 
 							personList.removeAll();
-							personEditMenu.removeAll();
+							editPerson.removeAll();
 						}
 					});
+				}
+			}
+		});
+		viewAllPersons.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (controller.getNumPersons() > 0) {
+					PersonTableModel tableModel = new PersonTableModel();
+					tableModel.setData(controller.getAllPersonsList());
+					PersonTableFrame frame = new PersonTableFrame(tableModel);
+					
+					PersonTableListener tableListener = new PersonTableListener() {
+						public void rowDeleted(int row) {
+							// TBD
+						}		
+						public void refresh() {
+							frame.setData (controller.getAllPersonsList());
+						}
+					};
+					
+					frame.setTableListener(tableListener);
+					frame.setVisible(true);
 				}
 			}
 		});

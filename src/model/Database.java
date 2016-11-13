@@ -443,6 +443,14 @@ public class Database {
 		return list;
 	}
 
+	public LinkedList<PersonModel> getAllPersonsList() {
+		LinkedList<PersonModel> persons = new LinkedList<PersonModel>();
+		for (PersonModel p : personList) {
+			persons.add(p);
+		}
+		return persons;
+	}
+	
 	public int getNumPersons() {
 		return personList.size();
 	}

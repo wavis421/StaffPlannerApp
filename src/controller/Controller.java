@@ -135,6 +135,10 @@ public class Controller {
 		return db.getAllPersons();
 	}
 	
+	public LinkedList<PersonModel> getAllPersonsList() {
+		return db.getAllPersonsList();
+	}
+	
 	public int getNumPersons() {
 		return db.getNumPersons();
 	}
