@@ -70,7 +70,7 @@ public class CalendarPanel extends JPanel {
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 
-		innerDayBorder = BorderFactory.createLineBorder(Color.decode(Integer.toString(0xDD00DD)), 2);
+		innerDayBorder = BorderFactory.createLineBorder(Color.decode(Integer.toString(0xF00000)), 2);
 		outerDayBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
 		// Initialize calendar parameters and display this month's calendar

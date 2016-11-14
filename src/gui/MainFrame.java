@@ -42,7 +42,7 @@ import model.TaskModel;
 
 public class MainFrame extends JFrame {
 	/* Private constants */
-	private static final int PREF_FRAME_WIDTH = 900;
+	private static final int PREF_FRAME_WIDTH = 950;
 	private static final int PREF_FRAME_HEIGHT = 700;
 
 	/* Private instance variables */
@@ -400,7 +400,7 @@ public class MainFrame extends JFrame {
 					taskItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							String origName = taskItem.getText();
-							editTask(origName);
+							editTask(selectedProgramName, origName);
 
 							taskList.removeAll();
 							taskEditMenu.removeAll();
@@ -471,20 +471,22 @@ public class MainFrame extends JFrame {
 				if (controller.getNumPersons() > 0) {
 					PersonTableModel tableModel = new PersonTableModel();
 					tableModel.setData(controller.getAllPersonsList());
-					PersonTableFrame frame = new PersonTableFrame(tableModel);
-					
+					PersonTableFrame frame = new PersonTableFrame("Staff/Volunteers", tableModel);
+
 					PersonTableListener tableListener = new PersonTableListener() {
 						public void rowDeleted(int row) {
-						}	
+						}
+
 						public void editRow(String personName) {
 							editPerson(personName);
 							frame.setData(controller.getAllPersonsList());
 						}
+
 						public void refresh() {
-							frame.setData (controller.getAllPersonsList());
+							frame.setData(controller.getAllPersonsList());
 						}
 					};
-					
+
 					frame.setTableListener(tableListener);
 					frame.setVisible(true);
 				}
@@ -551,7 +553,7 @@ public class MainFrame extends JFrame {
 				int confirm = JOptionPane.showConfirmDialog(MainFrame.this,
 						"Task " + dialogResponse.getTaskName() + " already exists. Do you want to edit existing task?");
 				if (confirm == JOptionPane.OK_OPTION)
-					editTask(dialogResponse.getTaskName());
+					editTask(dialogResponse.getProgramName(), dialogResponse.getTaskName());
 				else if (confirm == JOptionPane.NO_OPTION)
 					createTaskRetry(dialogResponse);
 
@@ -563,15 +565,18 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	private void editTask(String origName) {
-		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, selectedProgramName,
-				controller.getTaskByName(selectedProgramName, origName));
+	private void editTask(String programName, String origTaskName) {
+		if (programName == null)
+			programName = controller.findProgramByTaskName(origTaskName);
+
+		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, programName,
+				controller.getTaskByName(programName, origTaskName));
 		TaskEvent dialogResponse = taskEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
 			// Update task list and refresh calendar
-			if (!origName.equals(dialogResponse.getTaskName()))
-				controller.renameTask(selectedProgramName, origName, dialogResponse.getTaskName());
+			if (!origTaskName.equals(dialogResponse.getTaskName()))
+				controller.renameTask(programName, origTaskName, dialogResponse.getTaskName());
 			controller.updateTask(dialogResponse);
 			updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 		}
@@ -660,13 +665,18 @@ public class MainFrame extends JFrame {
 	private void setCalendarPopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 		JMenuItem editTaskItem = new JMenuItem("Edit task");
+		JMenuItem viewAssignedStaffItem = new JMenuItem("View staff by task");
+		JMenuItem viewAllStaffForToday = new JMenuItem("View all staff for today");
 		popupMenu.add(editTaskItem);
+		popupMenu.add(viewAssignedStaffItem);
+		popupMenu.add(viewAllStaffForToday);
 
 		// Day Box listener
 		calPanel.setDayBoxListener(new DayBoxListener() {
 			public void dayBoxClicked(Calendar calendar, Point point, CalendarDayModel task) {
 				selectedCalendar = calendar;
-				selectedTask = controller.getTaskByName(selectedProgramName, task.getTask().getTaskName());
+				String programName = controller.findProgramByTaskName(task.getTask().getTaskName());
+				selectedTask = controller.getTaskByName(programName, task.getTask().getTaskName());
 				System.out.println("day box clicked: day = " + calendar.get(Calendar.DAY_OF_MONTH) + ", room = "
 						+ task.getTask().getLocation() + ", task name = " + task.getTask().getTaskName());
 
@@ -677,14 +687,68 @@ public class MainFrame extends JFrame {
 		// Day Box pop-up sub-menus
 		editTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Edit task: " + selectedCalendar.get(Calendar.MONTH) + "/"
-						+ selectedCalendar.get(Calendar.DAY_OF_MONTH) + "/" + selectedCalendar.get(Calendar.YEAR)
-						+ ", Room = " + selectedTask.getLocation() + ", task name = " + selectedTask.getTaskName());
-
-				// Edit task (TBD), then update calendar using filters
+				// Edit task, then update calendar using filters
 				LinkedList<CalendarDayModel> tasksByDay = controller.getAllTasksByDay(selectedCalendar);
+				editTask(null, selectedTask.getTaskName());
 				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1, tasksByDay);
 				calPanel.refresh();
+			}
+		});
+		viewAssignedStaffItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// View assigned persons
+				LinkedList<PersonModel> personByTask = controller.getPersonsByDayByTask(selectedCalendar,
+						selectedTask.getTaskName());
+
+				PersonTableModel tableModel = new PersonTableModel();
+				tableModel.setData(personByTask);
+				PersonTableFrame frame = new PersonTableFrame("Staff/Volunteers for " + selectedTask.getTaskName()
+						+ " on " + getDisplayDate(selectedCalendar), tableModel);
+
+				PersonTableListener tableListener = new PersonTableListener() {
+					public void rowDeleted(int row) {
+					}
+
+					public void editRow(String personName) {
+						editPerson(personName);
+						frame.setData(controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+					}
+
+					public void refresh() {
+						frame.setData(controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+					}
+				};
+
+				frame.setTableListener(tableListener);
+				frame.setVisible(true);
+			}
+		});
+		viewAllStaffForToday.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// View all persons
+				LinkedList<PersonModel> personList = controller.getPersonsByDay(selectedCalendar);
+
+				PersonTableModel tableModel = new PersonTableModel();
+				tableModel.setData(personList);
+				PersonTableFrame frame = new PersonTableFrame(
+						"Staff/Volunteers for " + getDisplayDate(selectedCalendar), tableModel);
+
+				PersonTableListener tableListener = new PersonTableListener() {
+					public void rowDeleted(int row) {
+					}
+
+					public void editRow(String personName) {
+						editPerson(personName);
+						frame.setData(controller.getPersonsByDay(selectedCalendar));
+					}
+
+					public void refresh() {
+						frame.setData(controller.getPersonsByDay(selectedCalendar));
+					}
+				};
+
+				frame.setTableListener(tableListener);
+				frame.setVisible(true);
 			}
 		});
 	}
@@ -835,5 +899,10 @@ public class MainFrame extends JFrame {
 			selectedFilterId = NO_FILTER;
 		else
 			selectedFilterId = filterId;
+	}
+
+	private String getDisplayDate(Calendar calendar) {
+		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
+				+ calendar.get(Calendar.YEAR));
 	}
 }

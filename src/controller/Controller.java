@@ -75,6 +75,10 @@ public class Controller {
 		return db.getTaskByName(programName, taskName);
 	}
 
+	public String findProgramByTaskName(String taskName) {
+		return db.findProgramByTaskName(taskName);
+	}
+	
 	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
 		return db.getTasksByDayByProgram(calendar, programs);
 	}
@@ -133,6 +137,14 @@ public class Controller {
 	
 	public JList<PersonModel> getAllPersons() {
 		return db.getAllPersons();
+	}
+	
+	public LinkedList<PersonModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
+		return db.getPersonsByDayByTask(calendar, taskName);
+	}
+	
+	public LinkedList<PersonModel> getPersonsByDay(Calendar calendar) {
+		return db.getPersonsByDay(calendar);
 	}
 	
 	public LinkedList<PersonModel> getAllPersonsList() {

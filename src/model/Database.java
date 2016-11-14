@@ -160,6 +160,17 @@ public class Database {
 		return null;
 	}
 
+	public String findProgramByTaskName(String taskName) {
+		LinkedList<ProgramModel> allPrograms = getAllPrograms();
+		for (ProgramModel p : allPrograms) {
+			for (TaskModel t : p.getTaskList()) {
+				if (t.getTaskName().equals(taskName))
+					return p.getProgramName();
+			}
+		}
+		return null;
+	}
+
 	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programList) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
@@ -375,8 +386,7 @@ public class Database {
 				if (today.compareTo(startDate) >= 0 && today.compareTo(endDate) <= 0) {
 					// Person unavailable, today is between start and end
 					return false;
-				}
-				else
+				} else
 					return true;
 
 			} catch (ParseException e) {
@@ -451,6 +461,64 @@ public class Database {
 		return persons;
 	}
 	
+	public LinkedList<PersonModel> getPersonsByDay(Calendar calendar) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Date thisDay = getDay(calendar);
+
+		JList<PersonModel> personList = getAllPersons();
+		LinkedList<CalendarDayModel> tasksForToday = getAllTasksByDay(calendar);
+		LinkedList<PersonModel> thisDaysPersons = new LinkedList<PersonModel>();
+
+		for (int i = 0; i < personList.getModel().getSize(); i++) {
+			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i).toString());
+			if (!isPersonAvailable(pModel, thisDay))
+				continue;
+
+			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
+				AssignedTasksModel assignedTask = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
+				TaskModel task = findTaskInList(assignedTask.getTaskName(), tasksForToday);
+				if (task != null) {
+					// Got a task match!! Check if today is assigned.
+					if ((assignedTask.getDaysOfWeek()[dayOfWeekIdx])
+							&& (assignedTask.getWeeksOfMonth()[dayOfWeekInMonthIdx])) {
+						thisDaysPersons.add(pModel);
+						break;
+					}
+				}
+			}
+		}
+		return thisDaysPersons;
+	}
+	
+	public LinkedList<PersonModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Date thisDay = getDay(calendar);
+
+		JList<PersonModel> personList = getAllPersons();
+		LinkedList<PersonModel> thisDaysPersons = new LinkedList<PersonModel>();
+
+		for (int i = 0; i < personList.getModel().getSize(); i++) {
+			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i).toString());
+			if (!isPersonAvailable(pModel, thisDay))
+				continue;
+
+			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
+				AssignedTasksModel assignedTask = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
+				if (taskName.equals(assignedTask.getTaskName())) {
+					// Got a task match!! Check if today is assigned.
+					if ((assignedTask.getDaysOfWeek()[dayOfWeekIdx])
+							&& (assignedTask.getWeeksOfMonth()[dayOfWeekInMonthIdx])) {
+						thisDaysPersons.add(pModel);
+						break;
+					}
+				}
+			}
+		}
+		return thisDaysPersons;
+	}
+
 	public int getNumPersons() {
 		return personList.size();
 	}
@@ -464,6 +532,14 @@ public class Database {
 			i++;
 		}
 		return -1;
+	}
+
+	private TaskModel findTaskInList (String taskName, LinkedList<CalendarDayModel> dayList) {
+		for (CalendarDayModel day : dayList) {
+			if (day.getTask().getTaskName().equals(taskName))
+				return day.getTask();
+		}
+		return null;
 	}
 
 	/*

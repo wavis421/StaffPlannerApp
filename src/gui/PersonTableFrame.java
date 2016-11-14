@@ -14,18 +14,18 @@ import model.PersonModel;
 public class PersonTableFrame extends JFrame {
 	private static final int PREF_FRAME_WIDTH = 800;
 	private static final int PREF_FRAME_HEIGHT = 300;
-	
+
 	private PersonTableListener tableListener;
 	private PersonTableModel tableModel;
 	private PersonTablePanel tablePanel;
 
-	public PersonTableFrame (PersonTableModel model) {
-		setTitle("Staff/Volunteers");
+	public PersonTableFrame(String title, PersonTableModel model) {
+		setTitle(title);
 		this.tableModel = model;
 		this.tablePanel = new PersonTablePanel(tableModel);
-	
-		setLayout (new BorderLayout());
-		JPanel buttonPanel = createButtonPanel ();
+
+		setLayout(new BorderLayout());
+		JPanel buttonPanel = createButtonPanel();
 		add(tablePanel, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.SOUTH);
 
@@ -34,29 +34,44 @@ public class PersonTableFrame extends JFrame {
 		setSize(PREF_FRAME_WIDTH, PREF_FRAME_HEIGHT);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
-	
-	public void setTableListener (PersonTableListener listener)
-	{
+
+	public void setTableListener(PersonTableListener listener) {
 		this.tableListener = listener;
 		tablePanel.setPersonTableListener(listener);
 	}
-	
+
 	public void setData(LinkedList<PersonModel> db) {
 		tablePanel.setData(db);
 	}
-	
+
 	public void tableRefresh() {
 		tablePanel.refresh();
 	}
-	
+
 	private JPanel createButtonPanel() {
 		JPanel panel = new JPanel();
+		JButton addPersonButton = new JButton("Add person");
+		JButton sendEmailButton = new JButton("Send email");
 		JButton refreshButton = new JButton("Refresh");
 		JButton closeButton = new JButton("Close");
-		
+
+		panel.add(addPersonButton);
+		panel.add(sendEmailButton);
 		panel.add(refreshButton);
 		panel.add(closeButton);
-		
+
+		addPersonButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+
+		sendEmailButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+
 		refreshButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (tableListener != null) {
@@ -64,13 +79,13 @@ public class PersonTableFrame extends JFrame {
 				}
 			}
 		});
-		
+
 		closeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				dispose();
 			}
 		});
-		
+
 		return panel;
 	}
 }
