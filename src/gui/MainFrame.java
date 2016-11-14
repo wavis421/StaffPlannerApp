@@ -42,7 +42,7 @@ import model.TaskModel;
 
 public class MainFrame extends JFrame {
 	/* Private constants */
-	private static final int PREF_FRAME_WIDTH = 950;
+	private static final int PREF_FRAME_WIDTH = 975;
 	private static final int PREF_FRAME_HEIGHT = 700;
 
 	/* Private instance variables */
@@ -61,6 +61,8 @@ public class MainFrame extends JFrame {
 	private final int PROGRAM_FILTER = 1;
 	private final int PERSON_FILTER = 2;
 	private final int STAFF_FILTER = 3;
+	private final int LOCATION_FILTER = 4;
+	private final int TIME_FILTER = 5;
 	private int selectedFilterId = NO_FILTER;
 	private JList<String> filteredList = null;
 
@@ -162,10 +164,14 @@ public class MainFrame extends JFrame {
 		filterByProgramMenuItem = new JMenuItem("by Program");
 		filterByPersonMenuItem = new JMenuItem("by Person");
 		JMenuItem filterByStaffShortageItem = new JMenuItem("by Staff Shortage");
+		JMenuItem filterByLocationItem = new JMenuItem("by Location");
+		JMenuItem filterByTimeItem = new JMenuItem("by Time");
 		calendarFilterMenu.add(filterNoneItem);
 		calendarFilterMenu.add(filterByProgramMenuItem);
 		calendarFilterMenu.add(filterByPersonMenuItem);
 		calendarFilterMenu.add(filterByStaffShortageItem);
+		calendarFilterMenu.add(filterByLocationItem);
+		calendarFilterMenu.add(filterByTimeItem);
 		if (controller.getNumPrograms() <= 1)
 			filterByProgramMenuItem.setEnabled(false);
 		if (controller.getNumPersons() <= 1)
@@ -222,8 +228,7 @@ public class MainFrame extends JFrame {
 							filterByProgramMenuItem.setEnabled(true);
 						if (numPrograms == 1) {
 							JList<String> programList = controller.getAllProgramsAsString();
-							selectedProgramName = programList.getModel().getElementAt(0);
-							calPanel.setProgramName(selectedProgramName);
+							setProgramName (programList.getModel().getElementAt(0));
 							taskMenu.setEnabled(true);
 
 						} else if (numPrograms > 1 && selectedProgramName == null) {
@@ -231,8 +236,7 @@ public class MainFrame extends JFrame {
 							selectActiveProgramDialog ev = new selectActiveProgramDialog(MainFrame.this, programList);
 							String dialogResponse = ev.getDialogResponse();
 							if (dialogResponse != null) {
-								selectedProgramName = dialogResponse;
-								calPanel.setProgramName(selectedProgramName);
+								setProgramName (dialogResponse);
 								taskMenu.setEnabled(true);
 							}
 						}
@@ -309,8 +313,7 @@ public class MainFrame extends JFrame {
 							filterByProgramMenuItem.setEnabled(true);
 
 						if (dialogResponse.isSelectedActive()) {
-							selectedProgramName = dialogResponse.getProgramName();
-							calPanel.setProgramName(selectedProgramName);
+							setProgramName (dialogResponse.getProgramName());
 							taskMenu.setEnabled(true);
 						}
 					}
@@ -338,8 +341,7 @@ public class MainFrame extends JFrame {
 									// program if needed
 									controller.renameProgram(programItem.getText(), dialogResponse.getProgramName());
 									if (selectedProgramName.equals(programItem.getText())) {
-										selectedProgramName = dialogResponse.getProgramName();
-										calPanel.setProgramName(dialogResponse.getProgramName());
+										setProgramName(dialogResponse.getProgramName());
 									}
 								}
 								controller.updateProgram(dialogResponse.getProgramName(), dialogResponse.getStartDate(),
@@ -364,8 +366,7 @@ public class MainFrame extends JFrame {
 
 					programItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent ev) {
-							selectedProgramName = programItem.getText();
-							calPanel.setProgramName(selectedProgramName);
+							setProgramName(programItem.getText());
 							taskMenu.setEnabled(true);
 
 							programList.removeAll();
@@ -904,5 +905,10 @@ public class MainFrame extends JFrame {
 	private String getDisplayDate(Calendar calendar) {
 		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
 				+ calendar.get(Calendar.YEAR));
+	}
+
+	private void setProgramName(String progName) {
+		selectedProgramName = progName;
+		calPanel.setProgramName(selectedProgramName);
 	}
 }
