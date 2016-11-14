@@ -346,6 +346,7 @@ public class MainFrame extends JFrame {
 								}
 								controller.updateProgram(dialogResponse.getProgramName(), dialogResponse.getStartDate(),
 										dialogResponse.getEndDate());
+								updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 							}
 
 							programList.removeAll();
