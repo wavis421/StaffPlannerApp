@@ -60,7 +60,7 @@ public class MainFrame extends JFrame {
 	private final int NO_FILTER = 0;
 	private final int PROGRAM_FILTER = 1;
 	private final int PERSON_FILTER = 2;
-	private final int STAFF_FILTER = 3;
+	private final int ROSTER_FILTER = 3;
 	private final int LOCATION_FILTER = 4;
 	private final int TIME_FILTER = 5;
 	private int selectedFilterId = NO_FILTER;
@@ -110,7 +110,7 @@ public class MainFrame extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu programMenu = new JMenu("Program");
 		JMenu taskMenu = new JMenu("Task");
-		JMenu personMenu = new JMenu("Staff/Volunteers");
+		JMenu personMenu = new JMenu("Leaders/Volunteers");
 		JMenu calendarMenu = new JMenu("Calendar");
 		menuBar.add(fileMenu);
 		menuBar.add(programMenu);
@@ -122,14 +122,14 @@ public class MainFrame extends JFrame {
 
 		// Add file sub-menus
 		JMenuItem exportProgramItem = new JMenuItem("Export program...  ");
-		JMenuItem exportStaffItem = new JMenuItem("Export staff...  ");
+		JMenuItem exportRosterItem = new JMenuItem("Export roster...  ");
 		JMenuItem importProgramItem = new JMenuItem("Import program...  ");
-		JMenuItem importStaffItem = new JMenuItem("Import staff...  ");
+		JMenuItem importRosterItem = new JMenuItem("Import roster...  ");
 		JMenuItem exitItem = new JMenuItem("Exit");
 		fileMenu.add(importProgramItem);
 		fileMenu.add(exportProgramItem);
-		fileMenu.add(importStaffItem);
-		fileMenu.add(exportStaffItem);
+		fileMenu.add(importRosterItem);
+		fileMenu.add(exportRosterItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 
@@ -163,13 +163,13 @@ public class MainFrame extends JFrame {
 		JMenuItem filterNoneItem = new JMenuItem("None");
 		filterByProgramMenuItem = new JMenuItem("by Program");
 		filterByPersonMenuItem = new JMenuItem("by Person");
-		JMenuItem filterByStaffShortageItem = new JMenuItem("by Staff Shortage");
+		JMenuItem filterByIncompleteRosterItem = new JMenuItem("by Incomplete Roster");
 		JMenuItem filterByLocationItem = new JMenuItem("by Location");
 		JMenuItem filterByTimeItem = new JMenuItem("by Time");
 		calendarFilterMenu.add(filterNoneItem);
 		calendarFilterMenu.add(filterByProgramMenuItem);
 		calendarFilterMenu.add(filterByPersonMenuItem);
-		calendarFilterMenu.add(filterByStaffShortageItem);
+		calendarFilterMenu.add(filterByIncompleteRosterItem);
 		calendarFilterMenu.add(filterByLocationItem);
 		calendarFilterMenu.add(filterByTimeItem);
 		if (controller.getNumPrograms() <= 1)
@@ -178,19 +178,19 @@ public class MainFrame extends JFrame {
 			filterByPersonMenuItem.setEnabled(false);
 
 		// Create listeners
-		createFileMenuListeners(taskMenu, exportProgramItem, exportStaffItem, importProgramItem, importStaffItem,
+		createFileMenuListeners(taskMenu, exportProgramItem, exportRosterItem, importProgramItem, importRosterItem,
 				exitItem);
 		createProgramMenuListeners(taskMenu, programCreateItem, programEditMenu, programSelectMenu);
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu);
 		createPersonMenuListeners(personAddItem, personEditMenu, personViewAllItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
-				filterByStaffShortageItem);
+				filterByIncompleteRosterItem);
 
 		return menuBar;
 	}
 
-	private void createFileMenuListeners(JMenu taskMenu, JMenuItem exportProgramItem, JMenuItem exportStaffItem,
-			JMenuItem importProgramItem, JMenuItem importStaffItem, JMenuItem exitItem) {
+	private void createFileMenuListeners(JMenu taskMenu, JMenuItem exportProgramItem, JMenuItem exportRosterItem,
+			JMenuItem importProgramItem, JMenuItem importRosterItem, JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		exportProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -248,11 +248,11 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
-		exportStaffItem.addActionListener(new ActionListener() {
+		exportRosterItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
-						controller.saveStaffToFile(fileChooser.getSelectedFile());
+						controller.saveRosterToFile(fileChooser.getSelectedFile());
 
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -261,12 +261,12 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
-		importStaffItem.addActionListener(new ActionListener() {
+		importRosterItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
-						// Load staff and clear person filter
-						controller.loadStaffFromFile(fileChooser.getSelectedFile());
+						// Load roster and clear person filter
+						controller.loadRosterFromFile(fileChooser.getSelectedFile());
 						if (selectedFilterId == PERSON_FILTER)
 							setCalendarFilter(NO_FILTER, null);
 
@@ -473,7 +473,7 @@ public class MainFrame extends JFrame {
 				if (controller.getNumPersons() > 0) {
 					PersonTableModel tableModel = new PersonTableModel();
 					tableModel.setData(controller.getAllPersonsList());
-					PersonTableFrame frame = new PersonTableFrame("Staff/Volunteers", tableModel);
+					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", tableModel);
 
 					PersonTableListener tableListener = new PersonTableListener() {
 						public void rowDeleted(int row) {
@@ -497,7 +497,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createCalendarMenuListeners(JMenuItem filterNoneItem, JMenuItem filterByProgramItem,
-			JMenuItem filterByPersonItem, JMenuItem filterByShortStaffItem) {
+			JMenuItem filterByPersonItem, JMenuItem filterByIncompleteRosterItem) {
 		// Set up listeners for CALENDAR menu
 		filterByProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -521,10 +521,10 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
-		filterByShortStaffItem.addActionListener(new ActionListener() {
+		filterByIncompleteRosterItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Set calendar filter
-				setCalendarFilter(STAFF_FILTER, null);
+				setCalendarFilter(ROSTER_FILTER, null);
 				updateMonth((Calendar) calPanel.getCurrentCalendar().clone());
 			}
 		});
@@ -586,7 +586,7 @@ public class MainFrame extends JFrame {
 
 	private void cloneTask(TaskModel task) {
 		TaskEvent ev = new TaskEvent(MainFrame.this, selectedProgramName, null, task.getLocation(),
-				task.getNumStaffReqd(), task.getTotalPersonsReqd(), task.getDayOfWeek(), task.getWeekOfMonth(),
+				task.getNumLeadersReqd(), task.getTotalPersonsReqd(), task.getDayOfWeek(), task.getWeekOfMonth(),
 				task.getTime(), task.getColor());
 
 		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, ev);
@@ -609,7 +609,7 @@ public class MainFrame extends JFrame {
 				JTree taskTree = createTaskTree(assignedTaskList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-								dialogResponse.isStaff(), dialogResponse.getNotes(), assignedTaskList,
+								dialogResponse.isLeader(), dialogResponse.getNotes(), assignedTaskList,
 								dialogResponse.getDatesUnavailable()),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
@@ -618,7 +618,7 @@ public class MainFrame extends JFrame {
 			} else {
 				// Add person to database
 				controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-						dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks(),
+						dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks(),
 						dialogResponse.getDatesUnavailable());
 				if (controller.getNumPersons() > 1)
 					filterByPersonMenuItem.setEnabled(true);
@@ -637,7 +637,7 @@ public class MainFrame extends JFrame {
 				JTree taskTree = createTaskTree(assignedList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-								dialogResponse.isStaff(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks(),
+								dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks(),
 								dialogResponse.getDatesUnavailable()),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedList), taskTree);
 				processEditPersonDialog(personEvent, origName);
@@ -667,11 +667,11 @@ public class MainFrame extends JFrame {
 	private void setCalendarPopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 		JMenuItem editTaskItem = new JMenuItem("Edit task");
-		JMenuItem viewAssignedStaffItem = new JMenuItem("View staff by task");
-		JMenuItem viewAllStaffForToday = new JMenuItem("View all staff for today");
+		JMenuItem viewRosterByTaskItem = new JMenuItem("View roster by task");
+		JMenuItem viewCompleteRosterForToday = new JMenuItem("View complete roster for today");
 		popupMenu.add(editTaskItem);
-		popupMenu.add(viewAssignedStaffItem);
-		popupMenu.add(viewAllStaffForToday);
+		popupMenu.add(viewRosterByTaskItem);
+		popupMenu.add(viewCompleteRosterForToday);
 
 		// Day Box listener
 		calPanel.setDayBoxListener(new DayBoxListener() {
@@ -696,7 +696,7 @@ public class MainFrame extends JFrame {
 				calPanel.refresh();
 			}
 		});
-		viewAssignedStaffItem.addActionListener(new ActionListener() {
+		viewRosterByTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// View assigned persons
 				LinkedList<PersonModel> personByTask = controller.getPersonsByDayByTask(selectedCalendar,
@@ -704,7 +704,7 @@ public class MainFrame extends JFrame {
 
 				PersonTableModel tableModel = new PersonTableModel();
 				tableModel.setData(personByTask);
-				PersonTableFrame frame = new PersonTableFrame("Staff/Volunteers for " + selectedTask.getTaskName()
+				PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
 						+ " on " + getDisplayDate(selectedCalendar), tableModel);
 
 				PersonTableListener tableListener = new PersonTableListener() {
@@ -725,7 +725,7 @@ public class MainFrame extends JFrame {
 				frame.setVisible(true);
 			}
 		});
-		viewAllStaffForToday.addActionListener(new ActionListener() {
+		viewCompleteRosterForToday.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// View all persons
 				LinkedList<PersonModel> personList = controller.getPersonsByDay(selectedCalendar);
@@ -733,7 +733,7 @@ public class MainFrame extends JFrame {
 				PersonTableModel tableModel = new PersonTableModel();
 				tableModel.setData(personList);
 				PersonTableFrame frame = new PersonTableFrame(
-						"Staff/Volunteers for " + getDisplayDate(selectedCalendar), tableModel);
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel);
 
 				PersonTableListener tableListener = new PersonTableListener() {
 					public void rowDeleted(int row) {
@@ -763,8 +763,8 @@ public class MainFrame extends JFrame {
 				tasks = controller.getTasksByDayByProgram(calendar, filteredList);
 			else if (selectedFilterId == PERSON_FILTER)
 				tasks = controller.getTasksByDayByPerson(calendar, filteredList);
-			else if (selectedFilterId == STAFF_FILTER)
-				tasks = controller.getTasksByDayByStaffShortage(calendar);
+			else if (selectedFilterId == ROSTER_FILTER)
+				tasks = controller.getTasksByDayByIncompleteRoster(calendar);
 			else
 				tasks = controller.getAllTasksByDay(calendar);
 

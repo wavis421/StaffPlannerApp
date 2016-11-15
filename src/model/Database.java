@@ -230,7 +230,7 @@ public class Database {
 		return thisDaysTasks;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByStaffShortage(Calendar calendar) {
+	public LinkedList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
@@ -402,9 +402,9 @@ public class Database {
 	/*
 	 * ------- Person data -------
 	 */
-	public void addPerson(String name, String phone, String email, boolean staff, String notes,
+	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
-		personList.add(new PersonModel(name, phone, email, staff, notes, assignedTasks, datesUnavailable));
+		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable));
 		Collections.sort(personList, new PersonComparator());
 	}
 
@@ -588,33 +588,33 @@ public class Database {
 		ois.close();
 	}
 
-	public void saveStaffToFile(File file) throws IOException {
+	public void saveRosterToFile(File file) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
 
 		// Convert to array
-		PersonModel[] staff = personList.toArray(new PersonModel[personList.size()]);
+		PersonModel[] roster = personList.toArray(new PersonModel[personList.size()]);
 
-		oos.writeObject(staff);
+		oos.writeObject(roster);
 		oos.close();
 	}
 
-	public void loadStaffFromFile(File file) throws IOException {
+	public void loadRosterFromFile(File file) throws IOException {
 		FileInputStream fis = new FileInputStream(file);
 		ObjectInputStream ois = new ObjectInputStream(fis);
 
 		try {
 			// Convert from array
-			PersonModel[] staff = (PersonModel[]) ois.readObject();
+			PersonModel[] roster = (PersonModel[]) ois.readObject();
 			personList.clear();
-			personList.addAll(Arrays.asList(staff));
+			personList.addAll(Arrays.asList(roster));
 
 		} catch (ClassNotFoundException e) {
-			JOptionPane.showMessageDialog(null, "Invalid file format.", "Error Loading Staff File",
+			JOptionPane.showMessageDialog(null, "Invalid file format.", "Error Loading Roster File",
 					JOptionPane.ERROR_MESSAGE);
 			// e.printStackTrace();
 		} catch (InvalidClassException e) {
-			JOptionPane.showMessageDialog(null, "File version does not match.", "Error Loading Staff File",
+			JOptionPane.showMessageDialog(null, "File version does not match.", "Error Loading Roster File",
 					JOptionPane.ERROR_MESSAGE);
 		}
 		ois.close();

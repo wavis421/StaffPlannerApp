@@ -8,17 +8,17 @@ public class TaskModel implements Serializable {
 	private String taskName;
 	private Time time;
 	private String location;
-	private int numStaffReqd;
+	private int numLeadersReqd;
 	private int totalPersonsReqd;
 	private boolean[] dayOfWeek;
 	private boolean[] weekOfMonth;
 	private int color;
 
-	public TaskModel(String taskName, String location, int numStaffReqd, int totalPersonsReqd, boolean[] dayOfWeek,
+	public TaskModel(String taskName, String location, int numLeadersReqd, int totalPersonsReqd, boolean[] dayOfWeek,
 			boolean[] weekOfMonth, Time time, int color) {
 		this.taskName = taskName;
 		this.location = location;
-		this.numStaffReqd = numStaffReqd;
+		this.numLeadersReqd = numLeadersReqd;
 		this.totalPersonsReqd = totalPersonsReqd;
 		this.dayOfWeek = dayOfWeek;
 		this.weekOfMonth = weekOfMonth;
@@ -46,8 +46,8 @@ public class TaskModel implements Serializable {
 		return location;
 	}
 
-	public int getNumStaffReqd() {
-		return numStaffReqd;
+	public int getNumLeadersReqd() {
+		return numLeadersReqd;
 	}
 
 	public int getTotalPersonsReqd() {

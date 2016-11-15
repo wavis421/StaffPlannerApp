@@ -8,7 +8,7 @@ public class TaskEvent extends EventObject {
 	private String programName;
 	private String taskName;
 	private String location;
-	private int numStaffReqd;
+	private int numLeadersReqd;
 	private int totalPersonsReqd;
 	private boolean[] dayOfWeek;
 	private boolean[] weekOfMonth;
@@ -19,14 +19,14 @@ public class TaskEvent extends EventObject {
 		super(source);
 	}
 
-	public TaskEvent(Object source, String programName, String taskName, String location, int numStaffReqd,
+	public TaskEvent(Object source, String programName, String taskName, String location, int numLeadersReqd,
 			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, Time time, int color) {
 		super(source);
 
 		this.programName = programName;
 		this.taskName = taskName;
 		this.location = location;
-		this.numStaffReqd = numStaffReqd;
+		this.numLeadersReqd = numLeadersReqd;
 		this.totalPersonsReqd = totalPersonsReqd;
 		this.dayOfWeek = dayOfWeek;
 		this.weekOfMonth = weekOfMonth;
@@ -50,8 +50,8 @@ public class TaskEvent extends EventObject {
 		return location;
 	}
 
-	public int getNumStaffReqd() {
-		return numStaffReqd;
+	public int getNumLeadersReqd() {
+		return numLeadersReqd;
 	}
 
 	public int getTotalPersonsReqd() {

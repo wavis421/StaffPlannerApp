@@ -57,7 +57,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JTextField personName = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField phone = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField email = new JTextField(TEXT_FIELD_SIZE);
-	private JRadioButton staffButton = new JRadioButton("Staff");
+	private JRadioButton leaderButton = new JRadioButton("Leader");
 	private JRadioButton volunteerButton = new JRadioButton("Volunteer");
 	private ButtonGroup staffGroup = new ButtonGroup();
 	private JPanel staffPanel = new JPanel();
@@ -73,7 +73,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JLabel nameLabel = new JLabel("Person's name: ");
 	private JLabel phoneLabel = new JLabel("Phone #: ");
 	private JLabel emailLabel = new JLabel("Email: ");
-	private JLabel staffLabel = new JLabel("Staff or volunteer: ");
+	private JLabel staffLabel = new JLabel("Leader or volunteer: ");
 	private JLabel notesLabel = new JLabel("Notes: ");
 	private JLabel datesLabel = new JLabel("Dates Unavailable: ");
 
@@ -88,7 +88,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		super(parent, "Add person...");
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
-		this.staffButton.setSelected(true);
+		this.leaderButton.setSelected(true);
 		this.assignedTasks = new LinkedList<AssignedTasksModel>();
 		this.datesUnavailable = new DateRangeModel("", "");
 
@@ -105,8 +105,8 @@ public class CreateUpdatePersonDialog extends JDialog {
 		this.phone.setText(person.getPhone());
 		this.email.setText(person.getEmail());
 		this.notesArea.setText(person.getNotes());
-		if (person.isStaff())
-			this.staffButton.setSelected(true);
+		if (person.isLeader())
+			this.leaderButton.setSelected(true);
 		else
 			this.volunteerButton.setSelected(true);
 		this.assignedTasks = person.getAssignedTasks();
@@ -146,7 +146,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks, null,
+								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTasks, null,
 								datesUnavailable);
 						okToSave = true;
 						dialogResponse = ev;
@@ -232,13 +232,13 @@ public class CreateUpdatePersonDialog extends JDialog {
 	}
 
 	private void createStaffSelector() {
-		staffButton.setActionCommand("staff");
+		leaderButton.setActionCommand("leader");
 		volunteerButton.setActionCommand("volunteer");
 
-		staffPanel.add(staffButton);
+		staffPanel.add(leaderButton);
 		staffPanel.add(volunteerButton);
 
-		staffGroup.add(staffButton);
+		staffGroup.add(leaderButton);
 		staffGroup.add(volunteerButton);
 	}
 
@@ -392,7 +392,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
+								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
 								lastAssignedTask, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
@@ -439,7 +439,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								staffButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
+								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
 								lastAssignedTask, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);

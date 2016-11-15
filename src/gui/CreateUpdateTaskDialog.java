@@ -39,7 +39,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private JTextField taskNameField = new JTextField(TEXT_FIELD_WIDTH);
 	private JTextField timeTextField = new JTextField(10);
 	private JTextField locationTextField = new JTextField(TEXT_FIELD_WIDTH);
-	private JSpinner numStaffSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
+	private JSpinner numLeadersSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
 	private JSpinner totalPersonsSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
 	private JRadioButton[] dayOfWeekButtons = new JRadioButton[7];
 	private JRadioButton[] weekOfMonthButtons = new JRadioButton[5];
@@ -84,7 +84,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		taskNameField.setText(currentTask.getTaskName());
 		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
 		locationTextField.setText(currentTask.getLocation());
-		numStaffSpinner.setValue(currentTask.getNumStaffReqd());
+		numLeadersSpinner.setValue(currentTask.getNumLeadersReqd());
 		totalPersonsSpinner.setValue(currentTask.getTotalPersonsReqd());
 
 		borderTitle = new String("Edit task");
@@ -98,12 +98,12 @@ public class CreateUpdateTaskDialog extends JDialog {
 		// Set up task, but leave name field empty since it was found to be a
 		// duplicate
 		currentProgramName = event.getProgramName();
-		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getNumStaffReqd(),
+		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getNumLeadersReqd(),
 				event.getTotalPersonsReqd(), event.getDayOfWeek(), event.getWeekOfMonth(), event.getTime(),
 				event.getColor());
 		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
 		locationTextField.setText(currentTask.getLocation());
-		numStaffSpinner.setValue(currentTask.getNumStaffReqd());
+		numLeadersSpinner.setValue(currentTask.getNumLeadersReqd());
 		totalPersonsSpinner.setValue(currentTask.getTotalPersonsReqd());
 
 		borderTitle = new String("Create new task");
@@ -151,7 +151,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 						// Create TaskEvent and set response
 						TaskEvent ev = new TaskEvent(this, currentProgramName, taskNameField.getText(),
-								locationTextField.getText(), (Integer) numStaffSpinner.getValue(),
+								locationTextField.getText(), (Integer) numLeadersSpinner.getValue(),
 								(Integer) totalPersonsSpinner.getValue(), daysOfWeekSelected, weeksOfMonthSelected,
 								time, Integer.parseInt(colorGroup.getSelection().getActionCommand()));
 						dialogResponse = ev;
@@ -233,8 +233,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 		addRowToControlPanel(gc, taskNameLabel, taskNameField, gridY++);
 		addRowToControlPanel(gc, locationLabel, locationTextField, gridY++);
 		addRowToControlPanel(gc, timeLabel, timeTextField, gridY++);
-		addRowToControlPanel(gc, new JLabel("Minimum # staff req'd: "), numStaffSpinner, gridY++);
-		addRowToControlPanel(gc, new JLabel("Total staff/volunteers req'd: "), totalPersonsSpinner, gridY++);
+		addRowToControlPanel(gc, new JLabel("Minimum # leaders req'd: "), numLeadersSpinner, gridY++);
+		addRowToControlPanel(gc, new JLabel("Total leaders/volunteers req'd: "), totalPersonsSpinner, gridY++);
 		addRowToControlPanel(gc, dayOfWeekLabel, dayOfWeekPanel, gridY++);
 		addRowToControlPanel(gc, weekOfMonthLabel, weekOfMonthPanel, gridY++);
 		addRowToControlPanel(gc, colorChooserLabel, colorPanel, gridY++);
@@ -340,7 +340,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	}
 
 	private void createSpinnerListeners() {
-		numStaffSpinner.addChangeListener(new ChangeListener() {
+		numLeadersSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				checkSpinnerValues();
 			}
@@ -353,7 +353,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	}
 
 	private void checkSpinnerValues() {
-		if ((Integer) numStaffSpinner.getValue() > (Integer) totalPersonsSpinner.getValue())
-			totalPersonsSpinner.setValue((Integer) numStaffSpinner.getValue());
+		if ((Integer) numLeadersSpinner.getValue() > (Integer) totalPersonsSpinner.getValue())
+			totalPersonsSpinner.setValue((Integer) numLeadersSpinner.getValue());
 	}
 }

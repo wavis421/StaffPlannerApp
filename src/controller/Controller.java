@@ -56,13 +56,13 @@ public class Controller {
 	 * ------- Task data -------
 	 */
 	public void addTask(TaskEvent ev) {
-		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumStaffReqd(), ev.getTotalPersonsReqd(),
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(), ev.getTotalPersonsReqd(),
 				ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 		db.addTask(ev.getProgramName(), task);
 	}
 
 	public void updateTask(TaskEvent ev) {
-		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumStaffReqd(), ev.getTotalPersonsReqd(),
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(), ev.getTotalPersonsReqd(),
 				ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 		db.updateTask(ev.getProgramName(), task);
 	}
@@ -87,8 +87,8 @@ public class Controller {
 		return db.getTasksByDayByPerson(calendar, personList);
 	}
 	
-	public LinkedList<CalendarDayModel> getTasksByDayByStaffShortage(Calendar calendar) {
-		return db.getTasksByDayByStaffShortage(calendar);
+	public LinkedList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
+		return db.getTasksByDayByIncompleteRoster(calendar);
 	}
 	
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
@@ -112,13 +112,13 @@ public class Controller {
 	/*
 	 * ------- Persons -------
 	 */
-	public void addPerson(String name, String phone, String email, boolean staff, String notes,
+	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
-		db.addPerson(name, phone, email, staff, notes, assignedTasks, datesUnavailable);	
+		db.addPerson(name, phone, email, leader, notes, assignedTasks, datesUnavailable);	
 	}
 	
 	public void updatePerson(PersonEvent ev) {
-		PersonModel person = new PersonModel(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isStaff(), ev.getNotes(),
+		PersonModel person = new PersonModel(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
 				ev.getAssignedTasks(), ev.getDatesUnavailable());
 		db.updatePerson(person);
 	}
@@ -166,11 +166,11 @@ public class Controller {
 		db.loadProgramFromFile(file);
 	}
 	
-	public void saveStaffToFile(File file) throws IOException {
-		db.saveStaffToFile(file);
+	public void saveRosterToFile(File file) throws IOException {
+		db.saveRosterToFile(file);
 	}
 
-	public void loadStaffFromFile(File file) throws IOException {
-		db.loadStaffFromFile(file);
+	public void loadRosterFromFile(File file) throws IOException {
+		db.loadRosterFromFile(file);
 	}
 }

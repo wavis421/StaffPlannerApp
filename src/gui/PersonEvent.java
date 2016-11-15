@@ -10,7 +10,7 @@ public class PersonEvent extends EventObject {
 	private String name;
 	private String phone;
 	private String email;
-	private boolean staff;
+	private boolean leader;
 	private String notes;
 	private LinkedList<AssignedTasksModel> assignedTasks;
 	private AssignedTasksModel lastTaskAdded;
@@ -20,7 +20,7 @@ public class PersonEvent extends EventObject {
 		super(source);
 	}
 
-	public PersonEvent(Object source, String name, String phone, String email, boolean staff, String notes,
+	public PersonEvent(Object source, String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, AssignedTasksModel lastTaskAdded,
 			DateRangeModel datesUnavailable) {
 		super(source);
@@ -28,7 +28,7 @@ public class PersonEvent extends EventObject {
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
-		this.staff = staff;
+		this.leader = leader;
 		this.notes = notes;
 		this.assignedTasks = assignedTasks;
 		this.lastTaskAdded = lastTaskAdded;
@@ -47,8 +47,8 @@ public class PersonEvent extends EventObject {
 		return email;
 	}
 
-	public boolean isStaff() {
-		return staff;
+	public boolean isLeader() {
+		return leader;
 	}
 
 	public String getNotes() {

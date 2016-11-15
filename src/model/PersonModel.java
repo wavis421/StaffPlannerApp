@@ -8,17 +8,17 @@ public class PersonModel implements Serializable {
 	private String name;
 	private String phone;
 	private String email;
-	private boolean staff; // Staff or volunteer
+	private boolean leader; // Leader or volunteer
 	private String notes;
 	private LinkedList<AssignedTasksModel> assignedTasks;
 	private DateRangeModel datesUnavailable;
 
-	public PersonModel(String name, String phone, String email, boolean staff, String notes,
+	public PersonModel(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
-		this.staff = staff;
+		this.leader = leader;
 		this.notes = notes;
 		this.assignedTasks = assignedTasks;
 		this.datesUnavailable = datesUnavailable;
@@ -44,8 +44,8 @@ public class PersonModel implements Serializable {
 		return email;
 	}
 
-	public boolean isStaff() {
-		return staff;
+	public boolean isLeader() {
+		return leader;
 	}
 
 	public String getNotes() {
