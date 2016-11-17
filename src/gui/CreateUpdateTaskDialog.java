@@ -11,10 +11,13 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Time;
+import java.util.Calendar;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,13 +35,18 @@ import model.TaskModel;
 
 public class CreateUpdateTaskDialog extends JDialog {
 	private static final int TEXT_FIELD_WIDTH = 30;
+	private static final int DEFAULT_HOUR = 8;
+	private static final int DEFAULT_MINUTE = 30;
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
 	// Private instance variables
 	private JTextField taskNameField = new JTextField(TEXT_FIELD_WIDTH);
-	private JTextField timeTextField = new JTextField(10);
 	private JTextField locationTextField = new JTextField(TEXT_FIELD_WIDTH);
+	private NumberSpinnerHandler hourSpinner;
+	private NumberSpinnerHandler minuteSpinner;
+
+	private JComboBox<String> comboAmPm;
 	private JSpinner numLeadersSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
 	private JSpinner totalPersonsSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
 	private JRadioButton[] dayOfWeekButtons = new JRadioButton[7];
@@ -48,7 +56,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 	// Label variables
 	private JLabel taskNameLabel = new JLabel("Task Name: ");
-	private JLabel timeLabel = new JLabel("Time: ");
+	private JLabel timeLabel = new JLabel("Start Time: ");
 	private JLabel locationLabel = new JLabel("Location: ");
 	private JLabel dayOfWeekLabel = new JLabel("Days of the Week: ");
 	private JLabel weekOfMonthLabel = new JLabel("DOW in the Month:");
@@ -59,6 +67,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private JPanel buttonsPanel;
 	private JPanel dayOfWeekPanel;
 	private JPanel weekOfMonthPanel;
+	private JPanel timePanel;
 	private TaskEvent dialogResponse;
 
 	// Track current program and task
@@ -71,6 +80,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		super(parent, programName, true);
 		currentProgramName = new String(programName);
 		currentTask = null;
+		createTimePanel(null);
 		borderTitle = new String("Create new task");
 		setupTaskDialog();
 	}
@@ -82,7 +92,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		currentProgramName = programName;
 		currentTask = task;
 		taskNameField.setText(currentTask.getTaskName());
-		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
+		createTimePanel(currentTask.getTime());
 		locationTextField.setText(currentTask.getLocation());
 		numLeadersSpinner.setValue(currentTask.getNumLeadersReqd());
 		totalPersonsSpinner.setValue(currentTask.getTotalPersonsReqd());
@@ -101,7 +111,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getNumLeadersReqd(),
 				event.getTotalPersonsReqd(), event.getDayOfWeek(), event.getWeekOfMonth(), event.getTime(),
 				event.getColor());
-		timeTextField.setText(getTimeString(currentTask.getTime().toString()));
+
+		createTimePanel(currentTask.getTime());
 		locationTextField.setText(currentTask.getLocation());
 		numLeadersSpinner.setValue(currentTask.getNumLeadersReqd());
 		totalPersonsSpinner.setValue(currentTask.getTotalPersonsReqd());
@@ -110,57 +121,43 @@ public class CreateUpdateTaskDialog extends JDialog {
 		setupTaskDialog();
 	}
 
-	private String getTimeString(String timeString) {
-		int firstColon = timeString.indexOf(":");
-		return timeString.substring(0, firstColon + 3);
-	}
-
 	private void setupTaskDialog() {
 		createDayOfWeekButtons();
 		createWeekOfMonthButtons();
 		createColorSelector();
 		createSpinnerListeners();
 
-		timeTextField.setToolTipText("Enter start time as hh:mm");
-
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					// Make sure that task name has been entered
-					if (taskNameField.getText().equals("")) {
-						JOptionPane.showMessageDialog(okButton, "Task name field is required");
-					} else {
-						// Validate that time field is correct format
-						Time time = Time.valueOf(timeTextField.getText() + ":00");
-
-						// Create days of week array
-						int numDaysInWeek = dayOfWeekButtons.length;
-						boolean[] daysOfWeekSelected = new boolean[numDaysInWeek];
-						for (int i = 0; i < numDaysInWeek; i++) {
-							if (dayOfWeekButtons[i].isSelected())
-								daysOfWeekSelected[i] = true;
-						}
-
-						// Create weeks of month array
-						int numWeeksInMonth = weekOfMonthButtons.length;
-						boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
-						for (int i = 0; i < numWeeksInMonth; i++) {
-							if (weekOfMonthButtons[i].isSelected())
-								weeksOfMonthSelected[i] = true;
-						}
-
-						// Create TaskEvent and set response
-						TaskEvent ev = new TaskEvent(this, currentProgramName, taskNameField.getText(),
-								locationTextField.getText(), (Integer) numLeadersSpinner.getValue(),
-								(Integer) totalPersonsSpinner.getValue(), daysOfWeekSelected, weeksOfMonthSelected,
-								time, Integer.parseInt(colorGroup.getSelection().getActionCommand()));
-						dialogResponse = ev;
-						setVisible(false);
-						dispose();
+				// Make sure that task name has been entered
+				if (taskNameField.getText().equals("")) {
+					JOptionPane.showMessageDialog(okButton, "Task name field is required");
+				} else {
+					// Create days of week array
+					int numDaysInWeek = dayOfWeekButtons.length;
+					boolean[] daysOfWeekSelected = new boolean[numDaysInWeek];
+					for (int i = 0; i < numDaysInWeek; i++) {
+						if (dayOfWeekButtons[i].isSelected())
+							daysOfWeekSelected[i] = true;
 					}
 
-				} catch (IllegalArgumentException ev) {
-					JOptionPane.showMessageDialog(okButton, "Please enter Time as hh:mm");
+					// Create weeks of month array
+					int numWeeksInMonth = weekOfMonthButtons.length;
+					boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
+					for (int i = 0; i < numWeeksInMonth; i++) {
+						if (weekOfMonthButtons[i].isSelected())
+							weeksOfMonthSelected[i] = true;
+					}
+
+					// Create TaskEvent and set response
+					TaskEvent ev = new TaskEvent(this, currentProgramName, taskNameField.getText(),
+							locationTextField.getText(), (Integer) numLeadersSpinner.getValue(),
+							(Integer) totalPersonsSpinner.getValue(), daysOfWeekSelected, weeksOfMonthSelected,
+							getTime(hourSpinner, minuteSpinner),
+							Integer.parseInt(colorGroup.getSelection().getActionCommand()));
+					dialogResponse = ev;
+					setVisible(false);
+					dispose();
 				}
 			}
 		});
@@ -191,21 +188,21 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		controlsPanel.setLayout(new GridBagLayout());
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		
+
 		// Add day-of-week buttons
 		for (int i = 0; i < dayOfWeekButtons.length; i++) {
 			dayOfWeekPanel.add(dayOfWeekButtons[i]);
 		}
-		
+
 		// Add weeks in month buttons and the "all" button
 		JPanel womSubPanel = new JPanel();
 		for (int i = 0; i < weekOfMonthButtons.length; i++) {
 			womSubPanel.add(weekOfMonthButtons[i]);
 		}
-		JRadioButton allWeeksButton = new JRadioButton ("All");
+		JRadioButton allWeeksButton = new JRadioButton("All");
 		weekOfMonthPanel.add(womSubPanel);
 		weekOfMonthPanel.add(allWeeksButton);
-		
+
 		// Add listener to "all" button
 		allWeeksButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -232,7 +229,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 		// Add task name, location, time, DOW/WOM selectors and color picker
 		addRowToControlPanel(gc, taskNameLabel, taskNameField, gridY++);
 		addRowToControlPanel(gc, locationLabel, locationTextField, gridY++);
-		addRowToControlPanel(gc, timeLabel, timeTextField, gridY++);
+		addRowToControlPanel(gc, timeLabel, timePanel, gridY++);
 		addRowToControlPanel(gc, new JLabel("Minimum # leaders req'd: "), numLeadersSpinner, gridY++);
 		addRowToControlPanel(gc, new JLabel("Total leaders/volunteers req'd: "), totalPersonsSpinner, gridY++);
 		addRowToControlPanel(gc, dayOfWeekLabel, dayOfWeekPanel, gridY++);
@@ -355,5 +352,42 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private void checkSpinnerValues() {
 		if ((Integer) numLeadersSpinner.getValue() > (Integer) totalPersonsSpinner.getValue())
 			totalPersonsSpinner.setValue((Integer) numLeadersSpinner.getValue());
+	}
+
+	private void createTimePanel(Time time) {
+		if (time == null)
+			time = Time.valueOf(DEFAULT_HOUR + ":" + DEFAULT_MINUTE + ":00");
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(time);
+		
+		hourSpinner = new NumberSpinnerHandler(cal.get(Calendar.HOUR), 1, 12, 1);
+		minuteSpinner = new NumberSpinnerHandler(cal.get(Calendar.MINUTE), 0, 59, 5);
+		
+		hourSpinner.setPreferredSize(new Dimension(35, hourSpinner.getPreferredSize().height));
+		minuteSpinner.setPreferredSize(new Dimension(35, minuteSpinner.getPreferredSize().height));
+
+		DefaultComboBoxModel<String> modelAmPm = new DefaultComboBoxModel<String>();
+		modelAmPm.addElement("AM");
+		modelAmPm.addElement("PM");
+		comboAmPm = new JComboBox<String>(modelAmPm);
+		comboAmPm.setSelectedIndex(cal.get(Calendar.AM_PM));
+		comboAmPm.setEditable(false);
+		comboAmPm.setBorder(BorderFactory.createEtchedBorder());
+
+		// Add everything to the time panel
+		timePanel = new JPanel();
+		timePanel.add(hourSpinner);
+		timePanel.add(new JLabel(":"));
+		timePanel.add(minuteSpinner);
+		timePanel.add(comboAmPm);
+	}
+
+	private Time getTime(NumberSpinnerHandler hour, NumberSpinnerHandler minute) {
+		int newHour = hour.getCurrentValue();
+		if (comboAmPm.getSelectedIndex() == 1) // PM
+			newHour += 12;
+		
+		return (Time.valueOf(newHour + ":" + minuteSpinner.getCurrentValue() + ":00"));
 	}
 }
