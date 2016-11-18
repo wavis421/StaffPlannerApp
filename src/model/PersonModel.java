@@ -3,7 +3,7 @@ package model;
 import java.io.Serializable;
 import java.util.LinkedList;
 
-public class PersonModel implements Serializable {
+public class PersonModel implements Serializable, Comparable<PersonModel> {
 	private static final long serialVersionUID = 12340001L;
 	private String name;
 	private String phone;
@@ -58,5 +58,10 @@ public class PersonModel implements Serializable {
 
 	public DateRangeModel getDatesUnavailable() {
 		return datesUnavailable;
+	}
+
+	@Override
+	public int compareTo(PersonModel otherPerson) {
+		return (this.getName().compareTo(otherPerson.getName()));
 	}
 }

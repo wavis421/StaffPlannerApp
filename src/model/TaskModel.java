@@ -3,7 +3,7 @@ package model;
 import java.io.Serializable;
 import java.sql.Time;
 
-public class TaskModel implements Serializable {
+public class TaskModel implements Serializable, Comparable<TaskModel> {
 	private static final long serialVersionUID = 12340001L;
 	private String taskName;
 	private Time time;
@@ -64,5 +64,10 @@ public class TaskModel implements Serializable {
 
 	public int getColor() {
 		return color;
+	}
+
+	@Override
+	public int compareTo(TaskModel otherTask) {
+		return (this.getTime().compareTo(otherTask.getTime()));
 	}
 }

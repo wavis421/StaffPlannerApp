@@ -3,7 +3,7 @@ package model;
 import java.io.Serializable;
 import java.util.LinkedList;
 
-public class ProgramModel implements Serializable {
+public class ProgramModel implements Serializable, Comparable<ProgramModel> {
 	private static final long serialVersionUID = 12340001L;
 	private String programName;
 	private String startDate, endDate;
@@ -47,5 +47,10 @@ public class ProgramModel implements Serializable {
 
 	public LinkedList<TaskModel> getTaskList() {
 		return taskList;
+	}
+
+	@Override
+	public int compareTo(ProgramModel otherProgram) {
+		return (this.getProgramName().compareTo(otherProgram.getProgramName()));
 	}
 }

@@ -19,10 +19,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
-import gui.PersonComparator;
-import gui.ProgramComparator;
-import gui.TimeComparator;
-
 public class Database {
 	private LinkedList<ProgramModel> programList;
 	private LinkedList<PersonModel> personList;
@@ -39,7 +35,7 @@ public class Database {
 	public void addProgram(String programName, String startDate, String endDate) {
 		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
 		programList.add(new ProgramModel(programName, startDate, endDate, taskList));
-		Collections.sort(programList, new ProgramComparator());
+		Collections.sort(programList);
 	}
 
 	public void updateProgram(String programName, String startDate, String endDate) {
@@ -52,7 +48,7 @@ public class Database {
 		ProgramModel program = getProgramByName(oldName);
 		if (program != null) {
 			program.setProgramName(newName);
-			Collections.sort(programList, new ProgramComparator());
+			Collections.sort(programList);
 
 			// Update persons' assigned tasks lists
 			updateProgramNameByPerson(oldName, newName);
@@ -115,7 +111,7 @@ public class Database {
 	public void addTask(String programName, TaskModel task) {
 		ProgramModel program = getProgramByName(programName);
 		program.getTaskList().add(task);
-		Collections.sort(program.getTaskList(), new TimeComparator());
+		Collections.sort(program.getTaskList());
 	}
 
 	public void updateTask(String programName, TaskModel task) {
@@ -123,7 +119,7 @@ public class Database {
 		int taskIdx = getTaskIndexByName(program, task.getTaskName());
 		if (taskIdx != -1) {
 			program.getTaskList().set(taskIdx, task);
-			Collections.sort(program.getTaskList(), new TimeComparator());
+			Collections.sort(program.getTaskList());
 		} else
 			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!", "Error updating task",
 					JOptionPane.ERROR_MESSAGE);
@@ -405,7 +401,7 @@ public class Database {
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
 		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable));
-		Collections.sort(personList, new PersonComparator());
+		Collections.sort(personList);
 	}
 
 	public void updatePerson(PersonModel person) {
@@ -421,7 +417,7 @@ public class Database {
 		if (personIdx != -1) {
 			PersonModel person = personList.get(personIdx);
 			person.setName(newName);
-			Collections.sort(personList, new PersonComparator());
+			Collections.sort(personList);
 		} else
 			JOptionPane.showMessageDialog(null, "Person '" + oldName + "' not found!");
 	}
