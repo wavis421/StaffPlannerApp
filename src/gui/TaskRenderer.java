@@ -10,7 +10,7 @@ import javax.swing.ListCellRenderer;
 import model.TaskModel;
 
 public class TaskRenderer extends JLabel implements ListCellRenderer<TaskModel> {
-
+	// TODO: Combine with other renderers!!
 	public TaskRenderer() {
 		setOpaque(true);
 	}

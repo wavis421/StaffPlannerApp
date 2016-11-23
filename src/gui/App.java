@@ -1,3 +1,7 @@
+/**
+ * The StaffPlannerApp provides...
+ * TODO
+ */
 package gui;
 
 import javax.swing.SwingUtilities;

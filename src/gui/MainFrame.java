@@ -772,7 +772,30 @@ public class MainFrame extends JFrame {
 		}
 		calPanel.refresh();
 	}
+	
+	// Calendar filters
+	private void setCalendarFilter(int filterId, JList<String> list) {
+		if (filteredList != null)
+			filteredList.removeAll();
 
+		filteredList = list;
+		if ((filterId == PROGRAM_FILTER || filterId == PERSON_FILTER) && filteredList == null)
+			selectedFilterId = NO_FILTER;
+		else
+			selectedFilterId = filterId;
+	}
+
+	private String getDisplayDate(Calendar calendar) {
+		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
+				+ calendar.get(Calendar.YEAR));
+	}
+
+	private void setProgramName(String progName) {
+		selectedProgramName = progName;
+		calPanel.setProgramName(selectedProgramName);
+	}
+
+	// TODO: Make the tree handling methods (below) a separate class
 	private JTree createTaskTree(LinkedList<AssignedTasksModel> assignedTaskList) {
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Select task to assign  >>>");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
@@ -890,26 +913,5 @@ public class MainFrame extends JFrame {
 			}
 		}
 		return false;
-	}
-
-	private void setCalendarFilter(int filterId, JList<String> list) {
-		if (filteredList != null)
-			filteredList.removeAll();
-
-		filteredList = list;
-		if ((filterId == PROGRAM_FILTER || filterId == PERSON_FILTER) && filteredList == null)
-			selectedFilterId = NO_FILTER;
-		else
-			selectedFilterId = filterId;
-	}
-
-	private String getDisplayDate(Calendar calendar) {
-		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
-				+ calendar.get(Calendar.YEAR));
-	}
-
-	private void setProgramName(String progName) {
-		selectedProgramName = progName;
-		calPanel.setProgramName(selectedProgramName);
 	}
 }

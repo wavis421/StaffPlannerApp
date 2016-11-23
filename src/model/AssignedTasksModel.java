@@ -2,24 +2,24 @@ package model;
 
 import java.io.Serializable;
 
-public class AssignedTasksModel implements Serializable {
+public class AssignedTasksModel implements Serializable, Comparable<AssignedTasksModel> {
 	private static final long serialVersionUID = 12340001L;
 	private String programName;
 	private String taskName;
 	private boolean[] daysOfWeek;
 	private boolean[] weeksOfMonth;
-	
-	public AssignedTasksModel (String programName, String taskName, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+
+	public AssignedTasksModel(String programName, String taskName, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
 		this.programName = programName;
 		this.taskName = taskName;
 		this.daysOfWeek = daysOfWeek;
 		this.weeksOfMonth = weeksOfMonth;
 	}
 
-	public String toString () {
+	public String toString() {
 		return taskName;
 	}
-	
+
 	public String getProgramName() {
 		return programName;
 	}
@@ -42,5 +42,11 @@ public class AssignedTasksModel implements Serializable {
 
 	public boolean[] getWeeksOfMonth() {
 		return weeksOfMonth;
+	}
+
+	@Override
+	public int compareTo(AssignedTasksModel otherTask) {
+		// TODO: Sort by task time
+		return (this.getTaskName().compareTo(otherTask.getTaskName()));
 	}
 }

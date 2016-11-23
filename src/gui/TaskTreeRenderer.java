@@ -19,6 +19,7 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 	private static final String BOLD_FONT = "Arial-bold-12";
 	private static final String ITALIC_FONT = "Arial-italic-12";
 
+	// TODO: Combine with other renderers!!
 	public TaskTreeRenderer() {
 		super();
 

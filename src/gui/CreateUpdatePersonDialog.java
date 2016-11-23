@@ -142,7 +142,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 					if (personName.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 					} else {
-						Collections.sort(assignedTasks, new AssignedTaskComparator());
+						Collections.sort(assignedTasks);
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
@@ -388,7 +388,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 						removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
 						assignedTasks.add(lastAssignedTask);
 
-						Collections.sort(assignedTasks, new AssignedTaskComparator());
+						Collections.sort(assignedTasks);
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
@@ -435,7 +435,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
 						assignedTasks.add(lastAssignedTask);
 
-						Collections.sort(assignedTasks, new AssignedTaskComparator());
+						Collections.sort(assignedTasks);
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),

@@ -19,6 +19,7 @@ public class AssignTaskTreeRenderer extends DefaultTreeCellRenderer {
 	private static final String ITALIC_FONT = "Arial-italic-12";
 
 	public AssignTaskTreeRenderer() {
+		// TODO: Combine with other renderers!!
 		super();
 
 		setOpaque(true);
