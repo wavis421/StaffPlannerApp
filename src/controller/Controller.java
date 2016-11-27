@@ -3,6 +3,7 @@ package controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import javax.swing.JList;
@@ -119,7 +120,7 @@ public class Controller {
 	
 	public void updatePerson(PersonEvent ev) {
 		PersonModel person = new PersonModel(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
-				ev.getAssignedTasks(), ev.getDatesUnavailable());
+				ev.getAssignedTaskChanges(), ev.getDatesUnavailable());		
 		db.updatePerson(person);
 	}
 	

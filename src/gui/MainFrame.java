@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 
@@ -228,7 +229,7 @@ public class MainFrame extends JFrame {
 							filterByProgramMenuItem.setEnabled(true);
 						if (numPrograms == 1) {
 							JList<String> programList = controller.getAllProgramsAsString();
-							setProgramName (programList.getModel().getElementAt(0));
+							setProgramName(programList.getModel().getElementAt(0));
 							taskMenu.setEnabled(true);
 
 						} else if (numPrograms > 1 && selectedProgramName == null) {
@@ -236,7 +237,7 @@ public class MainFrame extends JFrame {
 							selectActiveProgramDialog ev = new selectActiveProgramDialog(MainFrame.this, programList);
 							String dialogResponse = ev.getDialogResponse();
 							if (dialogResponse != null) {
-								setProgramName (dialogResponse);
+								setProgramName(dialogResponse);
 								taskMenu.setEnabled(true);
 							}
 						}
@@ -313,7 +314,7 @@ public class MainFrame extends JFrame {
 							filterByProgramMenuItem.setEnabled(true);
 
 						if (dialogResponse.isSelectedActive()) {
-							setProgramName (dialogResponse.getProgramName());
+							setProgramName(dialogResponse.getProgramName());
 							taskMenu.setEnabled(true);
 						}
 					}
@@ -605,12 +606,12 @@ public class MainFrame extends JFrame {
 							"Person " + dialogResponse.getName() + " already exists. Please use a different name.");
 
 				// Do not save; go back and edit person
-				LinkedList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTasks();
+				LinkedList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTaskChanges();
 				JTree taskTree = createTaskTree(assignedTaskList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(), assignedTaskList,
-								dialogResponse.getDatesUnavailable()),
+								dialogResponse.getDatesUnavailable()), assignedTaskList,
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
 				processAddPersonDialog(personEvent);
@@ -618,7 +619,7 @@ public class MainFrame extends JFrame {
 			} else {
 				// Add person to database
 				controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-						dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks(),
+						dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTaskChanges(),
 						dialogResponse.getDatesUnavailable());
 				if (controller.getNumPersons() > 1)
 					filterByPersonMenuItem.setEnabled(true);
@@ -633,12 +634,13 @@ public class MainFrame extends JFrame {
 
 		if (dialogResponse != null) {
 			if (!isOkToSave) {
-				LinkedList<AssignedTasksModel> assignedList = dialogResponse.getAssignedTasks();
+				LinkedList<AssignedTasksModel> assignedList = mergeAssignedTaskList(origName,
+						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-								dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTasks(),
-								dialogResponse.getDatesUnavailable()),
+								dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTaskChanges(),
+								dialogResponse.getDatesUnavailable()), dialogResponse.getAssignedTaskChanges(),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedList), taskTree);
 				processEditPersonDialog(personEvent, origName);
 			} else {
@@ -659,6 +661,7 @@ public class MainFrame extends JFrame {
 			LinkedList<AssignedTasksModel> assignedList = person.getAssignedTasks();
 			JTree taskTree = createTaskTree(assignedList);
 			CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this, person,
+					new LinkedList<AssignedTasksModel>(), 
 					createAssignedTasksTree(null, taskTree, assignedList), taskTree);
 			processEditPersonDialog(personEvent, origName);
 		}
@@ -773,7 +776,7 @@ public class MainFrame extends JFrame {
 		}
 		calPanel.refresh();
 	}
-	
+
 	// Calendar filters
 	private void setCalendarFilter(int filterId, JList<String> list) {
 		if (filteredList != null)
@@ -914,5 +917,20 @@ public class MainFrame extends JFrame {
 			}
 		}
 		return false;
+	}
+
+	private LinkedList<AssignedTasksModel> mergeAssignedTaskList(String personName,
+			LinkedList<AssignedTasksModel> assignedTaskChangeList) {
+		PersonModel person = controller.getPersonByName(personName);
+		LinkedList<AssignedTasksModel> masterTaskList = person.getAssignedTasks();
+
+		// Merge master task list into task changed list
+		for (AssignedTasksModel task : masterTaskList) {
+			if (!findNodeInAssignedTaskList(assignedTaskChangeList, task.getTaskName())) {
+				assignedTaskChangeList.add(task);
+			}
+		}
+		Collections.sort(assignedTaskChangeList);
+		return assignedTaskChangeList;
 	}
 }

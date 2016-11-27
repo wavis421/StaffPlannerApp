@@ -64,7 +64,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JPanel datePanel = new JPanel();
 	private JDatePickerImpl startDayPicker, endDayPicker;
 	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
-	private LinkedList<AssignedTasksModel> assignedTasks;
+	private LinkedList<AssignedTasksModel> assignedTaskChanges;
 	private DateRangeModel datesUnavailable;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
@@ -89,14 +89,14 @@ public class CreateUpdatePersonDialog extends JDialog {
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
 		this.leaderButton.setSelected(true);
-		this.assignedTasks = new LinkedList<AssignedTasksModel>();
+		this.assignedTaskChanges = new LinkedList<AssignedTasksModel>();
 		this.datesUnavailable = new DateRangeModel("", "");
 
 		setupPersonDialog();
 	}
 
 	// Constructor for updating existing person, PersonModel contains values
-	public CreateUpdatePersonDialog(JFrame parent, PersonModel person, JTree assignedTasksTree, JTree taskTree) {
+	public CreateUpdatePersonDialog(JFrame parent, PersonModel person, LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
@@ -109,7 +109,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 			this.leaderButton.setSelected(true);
 		else
 			this.volunteerButton.setSelected(true);
-		this.assignedTasks = person.getAssignedTasks();
+		this.assignedTaskChanges = assignedTaskChanges;
 		this.datesUnavailable = person.getDatesUnavailable();
 
 		setupPersonDialog();
@@ -142,11 +142,10 @@ public class CreateUpdatePersonDialog extends JDialog {
 					if (personName.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 					} else {
-						Collections.sort(assignedTasks);
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTasks, null,
+								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges, null,
 								datesUnavailable);
 						okToSave = true;
 						dialogResponse = ev;
@@ -386,13 +385,12 @@ public class CreateUpdatePersonDialog extends JDialog {
 								eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
 								eventResponse.getWeeksOfMonth());
 						removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
-						assignedTasks.add(lastAssignedTask);
+						assignedTaskChanges.add(lastAssignedTask);
 
-						Collections.sort(assignedTasks);
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
+								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
 								lastAssignedTask, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
@@ -433,13 +431,12 @@ public class CreateUpdatePersonDialog extends JDialog {
 					if (eventResponse != null) {
 						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(node.getParent().toString(),
 								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
-						assignedTasks.add(lastAssignedTask);
+						assignedTaskChanges.add(lastAssignedTask);
 
-						Collections.sort(assignedTasks);
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTasks,
+								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
 								lastAssignedTask, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
@@ -452,10 +449,10 @@ public class CreateUpdatePersonDialog extends JDialog {
 	}
 
 	private void removeNodeFromAssignedTaskList(String taskName) {
-		for (AssignedTasksModel t : assignedTasks) {
+		for (AssignedTasksModel t : assignedTaskChanges) {
 			if (t.getTaskName().equals(taskName)) {
-				int idx = assignedTasks.indexOf(t);
-				assignedTasks.remove(idx);
+				int idx = assignedTaskChanges.indexOf(t);
+				assignedTaskChanges.remove(idx);
 				return;
 			}
 		}

@@ -12,7 +12,7 @@ public class PersonEvent extends EventObject {
 	private String email;
 	private boolean leader;
 	private String notes;
-	private LinkedList<AssignedTasksModel> assignedTasks;
+	private LinkedList<AssignedTasksModel> assignedTaskChanges;
 	private AssignedTasksModel lastTaskAdded;
 	private DateRangeModel datesUnavailable;
 
@@ -21,7 +21,7 @@ public class PersonEvent extends EventObject {
 	}
 
 	public PersonEvent(Object source, String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, AssignedTasksModel lastTaskAdded,
+			LinkedList<AssignedTasksModel> assignedTaskChanges, AssignedTasksModel lastTaskAdded,
 			DateRangeModel datesUnavailable) {
 		super(source);
 
@@ -30,7 +30,7 @@ public class PersonEvent extends EventObject {
 		this.email = email;
 		this.leader = leader;
 		this.notes = notes;
-		this.assignedTasks = assignedTasks;
+		this.assignedTaskChanges = assignedTaskChanges;
 		this.lastTaskAdded = lastTaskAdded;
 		this.datesUnavailable = datesUnavailable;
 	}
@@ -55,8 +55,8 @@ public class PersonEvent extends EventObject {
 		return notes;
 	}
 
-	public LinkedList<AssignedTasksModel> getAssignedTasks() {
-		return assignedTasks;
+	public LinkedList<AssignedTasksModel> getAssignedTaskChanges() {
+		return assignedTaskChanges;
 	}
 
 	public AssignedTasksModel getLastTaskAdded() {

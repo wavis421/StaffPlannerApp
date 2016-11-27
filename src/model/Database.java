@@ -404,12 +404,29 @@ public class Database {
 		Collections.sort(personList);
 	}
 
-	public void updatePerson(PersonModel person) {
-		int personIdx = getPersonIndexByName(person.getName());
-		if (personIdx != -1)
-			personList.set(personIdx, person);
+	public void updatePerson(PersonModel updatedPerson) {
+		int personIdx = getPersonIndexByName(updatedPerson.getName());
+
+		if (personIdx != -1) {
+			// Updated all person fields except content of linked lists
+			personList.set(personIdx, updatedPerson);
+			
+			// Merge in the assigned task changes (assigned task list ONLY contains changes!!)
+			int taskIdx;
+			LinkedList<AssignedTasksModel> dbAssignedTaskList = personList.get(personIdx).getAssignedTasks();
+			for (AssignedTasksModel assignedTask : updatedPerson.getAssignedTasks()) {
+				taskIdx = findAssignedTaskIdx(assignedTask.getTaskName(), dbAssignedTaskList);
+				if (taskIdx != -1)
+					// Assigned task already in database, so update
+					personList.get(personIdx).getAssignedTasks().set(taskIdx, assignedTask);
+				else
+					// New task was assigned, add to database
+					personList.get(personIdx).getAssignedTasks().add(assignedTask);
+			}
+
+		}
 		else
-			JOptionPane.showMessageDialog(null, "Person '" + person.getName() + "' not found!");
+			JOptionPane.showMessageDialog(null, "Person '" + updatedPerson.getName() + "' not found!");
 	}
 
 	public void renamePerson(String oldName, String newName) {
@@ -536,6 +553,17 @@ public class Database {
 				return day.getTask();
 		}
 		return null;
+	}
+	
+	private int findAssignedTaskIdx (String taskName, LinkedList<AssignedTasksModel> assignedTaskList) {
+		int i = 0;
+		
+		for (AssignedTasksModel task : assignedTaskList) {
+			if (task.getTaskName().equals(taskName))
+				return i;
+			i++;
+		}
+		return -1;
 	}
 
 	/*
