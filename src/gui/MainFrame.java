@@ -185,7 +185,7 @@ public class MainFrame extends JFrame {
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu);
 		createPersonMenuListeners(personAddItem, personEditMenu, personViewAllItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
-				filterByIncompleteRosterItem, filterByLocationItem);
+				filterByIncompleteRosterItem, filterByLocationItem, filterByTimeItem);
 
 		return menuBar;
 	}
@@ -498,7 +498,8 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createCalendarMenuListeners(JMenuItem filterNoneItem, JMenuItem filterByProgramItem,
-			JMenuItem filterByPersonItem, JMenuItem filterByIncompleteRosterItem, JMenuItem filterByLocationItem) {
+			JMenuItem filterByPersonItem, JMenuItem filterByIncompleteRosterItem, JMenuItem filterByLocationItem,
+			JMenuItem filterByTimeItem) {
 		// Set up listeners for CALENDAR menu
 		filterByProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -534,9 +535,20 @@ public class MainFrame extends JFrame {
 				JList<String> locationList = controller.getAllLocationsAsString();
 				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by location", locationList);
 				JList<String> dialogResponse = ev.getDialogResponse();
-				
+
 				// Only one filter can be active
 				setCalendarFilter(LOCATION_FILTER, dialogResponse);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+		});
+		filterByTimeItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JList<String> timeList = controller.getAllTimesAsString();
+				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by time", timeList);
+				JList<String> dialogResponse = ev.getDialogResponse();
+
+				// Only one filter can be active
+				setCalendarFilter(TIME_FILTER, dialogResponse);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 		});
@@ -622,7 +634,8 @@ public class MainFrame extends JFrame {
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(), assignedTaskList,
-								dialogResponse.getDatesUnavailable()), assignedTaskList,
+								dialogResponse.getDatesUnavailable()),
+						assignedTaskList,
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
 				processAddPersonDialog(personEvent);
@@ -650,8 +663,9 @@ public class MainFrame extends JFrame {
 				JTree taskTree = createTaskTree(assignedList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-								dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTaskChanges(),
-								dialogResponse.getDatesUnavailable()), dialogResponse.getAssignedTaskChanges(),
+								dialogResponse.isLeader(), dialogResponse.getNotes(),
+								dialogResponse.getAssignedTaskChanges(), dialogResponse.getDatesUnavailable()),
+						dialogResponse.getAssignedTaskChanges(),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedList), taskTree);
 				processEditPersonDialog(personEvent, origName);
 			} else {
@@ -672,8 +686,8 @@ public class MainFrame extends JFrame {
 			LinkedList<AssignedTasksModel> assignedList = person.getAssignedTasks();
 			JTree taskTree = createTaskTree(assignedList);
 			CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this, person,
-					new LinkedList<AssignedTasksModel>(), 
-					createAssignedTasksTree(null, taskTree, assignedList), taskTree);
+					new LinkedList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
+					taskTree);
 			processEditPersonDialog(personEvent, origName);
 		}
 	}
@@ -781,6 +795,8 @@ public class MainFrame extends JFrame {
 				tasks = controller.getTasksByDayByIncompleteRoster(localCalendar);
 			else if (selectedFilterId == LOCATION_FILTER)
 				tasks = controller.getTasksByDayByLocation(localCalendar, filteredList);
+			else if (selectedFilterId == TIME_FILTER)
+				tasks = controller.getTasksByDayByTime(localCalendar, filteredList);
 			else
 				tasks = controller.getAllTasksByDay(localCalendar);
 
@@ -793,9 +809,10 @@ public class MainFrame extends JFrame {
 	private void setCalendarFilter(int filterId, JList<String> list) {
 		if (filteredList != null)
 			filteredList.removeAll();
-
 		filteredList = list;
-		if ((filterId == PROGRAM_FILTER || filterId == PERSON_FILTER || filterId == LOCATION_FILTER) && filteredList == null)
+		
+		// Roster filter has a null list
+		if (filteredList == null && filterId != ROSTER_FILTER)
 			selectedFilterId = NO_FILTER;
 		else
 			selectedFilterId = filterId;

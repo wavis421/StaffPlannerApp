@@ -96,6 +96,10 @@ public class Controller {
 		return db.getTasksByDayByLocation(calendar, locations);
 	}
 	
+	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> times) {
+		return db.getTasksByDayByTime(calendar, times);
+	}
+	
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		return db.getAllTasksByDay(calendar);
 	}
@@ -110,6 +114,10 @@ public class Controller {
 	
 	public JList<String> getAllLocationsAsString() {
 		return db.getAllLocationsAsString();
+	}
+	
+	public JList<String> getAllTimesAsString() {
+		return db.getAllTimesAsString();
 	}
 	
 	/*

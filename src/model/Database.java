@@ -260,8 +260,32 @@ public class Database {
 					break;
 				}
 			}
-			if (!match)
+			if (!match) {
+				// No match in location list, so remove; adjust loop index to handle element deletion
 				matchingTasks.remove(taskIdx);
+				taskIdx--;
+			}
+		}
+		return matchingTasks;
+	}
+	
+	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> timeList) {
+		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
+
+		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
+			String taskTime = formatTime(matchingTasks.get(taskIdx).getTask().getTime().toString());
+			boolean match = false;
+			for (int timeIdx = 0; timeIdx < timeList.getModel().getSize(); timeIdx++) {
+				if (taskTime.equals(timeList.getModel().getElementAt(timeIdx))) {
+					match = true;
+					break;
+				}
+			}
+			if (!match) {
+				// No match in timeList, so remove; adjust loop index to handle element deletion
+				matchingTasks.remove(taskIdx);
+				taskIdx--;
+			}
 		}
 		return matchingTasks;
 	}
@@ -311,7 +335,7 @@ public class Database {
 			for (int i = 0; i < taskList.getModel().getSize(); i++) {
 				// Check whether already in list before adding
 				String loc = taskList.getModel().getElementAt(i).getLocation();
-				if (!loc.equals("") && !findLocationInList(loc, locationList)) {
+				if (!loc.equals("") && !findStringMatchInList(loc, locationList)) {
 					locationModel.addElement(loc);
 				}
 			}
@@ -319,6 +343,23 @@ public class Database {
 		return (locationList);
 	}
 
+	public JList<String> getAllTimesAsString() {
+		DefaultListModel<String> timeModel = new DefaultListModel<String>();
+		JList<String> timeList = new JList<String>(timeModel);
+
+		for (ProgramModel prog : programList) {
+			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
+			for (int i = 0; i < taskList.getModel().getSize(); i++) {
+				// Check whether already in list before adding
+				String time = formatTime(taskList.getModel().getElementAt(i).getTime().toString());
+				if (!findStringMatchInList(time, timeList)) {
+					timeModel.addElement(time);
+				}
+			}
+		}
+		return (timeList);
+	}
+	
 	private int getTaskIndexByName(ProgramModel program, String taskName) {
 		int i = 0;
 
@@ -428,6 +469,19 @@ public class Database {
 			}
 		}
 		return true;
+	}
+	
+	private String formatTime (String time) {
+		String newTime;
+		
+		// Get rid of seconds
+		newTime = time.substring(0, 5);
+		
+		// Get rid of leading zero
+		if (newTime.charAt(0) == '0')
+			return newTime.substring(1); 
+		else
+			return newTime;
 	}
 
 	/*
@@ -590,9 +644,9 @@ public class Database {
 		return null;
 	}
 
-	private boolean findLocationInList(String location, JList<String> locList) {
-		for (int i = 0; i < locList.getModel().getSize(); i++) {
-			if (locList.getModel().getElementAt(i).equals(location))
+	private boolean findStringMatchInList(String findString, JList<String> list) {
+		for (int i = 0; i < list.getModel().getSize(); i++) {
+			if (list.getModel().getElementAt(i).equals(findString))
 				return true;
 		}
 		return false;
