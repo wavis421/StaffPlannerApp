@@ -108,7 +108,7 @@ public class CreateUpdateProgramDialog extends JDialog {
 						if (enableEndDateButton.isSelected())
 							endDate = endDatePicker.getJFormattedTextField().getText();
 
-						ProgramEvent ev = new ProgramEvent(this, programName.getText(), startDate, endDate,
+						ProgramEvent ev = new ProgramEvent(this, programName.getText().trim(), startDate, endDate,
 								selectActiveProgramButton.isSelected() ? true : false);
 						
 						// Generate start/end date for tracking last used dates

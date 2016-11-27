@@ -185,7 +185,7 @@ public class MainFrame extends JFrame {
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu);
 		createPersonMenuListeners(personAddItem, personEditMenu, personViewAllItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
-				filterByIncompleteRosterItem);
+				filterByIncompleteRosterItem, filterByLocationItem);
 
 		return menuBar;
 	}
@@ -498,7 +498,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createCalendarMenuListeners(JMenuItem filterNoneItem, JMenuItem filterByProgramItem,
-			JMenuItem filterByPersonItem, JMenuItem filterByIncompleteRosterItem) {
+			JMenuItem filterByPersonItem, JMenuItem filterByIncompleteRosterItem, JMenuItem filterByLocationItem) {
 		// Set up listeners for CALENDAR menu
 		filterByProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -526,6 +526,17 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// Set calendar filter
 				setCalendarFilter(ROSTER_FILTER, null);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+		});
+		filterByLocationItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JList<String> locationList = controller.getAllLocationsAsString();
+				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by location", locationList);
+				JList<String> dialogResponse = ev.getDialogResponse();
+				
+				// Only one filter can be active
+				setCalendarFilter(LOCATION_FILTER, dialogResponse);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 		});
@@ -695,8 +706,7 @@ public class MainFrame extends JFrame {
 				// Edit task, then update calendar using filters
 				LinkedList<CalendarDayModel> tasksByDay = controller.getAllTasksByDay(selectedCalendar);
 				editTask(null, selectedTask.getTaskName());
-				calPanel.updateTasksByDay(selectedCalendar.get(Calendar.DAY_OF_MONTH) - 1, tasksByDay);
-				calPanel.refresh();
+				updateMonth(selectedCalendar);
 			}
 		});
 		viewRosterByTaskItem.addActionListener(new ActionListener() {
@@ -769,6 +779,8 @@ public class MainFrame extends JFrame {
 				tasks = controller.getTasksByDayByPerson(localCalendar, filteredList);
 			else if (selectedFilterId == ROSTER_FILTER)
 				tasks = controller.getTasksByDayByIncompleteRoster(localCalendar);
+			else if (selectedFilterId == LOCATION_FILTER)
+				tasks = controller.getTasksByDayByLocation(localCalendar, filteredList);
 			else
 				tasks = controller.getAllTasksByDay(localCalendar);
 
@@ -783,7 +795,7 @@ public class MainFrame extends JFrame {
 			filteredList.removeAll();
 
 		filteredList = list;
-		if ((filterId == PROGRAM_FILTER || filterId == PERSON_FILTER) && filteredList == null)
+		if ((filterId == PROGRAM_FILTER || filterId == PERSON_FILTER || filterId == LOCATION_FILTER) && filteredList == null)
 			selectedFilterId = NO_FILTER;
 		else
 			selectedFilterId = filterId;

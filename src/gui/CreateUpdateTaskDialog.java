@@ -150,8 +150,8 @@ public class CreateUpdateTaskDialog extends JDialog {
 					}
 
 					// Create TaskEvent and set response
-					TaskEvent ev = new TaskEvent(this, currentProgramName, taskNameField.getText(),
-							locationTextField.getText(), (Integer) numLeadersSpinner.getValue(),
+					TaskEvent ev = new TaskEvent(this, currentProgramName, taskNameField.getText().trim(),
+							locationTextField.getText().trim(), (Integer) numLeadersSpinner.getValue(),
 							(Integer) totalPersonsSpinner.getValue(), daysOfWeekSelected, weeksOfMonthSelected,
 							getTime(hourSpinner, minuteSpinner),
 							Integer.parseInt(colorGroup.getSelection().getActionCommand()));

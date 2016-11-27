@@ -92,6 +92,10 @@ public class Controller {
 		return db.getTasksByDayByIncompleteRoster(calendar);
 	}
 	
+	public LinkedList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
+		return db.getTasksByDayByLocation(calendar, locations);
+	}
+	
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		return db.getAllTasksByDay(calendar);
 	}
@@ -102,6 +106,10 @@ public class Controller {
 
 	public JList<TaskModel> getAllTasks(String programName) {
 		return db.getAllTasks(programName);
+	}
+	
+	public JList<String> getAllLocationsAsString() {
+		return db.getAllLocationsAsString();
 	}
 	
 	/*

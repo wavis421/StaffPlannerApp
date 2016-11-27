@@ -96,7 +96,8 @@ public class CreateUpdatePersonDialog extends JDialog {
 	}
 
 	// Constructor for updating existing person, PersonModel contains values
-	public CreateUpdatePersonDialog(JFrame parent, PersonModel person, LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
+	public CreateUpdatePersonDialog(JFrame parent, PersonModel person,
+			LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
@@ -144,9 +145,9 @@ public class CreateUpdatePersonDialog extends JDialog {
 					} else {
 						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
 						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
-						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges, null,
-								datesUnavailable);
+						PersonEvent ev = new PersonEvent(this, personName.getText().trim(), phone.getText().trim(),
+								email.getText().trim(), leaderButton.isSelected() ? true : false, processNotesArea(),
+								assignedTaskChanges, null, datesUnavailable);
 						okToSave = true;
 						dialogResponse = ev;
 						setVisible(false);
@@ -282,14 +283,14 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 		// Add action listener
 		datePicker.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {				
+			public void actionPerformed(ActionEvent e) {
 				String startText = startDayPicker.getJFormattedTextField().getText();
 				String endText = endDayPicker.getJFormattedTextField().getText();
-				
+
 				// If end date is NULL, set it to start day
 				if (name.equals("start") && !startText.equals("")) {
 					if (endText.equals("")) {
-						endDayPicker = setDate (startText, endDayPicker);
+						endDayPicker = setDate(startText, endDayPicker);
 						endDayPicker.getJFormattedTextField().setText(startText);
 						endText = startText;
 					}
@@ -298,10 +299,10 @@ public class CreateUpdatePersonDialog extends JDialog {
 				// If start date is NULL, set it to end day
 				if (name.equals("end") && !endText.equals("")) {
 					if (startText.equals("")) {
-						startDayPicker = setDate (endText, startDayPicker);
+						startDayPicker = setDate(endText, startDayPicker);
 						startDayPicker.getJFormattedTextField().setText(endText);
 						startText = endText;
-					}	
+					}
 					endDayPicker.getModel().setSelected(true);
 				}
 
@@ -325,8 +326,8 @@ public class CreateUpdatePersonDialog extends JDialog {
 		datePicker.setName(name);
 		return datePicker;
 	}
-	
-	private JDatePickerImpl setDate (String dateText, JDatePickerImpl datePicker) {
+
+	private JDatePickerImpl setDate(String dateText, JDatePickerImpl datePicker) {
 		try {
 			SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 			Date date = dateFormatter.parse(dateText);
@@ -334,7 +335,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 			cal.setTime(date);
 			datePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
 					cal.get(Calendar.DAY_OF_MONTH));
-			
+
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

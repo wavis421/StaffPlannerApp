@@ -188,14 +188,14 @@ public class Database {
 		return thisDaysTasks;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
+	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> persons) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
 
 		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
-		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i));
+		for (int i = 0; i < persons.getModel().getSize(); i++) {
+			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
 			if (!isPersonAvailable(pModel, thisDay))
 				continue;
 
@@ -248,6 +248,24 @@ public class Database {
 		return thisDaysTasks;
 	}
 
+	public LinkedList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
+		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
+
+		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
+			String taskLoc = matchingTasks.get(taskIdx).getTask().getLocation();
+			boolean match = false;
+			for (int locIdx = 0; locIdx < locations.getModel().getSize(); locIdx++) {
+				if (taskLoc.equals(locations.getModel().getElementAt(locIdx))) {
+					match = true;
+					break;
+				}
+			}
+			if (!match)
+				matchingTasks.remove(taskIdx);
+		}
+		return matchingTasks;
+	}
+
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
@@ -274,14 +292,31 @@ public class Database {
 	 */
 
 	public JList<TaskModel> getAllTasks(String programName) {
-		DefaultListModel<TaskModel> taskModel = new DefaultListModel<>();
-		JList<TaskModel> taskList = new JList<>(taskModel);
+		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
+		JList<TaskModel> taskList = new JList<TaskModel>(taskModel);
 		ProgramModel program = getProgramByName(programName);
 
 		for (TaskModel t : program.getTaskList()) {
 			taskModel.addElement(t);
 		}
 		return taskList;
+	}
+
+	public JList<String> getAllLocationsAsString() {
+		DefaultListModel<String> locationModel = new DefaultListModel<String>();
+		JList<String> locationList = new JList<String>(locationModel);
+
+		for (ProgramModel prog : programList) {
+			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
+			for (int i = 0; i < taskList.getModel().getSize(); i++) {
+				// Check whether already in list before adding
+				String loc = taskList.getModel().getElementAt(i).getLocation();
+				if (!loc.equals("") && !findLocationInList(loc, locationList)) {
+					locationModel.addElement(loc);
+				}
+			}
+		}
+		return (locationList);
 	}
 
 	private int getTaskIndexByName(ProgramModel program, String taskName) {
@@ -305,11 +340,11 @@ public class Database {
 	}
 
 	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
-		JList<PersonModel> personList = getAllPersons();
+		JList<PersonModel> persons = getAllPersons();
 		int count = 0;
 
-		for (int idx = 0; idx < personList.getModel().getSize(); idx++) {
-			PersonModel person = personList.getModel().getElementAt(idx);
+		for (int idx = 0; idx < persons.getModel().getSize(); idx++) {
+			PersonModel person = persons.getModel().getElementAt(idx);
 			if (isPersonAvailable(person, today)) {
 				LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
 				for (AssignedTasksModel assignedTask : assignedTaskList) {
@@ -410,8 +445,9 @@ public class Database {
 		if (personIdx != -1) {
 			// Updated all person fields except content of linked lists
 			personList.set(personIdx, updatedPerson);
-			
-			// Merge in the assigned task changes (assigned task list ONLY contains changes!!)
+
+			// Merge in the assigned task changes (assigned task list ONLY
+			// contains changes!!)
 			int taskIdx;
 			LinkedList<AssignedTasksModel> dbAssignedTaskList = personList.get(personIdx).getAssignedTasks();
 			for (AssignedTasksModel assignedTask : updatedPerson.getAssignedTasks()) {
@@ -424,8 +460,7 @@ public class Database {
 					personList.get(personIdx).getAssignedTasks().add(assignedTask);
 			}
 
-		}
-		else
+		} else
 			JOptionPane.showMessageDialog(null, "Person '" + updatedPerson.getName() + "' not found!");
 	}
 
@@ -473,18 +508,18 @@ public class Database {
 		}
 		return persons;
 	}
-	
+
 	public LinkedList<PersonModel> getPersonsByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
 
-		JList<PersonModel> personList = getAllPersons();
+		JList<PersonModel> persons = getAllPersons();
 		LinkedList<CalendarDayModel> tasksForToday = getAllTasksByDay(calendar);
 		LinkedList<PersonModel> thisDaysPersons = new LinkedList<PersonModel>();
 
-		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i).toString());
+		for (int i = 0; i < persons.getModel().getSize(); i++) {
+			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
 			if (!isPersonAvailable(pModel, thisDay))
 				continue;
 
@@ -503,17 +538,17 @@ public class Database {
 		}
 		return thisDaysPersons;
 	}
-	
+
 	public LinkedList<PersonModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
 
-		JList<PersonModel> personList = getAllPersons();
+		JList<PersonModel> persons = getAllPersons();
 		LinkedList<PersonModel> thisDaysPersons = new LinkedList<PersonModel>();
 
-		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			PersonModel pModel = getPersonByName(personList.getModel().getElementAt(i).toString());
+		for (int i = 0; i < persons.getModel().getSize(); i++) {
+			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
 			if (!isPersonAvailable(pModel, thisDay))
 				continue;
 
@@ -547,17 +582,25 @@ public class Database {
 		return -1;
 	}
 
-	private TaskModel findTaskInList (String taskName, LinkedList<CalendarDayModel> dayList) {
+	private TaskModel findTaskInList(String taskName, LinkedList<CalendarDayModel> dayList) {
 		for (CalendarDayModel day : dayList) {
 			if (day.getTask().getTaskName().equals(taskName))
 				return day.getTask();
 		}
 		return null;
 	}
-	
-	private int findAssignedTaskIdx (String taskName, LinkedList<AssignedTasksModel> assignedTaskList) {
+
+	private boolean findLocationInList(String location, JList<String> locList) {
+		for (int i = 0; i < locList.getModel().getSize(); i++) {
+			if (locList.getModel().getElementAt(i).equals(location))
+				return true;
+		}
+		return false;
+	}
+
+	private int findAssignedTaskIdx(String taskName, LinkedList<AssignedTasksModel> assignedTaskList) {
 		int i = 0;
-		
+
 		for (AssignedTasksModel task : assignedTaskList) {
 			if (task.getTaskName().equals(taskName))
 				return i;
@@ -608,6 +651,9 @@ public class Database {
 		} catch (InvalidClassException e) {
 			JOptionPane.showMessageDialog(null, "File version does not match.", "Error Loading Program File",
 					JOptionPane.ERROR_MESSAGE);
+		} catch (ClassCastException e) {
+			JOptionPane.showMessageDialog(null, "Invalid file format.", "Error Loading Program File",
+					JOptionPane.ERROR_MESSAGE);
 		}
 		ois.close();
 	}
@@ -639,6 +685,9 @@ public class Database {
 			// e.printStackTrace();
 		} catch (InvalidClassException e) {
 			JOptionPane.showMessageDialog(null, "File version does not match.", "Error Loading Roster File",
+					JOptionPane.ERROR_MESSAGE);
+		} catch (ClassCastException e) {
+			JOptionPane.showMessageDialog(null, "Invalid file format.", "Error Loading Roster File",
 					JOptionPane.ERROR_MESSAGE);
 		}
 		ois.close();
