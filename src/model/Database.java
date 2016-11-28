@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -261,20 +262,21 @@ public class Database {
 				}
 			}
 			if (!match) {
-				// No match in location list, so remove; adjust loop index to handle element deletion
+				// No match in location list, so remove; adjust loop index to
+				// handle element deletion
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
 			}
 		}
 		return matchingTasks;
 	}
-	
+
 	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> timeList) {
 		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
 		Collections.sort(matchingTasks, new TimeComparator());
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
-			String taskTime = formatTime(matchingTasks.get(taskIdx).getTask().getTime().toString());
+			String taskTime = formatTime(matchingTasks.get(taskIdx).getTask().getTime());
 			boolean match = false;
 			for (int timeIdx = 0; timeIdx < timeList.getModel().getSize(); timeIdx++) {
 				if (taskTime.equals(timeList.getModel().getElementAt(timeIdx))) {
@@ -283,7 +285,8 @@ public class Database {
 				}
 			}
 			if (!match) {
-				// No match in timeList, so remove; adjust loop index to handle element deletion
+				// No match in timeList, so remove; adjust loop index to handle
+				// element deletion
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -352,7 +355,7 @@ public class Database {
 			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
 			for (int i = 0; i < taskList.getModel().getSize(); i++) {
 				// Check whether already in list before adding
-				String time = formatTime(taskList.getModel().getElementAt(i).getTime().toString());
+				String time = formatTime(taskList.getModel().getElementAt(i).getTime());
 				if (!findStringMatchInList(time, timeList)) {
 					timeModel.addElement(time);
 				}
@@ -360,7 +363,7 @@ public class Database {
 		}
 		return (timeList);
 	}
-	
+
 	private int getTaskIndexByName(ProgramModel program, String taskName) {
 		int i = 0;
 
@@ -471,18 +474,22 @@ public class Database {
 		}
 		return true;
 	}
-	
-	private String formatTime (String time) {
-		String newTime;
+
+	private String formatTime(Time time) {
+		// Time format for hour 1 - 12 and AM/PM field
+		SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+
+		// Set time and add an hour to convert from 0-11 to 1-12
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(time);
+		cal.add(Calendar.HOUR, 1);
 		
-		// Get rid of seconds
-		newTime = time.substring(0, 5);
-		
-		// Get rid of leading zero
-		if (newTime.charAt(0) == '0')
-			return newTime.substring(1); 
-		else
-			return newTime;
+		// If hour transitioned to 12:00 am/pm, then switch the AM/PM
+		int hour = cal.get(Calendar.HOUR);
+		if (hour == 0 || hour == 12)
+			cal.set(Calendar.AM_PM, cal.get(Calendar.AM_PM) == Calendar.AM ? Calendar.PM : Calendar.AM);
+
+		return timeFormat.format(cal.getTime());
 	}
 
 	/*

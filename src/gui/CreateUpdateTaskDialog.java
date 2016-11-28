@@ -360,10 +360,10 @@ public class CreateUpdateTaskDialog extends JDialog {
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(time);
-		
-		hourSpinner = new NumberSpinnerHandler(cal.get(Calendar.HOUR), 1, 12, 1);
+
+		hourSpinner = new NumberSpinnerHandler(cal.get(Calendar.HOUR) + 1, 1, 12, 1);
 		minuteSpinner = new NumberSpinnerHandler(cal.get(Calendar.MINUTE), 0, 59, 5);
-		
+
 		hourSpinner.setPreferredSize(new Dimension(35, hourSpinner.getPreferredSize().height));
 		minuteSpinner.setPreferredSize(new Dimension(35, minuteSpinner.getPreferredSize().height));
 
@@ -384,10 +384,10 @@ public class CreateUpdateTaskDialog extends JDialog {
 	}
 
 	private Time getTime(NumberSpinnerHandler hour, NumberSpinnerHandler minute) {
-		int newHour = hour.getCurrentValue();
+		int newHour = hour.getCurrentValue() - 1;
 		if (comboAmPm.getSelectedIndex() == 1) // PM
 			newHour += 12;
-		
+
 		return (Time.valueOf(newHour + ":" + minuteSpinner.getCurrentValue() + ":00"));
 	}
 }
