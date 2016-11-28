@@ -15,6 +15,8 @@ public class NumberSpinnerHandler extends JSpinner {
 		this.max = max;
 		this.interval = interval;
 
+		// Set editor to add leading zeros
+		setEditor(new JSpinner.NumberEditor(this, "00"));
 		model = new SpinnerNumberModel(value, min, max, interval);
 		setValue(value);
 
