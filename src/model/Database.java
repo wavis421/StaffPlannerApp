@@ -271,6 +271,7 @@ public class Database {
 	
 	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> timeList) {
 		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
+		Collections.sort(matchingTasks, new TimeComparator());
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
 			String taskTime = formatTime(matchingTasks.get(taskIdx).getTask().getTime().toString());
