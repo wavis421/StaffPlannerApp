@@ -40,16 +40,32 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 		return phone;
 	}
 
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
 	public String getEmail() {
 		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public boolean isLeader() {
 		return leader;
 	}
 
+	public void setLeader(boolean leader) {
+		this.leader = leader;
+	}
+
 	public String getNotes() {
 		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
 	}
 
 	public LinkedList<AssignedTasksModel> getAssignedTasks() {
@@ -58,6 +74,10 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 
 	public DateRangeModel getDatesUnavailable() {
 		return datesUnavailable;
+	}
+
+	public void setDatesUnavailable(DateRangeModel datesUnavailable) {
+		this.datesUnavailable = datesUnavailable;
 	}
 
 	@Override

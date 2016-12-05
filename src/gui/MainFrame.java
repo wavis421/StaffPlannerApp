@@ -658,7 +658,9 @@ public class MainFrame extends JFrame {
 
 		if (dialogResponse != null) {
 			if (!isOkToSave) {
-				LinkedList<AssignedTasksModel> assignedList = mergeAssignedTaskList(origName,
+				PersonModel thisPerson = controller.getPersonByName(origName);
+				LinkedList<AssignedTasksModel> assignedList = mergeAssignedTaskList(
+						(LinkedList<AssignedTasksModel>) thisPerson.getAssignedTasks().clone(),
 						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedList);
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
@@ -810,7 +812,7 @@ public class MainFrame extends JFrame {
 		if (filteredList != null)
 			filteredList.removeAll();
 		filteredList = list;
-		
+
 		// Roster filter has a null list
 		if (filteredList == null && filterId != ROSTER_FILTER)
 			selectedFilterId = NO_FILTER;
@@ -845,7 +847,7 @@ public class MainFrame extends JFrame {
 			// assigned
 			for (int j = 0; j < taskList.getModel().getSize(); j++) {
 				TaskModel task = taskList.getModel().getElementAt(j);
-				if (!findNodeInAssignedTaskList(assignedTaskList, task.getTaskName()))
+				if (findNodeInAssignedTaskList(assignedTaskList, task.getTaskName()) == -1)
 					pNode.add(new DefaultMutableTreeNode(task));
 			}
 		}
@@ -939,27 +941,28 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private boolean findNodeInAssignedTaskList(LinkedList<AssignedTasksModel> list, String taskName) {
-		for (AssignedTasksModel t : list) {
+	private int findNodeInAssignedTaskList(LinkedList<AssignedTasksModel> list, String taskName) {
+		for (int idx = 0; idx < list.size(); idx++) {
+			AssignedTasksModel t = list.get(idx);
 			if (t.getTaskName().equals(taskName)) {
-				return true;
+				return idx;
 			}
 		}
-		return false;
+		return -1;
 	}
 
-	private LinkedList<AssignedTasksModel> mergeAssignedTaskList(String personName,
+	private LinkedList<AssignedTasksModel> mergeAssignedTaskList(LinkedList<AssignedTasksModel> mergeTaskList,
 			LinkedList<AssignedTasksModel> assignedTaskChangeList) {
-		PersonModel person = controller.getPersonByName(personName);
-		LinkedList<AssignedTasksModel> masterTaskList = person.getAssignedTasks();
-
-		// Merge master task list into task changed list
-		for (AssignedTasksModel task : masterTaskList) {
-			if (!findNodeInAssignedTaskList(assignedTaskChangeList, task.getTaskName())) {
-				assignedTaskChangeList.add(task);
+		// Merge tasks changed list into merge list
+		for (AssignedTasksModel task : assignedTaskChangeList) {
+			int foundIdx = findNodeInAssignedTaskList(mergeTaskList, task.getTaskName());
+			if (foundIdx == -1) { // Not in list
+				mergeTaskList.add(task);
+			} else {
+				mergeTaskList.set(foundIdx, task);
 			}
 		}
-		Collections.sort(assignedTaskChangeList);
-		return assignedTaskChangeList;
+		Collections.sort(mergeTaskList);
+		return mergeTaskList;
 	}
 }

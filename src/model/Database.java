@@ -483,7 +483,7 @@ public class Database {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(time);
 		cal.add(Calendar.HOUR, 1);
-		
+
 		// If hour transitioned to 12:00 am/pm, then switch the AM/PM
 		int hour = cal.get(Calendar.HOUR);
 		if (hour == 0 || hour == 12)
@@ -505,22 +505,29 @@ public class Database {
 		int personIdx = getPersonIndexByName(updatedPerson.getName());
 
 		if (personIdx != -1) {
-			// Updated all person fields except content of linked lists
-			personList.set(personIdx, updatedPerson);
-
 			// Merge in the assigned task changes (assigned task list ONLY
 			// contains changes!!)
 			int taskIdx;
-			LinkedList<AssignedTasksModel> dbAssignedTaskList = personList.get(personIdx).getAssignedTasks();
+			PersonModel thisPerson = personList.get(personIdx);
+			LinkedList<AssignedTasksModel> dbAssignedTaskList = thisPerson.getAssignedTasks();
+
 			for (AssignedTasksModel assignedTask : updatedPerson.getAssignedTasks()) {
 				taskIdx = findAssignedTaskIdx(assignedTask.getTaskName(), dbAssignedTaskList);
 				if (taskIdx != -1)
 					// Assigned task already in database, so update
-					personList.get(personIdx).getAssignedTasks().set(taskIdx, assignedTask);
+					thisPerson.getAssignedTasks().set(taskIdx, assignedTask);
 				else
 					// New task was assigned, add to database
-					personList.get(personIdx).getAssignedTasks().add(assignedTask);
+					thisPerson.getAssignedTasks().add(assignedTask);
 			}
+
+			// Now update remaining fields
+			thisPerson.setName(updatedPerson.getName());
+			thisPerson.setPhone(updatedPerson.getPhone());
+			thisPerson.setEmail(updatedPerson.getEmail());
+			thisPerson.setLeader(updatedPerson.isLeader());
+			thisPerson.setNotes(updatedPerson.getNotes());
+			thisPerson.setDatesUnavailable(updatedPerson.getDatesUnavailable());
 
 		} else
 			JOptionPane.showMessageDialog(null, "Person '" + updatedPerson.getName() + "' not found!");
