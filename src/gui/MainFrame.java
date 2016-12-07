@@ -234,7 +234,7 @@ public class MainFrame extends JFrame {
 
 						} else if (numPrograms > 1 && selectedProgramName == null) {
 							JList<String> programList = controller.getAllProgramsAsString();
-							selectActiveProgramDialog ev = new selectActiveProgramDialog(MainFrame.this, programList);
+							SelectActiveProgramDialog ev = new SelectActiveProgramDialog(MainFrame.this, programList);
 							String dialogResponse = ev.getDialogResponse();
 							if (dialogResponse != null) {
 								setProgramName(dialogResponse);
@@ -474,9 +474,12 @@ public class MainFrame extends JFrame {
 				if (controller.getNumPersons() > 0) {
 					PersonTableModel tableModel = new PersonTableModel();
 					tableModel.setData(controller.getAllPersonsList());
-					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", tableModel);
+					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", tableModel, false);
 
 					PersonTableListener tableListener = new PersonTableListener() {
+						public void addPerson() {
+						}
+
 						public void rowDeleted(int row) {
 						}
 
@@ -634,7 +637,7 @@ public class MainFrame extends JFrame {
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(), assignedTaskList,
-								dialogResponse.getDatesUnavailable()),
+								dialogResponse.getDatesUnavailable(), null),
 						assignedTaskList,
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
@@ -666,7 +669,8 @@ public class MainFrame extends JFrame {
 				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(),
-								dialogResponse.getAssignedTaskChanges(), dialogResponse.getDatesUnavailable()),
+								dialogResponse.getAssignedTaskChanges(), dialogResponse.getDatesUnavailable(),
+								thisPerson.getSingleInstanceTaskAssignment()),
 						dialogResponse.getAssignedTaskChanges(),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedList), taskTree);
 				processEditPersonDialog(personEvent, origName);
@@ -720,7 +724,6 @@ public class MainFrame extends JFrame {
 		editTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Edit task, then update calendar using filters
-				LinkedList<CalendarDayModel> tasksByDay = controller.getAllTasksByDay(selectedCalendar);
 				editTask(null, selectedTask.getTaskName());
 				updateMonth(selectedCalendar);
 			}
@@ -734,9 +737,22 @@ public class MainFrame extends JFrame {
 				PersonTableModel tableModel = new PersonTableModel();
 				tableModel.setData(personByTask);
 				PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
-						+ " on " + getDisplayDate(selectedCalendar), tableModel);
+						+ " on " + getDisplayDate(selectedCalendar), tableModel, true);
 
 				PersonTableListener tableListener = new PersonTableListener() {
+					public void addPerson() {
+						JList<String> personList = controller.getAllPersonsAsString();
+						FilterListDialog ev = new FilterListDialog(MainFrame.this,
+								"Assign person(s) to " + selectedTask.getTaskName() + " on " + 
+										getDisplayDate(selectedCalendar), personList);
+						JList<String> dialogResponse = ev.getDialogResponse();
+
+						if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
+							controller.addSingleInstanceTask(dialogResponse, selectedCalendar, selectedTask.getTaskName());
+							frame.setData(controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+						}
+					}
+
 					public void rowDeleted(int row) {
 					}
 
@@ -762,9 +778,12 @@ public class MainFrame extends JFrame {
 				PersonTableModel tableModel = new PersonTableModel();
 				tableModel.setData(personList);
 				PersonTableFrame frame = new PersonTableFrame(
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel);
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel, false);
 
 				PersonTableListener tableListener = new PersonTableListener() {
+					public void addPerson() {
+					}
+
 					public void rowDeleted(int row) {
 					}
 

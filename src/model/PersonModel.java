@@ -12,9 +12,11 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 	private String notes;
 	private LinkedList<AssignedTasksModel> assignedTasks;
 	private DateRangeModel datesUnavailable;
+	private SingleInstanceTaskModel singleInstanceTaskAssignment;
 
 	public PersonModel(String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
+			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable,
+			SingleInstanceTaskModel singleInstanceTaskAssignment) {
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
@@ -22,6 +24,7 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 		this.notes = notes;
 		this.assignedTasks = assignedTasks;
 		this.datesUnavailable = datesUnavailable;
+		this.singleInstanceTaskAssignment = singleInstanceTaskAssignment;
 	}
 
 	public String toString() {
@@ -78,6 +81,14 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 
 	public void setDatesUnavailable(DateRangeModel datesUnavailable) {
 		this.datesUnavailable = datesUnavailable;
+	}
+
+	public SingleInstanceTaskModel getSingleInstanceTaskAssignment() {
+		return singleInstanceTaskAssignment;
+	}
+
+	public void setSingleInstanceTaskAssignment(SingleInstanceTaskModel singleInstanceTaskAssignment) {
+		this.singleInstanceTaskAssignment = singleInstanceTaskAssignment;
 	}
 
 	@Override

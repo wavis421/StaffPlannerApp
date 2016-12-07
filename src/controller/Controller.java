@@ -32,11 +32,11 @@ public class Controller {
 	public void updateProgram(String programName, String startDate, String endDate) {
 		db.updateProgram(programName, startDate, endDate);
 	}
-	
+
 	public void renameProgram(String oldName, String newName) {
 		db.renameProgram(oldName, newName);
 	}
-	
+
 	public ProgramModel getProgramByName(String programName) {
 		return db.getProgramByName(programName);
 	}
@@ -44,12 +44,12 @@ public class Controller {
 	public JList<String> getAllProgramsAsString() {
 		return db.getAllProgramsAsString();
 	}
-	
+
 	public LinkedList<ProgramModel> getAllPrograms() {
 		return db.getAllPrograms();
 	}
-	
-	public int getNumPrograms () {
+
+	public int getNumPrograms() {
 		return db.getNumPrograms();
 	}
 
@@ -57,14 +57,14 @@ public class Controller {
 	 * ------- Task data -------
 	 */
 	public void addTask(TaskEvent ev) {
-		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(), ev.getTotalPersonsReqd(),
-				ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
+				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 		db.addTask(ev.getProgramName(), task);
 	}
 
 	public void updateTask(TaskEvent ev) {
-		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(), ev.getTotalPersonsReqd(),
-				ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
+		TaskModel task = new TaskModel(ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
+				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 		db.updateTask(ev.getProgramName(), task);
 	}
 
@@ -79,27 +79,27 @@ public class Controller {
 	public String findProgramByTaskName(String taskName) {
 		return db.findProgramByTaskName(taskName);
 	}
-	
+
 	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
 		return db.getTasksByDayByProgram(calendar, programs);
 	}
-	
+
 	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
 		return db.getTasksByDayByPerson(calendar, personList);
 	}
-	
+
 	public LinkedList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
 		return db.getTasksByDayByIncompleteRoster(calendar);
 	}
-	
+
 	public LinkedList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
 		return db.getTasksByDayByLocation(calendar, locations);
 	}
-	
+
 	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> times) {
 		return db.getTasksByDayByTime(calendar, times);
 	}
-	
+
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		return db.getAllTasksByDay(calendar);
 	}
@@ -111,15 +111,15 @@ public class Controller {
 	public JList<TaskModel> getAllTasks(String programName) {
 		return db.getAllTasks(programName);
 	}
-	
+
 	public JList<String> getAllLocationsAsString() {
 		return db.getAllLocationsAsString();
 	}
-	
+
 	public JList<String> getAllTimesAsString() {
 		return db.getAllTimesAsString();
 	}
-	
+
 	/*
 	public JList<String> getAllTasksAsString(String programName) {
 		return db.getAllTasksAsString(programName);
@@ -131,47 +131,52 @@ public class Controller {
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
-		db.addPerson(name, phone, email, leader, notes, assignedTasks, datesUnavailable);	
+		db.addPerson(name, phone, email, leader, notes, assignedTasks, datesUnavailable);
 	}
-	
+
 	public void updatePerson(PersonEvent ev) {
-		PersonModel person = new PersonModel(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
-				ev.getAssignedTaskChanges(), ev.getDatesUnavailable());		
-		db.updatePerson(person);
+		db.updatePerson(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
+				ev.getAssignedTaskChanges(), ev.getDatesUnavailable());
 	}
-	
+
+	public void addSingleInstanceTask (JList<String> personList, Calendar day, String taskName) {
+		for (int i = 0; i < personList.getModel().getSize(); i++) {
+			db.addSingleInstanceTask(personList.getModel().getElementAt(i), day, taskName);
+		}
+	}
+
 	public void renamePerson(String oldName, String newName) {
 		db.renamePerson(oldName, newName);
 	}
-	
-	public PersonModel getPersonByName (String name) {
+
+	public PersonModel getPersonByName(String name) {
 		return db.getPersonByName(name);
 	}
-	
+
 	public JList<String> getAllPersonsAsString() {
 		return db.getAllPersonsAsString();
 	}
-	
+
 	public JList<PersonModel> getAllPersons() {
 		return db.getAllPersons();
 	}
-	
+
 	public LinkedList<PersonModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
 		return db.getPersonsByDayByTask(calendar, taskName);
 	}
-	
+
 	public LinkedList<PersonModel> getPersonsByDay(Calendar calendar) {
 		return db.getPersonsByDay(calendar);
 	}
-	
+
 	public LinkedList<PersonModel> getAllPersonsList() {
 		return db.getAllPersonsList();
 	}
-	
+
 	public int getNumPersons() {
 		return db.getNumPersons();
 	}
-	
+
 	/*
 	 * ------- File save/restore items -------
 	 */
@@ -182,7 +187,7 @@ public class Controller {
 	public void loadProgramFromFile(File file) throws IOException {
 		db.loadProgramFromFile(file);
 	}
-	
+
 	public void saveRosterToFile(File file) throws IOException {
 		db.saveRosterToFile(file);
 	}

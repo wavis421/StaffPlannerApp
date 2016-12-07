@@ -497,13 +497,15 @@ public class Database {
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
-		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable));
+		personList
+				.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable, null));
 		Collections.sort(personList);
 	}
 
-	public void updatePerson(PersonModel updatedPerson) {
-		int personIdx = getPersonIndexByName(updatedPerson.getName());
-
+	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader, 
+			String personNotes, LinkedList<AssignedTasksModel> personAssignedTasks, DateRangeModel personDatesUnavailable) {
+		
+		int personIdx = getPersonIndexByName(personName);
 		if (personIdx != -1) {
 			// Merge in the assigned task changes (assigned task list ONLY
 			// contains changes!!)
@@ -511,7 +513,7 @@ public class Database {
 			PersonModel thisPerson = personList.get(personIdx);
 			LinkedList<AssignedTasksModel> dbAssignedTaskList = thisPerson.getAssignedTasks();
 
-			for (AssignedTasksModel assignedTask : updatedPerson.getAssignedTasks()) {
+			for (AssignedTasksModel assignedTask : personAssignedTasks) {
 				taskIdx = findAssignedTaskIdx(assignedTask.getTaskName(), dbAssignedTaskList);
 				if (taskIdx != -1)
 					// Assigned task already in database, so update
@@ -521,16 +523,24 @@ public class Database {
 					thisPerson.getAssignedTasks().add(assignedTask);
 			}
 
-			// Now update remaining fields
-			thisPerson.setName(updatedPerson.getName());
-			thisPerson.setPhone(updatedPerson.getPhone());
-			thisPerson.setEmail(updatedPerson.getEmail());
-			thisPerson.setLeader(updatedPerson.isLeader());
-			thisPerson.setNotes(updatedPerson.getNotes());
-			thisPerson.setDatesUnavailable(updatedPerson.getDatesUnavailable());
+			// Now update remaining fields (except one-time assignments)
+			thisPerson.setName(personName);
+			thisPerson.setPhone(personPhone);
+			thisPerson.setEmail(personEmail);
+			thisPerson.setLeader(personIsLeader);
+			thisPerson.setNotes(personNotes);
+			thisPerson.setDatesUnavailable(personDatesUnavailable);
 
 		} else
-			JOptionPane.showMessageDialog(null, "Person '" + updatedPerson.getName() + "' not found!");
+			JOptionPane.showMessageDialog(null, "Person '" + personName + "' not found!");
+	}
+
+	public void addSingleInstanceTask (String personName, Calendar day, String taskName) {
+		System.out.println("Assign one-time task to " + personName + " for " + taskName + " on " + 
+				(day.get(Calendar.MONTH) + 1) + "/" + day.get(Calendar.DAY_OF_MONTH));
+		
+		PersonModel person = getPersonByName(personName);
+		person.setSingleInstanceTaskAssignment(new SingleInstanceTaskModel(taskName, day));
 	}
 
 	public void renamePerson(String oldName, String newName) {

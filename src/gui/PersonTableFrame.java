@@ -18,11 +18,13 @@ public class PersonTableFrame extends JFrame {
 	private PersonTableListener tableListener;
 	private PersonTableModel tableModel;
 	private PersonTablePanel tablePanel;
+	private boolean isAddButtonRequired;
 
-	public PersonTableFrame(String title, PersonTableModel model) {
+	public PersonTableFrame(String title, PersonTableModel model, boolean isAddButtonRequired) {
 		setTitle(title);
 		this.tableModel = model;
 		this.tablePanel = new PersonTablePanel(tableModel);
+		this.isAddButtonRequired = isAddButtonRequired;
 
 		setLayout(new BorderLayout());
 		JPanel buttonPanel = createButtonPanel();
@@ -50,25 +52,33 @@ public class PersonTableFrame extends JFrame {
 
 	private JPanel createButtonPanel() {
 		JPanel panel = new JPanel();
-		JButton addPersonButton = new JButton("Add person");
+		
+		if (isAddButtonRequired) {
+			JButton addPersonButton = new JButton("Add person");
+			panel.add(addPersonButton);
+
+			addPersonButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (tableListener != null) {
+						tableListener.addPerson();
+					}
+				}
+			});
+		}
+		
 		JButton sendEmailButton = new JButton("Send email");
 		JButton refreshButton = new JButton("Refresh");
 		JButton closeButton = new JButton("Close");
 
-		panel.add(addPersonButton);
 		panel.add(sendEmailButton);
 		panel.add(refreshButton);
 		panel.add(closeButton);
 
-		addPersonButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-			}
-		});
-
 		sendEmailButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
+				if (tableListener != null) {
+					tableListener.addPerson();
+				}
 			}
 		});
 

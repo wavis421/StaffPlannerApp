@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
-public class selectActiveProgramDialog extends JDialog {
+public class SelectActiveProgramDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
@@ -29,7 +29,7 @@ public class selectActiveProgramDialog extends JDialog {
 	private ButtonGroup programGroup = new ButtonGroup();
 	private String dialogResponse;
 
-	public selectActiveProgramDialog(JFrame parent, JList<String> programList) {
+	public SelectActiveProgramDialog(JFrame parent, JList<String> programList) {
 		super(parent, "Select active program...", true);
 		this.programList = programList;
 

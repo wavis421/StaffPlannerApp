@@ -52,7 +52,7 @@ public class FilterListDialog extends JDialog {
 		// Layout
 		setFilterLayout();
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		setSize(300, 120 + (20 * numRows));
+		setSize(350, 120 + (20 * numRows));
 		setVisible(true);
 	}
 
