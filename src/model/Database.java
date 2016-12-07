@@ -194,18 +194,9 @@ public class Database {
 
 			for (int i = 0; i < persons.getModel().getSize(); i++) {
 				PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
-				if (isPersonAvailable(pModel, thisDay)) {
-					for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
-						AssignedTasksModel assignedTask = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
-						if (assignedTask.getTaskName().equals(thisDaysTaskName) &&
-								assignedTask.getDaysOfWeek()[dayOfWeekIdx] &&
-								assignedTask.getWeeksOfMonth()[dayOfWeekInMonthIdx]) {
-							match = true;
-							break;
-						}
-					}
-					if (match)
-						break;
+				if (checkPersonMatchForTaskByDay(pModel, thisDaysTaskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)) {
+					match = true;
+					break;
 				}
 			}
 			if (!match) {
@@ -345,23 +336,29 @@ public class Database {
 		}
 	}
 
+	private boolean checkPersonMatchForTaskByDay (PersonModel person, String taskName, Date today, 
+			int dayOfWeekIdx, int dowInMonthIdx) {
+		if (isPersonAvailable(person, today)) {
+			LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+			for (AssignedTasksModel assignedTask : assignedTaskList) {
+				if (assignedTask.getTaskName().equals(taskName)
+						&& assignedTask.getDaysOfWeek()[dayOfWeekIdx]
+						&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
 		JList<PersonModel> persons = getAllPersons();
 		int count = 0;
 
 		for (int idx = 0; idx < persons.getModel().getSize(); idx++) {
 			PersonModel person = persons.getModel().getElementAt(idx);
-			if (isPersonAvailable(person, today)) {
-				LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
-				for (AssignedTasksModel assignedTask : assignedTaskList) {
-					if (assignedTask.getTaskName().equals(task.getTaskName())
-							&& assignedTask.getDaysOfWeek()[dayOfWeekIdx]
-							&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
-						count++;
-						break;
-					}
-				}
-			}
+			if (checkPersonMatchForTaskByDay(person, task.getTaskName(), today, dayOfWeekIdx, dowInMonthIdx))
+				count++;
 		}
 		return count;
 	}
@@ -589,19 +586,8 @@ public class Database {
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
-			if (!isPersonAvailable(pModel, thisDay))
-				continue;
-
-			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
-				AssignedTasksModel assignedTask = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
-				if (taskName.equals(assignedTask.getTaskName())) {
-					// Got a task match!! Check if today is assigned.
-					if ((assignedTask.getDaysOfWeek()[dayOfWeekIdx])
-							&& (assignedTask.getWeeksOfMonth()[dayOfWeekInMonthIdx])) {
-						thisDaysPersons.add(pModel);
-						break;
-					}
-				}
+			if (checkPersonMatchForTaskByDay(pModel, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)) {
+				thisDaysPersons.add(pModel);
 			}
 		}
 		return thisDaysPersons;
