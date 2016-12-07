@@ -168,22 +168,14 @@ public class Database {
 		return null;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programList) {
-		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = getDay(calendar);
+	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programFilterList) {
+		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
-		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
-		for (int i = 0; i < programList.getModel().getSize(); i++) {
-			ProgramModel program = getProgramByName(programList.getModel().getElementAt(i));
-			if (isProgramExpired(thisDay, program))
-				continue;
-
-			for (TaskModel t : program.getTaskList()) {
-				if ((t.getDayOfWeek()[dayOfWeekIdx]) && (t.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
-					thisDaysTasks.add(new CalendarDayModel(t,
-							getPersonCountForTaskByDay(t, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)));
-				}
+		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
+			String programName = findProgramByTaskName(thisDaysTasks.get(taskIdx).getTask().getTaskName());
+			if (!findStringMatchInList (programName, programFilterList)) {
+				thisDaysTasks.remove(taskIdx);
+				taskIdx--;
 			}
 		}
 		return thisDaysTasks;
@@ -193,57 +185,44 @@ public class Database {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
+		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+		boolean match;
+		
+		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
+			match = false;
+			String thisDaysTaskName = thisDaysTasks.get(taskIdx).getTask().getTaskName();
 
-		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
-		for (int i = 0; i < persons.getModel().getSize(); i++) {
-			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
-			if (!isPersonAvailable(pModel, thisDay))
-				continue;
-
-			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
-				AssignedTasksModel task = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
-				if (isProgramExpired(thisDay, getProgramByName(task.getProgramName())))
-					continue;
-
-				boolean alreadyInList = false;
-				for (int k = 0; k < thisDaysTasks.size(); k++) {
-					if (thisDaysTasks.get(k).getTask().getTaskName().equals(task.getTaskName())) {
-						alreadyInList = true;
+			for (int i = 0; i < persons.getModel().getSize(); i++) {
+				PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
+				if (isPersonAvailable(pModel, thisDay)) {
+					for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
+						AssignedTasksModel assignedTask = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
+						if (assignedTask.getTaskName().equals(thisDaysTaskName) &&
+								assignedTask.getDaysOfWeek()[dayOfWeekIdx] &&
+								assignedTask.getWeeksOfMonth()[dayOfWeekInMonthIdx]) {
+							match = true;
+							break;
+						}
+					}
+					if (match)
 						break;
-					}
 				}
-
-				if (!alreadyInList) {
-					boolean[] daysOfWeek = task.getDaysOfWeek();
-					boolean[] weeksOfMonth = task.getWeeksOfMonth();
-					TaskModel t = getTaskByName(task.getProgramName(), task.getTaskName());
-					if ((daysOfWeek[dayOfWeekIdx]) && (weeksOfMonth[dayOfWeekInMonthIdx])) {
-						thisDaysTasks.add(new CalendarDayModel(t,
-								getPersonCountForTaskByDay(t, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)));
-					}
-				}
+			}
+			if (!match) {
+				thisDaysTasks.remove(taskIdx);
+				taskIdx--;
 			}
 		}
 		return thisDaysTasks;
 	}
 
 	public LinkedList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
-		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = getDay(calendar);
-		int personCount;
+		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
-		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
-		for (ProgramModel prog : programList) {
-			if (isProgramExpired(thisDay, prog))
-				continue;
-
-			for (TaskModel task : prog.getTaskList()) {
-				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
-					personCount = getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx);
-					if (personCount < task.getTotalPersonsReqd())
-						thisDaysTasks.add(new CalendarDayModel(task, personCount));
-				}
+		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
+			if (thisDaysTasks.get(taskIdx).getPersonCount() >= thisDaysTasks.get(taskIdx).getTask().getTotalPersonsReqd()) {
+				thisDaysTasks.remove(taskIdx);
+				taskIdx--;
 			}
 		}
 		return thisDaysTasks;
@@ -254,16 +233,7 @@ public class Database {
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
 			String taskLoc = matchingTasks.get(taskIdx).getTask().getLocation();
-			boolean match = false;
-			for (int locIdx = 0; locIdx < locations.getModel().getSize(); locIdx++) {
-				if (taskLoc.equals(locations.getModel().getElementAt(locIdx))) {
-					match = true;
-					break;
-				}
-			}
-			if (!match) {
-				// No match in location list, so remove; adjust loop index to
-				// handle element deletion
+			if (!findStringMatchInList (taskLoc, locations)) {
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -277,16 +247,7 @@ public class Database {
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
 			String taskTime = formatTime(matchingTasks.get(taskIdx).getTask().getTime());
-			boolean match = false;
-			for (int timeIdx = 0; timeIdx < timeList.getModel().getSize(); timeIdx++) {
-				if (taskTime.equals(timeList.getModel().getElementAt(timeIdx))) {
-					match = true;
-					break;
-				}
-			}
-			if (!match) {
-				// No match in timeList, so remove; adjust loop index to handle
-				// element deletion
+			if (!findStringMatchInList (taskTime, timeList)) {
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
 			}
