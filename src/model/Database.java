@@ -340,12 +340,26 @@ public class Database {
 			int dayOfWeekIdx, int dowInMonthIdx) {
 		if (isPersonAvailable(person, today)) {
 			LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+			
+			// Check if task is in person's assigned task list for today
 			for (AssignedTasksModel assignedTask : assignedTaskList) {
 				if (assignedTask.getTaskName().equals(taskName)
 						&& assignedTask.getDaysOfWeek()[dayOfWeekIdx]
 						&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
 					return true;
 				}
+			}
+			
+			// Check if this person is a sub for today
+			if (person.getSingleInstanceTaskAssignment() != null) {
+				Calendar subCalendar = person.getSingleInstanceTaskAssignment().getTaskDate();
+				Date subDay = getDay(subCalendar);
+				int subWeekIdx = subCalendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+				int subDayIdx = subCalendar.get(Calendar.DAY_OF_WEEK) - 1;
+			
+				if (person.getSingleInstanceTaskAssignment().getTaskName().equals(taskName) &&
+						(subDay.compareTo(today) == 0) && (subWeekIdx == dowInMonthIdx) && (subDayIdx == dayOfWeekIdx))
+					return true;
 			}
 		}
 		return false;
@@ -557,19 +571,11 @@ public class Database {
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
-			if (!isPersonAvailable(pModel, thisDay))
-				continue;
 
-			for (int j = 0; j < pModel.getAssignedTasks().size(); j++) {
-				AssignedTasksModel assignedTask = (AssignedTasksModel) pModel.getAssignedTasks().get(j);
-				TaskModel task = findTaskInList(assignedTask.getTaskName(), tasksForToday);
-				if (task != null) {
-					// Got a task match!! Check if today is assigned.
-					if ((assignedTask.getDaysOfWeek()[dayOfWeekIdx])
-							&& (assignedTask.getWeeksOfMonth()[dayOfWeekInMonthIdx])) {
-						thisDaysPersons.add(pModel);
-						break;
-					}
+			for (int taskIdx = 0; taskIdx < tasksForToday.size(); taskIdx++) {
+				String taskName = tasksForToday.get(taskIdx).getTask().getTaskName();
+				if (checkPersonMatchForTaskByDay(pModel, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)) {
+					thisDaysPersons.add(pModel);
 				}
 			}
 		}

@@ -750,6 +750,7 @@ public class MainFrame extends JFrame {
 						if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
 							controller.addSingleInstanceTask(dialogResponse, selectedCalendar, selectedTask.getTaskName());
 							frame.setData(controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+							updateMonth(selectedCalendar);
 						}
 					}
 
@@ -759,6 +760,7 @@ public class MainFrame extends JFrame {
 					public void editRow(String personName) {
 						editPerson(personName);
 						frame.setData(controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+						updateMonth(selectedCalendar);
 					}
 
 					public void refresh() {
