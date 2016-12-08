@@ -15,6 +15,7 @@ import model.AssignedTasksModel;
 import model.CalendarDayModel;
 import model.Database;
 import model.DateRangeModel;
+import model.PersonByTaskModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
@@ -161,15 +162,15 @@ public class Controller {
 		return db.getAllPersons();
 	}
 
-	public LinkedList<PersonModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
+	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
 		return db.getPersonsByDayByTask(calendar, taskName);
 	}
 
-	public LinkedList<PersonModel> getPersonsByDay(Calendar calendar) {
+	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		return db.getPersonsByDay(calendar);
 	}
 
-	public LinkedList<PersonModel> getAllPersonsList() {
+	public LinkedList<PersonByTaskModel> getAllPersonsList() {
 		return db.getAllPersonsList();
 	}
 

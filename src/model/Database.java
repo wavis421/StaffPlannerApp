@@ -194,7 +194,7 @@ public class Database {
 
 			for (int i = 0; i < persons.getModel().getSize(); i++) {
 				PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
-				if (checkPersonMatchForTaskByDay(pModel, thisDaysTaskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)) {
+				if (checkPersonMatchForTaskByDay(pModel, thisDaysTaskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
 					match = true;
 					break;
 				}
@@ -336,7 +336,7 @@ public class Database {
 		}
 	}
 
-	private boolean checkPersonMatchForTaskByDay (PersonModel person, String taskName, Date today, 
+	private int checkPersonMatchForTaskByDay (PersonModel person, String taskName, Date today, 
 			int dayOfWeekIdx, int dowInMonthIdx) {
 		if (isPersonAvailable(person, today)) {
 			LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
@@ -346,7 +346,7 @@ public class Database {
 				if (assignedTask.getTaskName().equals(taskName)
 						&& assignedTask.getDaysOfWeek()[dayOfWeekIdx]
 						&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
-					return true;
+					return 0;
 				}
 			}
 			
@@ -359,10 +359,10 @@ public class Database {
 			
 				if (person.getSingleInstanceTaskAssignment().getTaskName().equals(taskName) &&
 						(subDay.compareTo(today) == 0) && (subWeekIdx == dowInMonthIdx) && (subDayIdx == dayOfWeekIdx))
-					return true;
+					return 1;
 			}
 		}
-		return false;
+		return -1;
 	}
 	
 	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
@@ -371,7 +371,7 @@ public class Database {
 
 		for (int idx = 0; idx < persons.getModel().getSize(); idx++) {
 			PersonModel person = persons.getModel().getElementAt(idx);
-			if (checkPersonMatchForTaskByDay(person, task.getTaskName(), today, dayOfWeekIdx, dowInMonthIdx))
+			if (checkPersonMatchForTaskByDay(person, task.getTaskName(), today, dayOfWeekIdx, dowInMonthIdx) >= 0)
 				count++;
 		}
 		return count;
@@ -552,48 +552,52 @@ public class Database {
 		return list;
 	}
 
-	public LinkedList<PersonModel> getAllPersonsList() {
-		LinkedList<PersonModel> persons = new LinkedList<PersonModel>();
+	public LinkedList<PersonByTaskModel> getAllPersonsList() {
+		LinkedList<PersonByTaskModel> personsByTask = new LinkedList<PersonByTaskModel>();
 		for (PersonModel p : personList) {
-			persons.add(p);
+			PersonByTaskModel person = new PersonByTaskModel(p, null, false);
+			personsByTask.add(person);
 		}
-		return persons;
+		return personsByTask;
 	}
 
-	public LinkedList<PersonModel> getPersonsByDay(Calendar calendar) {
+	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
 
 		JList<PersonModel> persons = getAllPersons();
 		LinkedList<CalendarDayModel> tasksForToday = getAllTasksByDay(calendar);
-		LinkedList<PersonModel> thisDaysPersons = new LinkedList<PersonModel>();
+		LinkedList<PersonByTaskModel> thisDaysPersons = new LinkedList<PersonByTaskModel>();
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
 
 			for (int taskIdx = 0; taskIdx < tasksForToday.size(); taskIdx++) {
-				String taskName = tasksForToday.get(taskIdx).getTask().getTaskName();
-				if (checkPersonMatchForTaskByDay(pModel, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)) {
-					thisDaysPersons.add(pModel);
+				TaskModel task = tasksForToday.get(taskIdx).getTask();
+				int match = checkPersonMatchForTaskByDay(pModel, task.getTaskName(), thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx);
+				if (match >= 0) {
+					PersonByTaskModel personByTask = new PersonByTaskModel (pModel, task, match == 0 ? false : true);
+					thisDaysPersons.add(personByTask);
 				}
 			}
 		}
 		return thisDaysPersons;
 	}
 
-	public LinkedList<PersonModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
+	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
 
 		JList<PersonModel> persons = getAllPersons();
-		LinkedList<PersonModel> thisDaysPersons = new LinkedList<PersonModel>();
+		LinkedList<PersonByTaskModel> thisDaysPersons = new LinkedList<PersonByTaskModel>();
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
-			if (checkPersonMatchForTaskByDay(pModel, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)) {
-				thisDaysPersons.add(pModel);
+			if (checkPersonMatchForTaskByDay(pModel, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
+				PersonByTaskModel personByTask = new PersonByTaskModel (pModel, null, false);
+				thisDaysPersons.add(personByTask);
 			}
 		}
 		return thisDaysPersons;

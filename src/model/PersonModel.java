@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 public class PersonModel implements Serializable, Comparable<PersonModel> {
-	private static final long serialVersionUID = 12340001L;
+	private static final long serialVersionUID = 12340002L;
 	private String name;
 	private String phone;
 	private String email;

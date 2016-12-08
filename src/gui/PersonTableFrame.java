@@ -9,7 +9,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import model.PersonModel;
+import model.PersonByTaskModel;
 
 public class PersonTableFrame extends JFrame {
 	private static final int PREF_FRAME_WIDTH = 800;
@@ -42,7 +42,7 @@ public class PersonTableFrame extends JFrame {
 		tablePanel.setPersonTableListener(listener);
 	}
 
-	public void setData(LinkedList<PersonModel> db) {
+	public void setData(LinkedList<PersonByTaskModel> db) {
 		tablePanel.setData(db);
 	}
 

@@ -37,6 +37,7 @@ import javax.swing.tree.TreeSelectionModel;
 import controller.Controller;
 import model.AssignedTasksModel;
 import model.CalendarDayModel;
+import model.PersonByTaskModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
@@ -472,7 +473,7 @@ public class MainFrame extends JFrame {
 		viewAllPersons.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
-					PersonTableModel tableModel = new PersonTableModel();
+					PersonTableModel tableModel = new PersonTableModel(false);
 					tableModel.setData(controller.getAllPersonsList());
 					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", tableModel, false);
 
@@ -731,10 +732,10 @@ public class MainFrame extends JFrame {
 		viewRosterByTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// View assigned persons
-				LinkedList<PersonModel> personByTask = controller.getPersonsByDayByTask(selectedCalendar,
+				LinkedList<PersonByTaskModel> personByTask = controller.getPersonsByDayByTask(selectedCalendar,
 						selectedTask.getTaskName());
 
-				PersonTableModel tableModel = new PersonTableModel();
+				PersonTableModel tableModel = new PersonTableModel(false);
 				tableModel.setData(personByTask);
 				PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
 						+ " on " + getDisplayDate(selectedCalendar), tableModel, true);
@@ -775,9 +776,9 @@ public class MainFrame extends JFrame {
 		viewCompleteRosterForToday.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// View all persons
-				LinkedList<PersonModel> personList = controller.getPersonsByDay(selectedCalendar);
+				LinkedList<PersonByTaskModel> personList = controller.getPersonsByDay(selectedCalendar);
 
-				PersonTableModel tableModel = new PersonTableModel();
+				PersonTableModel tableModel = new PersonTableModel(true);
 				tableModel.setData(personList);
 				PersonTableFrame frame = new PersonTableFrame(
 						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel, false);

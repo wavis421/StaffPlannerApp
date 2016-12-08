@@ -4,19 +4,33 @@ import java.util.LinkedList;
 
 import javax.swing.table.AbstractTableModel;
 
+import model.PersonByTaskModel;
 import model.PersonModel;
 
 public class PersonTableModel extends AbstractTableModel {
-	private LinkedList<PersonModel> personList;
-	private String colNames[] = { "Name", "Phone #", "E-Mail", "Notes", "Unavail Dates" };
+	private static final long serialVersionUID = 12340002L;
+	private LinkedList<PersonByTaskModel> personList;
+	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail", "Unavail Dates" };
+	private String colNamesExpanded[] = { "Name", "Ldr", "Sub", "Task", "Location", "Time", "Phone #", "E-Mail", "Unavail Dates" };
+	private String colNames[];
+	private boolean expanded;
 
-	public void setData(LinkedList<PersonModel> db) {
-		this.personList = db;
+	public PersonTableModel(boolean expanded) {
+		this.expanded = expanded;
+		if (expanded) {
+			colNames = colNamesExpanded;
+		} else {
+			colNames = colNamesBasic;
+		}
 	}
 
+	public void setData(LinkedList<PersonByTaskModel> db) {
+		this.personList = db;
+	}
+	
 	@Override
 	public int getColumnCount() {
-		return 5;
+		return colNames.length;
 	}
 
 	@Override
@@ -31,23 +45,46 @@ public class PersonTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		PersonModel person = personList.get(row);
-		switch (col) {
-		case 0:
-			return person.getName();
-		case 1:
-			return person.getPhone();
-		case 2:
-			return person.getEmail();
-		case 3:
-			return person.getNotes();
-		case 4:
-			return getDatesUnavail(person);
+		PersonByTaskModel person = personList.get(row);
+		if (expanded) {
+			switch (col) {
+			case 0:
+				return person.getPerson().getName();
+			case 1:
+				return (String) (Character.toString(person.getPerson().isLeader() ? '\u2713' : ' '));
+			case 2:
+				return (String) (Character.toString(person.isSubstitute() ? '\u2713' : ' '));
+			case 3:
+				return person.getTask().getTaskName();
+			case 4:
+				return person.getTask().getLocation();
+			case 5:
+				return person.getTask().getTime();
+			case 6:
+				return person.getPerson().getPhone();
+			case 7:
+				return person.getPerson().getEmail();
+			case 8:
+				return getDatesUnavail(person.getPerson());
+			}
+		} else {
+			switch (col) {
+			case 0:
+				return person.getPerson().getName();
+			case 1:
+				return (String) (Character.toString(person.getPerson().isLeader() ? '\u2713' : ' '));
+			case 2:
+				return person.getPerson().getPhone();
+			case 3:
+				return person.getPerson().getEmail();
+			case 4:
+				return getDatesUnavail(person.getPerson());
+			}
 		}
 		return null;
 	}
-	
-	public int getColumnForPersonName () {
+
+	public int getColumnForPersonName() {
 		return 0;
 	}
 

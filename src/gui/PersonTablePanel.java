@@ -13,6 +13,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import model.PersonByTaskModel;
 import model.PersonModel;
 
 public class PersonTablePanel extends JPanel {
@@ -73,7 +74,7 @@ public class PersonTablePanel extends JPanel {
 		add(new JScrollPane(table), BorderLayout.CENTER);
 	}
 
-	public void setData(LinkedList<PersonModel> db) {
+	public void setData(LinkedList<PersonByTaskModel> db) {
 		tableModel.setData(db);
 		refresh();
 	}

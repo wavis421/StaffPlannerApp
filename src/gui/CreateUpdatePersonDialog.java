@@ -45,6 +45,7 @@ import org.jdatepicker.impl.UtilDateModel;
 import model.AssignedTasksModel;
 import model.DateRangeModel;
 import model.PersonModel;
+import model.SingleInstanceTaskModel;
 import model.TaskModel;
 
 public class CreateUpdatePersonDialog extends JDialog {
@@ -66,6 +67,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
 	private LinkedList<AssignedTasksModel> assignedTaskChanges;
 	private DateRangeModel datesUnavailable;
+	private JTextField singleInstanceTask = new JTextField(TEXT_FIELD_SIZE);
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
 
@@ -76,6 +78,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JLabel staffLabel = new JLabel("Leader or volunteer: ");
 	private JLabel notesLabel = new JLabel("Notes: ");
 	private JLabel datesLabel = new JLabel("Dates Unavailable: ");
+	private JLabel singleTaskLabel = new JLabel("Dates Substituting: ");
 
 	// Dialog panels
 	private JPanel controlsPanel;
@@ -112,6 +115,12 @@ public class CreateUpdatePersonDialog extends JDialog {
 			this.volunteerButton.setSelected(true);
 		this.assignedTaskChanges = assignedTaskChanges;
 		this.datesUnavailable = person.getDatesUnavailable();
+		
+		if (person.getSingleInstanceTaskAssignment() != null) {
+			Calendar date = person.getSingleInstanceTaskAssignment().getTaskDate();
+			this.singleInstanceTask.setText(person.getSingleInstanceTaskAssignment().getTaskName() + " on " +
+					(date.get(Calendar.MONTH) + 1) + "/" +  date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));
+		}
 
 		setupPersonDialog();
 	}
@@ -127,6 +136,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private void setupPersonDialog() {
 		createStaffSelector();
 		createDateSelectors();
+		singleInstanceTask.setEditable(false);
 
 		// Force the text area not to expand when user types more than 3 lines!!
 		notesArea.setBorder(BorderFactory.createEtchedBorder());
@@ -169,7 +179,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setPersonLayout();
-		setSize(750, 480);
+		setSize(750, 500);
 		setVisible(true);
 	}
 
@@ -198,6 +208,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 		addRowToControlPanel(gc, emailLabel, email, gridY++);
 		addRowToControlPanel(gc, staffLabel, staffPanel, gridY++);
 		addRowToControlPanel(gc, datesLabel, datePanel, gridY++);
+		addRowToControlPanel(gc, singleTaskLabel, singleInstanceTask, gridY++);
 		addRowToControlPanel(gc, notesLabel, notesArea, gridY++);
 		addRowToControlPanel(gc, taskTreeScrollPane, assignedTasksScrollPane, gridY++);
 
