@@ -353,12 +353,12 @@ public class Database {
 			// Check if this person is a sub for today
 			if (person.getSingleInstanceTaskAssignment() != null) {
 				Calendar subCalendar = person.getSingleInstanceTaskAssignment().getTaskDate();
-				Date subDay = getDay(subCalendar);
-				int subWeekIdx = subCalendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-				int subDayIdx = subCalendar.get(Calendar.DAY_OF_WEEK) - 1;
+				Date extraDay = getDay(subCalendar);
+				int extraWeekIdx = subCalendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+				int extraDayIdx = subCalendar.get(Calendar.DAY_OF_WEEK) - 1;
 			
 				if (person.getSingleInstanceTaskAssignment().getTaskName().equals(taskName) &&
-						(subDay.compareTo(today) == 0) && (subWeekIdx == dowInMonthIdx) && (subDayIdx == dayOfWeekIdx))
+						(extraDay.compareTo(today) == 0) && (extraWeekIdx == dowInMonthIdx) && (extraDayIdx == dayOfWeekIdx))
 					return 1;
 			}
 		}

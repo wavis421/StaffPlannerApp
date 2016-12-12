@@ -78,7 +78,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private JLabel staffLabel = new JLabel("Leader or volunteer: ");
 	private JLabel notesLabel = new JLabel("Notes: ");
 	private JLabel datesLabel = new JLabel("Dates Unavailable: ");
-	private JLabel singleTaskLabel = new JLabel("Dates Substituting: ");
+	private JLabel singleTaskLabel = new JLabel("Extra Dates: ");
 
 	// Dialog panels
 	private JPanel controlsPanel;
