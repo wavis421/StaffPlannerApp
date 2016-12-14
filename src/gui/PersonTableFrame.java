@@ -18,13 +18,13 @@ public class PersonTableFrame extends JFrame {
 	private PersonTableListener tableListener;
 	private PersonTableModel tableModel;
 	private PersonTablePanel tablePanel;
-	private boolean isAddButtonRequired;
+	private String addButtonText;
 
-	public PersonTableFrame(String title, PersonTableModel model, boolean isAddButtonRequired) {
+	public PersonTableFrame(String title, PersonTableModel model, String addButtonText) {
 		setTitle(title);
 		this.tableModel = model;
 		this.tablePanel = new PersonTablePanel(tableModel);
-		this.isAddButtonRequired = isAddButtonRequired;
+		this.addButtonText = addButtonText;
 
 		setLayout(new BorderLayout());
 		JPanel buttonPanel = createButtonPanel();
@@ -52,9 +52,9 @@ public class PersonTableFrame extends JFrame {
 
 	private JPanel createButtonPanel() {
 		JPanel panel = new JPanel();
-		
-		if (isAddButtonRequired) {
-			JButton addPersonButton = new JButton("Add person");
+
+		if (!addButtonText.equals("")) {
+			JButton addPersonButton = new JButton(addButtonText);
 			panel.add(addPersonButton);
 
 			addPersonButton.addActionListener(new ActionListener() {
@@ -65,7 +65,7 @@ public class PersonTableFrame extends JFrame {
 				}
 			});
 		}
-		
+
 		JButton sendEmailButton = new JButton("Send email");
 		JButton refreshButton = new JButton("Refresh");
 		JButton closeButton = new JButton("Close");

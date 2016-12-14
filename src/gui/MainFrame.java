@@ -475,7 +475,7 @@ public class MainFrame extends JFrame {
 				if (controller.getNumPersons() > 0) {
 					PersonTableModel tableModel = new PersonTableModel(false);
 					tableModel.setData(controller.getAllPersonsList());
-					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", tableModel, false);
+					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", tableModel, "");
 
 					PersonTableListener tableListener = new PersonTableListener() {
 						public void addPerson() {
@@ -738,19 +738,20 @@ public class MainFrame extends JFrame {
 				PersonTableModel tableModel = new PersonTableModel(false);
 				tableModel.setData(personByTask);
 				PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
-						+ " on " + getDisplayDate(selectedCalendar), tableModel, true);
+						+ " on " + getDisplayDate(selectedCalendar), tableModel, "Add person");
 
 				PersonTableListener tableListener = new PersonTableListener() {
 					public void addPerson() {
 						JList<String> personList = controller.getAllPersonsAsString();
-						FilterListDialog ev = new FilterListDialog(MainFrame.this,
-								"Assign person(s) to " + selectedTask.getTaskName() + " on " + 
-										getDisplayDate(selectedCalendar), personList);
+						FilterListDialog ev = new FilterListDialog(MainFrame.this, "Assign person(s) to "
+								+ selectedTask.getTaskName() + " on " + getDisplayDate(selectedCalendar), personList);
 						JList<String> dialogResponse = ev.getDialogResponse();
 
 						if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
-							controller.addSingleInstanceTask(dialogResponse, selectedCalendar, selectedTask.getTaskName());
-							frame.setData(controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+							controller.addSingleInstanceTask(dialogResponse, selectedCalendar,
+									selectedTask.getTaskName());
+							frame.setData(
+									controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
 							updateMonth(selectedCalendar);
 						}
 					}
@@ -781,10 +782,24 @@ public class MainFrame extends JFrame {
 				PersonTableModel tableModel = new PersonTableModel(true);
 				tableModel.setData(personList);
 				PersonTableFrame frame = new PersonTableFrame(
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel, false);
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel, "Add Floater");
 
 				PersonTableListener tableListener = new PersonTableListener() {
+					// Add Floater
 					public void addPerson() {
+						JList<String> personList = controller.getAllPersonsAsString();
+						JList<String> timeList = controller.getAllTimesAsString();
+
+						AddFloaterDialog ev = new AddFloaterDialog(MainFrame.this, selectedCalendar, personList,
+								timeList);
+						FloaterEvent dialogResponse = ev.getDialogResponse();
+
+						if (dialogResponse != null) {
+							controller.addSingleInstanceTask(dialogResponse.getPersonNames(),
+									dialogResponse.getCalendar(), "");
+							frame.setData(controller.getPersonsByDay(selectedCalendar));
+							updateMonth(selectedCalendar);
+						}
 					}
 
 					public void rowDeleted(int row) {

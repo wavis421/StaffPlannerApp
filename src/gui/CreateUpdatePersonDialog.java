@@ -13,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -45,7 +44,6 @@ import org.jdatepicker.impl.UtilDateModel;
 import model.AssignedTasksModel;
 import model.DateRangeModel;
 import model.PersonModel;
-import model.SingleInstanceTaskModel;
 import model.TaskModel;
 
 public class CreateUpdatePersonDialog extends JDialog {
@@ -115,11 +113,14 @@ public class CreateUpdatePersonDialog extends JDialog {
 			this.volunteerButton.setSelected(true);
 		this.assignedTaskChanges = assignedTaskChanges;
 		this.datesUnavailable = person.getDatesUnavailable();
-		
+
 		if (person.getSingleInstanceTaskAssignment() != null) {
 			Calendar date = person.getSingleInstanceTaskAssignment().getTaskDate();
-			this.singleInstanceTask.setText(person.getSingleInstanceTaskAssignment().getTaskName() + " on " +
-					(date.get(Calendar.MONTH) + 1) + "/" +  date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));
+			String taskName = person.getSingleInstanceTaskAssignment().getTaskName();
+			if (taskName.equals(""))
+				taskName = "Floater";
+			this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
+					+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));
 		}
 
 		setupPersonDialog();

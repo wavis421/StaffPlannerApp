@@ -173,7 +173,7 @@ public class Database {
 
 		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
 			String programName = findProgramByTaskName(thisDaysTasks.get(taskIdx).getTask().getTaskName());
-			if (!findStringMatchInList (programName, programFilterList)) {
+			if (!findStringMatchInList(programName, programFilterList)) {
 				thisDaysTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -187,14 +187,16 @@ public class Database {
 		Date thisDay = getDay(calendar);
 		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 		boolean match;
-		
+
 		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
 			match = false;
 			String thisDaysTaskName = thisDaysTasks.get(taskIdx).getTask().getTaskName();
 
 			for (int i = 0; i < persons.getModel().getSize(); i++) {
 				PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
-				if (checkPersonMatchForTaskByDay(pModel, thisDaysTaskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
+				// -1 = no match, 0 = assigned task, 1 = single instance task
+				if (checkPersonMatchForTaskByDay(pModel, thisDaysTaskName, thisDay, dayOfWeekIdx,
+						dayOfWeekInMonthIdx) >= 0) {
 					match = true;
 					break;
 				}
@@ -211,7 +213,8 @@ public class Database {
 		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
 		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-			if (thisDaysTasks.get(taskIdx).getPersonCount() >= thisDaysTasks.get(taskIdx).getTask().getTotalPersonsReqd()) {
+			if (thisDaysTasks.get(taskIdx).getPersonCount() >= thisDaysTasks.get(taskIdx).getTask()
+					.getTotalPersonsReqd()) {
 				thisDaysTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -224,7 +227,7 @@ public class Database {
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
 			String taskLoc = matchingTasks.get(taskIdx).getTask().getLocation();
-			if (!findStringMatchInList (taskLoc, locations)) {
+			if (!findStringMatchInList(taskLoc, locations)) {
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -238,7 +241,7 @@ public class Database {
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
 			String taskTime = formatTime(matchingTasks.get(taskIdx).getTask().getTime());
-			if (!findStringMatchInList (taskTime, timeList)) {
+			if (!findStringMatchInList(taskTime, timeList)) {
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -336,41 +339,42 @@ public class Database {
 		}
 	}
 
-	private int checkPersonMatchForTaskByDay (PersonModel person, String taskName, Date today, 
-			int dayOfWeekIdx, int dowInMonthIdx) {
+	private int checkPersonMatchForTaskByDay(PersonModel person, String taskName, Date today, int dayOfWeekIdx,
+			int dowInMonthIdx) {
 		if (isPersonAvailable(person, today)) {
 			LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
-			
+
 			// Check if task is in person's assigned task list for today
 			for (AssignedTasksModel assignedTask : assignedTaskList) {
-				if (assignedTask.getTaskName().equals(taskName)
-						&& assignedTask.getDaysOfWeek()[dayOfWeekIdx]
+				if (assignedTask.getTaskName().equals(taskName) && assignedTask.getDaysOfWeek()[dayOfWeekIdx]
 						&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
 					return 0;
 				}
 			}
-			
+
 			// Check if this person is a sub for today
 			if (person.getSingleInstanceTaskAssignment() != null) {
 				Calendar subCalendar = person.getSingleInstanceTaskAssignment().getTaskDate();
 				Date extraDay = getDay(subCalendar);
 				int extraWeekIdx = subCalendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 				int extraDayIdx = subCalendar.get(Calendar.DAY_OF_WEEK) - 1;
-			
-				if (person.getSingleInstanceTaskAssignment().getTaskName().equals(taskName) &&
-						(extraDay.compareTo(today) == 0) && (extraWeekIdx == dowInMonthIdx) && (extraDayIdx == dayOfWeekIdx))
+
+				if (person.getSingleInstanceTaskAssignment().getTaskName().equals(taskName)
+						&& (extraDay.compareTo(today) == 0) && (extraWeekIdx == dowInMonthIdx)
+						&& (extraDayIdx == dayOfWeekIdx))
 					return 1;
 			}
 		}
 		return -1;
 	}
-	
+
 	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
 		JList<PersonModel> persons = getAllPersons();
 		int count = 0;
 
 		for (int idx = 0; idx < persons.getModel().getSize(); idx++) {
 			PersonModel person = persons.getModel().getElementAt(idx);
+			// -1 = no match, 0 = assigned task, 1 = single instance task
 			if (checkPersonMatchForTaskByDay(person, task.getTaskName(), today, dayOfWeekIdx, dowInMonthIdx) >= 0)
 				count++;
 		}
@@ -469,14 +473,14 @@ public class Database {
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
-		personList
-				.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable, null));
+		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable, null));
 		Collections.sort(personList);
 	}
 
-	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader, 
-			String personNotes, LinkedList<AssignedTasksModel> personAssignedTasks, DateRangeModel personDatesUnavailable) {
-		
+	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
+			String personNotes, LinkedList<AssignedTasksModel> personAssignedTasks,
+			DateRangeModel personDatesUnavailable) {
+
 		int personIdx = getPersonIndexByName(personName);
 		if (personIdx != -1) {
 			// Merge in the assigned task changes (assigned task list ONLY
@@ -507,10 +511,10 @@ public class Database {
 			JOptionPane.showMessageDialog(null, "Person '" + personName + "' not found!");
 	}
 
-	public void addSingleInstanceTask (String personName, Calendar day, String taskName) {
-		System.out.println("Assign one-time task to " + personName + " for " + taskName + " on " + 
-				(day.get(Calendar.MONTH) + 1) + "/" + day.get(Calendar.DAY_OF_MONTH));
-		
+	public void addSingleInstanceTask(String personName, Calendar day, String taskName) {
+		System.out.println("Assign one-time task to " + personName + " for " + taskName + " on "
+				+ (day.get(Calendar.MONTH) + 1) + "/" + day.get(Calendar.DAY_OF_MONTH));
+
 		PersonModel person = getPersonByName(personName);
 		person.setSingleInstanceTaskAssignment(new SingleInstanceTaskModel(taskName, day));
 	}
@@ -573,15 +577,27 @@ public class Database {
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
 
+			// Search through today's tasks for a person match
 			for (int taskIdx = 0; taskIdx < tasksForToday.size(); taskIdx++) {
 				TaskModel task = tasksForToday.get(taskIdx).getTask();
-				int match = checkPersonMatchForTaskByDay(pModel, task.getTaskName(), thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx);
+
+				// -1 = no match, 0 = assigned task, 1 = single instance task
+				int match = checkPersonMatchForTaskByDay(pModel, task.getTaskName(), thisDay, dayOfWeekIdx,
+						dayOfWeekInMonthIdx);
+
 				if (match >= 0) {
-					PersonByTaskModel personByTask = new PersonByTaskModel (pModel, task, match == 0 ? false : true);
+					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, task, match == 0 ? false : true);
 					thisDaysPersons.add(personByTask);
 				}
 			}
+			
+			// Check if person is a floater (not associated with task)
+			if (checkPersonMatchForTaskByDay(pModel, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
+				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false);
+				thisDaysPersons.add(personByTask);
+			}
 		}
+		
 		return thisDaysPersons;
 	}
 
@@ -595,8 +611,10 @@ public class Database {
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
+
+			// -1 = no match, 0 = assigned task, 1 = single instance task
 			if (checkPersonMatchForTaskByDay(pModel, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-				PersonByTaskModel personByTask = new PersonByTaskModel (pModel, null, false);
+				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false);
 				thisDaysPersons.add(personByTask);
 			}
 		}

@@ -12,7 +12,7 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 		this.taskName = taskName;
 		this.taskDate = taskDate;
 	}
-	
+
 	public String getTaskName() {
 		return taskName;
 	}
@@ -21,8 +21,7 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 		return taskDate;
 	}
 
-	public int compareTo(SingleInstanceTaskModel arg0) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int compareTo(SingleInstanceTaskModel otherTask) {
+		return (this.taskName.compareTo(otherTask.getTaskName()));
 	}
 }

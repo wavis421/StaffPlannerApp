@@ -1,5 +1,6 @@
 package gui;
 
+import java.sql.Time;
 import java.util.LinkedList;
 
 import javax.swing.table.AbstractTableModel;
@@ -11,7 +12,8 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 12340002L;
 	private LinkedList<PersonByTaskModel> personList;
 	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail", "Unavail Dates" };
-	private String colNamesExpanded[] = { "Name", "Ldr", "Sub", "Task", "Location", "Time", "Phone #", "E-Mail", "Unavail Dates" };
+	private String colNamesExpanded[] = { "Name", "Ldr", "Sub", "Task", "Location", "Time", "Phone #", "E-Mail",
+			"Unavail Dates" };
 	private String colNames[];
 	private boolean expanded;
 
@@ -27,7 +29,7 @@ public class PersonTableModel extends AbstractTableModel {
 	public void setData(LinkedList<PersonByTaskModel> db) {
 		this.personList = db;
 	}
-	
+
 	@Override
 	public int getColumnCount() {
 		return colNames.length;
@@ -55,11 +57,20 @@ public class PersonTableModel extends AbstractTableModel {
 			case 2:
 				return (String) (Character.toString(person.isSubstitute() ? '\u2713' : ' '));
 			case 3:
-				return person.getTask().getTaskName();
+				if (person.getTask() == null)
+					return "";
+				else
+					return person.getTask().getTaskName();
 			case 4:
-				return person.getTask().getLocation();
+				if (person.getTask() == null)
+					return "Floater";
+				else
+					return person.getTask().getLocation();
 			case 5:
-				return person.getTask().getTime();
+				if (person.getTask() == null)
+					return Time.valueOf("12:00:00");
+				else
+					return person.getTask().getTime();
 			case 6:
 				return person.getPerson().getPhone();
 			case 7:
