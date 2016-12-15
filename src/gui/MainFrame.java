@@ -13,6 +13,7 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -712,11 +713,17 @@ public class MainFrame extends JFrame {
 		calPanel.setDayBoxListener(new DayBoxListener() {
 			public void dayBoxClicked(Calendar calendar, Point point, CalendarDayModel task) {
 				selectedCalendar = calendar;
-				String programName = controller.findProgramByTaskName(task.getTask().getTaskName());
-				selectedTask = controller.getTaskByName(programName, task.getTask().getTaskName());
-				System.out.println("day box clicked: day = " + calendar.get(Calendar.DAY_OF_MONTH) + ", room = "
-						+ task.getTask().getLocation() + ", task name = " + task.getTask().getTaskName());
 
+				// Handle floater with null task
+				if (task.getTask() != null) {
+					String programName = controller.findProgramByTaskName(task.getTask().getTaskName());
+					selectedTask = controller.getTaskByName(programName, task.getTask().getTaskName());
+					System.out.println("day box clicked: day = " + calendar.get(Calendar.DAY_OF_MONTH) + ", room = "
+							+ task.getTask().getLocation() + ", task name = " + task.getTask().getTaskName());
+				} else {
+					selectedTask = null;
+					System.out.println("day box clicked: day = " + calendar.get(Calendar.DAY_OF_MONTH) + ", floater");
+				}
 				// Display pop-up menu
 				popupMenu.show(calPanel, point.x, point.y);
 			}
@@ -724,54 +731,61 @@ public class MainFrame extends JFrame {
 		// Day Box pop-up sub-menus
 		editTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Edit task, then update calendar using filters
-				editTask(null, selectedTask.getTaskName());
-				updateMonth(selectedCalendar);
+				if (selectedTask != null) {
+					// Edit task, then update calendar using filters
+					editTask(null, selectedTask.getTaskName());
+					updateMonth(selectedCalendar);
+				}
 			}
 		});
 		viewRosterByTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// View assigned persons
-				LinkedList<PersonByTaskModel> personByTask = controller.getPersonsByDayByTask(selectedCalendar,
-						selectedTask.getTaskName());
+				if (selectedTask != null) {
+					// View assigned persons
+					LinkedList<PersonByTaskModel> personByTask = controller.getPersonsByDayByTask(selectedCalendar,
+							selectedTask.getTaskName());
 
-				PersonTableModel tableModel = new PersonTableModel(false);
-				tableModel.setData(personByTask);
-				PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
-						+ " on " + getDisplayDate(selectedCalendar), tableModel, "Add person");
+					PersonTableModel tableModel = new PersonTableModel(false);
+					tableModel.setData(personByTask);
+					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
+							+ " on " + getDisplayDate(selectedCalendar), tableModel, "Add person");
 
-				PersonTableListener tableListener = new PersonTableListener() {
-					public void addPerson() {
-						JList<String> personList = controller.getAllPersonsAsString();
-						FilterListDialog ev = new FilterListDialog(MainFrame.this, "Assign person(s) to "
-								+ selectedTask.getTaskName() + " on " + getDisplayDate(selectedCalendar), personList);
-						JList<String> dialogResponse = ev.getDialogResponse();
+					PersonTableListener tableListener = new PersonTableListener() {
+						public void addPerson() {
+							JList<String> personList = controller.getAllPersonsAsString();
+							FilterListDialog ev = new FilterListDialog(MainFrame.this, "Assign person(s) to "
+									+ selectedTask.getTaskName() + " on " + getDisplayDate(selectedCalendar),
+									personList);
+							JList<String> dialogResponse = ev.getDialogResponse();
 
-						if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
-							controller.addSingleInstanceTask(dialogResponse, selectedCalendar,
-									selectedTask.getTaskName());
+							if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
+								controller.addSingleInstanceTask(dialogResponse, selectedCalendar,
+										selectedTask.getTaskName(), 0);
+								frame.setData(
+										controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+								updateMonth(selectedCalendar);
+							}
+						}
+
+						public void rowDeleted(int row) {
+						}
+
+						public void editRow(String personName) {
+							editPerson(personName);
 							frame.setData(
 									controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
 							updateMonth(selectedCalendar);
 						}
-					}
 
-					public void rowDeleted(int row) {
-					}
+						public void refresh() {
+							frame.setData(
+									controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+						}
+					};
 
-					public void editRow(String personName) {
-						editPerson(personName);
-						frame.setData(controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
-						updateMonth(selectedCalendar);
-					}
-
-					public void refresh() {
-						frame.setData(controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
-					}
-				};
-
-				frame.setTableListener(tableListener);
-				frame.setVisible(true);
+					frame.setTableListener(tableListener);
+					frame.setVisible(true);
+				}
 			}
 		});
 		viewCompleteRosterForToday.addActionListener(new ActionListener() {
@@ -782,21 +796,21 @@ public class MainFrame extends JFrame {
 				PersonTableModel tableModel = new PersonTableModel(true);
 				tableModel.setData(personList);
 				PersonTableFrame frame = new PersonTableFrame(
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel, "Add Floater");
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel, "Add floater");
 
 				PersonTableListener tableListener = new PersonTableListener() {
 					// Add Floater
 					public void addPerson() {
 						JList<String> personList = controller.getAllPersonsAsString();
-						JList<String> timeList = controller.getAllTimesAsString();
+						JList<Time> timeList = controller.getAllTimes();
 
-						AddFloaterDialog ev = new AddFloaterDialog(MainFrame.this, selectedCalendar, personList,
-								timeList);
+						AddFloaterDialog ev = new AddFloaterDialog(MainFrame.this, (Calendar) selectedCalendar.clone(),
+								personList, timeList);
 						FloaterEvent dialogResponse = ev.getDialogResponse();
 
 						if (dialogResponse != null) {
 							controller.addSingleInstanceTask(dialogResponse.getPersonNames(),
-									dialogResponse.getCalendar(), "");
+									dialogResponse.getCalendar(), "", dialogResponse.getColor());
 							frame.setData(controller.getPersonsByDay(selectedCalendar));
 							updateMonth(selectedCalendar);
 						}
@@ -837,7 +851,7 @@ public class MainFrame extends JFrame {
 			else if (selectedFilterId == TIME_FILTER)
 				tasks = controller.getTasksByDayByTime(localCalendar, filteredList);
 			else
-				tasks = controller.getAllTasksByDay(localCalendar);
+				tasks = controller.getAllTasksAndFloatersByDay(localCalendar);
 
 			calPanel.updateTasksByDay(i, tasks);
 		}

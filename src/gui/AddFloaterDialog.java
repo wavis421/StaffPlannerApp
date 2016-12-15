@@ -10,6 +10,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
@@ -35,7 +37,7 @@ public class AddFloaterDialog extends JDialog {
 	// Private instance variables
 	private JList<String> personsList;
 	private JComboBox<String> personCombo;
-	private JList<String> timesList;
+	private JList<Time> timesList;
 	private JComboBox<String> timeCombo;
 	private Calendar calendar;
 	private JPanel colorPanel = new JPanel();
@@ -52,7 +54,7 @@ public class AddFloaterDialog extends JDialog {
 	private FloaterEvent dialogResponse;
 
 	// Constructor for adding floater
-	public AddFloaterDialog(JFrame parent, Calendar date, JList<String> personsList, JList<String> timesList) {
+	public AddFloaterDialog(JFrame parent, Calendar date, JList<String> personsList, JList<Time> timesList) {
 		super(parent, "Add floater for " + (date.get(Calendar.MONTH) + 1) + "/" + date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR), true);
 
 		this.calendar = date;
@@ -73,6 +75,13 @@ public class AddFloaterDialog extends JDialog {
 				// Create FloaterEvent and set response
 				DefaultListModel<String> pModel = new DefaultListModel<String>();
 				pModel.addElement(new String(personCombo.getSelectedItem().toString()));
+
+				// Add selected time to calendar
+				int idx = timeCombo.getSelectedIndex();
+				Calendar timeCal = Calendar.getInstance();
+				timeCal.setTime(timesList.getModel().getElementAt(idx));
+				calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR));
+				calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
 
 				FloaterEvent ev = new FloaterEvent(this, new JList<String>(pModel), calendar,
 						Integer.parseInt(colorGroup.getSelection().getActionCommand()));
@@ -164,11 +173,13 @@ public class AddFloaterDialog extends JDialog {
 		personCombo.setMaximumSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
 	}
 
-	private void createTimesComboBox(JList<String> times) {
+	private void createTimesComboBox(JList<Time> times) {
 		DefaultComboBoxModel<String> timeModel = new DefaultComboBoxModel<String>();
 
-		for (int i = 0; i < times.getModel().getSize(); i++)
-			timeModel.addElement(times.getModel().getElementAt(i));
+		for (int i = 0; i < times.getModel().getSize(); i++) {
+			String timeString = formatTime (times.getModel().getElementAt(i));
+			timeModel.addElement(timeString);
+		}
 
 		timeCombo = new JComboBox<String>(timeModel);
 		timeCombo.setSelectedIndex(0);
@@ -204,5 +215,22 @@ public class AddFloaterDialog extends JDialog {
 
 		// Highlight default color BLACK
 		buttons[0].setSelected(true);
+	}
+	
+	private String formatTime(Time time) {
+		// Time format for hour 1 - 12 and AM/PM field
+		SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+
+		// Set time and add an hour to convert from 0-11 to 1-12
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(time);
+		cal.add(Calendar.HOUR, 1);
+
+		// If hour transitioned to 12:00 am/pm, then switch the AM/PM
+		int hour = cal.get(Calendar.HOUR);
+		if (hour == 0 || hour == 12)
+			cal.set(Calendar.AM_PM, cal.get(Calendar.AM_PM) == Calendar.AM ? Calendar.PM : Calendar.AM);
+
+		return timeFormat.format(cal.getTime());
 	}
 }

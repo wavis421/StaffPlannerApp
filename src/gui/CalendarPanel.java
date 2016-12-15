@@ -245,7 +245,7 @@ public class CalendarPanel extends JPanel {
 				for (int idx = 0; idx < dayBoxTaskList[dayIdx].size(); idx++) {
 					CalendarDayModel day = dayBoxTaskList[dayIdx].get(idx);
 					taskListModel.addElement(day);
-					if (day.getPersonCount() < day.getTask().getTotalPersonsReqd())
+					if (day.getTask() != null && (day.getPersonCount() < day.getTask().getTotalPersonsReqd()))
 						highlight = true;
 				}
 			}

@@ -262,10 +262,30 @@ public class Database {
 			for (TaskModel task : prog.getTaskList()) {
 				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
 					thisDaysTasks.add(new CalendarDayModel(task,
-							getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)));
+							getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx), 0, null));
 				}
 			}
 		}
+		return thisDaysTasks;
+	}
+
+	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Date thisDay = getDay(calendar);
+
+		// Get all tasks for today
+		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+		
+		// Now add floaters to the list
+		for (PersonModel person : personList) {
+			// Check if person is a floater (not associated with task)
+			if (checkPersonMatchForTaskByDay(person, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
+				thisDaysTasks.add(new CalendarDayModel(null, 0, person.getSingleInstanceTaskAssignment().getColor(),
+						person.getSingleInstanceTaskAssignment().getTaskDate()));
+			}
+		}
+		Collections.sort(thisDaysTasks);
 		return thisDaysTasks;
 	}
 
@@ -317,6 +337,31 @@ public class Database {
 			}
 		}
 		return (timeList);
+	}
+
+	public JList<Time> getAllTimes() {
+		DefaultListModel<Time> timeModel = new DefaultListModel<Time>();
+		JList<Time> timeList = new JList<Time>(timeModel);
+
+		for (ProgramModel prog : programList) {
+			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
+			for (int taskIdx = 0; taskIdx < taskList.getModel().getSize(); taskIdx++) {
+				// Check whether already in list before adding
+				boolean match = false;
+				Time taskTime = taskList.getModel().getElementAt(taskIdx).getTime();
+
+				for (int timeIdx = 0; timeIdx < timeList.getModel().getSize(); timeIdx++) {
+					if (timeList.getModel().getElementAt(timeIdx).compareTo(taskTime) == 0) {
+						match = true;
+						break;
+					}
+				}
+				if (!match) {
+					timeModel.addElement(taskTime);
+				}
+			}
+		}
+		return timeList;
 	}
 
 	private int getTaskIndexByName(ProgramModel program, String taskName) {
@@ -511,12 +556,10 @@ public class Database {
 			JOptionPane.showMessageDialog(null, "Person '" + personName + "' not found!");
 	}
 
-	public void addSingleInstanceTask(String personName, Calendar day, String taskName) {
-		System.out.println("Assign one-time task to " + personName + " for " + taskName + " on "
-				+ (day.get(Calendar.MONTH) + 1) + "/" + day.get(Calendar.DAY_OF_MONTH));
-
+	public void addSingleInstanceTask(String personName, Calendar day, String taskName, int color) {
+		// Note: Color parameter only valid when taskName is blank
 		PersonModel person = getPersonByName(personName);
-		person.setSingleInstanceTaskAssignment(new SingleInstanceTaskModel(taskName, day));
+		person.setSingleInstanceTaskAssignment(new SingleInstanceTaskModel(taskName, day, color));
 	}
 
 	public void renamePerson(String oldName, String newName) {
@@ -565,6 +608,9 @@ public class Database {
 		return personsByTask;
 	}
 
+	// Return list of all persons assigned to this day, including single
+	// instance
+	// assignments (subs) and floaters
 	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
@@ -590,14 +636,14 @@ public class Database {
 					thisDaysPersons.add(personByTask);
 				}
 			}
-			
+
 			// Check if person is a floater (not associated with task)
 			if (checkPersonMatchForTaskByDay(pModel, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
 				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false);
 				thisDaysPersons.add(personByTask);
 			}
 		}
-		
+
 		return thisDaysPersons;
 	}
 

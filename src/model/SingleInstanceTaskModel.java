@@ -4,13 +4,16 @@ import java.io.Serializable;
 import java.util.Calendar;
 
 public class SingleInstanceTaskModel implements Serializable, Comparable<SingleInstanceTaskModel> {
-	private static final long serialVersionUID = 12340001L;
+	private static final long serialVersionUID = 12340002L;
 	private String taskName;
 	private Calendar taskDate;
+	private int color;
 	
-	public SingleInstanceTaskModel (String taskName, Calendar taskDate) {
+	public SingleInstanceTaskModel (String taskName, Calendar taskDate, int color) {
 		this.taskName = taskName;
 		this.taskDate = taskDate;
+		this.color = color;
+
 	}
 
 	public String getTaskName() {
@@ -19,6 +22,10 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 
 	public Calendar getTaskDate() {
 		return taskDate;
+	}
+	
+	public int getColor() {
+		return color;
 	}
 
 	public int compareTo(SingleInstanceTaskModel otherTask) {

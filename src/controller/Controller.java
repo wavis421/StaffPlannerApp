@@ -2,8 +2,8 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Time;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.LinkedList;
 
 import javax.swing.JList;
@@ -105,6 +105,10 @@ public class Controller {
 		return db.getAllTasksByDay(calendar);
 	}
 
+	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay (Calendar calendar) {
+		return db.getAllTasksAndFloatersByDay(calendar);
+	}
+	
 	/*
 	 * public List<TaskModel> getAllTasks() { return db.getAllTasks(); }
 	 */
@@ -119,6 +123,10 @@ public class Controller {
 
 	public JList<String> getAllTimesAsString() {
 		return db.getAllTimesAsString();
+	}
+	
+	public JList<Time> getAllTimes() {
+		return db.getAllTimes();
 	}
 
 	/*
@@ -140,9 +148,9 @@ public class Controller {
 				ev.getAssignedTaskChanges(), ev.getDatesUnavailable());
 	}
 
-	public void addSingleInstanceTask (JList<String> personList, Calendar day, String taskName) {
+	public void addSingleInstanceTask (JList<String> personList, Calendar day, String taskName, int color) {
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			db.addSingleInstanceTask(personList.getModel().getElementAt(i), day, taskName);
+			db.addSingleInstanceTask(personList.getModel().getElementAt(i), day, taskName, color);
 		}
 	}
 

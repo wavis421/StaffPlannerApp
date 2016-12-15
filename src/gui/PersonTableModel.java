@@ -1,6 +1,7 @@
 package gui;
 
 import java.sql.Time;
+import java.util.Calendar;
 import java.util.LinkedList;
 
 import javax.swing.table.AbstractTableModel;
@@ -67,10 +68,15 @@ public class PersonTableModel extends AbstractTableModel {
 				else
 					return person.getTask().getLocation();
 			case 5:
-				if (person.getTask() == null)
-					return Time.valueOf("12:00:00");
-				else
-					return person.getTask().getTime();
+				Calendar cal;
+				if (person.getTask() == null) {
+					cal = person.getPerson().getSingleInstanceTaskAssignment().getTaskDate();
+				}
+				else {
+					cal = Calendar.getInstance();
+					cal.setTime(person.getTask().getTime());
+				}
+				return Time.valueOf((cal.get(Calendar.HOUR) + 1) + ":" + cal.get(Calendar.MINUTE) + ":00");
 			case 6:
 				return person.getPerson().getPhone();
 			case 7:

@@ -117,10 +117,15 @@ public class CreateUpdatePersonDialog extends JDialog {
 		if (person.getSingleInstanceTaskAssignment() != null) {
 			Calendar date = person.getSingleInstanceTaskAssignment().getTaskDate();
 			String taskName = person.getSingleInstanceTaskAssignment().getTaskName();
-			if (taskName.equals(""))
+			if (taskName.equals("")) {
 				taskName = "Floater";
-			this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
-					+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));
+				this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
+						+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR) + " at "
+						+ (date.get(Calendar.HOUR) + 1) + ":" + date.get(Calendar.MINUTE));
+			} else {
+				this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
+						+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));
+			}
 		}
 
 		setupPersonDialog();
