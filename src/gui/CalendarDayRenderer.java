@@ -32,7 +32,7 @@ public class CalendarDayRenderer extends JLabel implements ListCellRenderer<Cale
 			// Floater task
 			setForeground(new Color(calendarDay.getTextColor()));
 			setText("Floater " + (calendarDay.getFloaterTime().get(Calendar.HOUR) + 1) + ":"
-					+ calendarDay.getFloaterTime().get(Calendar.MINUTE));
+					+ String.format("%02d", calendarDay.getFloaterTime().get(Calendar.MINUTE)));
 			setFont(JTFTools.decodeFont(DEFAULT_FONT));
 		} else {
 			// Assigned task

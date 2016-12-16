@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -324,43 +325,42 @@ public class Database {
 
 	public JList<String> getAllTimesAsString() {
 		DefaultListModel<String> timeModel = new DefaultListModel<String>();
-		JList<String> timeList = new JList<String>(timeModel);
+		ArrayList<Time> timeArray = new ArrayList<Time>();
 
 		for (ProgramModel prog : programList) {
 			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
 			for (int i = 0; i < taskList.getModel().getSize(); i++) {
 				// Check whether already in list before adding
-				String time = formatTime(taskList.getModel().getElementAt(i).getTime());
-				if (!findStringMatchInList(time, timeList)) {
-					timeModel.addElement(time);
+				Time time = taskList.getModel().getElementAt(i).getTime();
+				if (!findTimeMatchInArray(time, timeArray)) {
+					timeArray.add(time);
 				}
 			}
 		}
-		return (timeList);
+		Collections.sort(timeArray);
+		for (int i = 0; i < timeArray.size(); i++)
+			timeModel.addElement(formatTime(timeArray.get(i)));
+		 
+		return (new JList<String>(timeModel));
 	}
 
 	public JList<Time> getAllTimes() {
 		DefaultListModel<Time> timeModel = new DefaultListModel<Time>();
-		JList<Time> timeList = new JList<Time>(timeModel);
+		ArrayList<Time> timeArray = new ArrayList<Time>();
 
 		for (ProgramModel prog : programList) {
 			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
 			for (int taskIdx = 0; taskIdx < taskList.getModel().getSize(); taskIdx++) {
 				// Check whether already in list before adding
-				boolean match = false;
 				Time taskTime = taskList.getModel().getElementAt(taskIdx).getTime();
-
-				for (int timeIdx = 0; timeIdx < timeList.getModel().getSize(); timeIdx++) {
-					if (timeList.getModel().getElementAt(timeIdx).compareTo(taskTime) == 0) {
-						match = true;
-						break;
-					}
-				}
-				if (!match) {
-					timeModel.addElement(taskTime);
-				}
+				if (!findTimeMatchInArray(taskTime, timeArray))
+					timeArray.add(taskTime);
 			}
 		}
+		Collections.sort(timeArray);
+		for (int i = 0; i < timeArray.size(); i++)
+			timeModel.addElement(timeArray.get(i));
+		JList<Time> timeList = new JList<Time>(timeModel);
 		return timeList;
 	}
 
@@ -693,6 +693,14 @@ public class Database {
 	private boolean findStringMatchInList(String findString, JList<String> list) {
 		for (int i = 0; i < list.getModel().getSize(); i++) {
 			if (list.getModel().getElementAt(i).equals(findString))
+				return true;
+		}
+		return false;
+	}
+
+	private boolean findTimeMatchInArray(Time findTime, ArrayList<Time> list) {
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).compareTo(findTime) == 0)
 				return true;
 		}
 		return false;
