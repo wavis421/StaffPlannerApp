@@ -380,19 +380,18 @@ public class Database {
 		return (new JList<String>(timeModel));
 	}
 
-	public JList<Time> getAllTimes() {
+	public JList<Time> getAllTimesByDay(Calendar calendar) {
 		DefaultListModel<Time> timeModel = new DefaultListModel<Time>();
 		ArrayList<Time> timeArray = new ArrayList<Time>();
 
-		for (ProgramModel prog : programList) {
-			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
-			for (int taskIdx = 0; taskIdx < taskList.getModel().getSize(); taskIdx++) {
-				// Check whether already in list before adding
-				Time taskTime = taskList.getModel().getElementAt(taskIdx).getTime();
-				if (!findTimeMatchInArray(taskTime, timeArray))
-					timeArray.add(taskTime);
-			}
+		LinkedList<CalendarDayModel> taskList = getAllTasksByDay(calendar);
+		for (int taskIdx = 0; taskIdx < taskList.size(); taskIdx++) {
+			// Check whether already in list before adding
+			Time taskTime = taskList.get(taskIdx).getTask().getTime();
+			if (!findTimeMatchInArray(taskTime, timeArray))
+				timeArray.add(taskTime);
 		}
+
 		Collections.sort(timeArray);
 		for (int i = 0; i < timeArray.size(); i++)
 			timeModel.addElement(timeArray.get(i));

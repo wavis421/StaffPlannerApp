@@ -125,8 +125,8 @@ public class Controller {
 		return db.getAllTimesAsString();
 	}
 	
-	public JList<Time> getAllTimes() {
-		return db.getAllTimes();
+	public JList<Time> getAllTimesByDay(Calendar calendar) {
+		return db.getAllTimesByDay(calendar);
 	}
 
 	/*

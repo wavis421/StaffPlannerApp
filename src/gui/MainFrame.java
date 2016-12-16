@@ -799,7 +799,7 @@ public class MainFrame extends JFrame {
 					// Add Floater
 					public void addPerson() {
 						JList<String> personList = controller.getAllPersonsAsString();
-						JList<Time> timeList = controller.getAllTimes();
+						JList<Time> timeList = controller.getAllTimesByDay(selectedCalendar);
 
 						AddFloaterDialog ev = new AddFloaterDialog(MainFrame.this, (Calendar) selectedCalendar.clone(),
 								personList, timeList);
