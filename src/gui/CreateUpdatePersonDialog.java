@@ -121,7 +121,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 				taskName = "Floater";
 				this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
 						+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR) + " at "
-						+ (date.get(Calendar.HOUR) + 1) + ":" + date.get(Calendar.MINUTE));
+						+ (date.get(Calendar.HOUR) + 1) + ":" + String.format("%02d", date.get(Calendar.MINUTE)));
 			} else {
 				this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
 						+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));

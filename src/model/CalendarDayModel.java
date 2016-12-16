@@ -6,22 +6,24 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class CalendarDayModel implements Serializable, Comparable<CalendarDayModel> {
-	private static final long serialVersionUID = 12340001L;
+	private static final long serialVersionUID = 12340002L;
 	private TaskModel task;
 	private int personCount;
 	private int textColor;
 	private Calendar floaterTime;
+	private String floaterTaskName;
 
-	public CalendarDayModel(TaskModel task, int personCount, int textColor, Calendar floaterTime) {
+	public CalendarDayModel(TaskModel task, int personCount, int textColor, Calendar floaterTime, String floaterTaskName) {
 		this.task = task;
 		this.personCount = personCount;
 		this.textColor = textColor;
 		this.floaterTime = floaterTime;
+		this.floaterTaskName = floaterTaskName;
 	}
 
 	public String toString() {
 		if (task == null)
-			return "";
+			return floaterTaskName;
 		else
 			return task.getTaskName();
 	}
@@ -40,6 +42,14 @@ public class CalendarDayModel implements Serializable, Comparable<CalendarDayMod
 
 	public Calendar getFloaterTime() {
 		return floaterTime;
+	}
+
+	public String getFloaterTaskName() {
+		return floaterTaskName;
+	}
+
+	public void setFloaterTaskName(String floaterTaskName) {
+		this.floaterTaskName = floaterTaskName;
 	}
 
 	@Override

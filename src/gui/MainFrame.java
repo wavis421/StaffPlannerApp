@@ -718,11 +718,8 @@ public class MainFrame extends JFrame {
 				if (task.getTask() != null) {
 					String programName = controller.findProgramByTaskName(task.getTask().getTaskName());
 					selectedTask = controller.getTaskByName(programName, task.getTask().getTaskName());
-					System.out.println("day box clicked: day = " + calendar.get(Calendar.DAY_OF_MONTH) + ", room = "
-							+ task.getTask().getLocation() + ", task name = " + task.getTask().getTaskName());
 				} else {
 					selectedTask = null;
-					System.out.println("day box clicked: day = " + calendar.get(Calendar.DAY_OF_MONTH) + ", floater");
 				}
 				// Display pop-up menu
 				popupMenu.show(calPanel, point.x, point.y);

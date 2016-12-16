@@ -263,7 +263,8 @@ public class Database {
 			for (TaskModel task : prog.getTaskList()) {
 				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
 					thisDaysTasks.add(new CalendarDayModel(task,
-							getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx), 0, null));
+							getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx),
+							task.getColor(), null, null));
 				}
 			}
 		}
@@ -277,13 +278,48 @@ public class Database {
 
 		// Get all tasks for today
 		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
-		
+
 		// Now add floaters to the list
 		for (PersonModel person : personList) {
 			// Check if person is a floater (not associated with task)
 			if (checkPersonMatchForTaskByDay(person, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
 				thisDaysTasks.add(new CalendarDayModel(null, 0, person.getSingleInstanceTaskAssignment().getColor(),
-						person.getSingleInstanceTaskAssignment().getTaskDate()));
+						person.getSingleInstanceTaskAssignment().getTaskDate(), "Floater"));
+			}
+		}
+
+		// Merge duplicate floaters
+		for (CalendarDayModel calDay : thisDaysTasks) {
+			if (calDay.getTask() == null) { // Found floater
+				Calendar taskTime = calDay.getFloaterTime();
+				int floaterCount = 0;
+				int firstFloaterIndex = 0;
+
+				// Find floaters with matching time
+				for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
+					if (thisDaysTasks.get(taskIdx).getFloaterTime() == null) {
+						// Not a floater
+						continue;
+					}
+
+					Calendar thisTaskTime = thisDaysTasks.get(taskIdx).getFloaterTime();
+					if (taskTime.get(Calendar.HOUR) == thisTaskTime.get(Calendar.HOUR)
+							&& taskTime.get(Calendar.MINUTE) == thisTaskTime.get(Calendar.MINUTE)) {
+						if (floaterCount == 0) {
+							// First match, keep in list
+							firstFloaterIndex = taskIdx;
+						} else {
+							// Multiple matches, remove from list
+							thisDaysTasks.remove(taskIdx);
+							taskIdx--;
+						}
+						floaterCount++;
+					}
+				}
+
+				// Update floater name if more than 1 match
+				if (floaterCount > 1)
+					thisDaysTasks.get(firstFloaterIndex).setFloaterTaskName(floaterCount + " Floaters");
 			}
 		}
 		Collections.sort(thisDaysTasks);
@@ -340,7 +376,7 @@ public class Database {
 		Collections.sort(timeArray);
 		for (int i = 0; i < timeArray.size(); i++)
 			timeModel.addElement(formatTime(timeArray.get(i)));
-		 
+
 		return (new JList<String>(timeModel));
 	}
 
@@ -609,8 +645,7 @@ public class Database {
 	}
 
 	// Return list of all persons assigned to this day, including single
-	// instance
-	// assignments (subs) and floaters
+	// instance assignments (subs) and floaters
 	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
