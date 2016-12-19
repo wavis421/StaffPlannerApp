@@ -55,7 +55,7 @@ public class CalendarPanel extends JPanel {
 	private static Locale locale = new Locale("en", "US", "");
 	private static DateFormatSymbols symbols = new DateFormatSymbols(locale);
 	private DayBoxListener dayListener;
-	private UpdateCalendarListener updateListener;
+	private CalendarUpdateListener updateListener;
 
 	// Private calendar variables
 	private Calendar currentCalendar;
@@ -91,7 +91,7 @@ public class CalendarPanel extends JPanel {
 	}
 
 	// Set listener for updating calendar month
-	public void setUpdateCalendarListener(UpdateCalendarListener listener) {
+	public void setUpdateCalendarListener(CalendarUpdateListener listener) {
 		this.updateListener = listener;
 	}
 

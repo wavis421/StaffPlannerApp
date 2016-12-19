@@ -90,7 +90,7 @@ public class MainFrame extends JFrame {
 
 		// Set up Calendar Panel and update month listener
 		calPanel.setPreferredSize(new Dimension(PREF_FRAME_WIDTH - 15, PREF_FRAME_HEIGHT - 60));
-		calPanel.setUpdateCalendarListener(new UpdateCalendarListener() {
+		calPanel.setUpdateCalendarListener(new CalendarUpdateListener() {
 			public void updateCalendar(Calendar calendar) {
 				updateMonth(calendar);
 			}
@@ -299,7 +299,7 @@ public class MainFrame extends JFrame {
 		// Set up listeners for PROGRAM menu
 		programCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				CreateUpdateProgramDialog programEvent = new CreateUpdateProgramDialog(MainFrame.this,
+				ProgramDialog programEvent = new ProgramDialog(MainFrame.this,
 						controller.getNumPrograms());
 				ProgramEvent dialogResponse = programEvent.getDialogResponse();
 
@@ -334,7 +334,7 @@ public class MainFrame extends JFrame {
 
 					programItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent ev) {
-							CreateUpdateProgramDialog programEvent = new CreateUpdateProgramDialog(MainFrame.this,
+							ProgramDialog programEvent = new ProgramDialog(MainFrame.this,
 									controller.getNumPrograms(), controller.getProgramByName(programItem.getText()));
 							ProgramEvent dialogResponse = programEvent.getDialogResponse();
 
@@ -445,7 +445,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				LinkedList<AssignedTasksModel> assignedList = new LinkedList<AssignedTasksModel>();
 				JTree taskTree = createTaskTree(assignedList);
-				CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this,
+				PersonDialog personEvent = new PersonDialog(MainFrame.this,
 						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
 				processAddPersonDialog(personEvent);
 			}
@@ -566,16 +566,16 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createTask() {
-		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, selectedProgramName);
+		TaskDialog taskEvent = new TaskDialog(MainFrame.this, selectedProgramName);
 		processCreateTaskDialog(taskEvent);
 	}
 
 	private void createTaskRetry(TaskEvent ev) {
-		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, ev);
+		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev);
 		processCreateTaskDialog(taskEvent);
 	}
 
-	private void processCreateTaskDialog(CreateUpdateTaskDialog taskEvent) {
+	private void processCreateTaskDialog(TaskDialog taskEvent) {
 		TaskEvent dialogResponse = taskEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
@@ -600,7 +600,7 @@ public class MainFrame extends JFrame {
 		if (programName == null)
 			programName = controller.findProgramByTaskName(origTaskName);
 
-		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, programName,
+		TaskDialog taskEvent = new TaskDialog(MainFrame.this, programName,
 				controller.getTaskByName(programName, origTaskName));
 		TaskEvent dialogResponse = taskEvent.getDialogResponse();
 
@@ -618,11 +618,11 @@ public class MainFrame extends JFrame {
 				task.getNumLeadersReqd(), task.getTotalPersonsReqd(), task.getDayOfWeek(), task.getWeekOfMonth(),
 				task.getTime(), task.getColor());
 
-		CreateUpdateTaskDialog taskEvent = new CreateUpdateTaskDialog(MainFrame.this, ev);
+		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev);
 		processCreateTaskDialog(taskEvent);
 	}
 
-	private void processAddPersonDialog(CreateUpdatePersonDialog personEvent) {
+	private void processAddPersonDialog(PersonDialog personEvent) {
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
 		boolean okToSave = personEvent.getOkToSaveStatus();
 
@@ -636,7 +636,7 @@ public class MainFrame extends JFrame {
 				// Do not save; go back and edit person
 				LinkedList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTaskChanges();
 				JTree taskTree = createTaskTree(assignedTaskList);
-				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
+				personEvent = new PersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(), assignedTaskList,
 								dialogResponse.getDatesUnavailable(), null),
@@ -657,7 +657,7 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	private void processEditPersonDialog(CreateUpdatePersonDialog personEvent, String origName) {
+	private void processEditPersonDialog(PersonDialog personEvent, String origName) {
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
 		boolean isOkToSave = personEvent.getOkToSaveStatus();
 
@@ -668,7 +668,7 @@ public class MainFrame extends JFrame {
 						(LinkedList<AssignedTasksModel>) thisPerson.getAssignedTasks().clone(),
 						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedList);
-				personEvent = new CreateUpdatePersonDialog(MainFrame.this,
+				personEvent = new PersonDialog(MainFrame.this,
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(),
 								dialogResponse.getAssignedTaskChanges(), dialogResponse.getDatesUnavailable(),
@@ -693,7 +693,7 @@ public class MainFrame extends JFrame {
 		else {
 			LinkedList<AssignedTasksModel> assignedList = person.getAssignedTasks();
 			JTree taskTree = createTaskTree(assignedList);
-			CreateUpdatePersonDialog personEvent = new CreateUpdatePersonDialog(MainFrame.this, person,
+			PersonDialog personEvent = new PersonDialog(MainFrame.this, person,
 					new LinkedList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
 					taskTree);
 			processEditPersonDialog(personEvent, origName);
@@ -801,7 +801,7 @@ public class MainFrame extends JFrame {
 						JList<String> personList = controller.getAllPersonsAsString();
 						JList<Time> timeList = controller.getAllTimesByDay(selectedCalendar);
 
-						AddFloaterDialog ev = new AddFloaterDialog(MainFrame.this, (Calendar) selectedCalendar.clone(),
+						FloaterDialog ev = new FloaterDialog(MainFrame.this, (Calendar) selectedCalendar.clone(),
 								personList, timeList);
 						FloaterEvent dialogResponse = ev.getDialogResponse();
 

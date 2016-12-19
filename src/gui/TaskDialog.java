@@ -33,7 +33,7 @@ import javax.swing.event.ChangeListener;
 
 import model.TaskModel;
 
-public class CreateUpdateTaskDialog extends JDialog {
+public class TaskDialog extends JDialog {
 	private static final int TEXT_FIELD_WIDTH = 30;
 	private static final int DEFAULT_HOUR = 8;
 	private static final int DEFAULT_MINUTE = 30;
@@ -76,7 +76,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	private String borderTitle;
 
 	// Constructor for creating new task
-	public CreateUpdateTaskDialog(JFrame parent, String programName) {
+	public TaskDialog(JFrame parent, String programName) {
 		super(parent, programName, true);
 		currentProgramName = new String(programName);
 		currentTask = null;
@@ -86,7 +86,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	}
 
 	// Constructor for updating existing task, TaskModel contains task values
-	public CreateUpdateTaskDialog(JFrame parent, String programName, TaskModel task) {
+	public TaskDialog(JFrame parent, String programName, TaskModel task) {
 		super(parent, programName, true);
 
 		currentProgramName = programName;
@@ -102,7 +102,7 @@ public class CreateUpdateTaskDialog extends JDialog {
 	}
 
 	// Constructor for re-try of task create, TaskEvent content re-loaded
-	public CreateUpdateTaskDialog(JFrame parent, TaskEvent event) {
+	public TaskDialog(JFrame parent, TaskEvent event) {
 		super(parent, event.getProgramName(), true);
 
 		// Set up task, but leave name field empty since it was found to be a

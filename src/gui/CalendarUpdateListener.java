@@ -2,6 +2,6 @@ package gui;
 
 import java.util.Calendar;
 
-public interface UpdateCalendarListener {
+public interface CalendarUpdateListener {
 	public void updateCalendar (Calendar calendar);
 }

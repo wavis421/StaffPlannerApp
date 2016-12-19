@@ -1,5 +1,5 @@
 package gui;
 
-public interface CreateTaskListener {
+public interface TaskCreateListener {
 	public void createTask (TaskEvent ev);
 }

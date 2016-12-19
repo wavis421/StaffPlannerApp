@@ -32,7 +32,7 @@ import org.jdatepicker.impl.UtilDateModel;
 
 import model.ProgramModel;
 
-public class CreateUpdateProgramDialog extends JDialog {
+public class ProgramDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
@@ -54,14 +54,14 @@ public class CreateUpdateProgramDialog extends JDialog {
 	private static String lastStartDate;
 	private static String lastEndDate;
 
-	public CreateUpdateProgramDialog(JFrame parent, int numPrograms) {
+	public ProgramDialog(JFrame parent, int numPrograms) {
 		super(parent, "Create program...", true);
 		this.numPrograms = numPrograms;
 
 		setupProgramDialog(false, false);
 	}
 
-	public CreateUpdateProgramDialog(JFrame parent, int numPrograms, ProgramModel program) {
+	public ProgramDialog(JFrame parent, int numPrograms, ProgramModel program) {
 		super(parent, "Edit program...", true);
 		this.programName.setText(program.getProgramName());
 		if (numPrograms > 0)

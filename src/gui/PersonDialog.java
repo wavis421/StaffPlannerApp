@@ -46,7 +46,7 @@ import model.DateRangeModel;
 import model.PersonModel;
 import model.TaskModel;
 
-public class CreateUpdatePersonDialog extends JDialog {
+public class PersonDialog extends JDialog {
 	// Constants
 	private static final int TEXT_FIELD_SIZE = 30;
 	private JButton okButton = new JButton("OK");
@@ -84,7 +84,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	private PersonEvent dialogResponse;
 	private boolean okToSave = false;
 
-	public CreateUpdatePersonDialog(JFrame parent, JTree assignedTasksTree, JTree taskTree) {
+	public PersonDialog(JFrame parent, JTree assignedTasksTree, JTree taskTree) {
 		// super(parent, "Add person...", true);
 		super(parent, "Add person...");
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
@@ -97,7 +97,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 	}
 
 	// Constructor for updating existing person, PersonModel contains values
-	public CreateUpdatePersonDialog(JFrame parent, PersonModel person,
+	public PersonDialog(JFrame parent, PersonModel person,
 			LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
@@ -393,7 +393,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 
 				if (node.getLevel() == 2) {
 					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
-					AssignTaskDialog event = new AssignTaskDialog(CreateUpdatePersonDialog.this,
+					AssignTaskDialog event = new AssignTaskDialog(PersonDialog.this,
 							(AssignTaskEvent) nodeInfo);
 
 					AssignTaskEvent eventResponse = event.getDialogResponse();
@@ -442,7 +442,7 @@ public class CreateUpdatePersonDialog extends JDialog {
 					// to be MODAL
 					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 
-					AssignTaskDialog event = new AssignTaskDialog(CreateUpdatePersonDialog.this,
+					AssignTaskDialog event = new AssignTaskDialog(PersonDialog.this,
 							node.getParent().toString(), (TaskModel) nodeInfo);
 
 					AssignTaskEvent eventResponse = event.getDialogResponse();

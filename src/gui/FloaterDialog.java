@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
-public class AddFloaterDialog extends JDialog {
+public class FloaterDialog extends JDialog {
 	private static final int TEXT_FIELD_WIDTH = 30;
 	private static final int TEXT_FIELD_HEIGHT = 20;
 	private JButton okButton = new JButton("OK");
@@ -54,7 +54,7 @@ public class AddFloaterDialog extends JDialog {
 	private FloaterEvent dialogResponse;
 
 	// Constructor for adding floater
-	public AddFloaterDialog(JFrame parent, Calendar date, JList<String> personsList, JList<Time> timesList) {
+	public FloaterDialog(JFrame parent, Calendar date, JList<String> personsList, JList<Time> timesList) {
 		super(parent, "Add floater for " + (date.get(Calendar.MONTH) + 1) + "/" + date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR), true);
 
 		this.calendar = date;
