@@ -7,8 +7,17 @@ import java.util.LinkedList;
 import javax.swing.table.AbstractTableModel;
 
 import model.PersonByTaskModel;
+import utilities.Utilities;
 
 public class PersonTableModel extends AbstractTableModel {
+	private static final int PERSON_NAME_COLUMN = 0;
+	private static final int LEADER_COLUMN = 1;
+	private static final int SUB_COLUMN = 2;
+	private static final int TASK_COLUMN = 3;
+	private static final int TIME_COLUMN = 5;
+	private static final int PHONE_COLUMN_EXPANDED = 6;
+	private static final int PHONE_COLUMN_NOT_EXPANDED = 2;
+	
 	private static final long serialVersionUID = 12340002L;
 	private LinkedList<PersonByTaskModel> personList;
 	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail" };
@@ -16,8 +25,9 @@ public class PersonTableModel extends AbstractTableModel {
 	private String colNames[];
 	private boolean expanded;
 
-	public PersonTableModel(boolean expanded) {
-		this.expanded = expanded;
+	public PersonTableModel(boolean isColumnExpanded, LinkedList<PersonByTaskModel> personList) {
+		this.personList = personList;
+		this.expanded = isColumnExpanded;
 		if (expanded) {
 			colNames = colNamesExpanded;
 		} else {
@@ -26,7 +36,7 @@ public class PersonTableModel extends AbstractTableModel {
 	}
 
 	public void setData(LinkedList<PersonByTaskModel> db) {
-		this.personList = db;
+		personList = db;
 	}
 
 	@Override
@@ -66,14 +76,11 @@ public class PersonTableModel extends AbstractTableModel {
 				else
 					return person.getTask().getLocation();
 			case 5: // Time
-				Calendar cal;
 				if (person.getTask() == null) {
-					cal = person.getPerson().getSingleInstanceTaskAssignment().getTaskDate();
+					return Utilities.formatTime((Calendar)person.getPerson().getSingleInstanceTaskAssignment().getTaskDate().clone());
 				} else {
-					cal = Calendar.getInstance();
-					cal.setTime(person.getTask().getTime());
+					return Utilities.formatTime(person.getTask().getTime());
 				}
-				return Time.valueOf((cal.get(Calendar.HOUR) + 1) + ":" + cal.get(Calendar.MINUTE) + ":00");
 			case 6: // Phone number
 				return person.getPerson().getPhone();
 			case 7: // email
@@ -95,6 +102,38 @@ public class PersonTableModel extends AbstractTableModel {
 	}
 
 	public int getColumnForPersonName() {
-		return 0;
+		return PERSON_NAME_COLUMN;
+	}
+	
+	public int getColumnForLeader() {
+		return LEADER_COLUMN;
+	}
+	
+	public int getColumnForSub() {
+		if (expanded)
+			return SUB_COLUMN;
+		else
+			return -1;
+	}
+	
+	public int getColumnForTaskName() {
+		if (expanded)
+			return TASK_COLUMN;
+		else
+			return -1;
+	}
+	
+	public int getColumnForTime() {
+		if (expanded)
+			return TIME_COLUMN;
+		else
+			return -1;
+	}
+	
+	public int getColumnForPhone() {
+		if (expanded)
+			return PHONE_COLUMN_EXPANDED;
+		else
+			return PHONE_COLUMN_NOT_EXPANDED;
 	}
 }

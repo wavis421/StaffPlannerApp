@@ -21,6 +21,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
+import utilities.Utilities;
+
 public class Database {
 	private LinkedList<ProgramModel> programList;
 	private LinkedList<PersonModel> personList;
@@ -238,10 +240,10 @@ public class Database {
 
 	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> timeList) {
 		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
-		Collections.sort(matchingTasks, new TimeComparator());
+		Collections.sort(matchingTasks);
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
-			String taskTime = formatTime(matchingTasks.get(taskIdx).getTask().getTime());
+			String taskTime = Utilities.formatTime(matchingTasks.get(taskIdx).getTask().getTime());
 			if (!findStringMatchInList(taskTime, timeList)) {
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
@@ -304,7 +306,8 @@ public class Database {
 
 					Calendar thisTaskTime = thisDaysTasks.get(taskIdx).getFloaterTime();
 					if (taskTime.get(Calendar.HOUR) == thisTaskTime.get(Calendar.HOUR)
-							&& taskTime.get(Calendar.MINUTE) == thisTaskTime.get(Calendar.MINUTE)) {
+							&& taskTime.get(Calendar.MINUTE) == thisTaskTime.get(Calendar.MINUTE)
+							&& taskTime.get(Calendar.AM_PM) == thisTaskTime.get(Calendar.AM_PM)) {
 						if (floaterCount == 0) {
 							// First match, keep in list
 							firstFloaterIndex = taskIdx;
@@ -375,7 +378,7 @@ public class Database {
 		}
 		Collections.sort(timeArray);
 		for (int i = 0; i < timeArray.size(); i++)
-			timeModel.addElement(formatTime(timeArray.get(i)));
+			timeModel.addElement(Utilities.formatTime(timeArray.get(i)));
 
 		return (new JList<String>(timeModel));
 	}
@@ -529,23 +532,6 @@ public class Database {
 			}
 		}
 		return true;
-	}
-
-	private String formatTime(Time time) {
-		// Time format for hour 1 - 12 and AM/PM field
-		SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
-
-		// Set time and add an hour to convert from 0-11 to 1-12
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(time);
-		cal.add(Calendar.HOUR, 1);
-
-		// If hour transitioned to 12:00 am/pm, then switch the AM/PM
-		int hour = cal.get(Calendar.HOUR);
-		if (hour == 0 || hour == 12)
-			cal.set(Calendar.AM_PM, cal.get(Calendar.AM_PM) == Calendar.AM ? Calendar.PM : Calendar.AM);
-
-		return timeFormat.format(cal.getTime());
 	}
 
 	/*

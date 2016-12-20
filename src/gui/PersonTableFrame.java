@@ -16,14 +16,12 @@ public class PersonTableFrame extends JFrame {
 	private static final int PREF_FRAME_HEIGHT = 300;
 
 	private PersonTableListener tableListener;
-	private PersonTableModel tableModel;
 	private PersonTablePanel tablePanel;
 	private String addButtonText;
 
-	public PersonTableFrame(String title, PersonTableModel model, String addButtonText) {
+	public PersonTableFrame(String title, boolean isColumnExpanded, LinkedList<PersonByTaskModel> personList, String addButtonText) {
 		setTitle(title);
-		this.tableModel = model;
-		this.tablePanel = new PersonTablePanel(tableModel);
+		this.tablePanel = new PersonTablePanel(isColumnExpanded, personList);
 		this.addButtonText = addButtonText;
 
 		setLayout(new BorderLayout());

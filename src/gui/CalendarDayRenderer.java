@@ -10,6 +10,7 @@ import javax.swing.ListCellRenderer;
 
 import acm.util.JTFTools;
 import model.CalendarDayModel;
+import utilities.Utilities;
 
 public class CalendarDayRenderer extends JLabel implements ListCellRenderer<CalendarDayModel> {
 
@@ -32,8 +33,7 @@ public class CalendarDayRenderer extends JLabel implements ListCellRenderer<Cale
 
 		if (calendarDay.getTask() == null) {
 			// Floater task
-			setText(calendarDay.getFloaterTaskName() + " " + (calendarDay.getFloaterTime().get(Calendar.HOUR) + 1) + ":"
-					+ String.format("%02d", calendarDay.getFloaterTime().get(Calendar.MINUTE)));
+			setText(calendarDay.getFloaterTaskName() + " " + Utilities.formatTime((Calendar)calendarDay.getFloaterTime().clone()));
 		} else {
 			// Assigned task
 			setText(calendarDay.getTask().getTaskName() + " (" + calendarDay.getPersonCount() + "/"

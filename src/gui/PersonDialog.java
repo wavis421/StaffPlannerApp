@@ -45,6 +45,7 @@ import model.AssignedTasksModel;
 import model.DateRangeModel;
 import model.PersonModel;
 import model.TaskModel;
+import utilities.Utilities;
 
 public class PersonDialog extends JDialog {
 	// Constants
@@ -121,7 +122,7 @@ public class PersonDialog extends JDialog {
 				taskName = "Floater";
 				this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
 						+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR) + " at "
-						+ (date.get(Calendar.HOUR) + 1) + ":" + String.format("%02d", date.get(Calendar.MINUTE)));
+						+ Utilities.formatTime((Calendar)date.clone()));
 			} else {
 				this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
 						+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));

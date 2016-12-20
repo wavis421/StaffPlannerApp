@@ -28,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
+import utilities.Utilities;
+
 public class FloaterDialog extends JDialog {
 	private static final int TEXT_FIELD_WIDTH = 30;
 	private static final int TEXT_FIELD_HEIGHT = 20;
@@ -80,8 +82,9 @@ public class FloaterDialog extends JDialog {
 				int idx = timeCombo.getSelectedIndex();
 				Calendar timeCal = Calendar.getInstance();
 				timeCal.setTime(timesList.getModel().getElementAt(idx));
-				calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR));
+				calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR) - 1);
 				calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
+				calendar.set(Calendar.AM_PM, timeCal.get(Calendar.AM_PM));
 
 				FloaterEvent ev = new FloaterEvent(this, new JList<String>(pModel), calendar,
 						Integer.parseInt(colorGroup.getSelection().getActionCommand()));
@@ -177,7 +180,7 @@ public class FloaterDialog extends JDialog {
 		DefaultComboBoxModel<String> timeModel = new DefaultComboBoxModel<String>();
 
 		for (int i = 0; i < times.getModel().getSize(); i++) {
-			String timeString = formatTime (times.getModel().getElementAt(i));
+			String timeString = Utilities.formatTime (times.getModel().getElementAt(i));
 			timeModel.addElement(timeString);
 		}
 
@@ -215,22 +218,5 @@ public class FloaterDialog extends JDialog {
 
 		// Highlight default color BLACK
 		buttons[0].setSelected(true);
-	}
-	
-	private String formatTime(Time time) {
-		// Time format for hour 1 - 12 and AM/PM field
-		SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
-
-		// Set time and add an hour to convert from 0-11 to 1-12
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(time);
-		cal.add(Calendar.HOUR, 1);
-
-		// If hour transitioned to 12:00 am/pm, then switch the AM/PM
-		int hour = cal.get(Calendar.HOUR);
-		if (hour == 0 || hour == 12)
-			cal.set(Calendar.AM_PM, cal.get(Calendar.AM_PM) == Calendar.AM ? Calendar.PM : Calendar.AM);
-
-		return timeFormat.format(cal.getTime());
 	}
 }

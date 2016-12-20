@@ -13,7 +13,8 @@ public class CalendarDayModel implements Serializable, Comparable<CalendarDayMod
 	private Calendar floaterTime;
 	private String floaterTaskName;
 
-	public CalendarDayModel(TaskModel task, int personCount, int textColor, Calendar floaterTime, String floaterTaskName) {
+	public CalendarDayModel(TaskModel task, int personCount, int textColor, Calendar floaterTime,
+			String floaterTaskName) {
 		this.task = task;
 		this.personCount = personCount;
 		this.textColor = textColor;
@@ -58,14 +59,20 @@ public class CalendarDayModel implements Serializable, Comparable<CalendarDayMod
 
 		if (otherTask.getTask() == null) {
 			Calendar cal = otherTask.getFloaterTime();
-			otherTaskTime = Time.valueOf((cal.get(Calendar.HOUR) + 1) + ":" + cal.get(Calendar.MINUTE) + ":00");;
+			if (cal.get(Calendar.AM_PM) == Calendar.PM)
+				otherTaskTime = Time.valueOf((cal.get(Calendar.HOUR) + 12) + ":" + cal.get(Calendar.MINUTE) + ":00");
+			else
+				otherTaskTime = Time.valueOf(cal.get(Calendar.HOUR) + ":" + cal.get(Calendar.MINUTE) + ":00");
 		} else {
 			otherTaskTime = (Time) otherTask.getTask().getTime();
 		}
 
 		if (task == null) {
 			Calendar cal = floaterTime;
-			thisTaskTime = Time.valueOf((cal.get(Calendar.HOUR) + 1) + ":" + cal.get(Calendar.MINUTE) + ":00");
+			if (cal.get(Calendar.AM_PM) == Calendar.PM)
+				thisTaskTime = Time.valueOf((cal.get(Calendar.HOUR) + 12) + ":" + cal.get(Calendar.MINUTE) + ":00");
+			else
+				thisTaskTime = Time.valueOf(cal.get(Calendar.HOUR) + ":" + cal.get(Calendar.MINUTE) + ":00");
 		} else {
 			thisTaskTime = (Time) task.getTime();
 		}

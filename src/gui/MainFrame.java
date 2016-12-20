@@ -299,8 +299,7 @@ public class MainFrame extends JFrame {
 		// Set up listeners for PROGRAM menu
 		programCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ProgramDialog programEvent = new ProgramDialog(MainFrame.this,
-						controller.getNumPrograms());
+				ProgramDialog programEvent = new ProgramDialog(MainFrame.this, controller.getNumPrograms());
 				ProgramEvent dialogResponse = programEvent.getDialogResponse();
 
 				if (dialogResponse != null) {
@@ -334,8 +333,8 @@ public class MainFrame extends JFrame {
 
 					programItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent ev) {
-							ProgramDialog programEvent = new ProgramDialog(MainFrame.this,
-									controller.getNumPrograms(), controller.getProgramByName(programItem.getText()));
+							ProgramDialog programEvent = new ProgramDialog(MainFrame.this, controller.getNumPrograms(),
+									controller.getProgramByName(programItem.getText()));
 							ProgramEvent dialogResponse = programEvent.getDialogResponse();
 
 							if (dialogResponse != null && dialogResponse.getProgramName() != null) {
@@ -474,9 +473,8 @@ public class MainFrame extends JFrame {
 		viewAllPersons.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
-					PersonTableModel tableModel = new PersonTableModel(false);
-					tableModel.setData(controller.getAllPersonsList());
-					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", tableModel, "");
+					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", false,
+							(LinkedList<PersonByTaskModel>) controller.getAllPersonsList().clone(), "");
 
 					PersonTableListener tableListener = new PersonTableListener() {
 						public void addPerson() {
@@ -693,9 +691,8 @@ public class MainFrame extends JFrame {
 		else {
 			LinkedList<AssignedTasksModel> assignedList = person.getAssignedTasks();
 			JTree taskTree = createTaskTree(assignedList);
-			PersonDialog personEvent = new PersonDialog(MainFrame.this, person,
-					new LinkedList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
-					taskTree);
+			PersonDialog personEvent = new PersonDialog(MainFrame.this, person, new LinkedList<AssignedTasksModel>(),
+					createAssignedTasksTree(null, taskTree, assignedList), taskTree);
 			processEditPersonDialog(personEvent, origName);
 		}
 	}
@@ -739,13 +736,11 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (selectedTask != null) {
 					// View assigned persons
-					LinkedList<PersonByTaskModel> personByTask = controller.getPersonsByDayByTask(selectedCalendar,
-							selectedTask.getTaskName());
+					LinkedList<PersonByTaskModel> personByTask = (LinkedList<PersonByTaskModel>) controller
+							.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()).clone();
 
-					PersonTableModel tableModel = new PersonTableModel(false);
-					tableModel.setData(personByTask);
 					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
-							+ " on " + getDisplayDate(selectedCalendar), tableModel, "Add person");
+							+ " on " + getDisplayDate(selectedCalendar), false, personByTask, "Add person");
 
 					PersonTableListener tableListener = new PersonTableListener() {
 						public void addPerson() {
@@ -788,12 +783,11 @@ public class MainFrame extends JFrame {
 		viewCompleteRosterForToday.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// View all persons
-				LinkedList<PersonByTaskModel> personList = controller.getPersonsByDay(selectedCalendar);
+				LinkedList<PersonByTaskModel> personList = (LinkedList<PersonByTaskModel>) controller
+						.getPersonsByDay(selectedCalendar).clone();
 
-				PersonTableModel tableModel = new PersonTableModel(true);
-				tableModel.setData(personList);
 				PersonTableFrame frame = new PersonTableFrame(
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), tableModel, "Add floater");
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true, personList, "Add floater");
 
 				PersonTableListener tableListener = new PersonTableListener() {
 					// Add Floater
