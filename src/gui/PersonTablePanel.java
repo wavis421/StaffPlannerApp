@@ -97,6 +97,7 @@ public class PersonTablePanel extends JPanel {
 	}
 
 	public void setData(LinkedList<PersonByTaskModel> db) {
+		personList = db;
 		tableModel.setData(db);
 		refresh();
 	}
@@ -124,7 +125,7 @@ public class PersonTablePanel extends JPanel {
 			else if (value instanceof Time)
 				setText((String) value.toString());
 
-			if (column != -1 && row < personList.size()) {
+			if (column != -1) {
 				Color textColor = Color.black;
 				if (column == tableModel.getColumnForTaskName()) {
 					PersonByTaskModel person = personList.get(row);
