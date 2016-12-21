@@ -75,7 +75,7 @@ public class PersonTableFrame extends JFrame {
 		sendEmailButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (tableListener != null) {
-					tableListener.addPerson();
+					System.out.println("Send email");
 				}
 			}
 		});

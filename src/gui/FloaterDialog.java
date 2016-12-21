@@ -82,7 +82,7 @@ public class FloaterDialog extends JDialog {
 				int idx = timeCombo.getSelectedIndex();
 				Calendar timeCal = Calendar.getInstance();
 				timeCal.setTime(timesList.getModel().getElementAt(idx));
-				calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR) - 1);
+				calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR));
 				calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
 				calendar.set(Calendar.AM_PM, timeCal.get(Calendar.AM_PM));
 

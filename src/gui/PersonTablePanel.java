@@ -18,7 +18,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 import model.PersonByTaskModel;
 
@@ -113,6 +112,7 @@ public class PersonTablePanel extends JPanel {
 	public class PersonTableRenderer extends JLabel implements TableCellRenderer {
 		private PersonTableRenderer() {
 			super();
+			super.setOpaque(true);
 		}
 
 		@Override
@@ -134,6 +134,11 @@ public class PersonTablePanel extends JPanel {
 						textColor = new Color(person.getPerson().getSingleInstanceTaskAssignment().getColor());
 				}
 				super.setForeground(textColor);
+				
+				if (isSelected) 
+					super.setBackground(new Color(0xDDDDDD));
+				else
+					super.setBackground(Color.WHITE);
 
 				if (column == tableModel.getColumnForPersonName())
 					super.setHorizontalAlignment(LEFT);
