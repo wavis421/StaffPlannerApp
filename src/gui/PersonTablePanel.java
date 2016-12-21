@@ -48,6 +48,7 @@ public class PersonTablePanel extends JPanel {
 			table.getColumnModel().getColumn(tableModel.getColumnForTime()).setMaxWidth(75);
 		}
 		table.setDefaultRenderer(Object.class, new PersonTableRenderer());
+		table.setAutoCreateRowSorter(true);
 
 		popup = new JPopupMenu();
 		removeItem = new JMenuItem("Delete row");
