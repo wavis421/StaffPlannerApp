@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 public class PersonModel implements Serializable, Comparable<PersonModel> {
-	private static final long serialVersionUID = 12340002L;
+	private static final long serialVersionUID = 12340003L;
 	private String name;
 	private String phone;
 	private String email;
@@ -12,11 +12,11 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 	private String notes;
 	private LinkedList<AssignedTasksModel> assignedTasks;
 	private DateRangeModel datesUnavailable;
-	private SingleInstanceTaskModel singleInstanceTaskAssignment;
+	private LinkedList<SingleInstanceTaskModel> singleInstanceTasks;
 
 	public PersonModel(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable,
-			SingleInstanceTaskModel singleInstanceTaskAssignment) {
+			LinkedList<SingleInstanceTaskModel> singleInstanceTaskAssignment) {
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
@@ -24,7 +24,7 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 		this.notes = notes;
 		this.assignedTasks = assignedTasks;
 		this.datesUnavailable = datesUnavailable;
-		this.singleInstanceTaskAssignment = singleInstanceTaskAssignment;
+		this.singleInstanceTasks = singleInstanceTaskAssignment;
 	}
 
 	public String toString() {
@@ -83,12 +83,8 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 		this.datesUnavailable = datesUnavailable;
 	}
 
-	public SingleInstanceTaskModel getSingleInstanceTaskAssignment() {
-		return singleInstanceTaskAssignment;
-	}
-
-	public void setSingleInstanceTaskAssignment(SingleInstanceTaskModel singleInstanceTaskAssignment) {
-		this.singleInstanceTaskAssignment = singleInstanceTaskAssignment;
+	public LinkedList<SingleInstanceTaskModel> getSingleInstanceTasks() {
+		return singleInstanceTasks;
 	}
 
 	@Override

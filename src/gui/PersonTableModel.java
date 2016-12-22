@@ -77,7 +77,7 @@ public class PersonTableModel extends AbstractTableModel {
 					return person.getTask().getLocation();
 			case 5: // Time
 				if (person.getTask() == null) {
-					return Utilities.formatTime((Calendar)person.getPerson().getSingleInstanceTaskAssignment().getTaskDate().clone());
+					return Utilities.formatTime((Calendar)person.getTaskDate().clone());
 				} else {
 					return Utilities.formatTime(person.getTask().getTime());
 				}

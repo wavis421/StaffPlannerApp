@@ -19,7 +19,9 @@ import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -44,12 +46,16 @@ import org.jdatepicker.impl.UtilDateModel;
 import model.AssignedTasksModel;
 import model.DateRangeModel;
 import model.PersonModel;
+import model.SingleInstanceTaskModel;
 import model.TaskModel;
 import utilities.Utilities;
 
 public class PersonDialog extends JDialog {
 	// Constants
 	private static final int TEXT_FIELD_SIZE = 30;
+	private static final int TASK_COMBO_WIDTH = 334;
+	private static final int TASK_COMBO_HEIGHT = 30;
+	
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
@@ -66,7 +72,7 @@ public class PersonDialog extends JDialog {
 	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
 	private LinkedList<AssignedTasksModel> assignedTaskChanges;
 	private DateRangeModel datesUnavailable;
-	private JTextField singleInstanceTask = new JTextField(TEXT_FIELD_SIZE);
+	private JComboBox<String> singleInstanceTaskCombo;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
 
@@ -94,12 +100,14 @@ public class PersonDialog extends JDialog {
 		this.assignedTaskChanges = new LinkedList<AssignedTasksModel>();
 		this.datesUnavailable = new DateRangeModel("", "");
 
+		createSingleInstanceTaskCombo(null);
+		
 		setupPersonDialog();
 	}
 
 	// Constructor for updating existing person, PersonModel contains values
-	public PersonDialog(JFrame parent, PersonModel person,
-			LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
+	public PersonDialog(JFrame parent, PersonModel person, LinkedList<AssignedTasksModel> assignedTaskChanges,
+			JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
@@ -115,20 +123,8 @@ public class PersonDialog extends JDialog {
 		this.assignedTaskChanges = assignedTaskChanges;
 		this.datesUnavailable = person.getDatesUnavailable();
 
-		if (person.getSingleInstanceTaskAssignment() != null) {
-			Calendar date = person.getSingleInstanceTaskAssignment().getTaskDate();
-			String taskName = person.getSingleInstanceTaskAssignment().getTaskName();
-			if (taskName.equals("")) {
-				taskName = "Floater";
-				this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
-						+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR) + " at "
-						+ Utilities.formatTime((Calendar)date.clone()));
-			} else {
-				this.singleInstanceTask.setText(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
-						+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));
-			}
-		}
-
+		createSingleInstanceTaskCombo(person.getSingleInstanceTasks());
+		
 		setupPersonDialog();
 	}
 
@@ -143,7 +139,7 @@ public class PersonDialog extends JDialog {
 	private void setupPersonDialog() {
 		createStaffSelector();
 		createDateSelectors();
-		singleInstanceTask.setEditable(false);
+		singleInstanceTaskCombo.setEditable(false);
 
 		// Force the text area not to expand when user types more than 3 lines!!
 		notesArea.setBorder(BorderFactory.createEtchedBorder());
@@ -215,7 +211,7 @@ public class PersonDialog extends JDialog {
 		addRowToControlPanel(gc, emailLabel, email, gridY++);
 		addRowToControlPanel(gc, staffLabel, staffPanel, gridY++);
 		addRowToControlPanel(gc, datesLabel, datePanel, gridY++);
-		addRowToControlPanel(gc, singleTaskLabel, singleInstanceTask, gridY++);
+		addRowToControlPanel(gc, singleTaskLabel, singleInstanceTaskCombo, gridY++);
 		addRowToControlPanel(gc, notesLabel, notesArea, gridY++);
 		addRowToControlPanel(gc, taskTreeScrollPane, assignedTasksScrollPane, gridY++);
 
@@ -230,7 +226,7 @@ public class PersonDialog extends JDialog {
 		setLayout(new BorderLayout());
 		add(controlsPanel, BorderLayout.CENTER);
 		add(buttonsPanel, BorderLayout.SOUTH);
-
+		
 		// make OK & cancel buttons the same size
 		Dimension btnSize = cancelButton.getPreferredSize();
 		okButton.setPreferredSize(btnSize);
@@ -258,6 +254,32 @@ public class PersonDialog extends JDialog {
 
 		staffGroup.add(leaderButton);
 		staffGroup.add(volunteerButton);
+	}
+
+	private void createSingleInstanceTaskCombo(LinkedList<SingleInstanceTaskModel> taskList) {
+		DefaultComboBoxModel<String> taskModel = new DefaultComboBoxModel<String>();
+
+		if (taskList != null) {
+			for (SingleInstanceTaskModel task : taskList) {
+				Calendar date = task.getTaskDate();
+				String taskName = task.getTaskName();
+				if (taskName.equals("")) {
+					taskName = "Floater";
+					taskModel.addElement(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
+							+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR) + " at "
+							+ Utilities.formatTime((Calendar) date.clone()));
+				} else {
+					taskModel.addElement(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
+							+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));
+				}
+			}
+		}
+
+		singleInstanceTaskCombo = new JComboBox<String>(taskModel);
+		if (taskModel.getSize() > 0)
+			singleInstanceTaskCombo.setSelectedIndex(0);
+		singleInstanceTaskCombo.setBorder(BorderFactory.createEtchedBorder());
+		singleInstanceTaskCombo.setPreferredSize(new Dimension(TASK_COMBO_WIDTH, TASK_COMBO_HEIGHT));
 	}
 
 	private void createDateSelectors() {
@@ -378,7 +400,7 @@ public class PersonDialog extends JDialog {
 
 	private void createTrees(JTree assignedTasksTree, JTree taskTree) {
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
-		assignedTasksScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
+		assignedTasksScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
 				(int) notesArea.getPreferredSize().getHeight() * 3));
 		assignedTasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
@@ -394,8 +416,7 @@ public class PersonDialog extends JDialog {
 
 				if (node.getLevel() == 2) {
 					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
-					AssignTaskDialog event = new AssignTaskDialog(PersonDialog.this,
-							(AssignTaskEvent) nodeInfo);
+					AssignTaskDialog event = new AssignTaskDialog(PersonDialog.this, (AssignTaskEvent) nodeInfo);
 
 					AssignTaskEvent eventResponse = event.getDialogResponse();
 					if (eventResponse != null) {
@@ -443,8 +464,8 @@ public class PersonDialog extends JDialog {
 					// to be MODAL
 					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 
-					AssignTaskDialog event = new AssignTaskDialog(PersonDialog.this,
-							node.getParent().toString(), (TaskModel) nodeInfo);
+					AssignTaskDialog event = new AssignTaskDialog(PersonDialog.this, node.getParent().toString(),
+							(TaskModel) nodeInfo);
 
 					AssignTaskEvent eventResponse = event.getDialogResponse();
 					if (eventResponse != null) {

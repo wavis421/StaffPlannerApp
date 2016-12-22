@@ -12,8 +12,9 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 	public SingleInstanceTaskModel (String taskName, Calendar taskDate, int color) {
 		this.taskName = taskName;
 		this.taskDate = taskDate;
+		
+		// Note: Color parameter only valid when taskName is blank
 		this.color = color;
-
 	}
 
 	public String getTaskName() {
@@ -29,6 +30,12 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 	}
 
 	public int compareTo(SingleInstanceTaskModel otherTask) {
-		return (this.taskName.compareTo(otherTask.getTaskName()));
+		int dateCompare = this.taskDate.compareTo(otherTask.getTaskDate());
+		int nameCompare = this.taskName.compareTo(otherTask.getTaskName());
+		
+		if (dateCompare != 0)
+			return dateCompare;
+		else
+			return nameCompare;
 	}
 }

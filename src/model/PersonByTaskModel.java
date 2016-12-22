@@ -1,14 +1,20 @@
 package model;
 
+import java.util.Calendar;
+
 public class PersonByTaskModel implements Comparable<PersonByTaskModel> {
 	private PersonModel person;
 	private TaskModel task;
 	private boolean isSubstitute;
+	private int taskColor;
+	private Calendar taskDate;
 	
-	public PersonByTaskModel(PersonModel person, TaskModel task, boolean isSubstitute) {
+	public PersonByTaskModel(PersonModel person, TaskModel task, boolean isSubstitute, int color, Calendar taskDate) {
 		this.person = person;
 		this.task = task;
 		this.isSubstitute = isSubstitute;
+		this.taskColor = color;
+		this.taskDate = taskDate;
 	}
 
 	public String toString () {
@@ -25,6 +31,14 @@ public class PersonByTaskModel implements Comparable<PersonByTaskModel> {
 
 	public boolean isSubstitute() {
 		return isSubstitute;
+	}
+
+	public int getTaskColor() {
+		return taskColor;
+	}
+
+	public Calendar getTaskDate() {
+		return taskDate;
 	}
 
 	@Override

@@ -283,10 +283,11 @@ public class Database {
 
 		// Now add floaters to the list
 		for (PersonModel person : personList) {
-			// Check if person is a floater (not associated with task)
-			if (checkPersonMatchForTaskByDay(person, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-				thisDaysTasks.add(new CalendarDayModel(null, 0, person.getSingleInstanceTaskAssignment().getColor(),
-						person.getSingleInstanceTaskAssignment().getTaskDate(), "Floater"));
+			// Check if person is a floater (not associated with task).
+			for (SingleInstanceTaskModel task : person.getSingleInstanceTasks()) {
+				if (checkSingleInstanceTaskMatch(task, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
+					thisDaysTasks.add(new CalendarDayModel(null, 0, task.getColor(), task.getTaskDate(), "Floater"));
+				}
 			}
 		}
 
@@ -304,10 +305,7 @@ public class Database {
 						continue;
 					}
 
-					Calendar thisTaskTime = thisDaysTasks.get(taskIdx).getFloaterTime();
-					if (taskTime.get(Calendar.HOUR) == thisTaskTime.get(Calendar.HOUR)
-							&& taskTime.get(Calendar.MINUTE) == thisTaskTime.get(Calendar.MINUTE)
-							&& taskTime.get(Calendar.AM_PM) == thisTaskTime.get(Calendar.AM_PM)) {
+					if (checkForTimeMatch (taskTime, thisDaysTasks.get(taskIdx).getFloaterTime())) {
 						if (floaterCount == 0) {
 							// First match, keep in list
 							firstFloaterIndex = taskIdx;
@@ -435,20 +433,43 @@ public class Database {
 				}
 			}
 
-			// Check if this person is a sub for today
-			if (person.getSingleInstanceTaskAssignment() != null) {
-				Calendar subCalendar = person.getSingleInstanceTaskAssignment().getTaskDate();
+			for (SingleInstanceTaskModel singleInstanceTask : person.getSingleInstanceTasks()) {
+				// Check if this person is a sub for today
+				Calendar subCalendar = singleInstanceTask.getTaskDate();
 				Date extraDay = getDay(subCalendar);
 				int extraWeekIdx = subCalendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 				int extraDayIdx = subCalendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-				if (person.getSingleInstanceTaskAssignment().getTaskName().equals(taskName)
-						&& (extraDay.compareTo(today) == 0) && (extraWeekIdx == dowInMonthIdx)
-						&& (extraDayIdx == dayOfWeekIdx))
+				if (singleInstanceTask.getTaskName().equals(taskName) && (extraDay.compareTo(today) == 0)
+						&& (extraWeekIdx == dowInMonthIdx) && (extraDayIdx == dayOfWeekIdx))
 					return 1;
 			}
 		}
 		return -1;
+	}
+
+	private int checkSingleInstanceTaskMatch(SingleInstanceTaskModel singleInstanceTask, String taskName, Date today,
+			int dayOfWeekIdx, int dowInMonthIdx) {
+		// Check if this person is a sub for today
+		Calendar subCalendar = singleInstanceTask.getTaskDate();
+		Date extraDay = getDay(subCalendar);
+		int extraWeekIdx = subCalendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int extraDayIdx = subCalendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+		if (singleInstanceTask.getTaskName().equals(taskName) && (extraDay.compareTo(today) == 0)
+				&& (extraWeekIdx == dowInMonthIdx) && (extraDayIdx == dayOfWeekIdx))
+			return 1;
+		else
+			return -1;
+	}
+
+	private boolean checkForTimeMatch(Calendar time1, Calendar time2) {
+		if (time1.get(Calendar.HOUR) == time2.get(Calendar.HOUR)
+				&& time1.get(Calendar.MINUTE) == time2.get(Calendar.MINUTE)
+				&& time1.get(Calendar.AM_PM) == time2.get(Calendar.AM_PM)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
@@ -539,7 +560,8 @@ public class Database {
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
-		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable, null));
+		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable,
+				new LinkedList<SingleInstanceTaskModel>()));
 		Collections.sort(personList);
 	}
 
@@ -577,10 +599,43 @@ public class Database {
 			JOptionPane.showMessageDialog(null, "Person '" + personName + "' not found!");
 	}
 
-	public void addSingleInstanceTask(String personName, Calendar day, String taskName, int color) {
-		// Note: Color parameter only valid when taskName is blank
+	public void addSingleInstanceTask(String personName, Calendar calendar, String taskName, int color) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Date thisDay = getDay(calendar);
+		boolean matchFound = false;
+
 		PersonModel person = getPersonByName(personName);
-		person.setSingleInstanceTaskAssignment(new SingleInstanceTaskModel(taskName, day, color));
+
+		// Make sure task is not already in list
+		if (checkPersonMatchForTaskByDay(person, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
+			if (!taskName.equals(""))
+				matchFound = true;
+			else {
+				// If a floater, must also match exact time
+				for (SingleInstanceTaskModel task : person.getSingleInstanceTasks()) {
+					if (task.getTaskDate().compareTo(calendar) == 0) {
+						matchFound = true;
+						break;
+					}
+				}
+			}
+		}
+
+		if (!matchFound) {
+			person.getSingleInstanceTasks().add(new SingleInstanceTaskModel(taskName, calendar, color));
+			Collections.sort(person.getSingleInstanceTasks());
+
+		} else {
+			if (taskName.equals(""))
+				JOptionPane.showMessageDialog(null,
+						person.getName() + " already assigned as Floater for "
+								+ Utilities.formatTime((Calendar) calendar.clone()),
+						"Failed to assign " + person.getName() + " as Floater", JOptionPane.WARNING_MESSAGE);
+			else
+				JOptionPane.showMessageDialog(null, person.getName() + " already assigned to " + taskName,
+						"Failed to assign " + person.getEmail() + " to " + taskName, JOptionPane.WARNING_MESSAGE);
+		}
 	}
 
 	public void renamePerson(String oldName, String newName) {
@@ -623,7 +678,7 @@ public class Database {
 	public LinkedList<PersonByTaskModel> getAllPersonsList() {
 		LinkedList<PersonByTaskModel> personsByTask = new LinkedList<PersonByTaskModel>();
 		for (PersonModel p : personList) {
-			PersonByTaskModel person = new PersonByTaskModel(p, null, false);
+			PersonByTaskModel person = new PersonByTaskModel(p, null, false, 0, null);
 			personsByTask.add(person);
 		}
 		return personsByTask;
@@ -652,22 +707,25 @@ public class Database {
 						dayOfWeekInMonthIdx);
 
 				if (match >= 0) {
-					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, task, match == 0 ? false : true);
+					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, task, match == 0 ? false : true,
+							task.getColor(), calendar);
 					thisDaysPersons.add(personByTask);
 				}
 			}
 
 			// Check if person is a floater (not associated with task)
-			if (checkPersonMatchForTaskByDay(pModel, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false);
-				thisDaysPersons.add(personByTask);
+			for (SingleInstanceTaskModel task : pModel.getSingleInstanceTasks()) {
+				if (checkSingleInstanceTaskMatch(task, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
+					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false, task.getColor(),
+							task.getTaskDate());
+					thisDaysPersons.add(personByTask);
+				}
 			}
 		}
-
 		return thisDaysPersons;
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, String taskName) {
+	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
@@ -679,8 +737,9 @@ public class Database {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
 
 			// -1 = no match, 0 = assigned task, 1 = single instance task
-			if (checkPersonMatchForTaskByDay(pModel, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false);
+			if (checkPersonMatchForTaskByDay(pModel, task.getTaskName(), thisDay, dayOfWeekIdx,
+					dayOfWeekInMonthIdx) >= 0) {
+				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false, task.getColor(), calendar);
 				thisDaysPersons.add(personByTask);
 			}
 		}

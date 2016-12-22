@@ -670,7 +670,7 @@ public class MainFrame extends JFrame {
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(),
 								dialogResponse.getAssignedTaskChanges(), dialogResponse.getDatesUnavailable(),
-								thisPerson.getSingleInstanceTaskAssignment()),
+								thisPerson.getSingleInstanceTasks()),
 						dialogResponse.getAssignedTaskChanges(),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedList), taskTree);
 				processEditPersonDialog(personEvent, origName);
@@ -737,7 +737,7 @@ public class MainFrame extends JFrame {
 				if (selectedTask != null) {
 					// View assigned persons
 					LinkedList<PersonByTaskModel> personByTask = (LinkedList<PersonByTaskModel>) controller
-							.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()).clone();
+							.getPersonsByDayByTask(selectedCalendar, selectedTask).clone();
 
 					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
 							+ " on " + getDisplayDate(selectedCalendar), false, personByTask, "Add person");
@@ -753,8 +753,8 @@ public class MainFrame extends JFrame {
 							if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
 								controller.addSingleInstanceTask(dialogResponse, selectedCalendar,
 										selectedTask.getTaskName(), 0);
-								frame.setData(
-										controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+								frame.setData((LinkedList<PersonByTaskModel>) controller
+										.getPersonsByDayByTask(selectedCalendar, selectedTask).clone());
 								updateMonth(selectedCalendar);
 							}
 						}
@@ -764,14 +764,14 @@ public class MainFrame extends JFrame {
 
 						public void editRow(String personName) {
 							editPerson(personName);
-							frame.setData(
-									controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+							frame.setData((LinkedList<PersonByTaskModel>) controller
+									.getPersonsByDayByTask(selectedCalendar, selectedTask).clone());
 							updateMonth(selectedCalendar);
 						}
 
 						public void refresh() {
-							frame.setData(
-									controller.getPersonsByDayByTask(selectedCalendar, selectedTask.getTaskName()));
+							frame.setData((LinkedList<PersonByTaskModel>) controller
+									.getPersonsByDayByTask(selectedCalendar, selectedTask).clone());
 						}
 					};
 
@@ -802,7 +802,8 @@ public class MainFrame extends JFrame {
 						if (dialogResponse != null) {
 							controller.addSingleInstanceTask(dialogResponse.getPersonNames(),
 									dialogResponse.getCalendar(), "", dialogResponse.getColor());
-							frame.setData(controller.getPersonsByDay(selectedCalendar));
+							frame.setData((LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar)
+									.clone());
 							updateMonth(selectedCalendar);
 						}
 					}
@@ -812,11 +813,13 @@ public class MainFrame extends JFrame {
 
 					public void editRow(String personName) {
 						editPerson(personName);
-						frame.setData(controller.getPersonsByDay(selectedCalendar));
+						frame.setData(
+								(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone());
 					}
 
 					public void refresh() {
-						frame.setData(controller.getPersonsByDay(selectedCalendar));
+						frame.setData(
+								(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone());
 					}
 				};
 

@@ -132,8 +132,8 @@ public class PersonTablePanel extends JPanel {
 					PersonByTaskModel person = personList.get(row);
 					if (person.getTask() != null)
 						textColor = new Color(person.getTask().getColor());
-					else if (person.getPerson().getSingleInstanceTaskAssignment() != null)
-						textColor = new Color(person.getPerson().getSingleInstanceTaskAssignment().getColor());
+					else
+						textColor = new Color(person.getTaskColor());
 				}
 				super.setForeground(textColor);
 				

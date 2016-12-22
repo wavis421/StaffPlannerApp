@@ -228,7 +228,7 @@ public class ProgramDialog extends JDialog {
 				}
 
 			} catch (ParseException ex) {
-				System.out.println("Exception " + ex);
+				System.out.println("Exception in ProgramDialog: " + ex);
 			}
 		}
 
