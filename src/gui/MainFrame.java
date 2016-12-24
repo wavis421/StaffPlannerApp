@@ -474,7 +474,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
-							(LinkedList<PersonByTaskModel>) controller.getAllPersonsList().clone(), "");
+							controller.getAllPersonsList(), "");
 					processViewAllPersonsDialog(ev.getDialogResponse());
 				}
 			}
@@ -485,7 +485,8 @@ public class MainFrame extends JFrame {
 		if (event != null) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				// Add button is not defined for this dialog option
-				JOptionPane.showMessageDialog(null, "processViewAllPersonsDialog with Add Person button should never occur");
+				JOptionPane.showMessageDialog(null,
+						"processViewAllPersonsDialog with Add Person button should never occur");
 			}
 
 			else if (event.getButtonId() == PersonTableDialog.getDeleteRowButtonId()
@@ -493,16 +494,16 @@ public class MainFrame extends JFrame {
 				// For any unimplemented buttons,
 				// refresh data and re-open Person Table dialog
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
-						(LinkedList<PersonByTaskModel>) controller.getAllPersonsList().clone(), "");
+						controller.getAllPersonsList(), "");
 				processViewAllPersonsDialog(ev.getDialogResponse());
 			}
 
 			else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				// Edit person and re-open Person Table dialog
 				editPerson(event.getPersonName());
-				
+
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
-						(LinkedList<PersonByTaskModel>) controller.getAllPersonsList().clone(), "");
+						controller.getAllPersonsList(), "");
 				processViewAllPersonsDialog(ev.getDialogResponse());
 			}
 
@@ -752,9 +753,7 @@ public class MainFrame extends JFrame {
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 							"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 									+ getDisplayDate(selectedCalendar),
-							false, (LinkedList<PersonByTaskModel>) controller
-									.getPersonsByDayByTask(selectedCalendar, selectedTask).clone(),
-							"Add person");
+							false, controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person");
 					processViewRosterByTaskDialog(ev.getDialogResponse());
 				}
 			}
@@ -764,8 +763,7 @@ public class MainFrame extends JFrame {
 				// View all persons
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
-						(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone(),
-						"Add floater");
+						controller.getPersonsByDay(selectedCalendar), "Add floater");
 				processViewCompleteRosterDialog(ev.getDialogResponse());
 			}
 		});
@@ -786,9 +784,7 @@ public class MainFrame extends JFrame {
 				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ getDisplayDate(selectedCalendar),
-						false, (LinkedList<PersonByTaskModel>) controller
-								.getPersonsByDayByTask(selectedCalendar, selectedTask).clone(),
-						"Add person");
+						false, controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person");
 				processViewRosterByTaskDialog(ev2.getDialogResponse());
 			}
 
@@ -799,9 +795,7 @@ public class MainFrame extends JFrame {
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ getDisplayDate(selectedCalendar),
-						false, (LinkedList<PersonByTaskModel>) controller
-								.getPersonsByDayByTask(selectedCalendar, selectedTask).clone(),
-						"Add person");
+						false, controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person");
 				processViewRosterByTaskDialog(ev.getDialogResponse());
 			}
 
@@ -812,9 +806,7 @@ public class MainFrame extends JFrame {
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ getDisplayDate(selectedCalendar),
-						false, (LinkedList<PersonByTaskModel>) controller
-								.getPersonsByDayByTask(selectedCalendar, selectedTask).clone(),
-						"Add person");
+						false, controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person");
 				processViewRosterByTaskDialog(ev.getDialogResponse());
 			}
 
@@ -842,28 +834,24 @@ public class MainFrame extends JFrame {
 				}
 				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
-						(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone(),
-						"Add floater");
+						controller.getPersonsByDay(selectedCalendar), "Add floater");
 				processViewCompleteRosterDialog(ev2.getDialogResponse());
-				
+
 			} else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				editPerson(event.getPersonName());
 
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
-						(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone(),
-						"Add floater");
+						controller.getPersonsByDay(selectedCalendar), "Add floater");
 				processViewCompleteRosterDialog(ev.getDialogResponse());
-				
+
 			} else if (event.getButtonId() == PersonTableDialog.getDeleteRowButtonId()
 					|| event.getButtonId() == PersonTableDialog.getEmailButtonId()) {
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
-						(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone(),
-						"Add floater");
+						controller.getPersonsByDay(selectedCalendar), "Add floater");
 				processViewCompleteRosterDialog(ev.getDialogResponse());
-			}
-			else {
+			} else {
 				// Exiting dialog without any action
 				updateMonth(selectedCalendar);
 			}

@@ -267,7 +267,7 @@ public class PersonDialog extends JDialog {
 					taskName = "Floater";
 					taskModel.addElement(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
 							+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR) + " at "
-							+ Utilities.formatTime((Calendar) date.clone()));
+							+ Utilities.formatTime(date));
 				} else {
 					taskModel.addElement(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
 							+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));

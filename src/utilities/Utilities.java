@@ -16,14 +16,16 @@ public class Utilities {
 	}
 
 	public static String formatTime(Calendar cal) {
+		Calendar localCal = (Calendar) cal.clone();
+		
 		// Convert HOUR from 0-11 to 1-12
-		cal.add(Calendar.HOUR, 1);
+		localCal.add(Calendar.HOUR, 1);
 
 		// If hour transitioned to 12:00 am/pm, then switch the AM/PM
-		int hour = cal.get(Calendar.HOUR);
+		int hour = localCal.get(Calendar.HOUR);
 		if (hour == 0 || hour == 12)
-			cal.set(Calendar.AM_PM, cal.get(Calendar.AM_PM) == Calendar.AM ? Calendar.PM : Calendar.AM);
+			localCal.set(Calendar.AM_PM, localCal.get(Calendar.AM_PM) == Calendar.AM ? Calendar.PM : Calendar.AM);
 
-		return timeFormat.format(cal.getTime());
+		return timeFormat.format(localCal.getTime());
 	}
 }

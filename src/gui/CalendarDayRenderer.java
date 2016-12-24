@@ -33,7 +33,7 @@ public class CalendarDayRenderer extends JLabel implements ListCellRenderer<Cale
 
 		if (calendarDay.getTask() == null) {
 			// Floater task
-			setText(calendarDay.getFloaterTaskName() + " " + Utilities.formatTime((Calendar)calendarDay.getFloaterTime().clone()));
+			setText(calendarDay.getFloaterTaskName() + " " + Utilities.formatTime(calendarDay.getFloaterTime()));
 		} else {
 			// Assigned task
 			setText(calendarDay.getTask().getTaskName() + " (" + calendarDay.getPersonCount() + "/"

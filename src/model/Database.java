@@ -270,7 +270,7 @@ public class Database {
 				}
 			}
 		}
-		return thisDaysTasks;
+		return (LinkedList<CalendarDayModel>) thisDaysTasks.clone();
 	}
 
 	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
@@ -292,7 +292,8 @@ public class Database {
 		}
 
 		// Merge duplicate floaters
-		for (CalendarDayModel calDay : thisDaysTasks) {
+		for (int i = 0; i < thisDaysTasks.size(); i++) {
+			CalendarDayModel calDay = thisDaysTasks.get(i);
 			if (calDay.getTask() == null) { // Found floater
 				Calendar taskTime = calDay.getFloaterTime();
 				int floaterCount = 0;
@@ -304,7 +305,7 @@ public class Database {
 						// Not a floater
 						continue;
 					}
-
+					
 					if (checkForTimeMatch (taskTime, thisDaysTasks.get(taskIdx).getFloaterTime())) {
 						if (floaterCount == 0) {
 							// First match, keep in list
@@ -630,7 +631,7 @@ public class Database {
 			if (taskName.equals(""))
 				JOptionPane.showMessageDialog(null,
 						person.getName() + " already assigned as Floater for "
-								+ Utilities.formatTime((Calendar) calendar.clone()),
+								+ Utilities.formatTime(calendar),
 						"Failed to assign " + person.getName() + " as Floater", JOptionPane.WARNING_MESSAGE);
 			else
 				JOptionPane.showMessageDialog(null, person.getName() + " already assigned to " + taskName,
@@ -681,7 +682,7 @@ public class Database {
 			PersonByTaskModel person = new PersonByTaskModel(p, null, false, 0, null);
 			personsByTask.add(person);
 		}
-		return personsByTask;
+		return (LinkedList<PersonByTaskModel>) personsByTask.clone();
 	}
 
 	// Return list of all persons assigned to this day, including single
@@ -722,7 +723,7 @@ public class Database {
 				}
 			}
 		}
-		return thisDaysPersons;
+		return (LinkedList<PersonByTaskModel>) thisDaysPersons.clone();
 	}
 
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
@@ -743,7 +744,7 @@ public class Database {
 				thisDaysPersons.add(personByTask);
 			}
 		}
-		return thisDaysPersons;
+		return (LinkedList<PersonByTaskModel>) thisDaysPersons.clone();
 	}
 
 	public int getNumPersons() {
