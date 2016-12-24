@@ -473,31 +473,44 @@ public class MainFrame extends JFrame {
 		viewAllPersons.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
-					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers", false,
+					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
 							(LinkedList<PersonByTaskModel>) controller.getAllPersonsList().clone(), "");
-
-					PersonTableListener tableListener = new PersonTableListener() {
-						public void addPerson() {
-						}
-
-						public void rowDeleted(int row) {
-						}
-
-						public void editRow(String personName) {
-							editPerson(personName);
-							frame.setData(controller.getAllPersonsList());
-						}
-
-						public void refresh() {
-							frame.setData(controller.getAllPersonsList());
-						}
-					};
-
-					frame.setTableListener(tableListener);
-					frame.setVisible(true);
+					processViewAllPersonsDialog(ev.getDialogResponse());
 				}
 			}
 		});
+	}
+
+	private void processViewAllPersonsDialog(PersonTableEvent event) {
+		if (event != null) {
+			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
+				// Add button is not defined for this dialog option
+				JOptionPane.showMessageDialog(null, "processViewAllPersonsDialog with Add Person button should never occur");
+			}
+
+			else if (event.getButtonId() == PersonTableDialog.getDeleteRowButtonId()
+					|| event.getButtonId() == PersonTableDialog.getEmailButtonId()) {
+				// For any unimplemented buttons,
+				// refresh data and re-open Person Table dialog
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
+						(LinkedList<PersonByTaskModel>) controller.getAllPersonsList().clone(), "");
+				processViewAllPersonsDialog(ev.getDialogResponse());
+			}
+
+			else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
+				// Edit person and re-open Person Table dialog
+				editPerson(event.getPersonName());
+				
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
+						(LinkedList<PersonByTaskModel>) controller.getAllPersonsList().clone(), "");
+				processViewAllPersonsDialog(ev.getDialogResponse());
+			}
+
+			else {
+				// Exiting dialog without any action
+				updateMonth(selectedCalendar);
+			}
+		}
 	}
 
 	private void createCalendarMenuListeners(JMenuItem filterNoneItem, JMenuItem filterByProgramItem,
@@ -736,97 +749,125 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (selectedTask != null) {
 					// View assigned persons
-					LinkedList<PersonByTaskModel> personByTask = (LinkedList<PersonByTaskModel>) controller
-							.getPersonsByDayByTask(selectedCalendar, selectedTask).clone();
-
-					PersonTableFrame frame = new PersonTableFrame("Leaders/Volunteers for " + selectedTask.getTaskName()
-							+ " on " + getDisplayDate(selectedCalendar), false, personByTask, "Add person");
-
-					PersonTableListener tableListener = new PersonTableListener() {
-						public void addPerson() {
-							JList<String> personList = controller.getAllPersonsAsString();
-							FilterListDialog ev = new FilterListDialog(MainFrame.this, "Assign person(s) to "
-									+ selectedTask.getTaskName() + " on " + getDisplayDate(selectedCalendar),
-									personList);
-							JList<String> dialogResponse = ev.getDialogResponse();
-
-							if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
-								controller.addSingleInstanceTask(dialogResponse, selectedCalendar,
-										selectedTask.getTaskName(), 0);
-								frame.setData((LinkedList<PersonByTaskModel>) controller
-										.getPersonsByDayByTask(selectedCalendar, selectedTask).clone());
-								updateMonth(selectedCalendar);
-							}
-						}
-
-						public void rowDeleted(int row) {
-						}
-
-						public void editRow(String personName) {
-							editPerson(personName);
-							frame.setData((LinkedList<PersonByTaskModel>) controller
-									.getPersonsByDayByTask(selectedCalendar, selectedTask).clone());
-							updateMonth(selectedCalendar);
-						}
-
-						public void refresh() {
-							frame.setData((LinkedList<PersonByTaskModel>) controller
-									.getPersonsByDayByTask(selectedCalendar, selectedTask).clone());
-						}
-					};
-
-					frame.setTableListener(tableListener);
-					frame.setVisible(true);
+					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
+							"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
+									+ getDisplayDate(selectedCalendar),
+							false, (LinkedList<PersonByTaskModel>) controller
+									.getPersonsByDayByTask(selectedCalendar, selectedTask).clone(),
+							"Add person");
+					processViewRosterByTaskDialog(ev.getDialogResponse());
 				}
 			}
 		});
 		viewCompleteRosterForToday.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// View all persons
-				LinkedList<PersonByTaskModel> personList = (LinkedList<PersonByTaskModel>) controller
-						.getPersonsByDay(selectedCalendar).clone();
-
-				PersonTableFrame frame = new PersonTableFrame(
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true, personList, "Add floater");
-
-				PersonTableListener tableListener = new PersonTableListener() {
-					// Add Floater
-					public void addPerson() {
-						JList<String> personList = controller.getAllPersonsAsString();
-						JList<Time> timeList = controller.getAllTimesByDay(selectedCalendar);
-
-						FloaterDialog ev = new FloaterDialog(MainFrame.this, (Calendar) selectedCalendar.clone(),
-								personList, timeList);
-						FloaterEvent dialogResponse = ev.getDialogResponse();
-
-						if (dialogResponse != null) {
-							controller.addSingleInstanceTask(dialogResponse.getPersonNames(),
-									dialogResponse.getCalendar(), "", dialogResponse.getColor());
-							frame.setData((LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar)
-									.clone());
-							updateMonth(selectedCalendar);
-						}
-					}
-
-					public void rowDeleted(int row) {
-					}
-
-					public void editRow(String personName) {
-						editPerson(personName);
-						frame.setData(
-								(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone());
-					}
-
-					public void refresh() {
-						frame.setData(
-								(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone());
-					}
-				};
-
-				frame.setTableListener(tableListener);
-				frame.setVisible(true);
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
+						(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone(),
+						"Add floater");
+				processViewCompleteRosterDialog(ev.getDialogResponse());
 			}
 		});
+	}
+
+	private void processViewRosterByTaskDialog(PersonTableEvent event) {
+		if (event != null) {
+			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
+				FilterListDialog ev1 = new FilterListDialog(MainFrame.this,
+						"Assign person(s) to " + selectedTask.getTaskName() + " on " + getDisplayDate(selectedCalendar),
+						controller.getAllPersonsAsString());
+				JList<String> dialogResponse = ev1.getDialogResponse();
+
+				if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
+					controller.addSingleInstanceTask(dialogResponse, selectedCalendar, selectedTask.getTaskName(), 0);
+				}
+
+				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,
+						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
+								+ getDisplayDate(selectedCalendar),
+						false, (LinkedList<PersonByTaskModel>) controller
+								.getPersonsByDayByTask(selectedCalendar, selectedTask).clone(),
+						"Add person");
+				processViewRosterByTaskDialog(ev2.getDialogResponse());
+			}
+
+			else if (event.getButtonId() == PersonTableDialog.getDeleteRowButtonId()
+					|| event.getButtonId() == PersonTableDialog.getEmailButtonId()) {
+				// For any unimplemented buttons,
+				// refresh data and re-open Person Table dialog
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
+						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
+								+ getDisplayDate(selectedCalendar),
+						false, (LinkedList<PersonByTaskModel>) controller
+								.getPersonsByDayByTask(selectedCalendar, selectedTask).clone(),
+						"Add person");
+				processViewRosterByTaskDialog(ev.getDialogResponse());
+			}
+
+			else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
+				// Edit person and re-open Person Table dialog
+				editPerson(event.getPersonName());
+
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
+						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
+								+ getDisplayDate(selectedCalendar),
+						false, (LinkedList<PersonByTaskModel>) controller
+								.getPersonsByDayByTask(selectedCalendar, selectedTask).clone(),
+						"Add person");
+				processViewRosterByTaskDialog(ev.getDialogResponse());
+			}
+
+			else {
+				// Exiting dialog without any action
+				updateMonth(selectedCalendar);
+			}
+		}
+
+	}
+
+	private void processViewCompleteRosterDialog(PersonTableEvent event) {
+		if (event != null) {
+			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
+				JList<String> personList = controller.getAllPersonsAsString();
+				JList<Time> timeList = controller.getAllTimesByDay(selectedCalendar);
+
+				FloaterDialog ev1 = new FloaterDialog(MainFrame.this, (Calendar) selectedCalendar.clone(), personList,
+						timeList);
+				FloaterEvent dialogResponse = ev1.getDialogResponse();
+
+				if (dialogResponse != null) {
+					controller.addSingleInstanceTask(dialogResponse.getPersonNames(), dialogResponse.getCalendar(), "",
+							dialogResponse.getColor());
+				}
+				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
+						(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone(),
+						"Add floater");
+				processViewCompleteRosterDialog(ev2.getDialogResponse());
+				
+			} else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
+				editPerson(event.getPersonName());
+
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
+						(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone(),
+						"Add floater");
+				processViewCompleteRosterDialog(ev.getDialogResponse());
+				
+			} else if (event.getButtonId() == PersonTableDialog.getDeleteRowButtonId()
+					|| event.getButtonId() == PersonTableDialog.getEmailButtonId()) {
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
+						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
+						(LinkedList<PersonByTaskModel>) controller.getPersonsByDay(selectedCalendar).clone(),
+						"Add floater");
+				processViewCompleteRosterDialog(ev.getDialogResponse());
+			}
+			else {
+				// Exiting dialog without any action
+				updateMonth(selectedCalendar);
+			}
+		}
 	}
 
 	private void updateMonth(Calendar calendar) {

@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.sql.Time;
 import java.util.LinkedList;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -22,7 +23,8 @@ import javax.swing.table.TableCellRenderer;
 import model.PersonByTaskModel;
 
 public class PersonTablePanel extends JPanel {
-	private final int ROW_GAP = 5;
+	private static final int ROW_GAP = 5;
+	
 	private JTable table;
 	private PersonTableModel tableModel;
 	private JPopupMenu popup;
@@ -56,8 +58,8 @@ public class PersonTablePanel extends JPanel {
 		popup.add(removeItem);
 		popup.add(editItem);
 
-		// Detect right mouse click on table, then pop-up "Delete row" and
-		// select row
+		// Detect right mouse click on table, then pop-up "Delete/Edit row" 
+		// and select row
 		table.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON3) {
@@ -100,15 +102,11 @@ public class PersonTablePanel extends JPanel {
 	public void setData(LinkedList<PersonByTaskModel> db) {
 		personList = db;
 		tableModel.setData(db);
-		refresh();
+		tableModel.fireTableDataChanged();
 	}
 
 	public void setPersonTableListener(PersonTableListener listener) {
 		this.personTableListener = listener;
-	}
-
-	public void refresh() {
-		tableModel.fireTableDataChanged();
 	}
 
 	public class PersonTableRenderer extends JLabel implements TableCellRenderer {
