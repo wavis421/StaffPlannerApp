@@ -509,7 +509,7 @@ public class MainFrame extends JFrame {
 
 			else {
 				// Exiting dialog without any action
-				updateMonth(selectedCalendar);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 		}
 	}
@@ -812,7 +812,7 @@ public class MainFrame extends JFrame {
 
 			else {
 				// Exiting dialog without any action
-				updateMonth(selectedCalendar);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 		}
 
@@ -853,7 +853,7 @@ public class MainFrame extends JFrame {
 				processViewCompleteRosterDialog(ev.getDialogResponse());
 			} else {
 				// Exiting dialog without any action
-				updateMonth(selectedCalendar);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 		}
 	}

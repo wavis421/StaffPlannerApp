@@ -1,14 +1,26 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Time;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
 
 import model.PersonByTaskModel;
 
@@ -21,8 +33,18 @@ public class PersonTableDialog extends JDialog {
 	private static final int CLOSE_BUTTON = 2;
 	private static final int EDIT_ROW_BUTTON = 3;
 	private static final int DELETE_ROW_BUTTON = 4;
+	
+	private static final int ROW_GAP = 5;
 
-	private PersonTablePanel tablePanel;
+	private boolean isColumnExpanded;
+	private JPanel tablePanel;
+	private JTable table;
+	private PersonTableModel tableModel;
+	private JPopupMenu popup;
+	private JMenuItem removeItem;
+	private JMenuItem editItem;
+	private LinkedList<PersonByTaskModel> personList;
+
 	private String addButtonText;
 
 	private PersonTableEvent dialogResponse;
@@ -31,28 +53,11 @@ public class PersonTableDialog extends JDialog {
 			LinkedList<PersonByTaskModel> personList, String addButtonText) {
 		super(parent, true);
 		setTitle(title);
-		this.tablePanel = new PersonTablePanel(isColumnExpanded, personList);
 		this.addButtonText = addButtonText;
+		this.isColumnExpanded = isColumnExpanded;
+		this.personList = personList;
 		
-		// Add listeners for edit & delete row
-		PersonTableListener tableListener = new PersonTableListener () {
-			@Override
-			public void rowDeleted(int row) {
-				PersonTableEvent ev = new PersonTableEvent(this, DELETE_ROW_BUTTON, row, null);
-				dialogResponse = ev;
-				setVisible(false);
-				dispose();
-			}
-			
-			@Override
-			public void editRow(String personName) {
-				PersonTableEvent ev = new PersonTableEvent(this, EDIT_ROW_BUTTON, 0, personName);
-				dialogResponse = ev;
-				setVisible(false);
-				dispose();
-			}
-		};
-		this.tablePanel.setPersonTableListener(tableListener);
+		tablePanel = createPersonTablePanel ();
 
 		setLayout(new BorderLayout());
 		JPanel buttonPanel = createButtonPanel();
@@ -66,10 +71,6 @@ public class PersonTableDialog extends JDialog {
 
 	public PersonTableEvent getDialogResponse() {
 		return dialogResponse;
-	}
-
-	public void setData(LinkedList<PersonByTaskModel> db) {
-		tablePanel.setData(db);
 	}
 
 	private JPanel createButtonPanel() {
@@ -111,6 +112,116 @@ public class PersonTableDialog extends JDialog {
 		});
 
 		return panel;
+	}
+	
+	private JPanel createPersonTablePanel () {
+		JPanel panel = new JPanel();
+		tableModel = new PersonTableModel(isColumnExpanded, personList);
+		table = new JTable(tableModel);
+
+		table.setFont(new Font("Serif", Font.PLAIN, 14));
+		table.getTableHeader().setFont(new Font("Serif", Font.BOLD, 16));
+		table.setRowHeight(table.getRowHeight() + ROW_GAP);
+		table.getColumnModel().getColumn(tableModel.getColumnForLeader()).setMaxWidth(35);
+		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setMaxWidth(100);
+		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setPreferredWidth(95);
+		if (isColumnExpanded) {
+			table.getColumnModel().getColumn(tableModel.getColumnForSub()).setMaxWidth(35);
+			table.getColumnModel().getColumn(tableModel.getColumnForTime()).setMaxWidth(75);
+		}
+		table.setDefaultRenderer(Object.class, new PersonTableRenderer());
+		table.setAutoCreateRowSorter(true);
+
+		popup = new JPopupMenu();
+		removeItem = new JMenuItem("Delete row");
+		editItem = new JMenuItem("Edit row");
+		popup.add(removeItem);
+		popup.add(editItem);
+
+		// Detect right mouse click on table, then pop-up "Delete/Edit row" 
+		// and select row
+		table.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					popup.show(table, e.getX(), e.getY());
+					int row = table.rowAtPoint(e.getPoint());
+					table.getSelectionModel().setSelectionInterval(row, row);
+				}
+			}
+		});
+
+		// When "Delete row" selected, then trigger PersonTableListener action
+		// for this row
+		removeItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				PersonTableEvent ev = new PersonTableEvent(this, DELETE_ROW_BUTTON, table.getSelectedRow(), null);
+				dialogResponse = ev;
+				setVisible(false);
+				dispose();
+			}
+		});
+
+		// When "Edit row" selected, then trigger PersonTableListener action
+		// for this row
+		editItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {				
+				PersonTableEvent ev = new PersonTableEvent(this, EDIT_ROW_BUTTON, 0, 
+						(String) tableModel.getValueAt(table.getSelectedRow(), tableModel.getColumnForPersonName()));
+				dialogResponse = ev;
+				setVisible(false);
+				dispose();
+			}
+		});
+
+		panel.setLayout(new BorderLayout());
+		panel.add(new JScrollPane(table), BorderLayout.CENTER);
+		return panel;
+	}
+	
+	public void setData(LinkedList<PersonByTaskModel> db) {
+		personList = db;
+		tableModel.setData(db);
+		tableModel.fireTableDataChanged();
+	}
+
+	public class PersonTableRenderer extends JLabel implements TableCellRenderer {
+		private PersonTableRenderer() {
+			super();
+			super.setOpaque(true);
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+
+			if (value instanceof String)
+				setText((String) value);
+			else if (value instanceof Time)
+				setText((String) value.toString());
+
+			if (column != -1) {
+				Color textColor = Color.black;
+				if (column == tableModel.getColumnForTaskName()) {
+					PersonByTaskModel person = personList.get(row);
+					if (person.getTask() != null)
+						textColor = new Color(person.getTask().getColor());
+					else
+						textColor = new Color(person.getTaskColor());
+				}
+				super.setForeground(textColor);
+				
+				if (isSelected) 
+					super.setBackground(new Color(0xDDDDDD));
+				else
+					super.setBackground(Color.WHITE);
+
+				if (column == tableModel.getColumnForPersonName())
+					super.setHorizontalAlignment(LEFT);
+				else
+					super.setHorizontalAlignment(CENTER);
+			}
+			return this;
+		}
 	}
 
 	public static int getAddPersonButtonId() {
