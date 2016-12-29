@@ -105,10 +105,10 @@ public class Controller {
 		return db.getAllTasksByDay(calendar);
 	}
 
-	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay (Calendar calendar) {
+	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
 		return db.getAllTasksAndFloatersByDay(calendar);
 	}
-	
+
 	/*
 	 * public List<TaskModel> getAllTasks() { return db.getAllTasks(); }
 	 */
@@ -124,7 +124,7 @@ public class Controller {
 	public JList<String> getAllTimesAsString() {
 		return db.getAllTimesAsString();
 	}
-	
+
 	public JList<Time> getAllTimesByDay(Calendar calendar) {
 		return db.getAllTimesByDay(calendar);
 	}
@@ -148,7 +148,7 @@ public class Controller {
 				ev.getAssignedTaskChanges(), ev.getDatesUnavailable());
 	}
 
-	public void addSingleInstanceTask (JList<String> personList, Calendar day, String taskName, int color) {
+	public void addSingleInstanceTask(JList<String> personList, Calendar day, String taskName, int color) {
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
 			db.addSingleInstanceTask(personList.getModel().getElementAt(i), day, taskName, color);
 		}

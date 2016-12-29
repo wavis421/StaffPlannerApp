@@ -305,8 +305,8 @@ public class Database {
 						// Not a floater
 						continue;
 					}
-					
-					if (checkForTimeMatch (taskTime, thisDaysTasks.get(taskIdx).getFloaterTime())) {
+
+					if (Utilities.checkForTimeMatch(taskTime, thisDaysTasks.get(taskIdx).getFloaterTime())) {
 						if (floaterCount == 0) {
 							// First match, keep in list
 							firstFloaterIndex = taskIdx;
@@ -437,12 +437,10 @@ public class Database {
 			for (SingleInstanceTaskModel singleInstanceTask : person.getSingleInstanceTasks()) {
 				// Check if this person is a sub for today
 				Calendar subCalendar = singleInstanceTask.getTaskDate();
-				Date extraDay = getDay(subCalendar);
-				int extraWeekIdx = subCalendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-				int extraDayIdx = subCalendar.get(Calendar.DAY_OF_WEEK) - 1;
-				if (singleInstanceTask.getTaskName().equals(taskName) && (extraDay.compareTo(today) == 0)
-						&& (extraWeekIdx == dowInMonthIdx) && (extraDayIdx == dayOfWeekIdx))
+				if (singleInstanceTask.getTaskName().equals(taskName)
+						&& checkForDateAndTimeMatch(today, dayOfWeekIdx, dowInMonthIdx, subCalendar)) {
 					return 1;
+				}
 			}
 		}
 		return -1;
@@ -452,21 +450,20 @@ public class Database {
 			int dayOfWeekIdx, int dowInMonthIdx) {
 		// Check if this person is a sub for today
 		Calendar subCalendar = singleInstanceTask.getTaskDate();
-		Date extraDay = getDay(subCalendar);
-		int extraWeekIdx = subCalendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int extraDayIdx = subCalendar.get(Calendar.DAY_OF_WEEK) - 1;
 
-		if (singleInstanceTask.getTaskName().equals(taskName) && (extraDay.compareTo(today) == 0)
-				&& (extraWeekIdx == dowInMonthIdx) && (extraDayIdx == dayOfWeekIdx))
+		if (singleInstanceTask.getTaskName().equals(taskName)
+				&& checkForDateAndTimeMatch(today, dayOfWeekIdx, dowInMonthIdx, subCalendar))
 			return 1;
 		else
 			return -1;
 	}
 
-	private boolean checkForTimeMatch(Calendar time1, Calendar time2) {
-		if (time1.get(Calendar.HOUR) == time2.get(Calendar.HOUR)
-				&& time1.get(Calendar.MINUTE) == time2.get(Calendar.MINUTE)
-				&& time1.get(Calendar.AM_PM) == time2.get(Calendar.AM_PM)) {
+	private boolean checkForDateAndTimeMatch(Date todayDate, int todayDOW, int todayWOM, Calendar calendar) {
+		Date calDay = getDay(calendar);
+		int calWeekIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int calDayIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+		if ((calDay.compareTo(todayDate) == 0) && (calWeekIdx == todayWOM) && (calDayIdx == todayDOW)) {
 			return true;
 		} else {
 			return false;
@@ -601,42 +598,12 @@ public class Database {
 	}
 
 	public void addSingleInstanceTask(String personName, Calendar calendar, String taskName, int color) {
-		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = getDay(calendar);
-		boolean matchFound = false;
-
+		// Get person
 		PersonModel person = getPersonByName(personName);
 
-		// Make sure task is not already in list
-		if (checkPersonMatchForTaskByDay(person, taskName, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-			if (!taskName.equals(""))
-				matchFound = true;
-			else {
-				// If a floater, must also match exact time
-				for (SingleInstanceTaskModel task : person.getSingleInstanceTasks()) {
-					if (task.getTaskDate().compareTo(calendar) == 0) {
-						matchFound = true;
-						break;
-					}
-				}
-			}
-		}
-
-		if (!matchFound) {
-			person.getSingleInstanceTasks().add(new SingleInstanceTaskModel(taskName, calendar, color));
-			Collections.sort(person.getSingleInstanceTasks());
-
-		} else {
-			if (taskName.equals(""))
-				JOptionPane.showMessageDialog(null,
-						person.getName() + " already assigned as Floater for "
-								+ Utilities.formatTime(calendar),
-						"Failed to assign " + person.getName() + " as Floater", JOptionPane.WARNING_MESSAGE);
-			else
-				JOptionPane.showMessageDialog(null, person.getName() + " already assigned to " + taskName,
-						"Failed to assign " + person.getEmail() + " to " + taskName, JOptionPane.WARNING_MESSAGE);
-		}
+		// Add task to single instance task list
+		person.getSingleInstanceTasks().add(new SingleInstanceTaskModel(taskName, calendar, color));
+		Collections.sort(person.getSingleInstanceTasks());
 	}
 
 	public void renamePerson(String oldName, String newName) {

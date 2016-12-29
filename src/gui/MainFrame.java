@@ -38,7 +38,6 @@ import javax.swing.tree.TreeSelectionModel;
 import controller.Controller;
 import model.AssignedTasksModel;
 import model.CalendarDayModel;
-import model.PersonByTaskModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
@@ -778,7 +777,8 @@ public class MainFrame extends JFrame {
 				JList<String> dialogResponse = ev1.getDialogResponse();
 
 				if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
-					controller.addSingleInstanceTask(dialogResponse, selectedCalendar, selectedTask.getTaskName(), 0);
+					controller.addSingleInstanceTask(dialogResponse, selectedCalendar, selectedTask.getTaskName(),
+							selectedTask.getColor());
 				}
 
 				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,

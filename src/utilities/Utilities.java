@@ -28,4 +28,30 @@ public class Utilities {
 
 		return timeFormat.format(localCal.getTime());
 	}
+	
+	public static boolean checkForTimeMatch(Time time1, Calendar time2) {
+		Calendar time1Cal = Calendar.getInstance();
+		time1Cal.setTime(time1);
+		
+		return checkForTimeMatch(time1Cal, time2);
+	}
+	
+	public static boolean checkForTimeMatch(Calendar time1, Calendar time2) {
+		if (time1.get(Calendar.HOUR) == time2.get(Calendar.HOUR)
+				&& time1.get(Calendar.MINUTE) == time2.get(Calendar.MINUTE)
+				&& time1.get(Calendar.AM_PM) == time2.get(Calendar.AM_PM)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public static void addTimeToCalendar(Calendar calendar, Time time) {
+		Calendar timeCal = Calendar.getInstance();
+		timeCal.setTime(time);
+		
+		calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR));
+		calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
+		calendar.set(Calendar.AM_PM, timeCal.get(Calendar.AM_PM));
+	}
 }

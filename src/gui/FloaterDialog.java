@@ -11,7 +11,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Time;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
@@ -57,7 +56,8 @@ public class FloaterDialog extends JDialog {
 
 	// Constructor for adding floater
 	public FloaterDialog(JFrame parent, Calendar date, JList<String> personsList, JList<Time> timesList) {
-		super(parent, "Add floater for " + (date.get(Calendar.MONTH) + 1) + "/" + date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR), true);
+		super(parent, "Add floater for " + (date.get(Calendar.MONTH) + 1) + "/" + date.get(Calendar.DAY_OF_MONTH) + "/"
+				+ date.get(Calendar.YEAR), true);
 
 		this.calendar = date;
 		this.personsList = personsList;
@@ -73,18 +73,13 @@ public class FloaterDialog extends JDialog {
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				// Create FloaterEvent and set response
 				DefaultListModel<String> pModel = new DefaultListModel<String>();
 				pModel.addElement(new String(personCombo.getSelectedItem().toString()));
 
 				// Add selected time to calendar
 				int idx = timeCombo.getSelectedIndex();
-				Calendar timeCal = Calendar.getInstance();
-				timeCal.setTime(timesList.getModel().getElementAt(idx));
-				calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR));
-				calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
-				calendar.set(Calendar.AM_PM, timeCal.get(Calendar.AM_PM));
+				Utilities.addTimeToCalendar(calendar, timesList.getModel().getElementAt(idx));
 
 				FloaterEvent ev = new FloaterEvent(this, new JList<String>(pModel), calendar,
 						Integer.parseInt(colorGroup.getSelection().getActionCommand()));
@@ -180,7 +175,7 @@ public class FloaterDialog extends JDialog {
 		DefaultComboBoxModel<String> timeModel = new DefaultComboBoxModel<String>();
 
 		for (int i = 0; i < times.getModel().getSize(); i++) {
-			String timeString = Utilities.formatTime (times.getModel().getElementAt(i));
+			String timeString = Utilities.formatTime(times.getModel().getElementAt(i));
 			timeModel.addElement(timeString);
 		}
 
