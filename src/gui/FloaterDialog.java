@@ -16,11 +16,9 @@ import java.util.Calendar;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -55,7 +53,7 @@ public class FloaterDialog extends JDialog {
 	private FloaterEvent dialogResponse;
 
 	// Constructor for adding floater
-	public FloaterDialog(JFrame parent, Calendar date, JList<String> personsList, JList<Time> timesList) {
+	public FloaterDialog(JDialog parent, Calendar date, JList<String> personsList, JList<Time> timesList) {
 		super(parent, "Add floater for " + (date.get(Calendar.MONTH) + 1) + "/" + date.get(Calendar.DAY_OF_MONTH) + "/"
 				+ date.get(Calendar.YEAR), true);
 
@@ -73,15 +71,12 @@ public class FloaterDialog extends JDialog {
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Create FloaterEvent and set response
-				DefaultListModel<String> pModel = new DefaultListModel<String>();
-				pModel.addElement(new String(personCombo.getSelectedItem().toString()));
-
 				// Add selected time to calendar
 				int idx = timeCombo.getSelectedIndex();
 				Utilities.addTimeToCalendar(calendar, timesList.getModel().getElementAt(idx));
 
-				FloaterEvent ev = new FloaterEvent(this, new JList<String>(pModel), calendar,
+				// Create FloaterEvent and set response
+				FloaterEvent ev = new FloaterEvent(this, personCombo.getSelectedItem().toString(), calendar,
 						Integer.parseInt(colorGroup.getSelection().getActionCommand()));
 				dialogResponse = ev;
 

@@ -3,10 +3,8 @@ package gui;
 import java.util.Calendar;
 import java.util.EventObject;
 
-import javax.swing.JList;
-
 public class FloaterEvent extends EventObject {
-	private JList<String> personNames;
+	private String personName;
 	private Calendar calendar;
 	private int color;
 
@@ -14,16 +12,16 @@ public class FloaterEvent extends EventObject {
 		super(source);
 	}
 
-	public FloaterEvent(Object source, JList<String> personNames, Calendar calendar, int color) {
+	public FloaterEvent(Object source, String personName, Calendar calendar, int color) {
 		super(source);
 
-		this.personNames = personNames;
+		this.personName = personName;
 		this.calendar = calendar;
 		this.color = color;
 	}
 
-	public JList<String> getPersonNames() {
-		return personNames;
+	public String getPersonName() {
+		return personName;
 	}
 
 	public Calendar getCalendar() {
