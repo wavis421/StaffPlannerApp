@@ -675,6 +675,7 @@ public class Database {
 						dayOfWeekInMonthIdx);
 
 				if (match >= 0) {
+					Utilities.addTimeToCalendar(calendar, task.getTime());
 					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, task, match == 0 ? false : true,
 							task.getColor(), calendar);
 					thisDaysPersons.add(personByTask);
@@ -707,6 +708,7 @@ public class Database {
 			// -1 = no match, 0 = assigned task, 1 = single instance task
 			if (checkPersonMatchForTaskByDay(pModel, task.getTaskName(), thisDay, dayOfWeekIdx,
 					dayOfWeekInMonthIdx) >= 0) {
+				Utilities.addTimeToCalendar(calendar, task.getTime());
 				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false, task.getColor(), calendar);
 				thisDaysPersons.add(personByTask);
 			}

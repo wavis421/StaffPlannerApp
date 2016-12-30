@@ -14,7 +14,7 @@ public class PersonByTaskModel implements Comparable<PersonByTaskModel> {
 		this.task = task;
 		this.isSubstitute = isSubstitute;
 		this.taskColor = color;
-		this.taskDate = taskDate;
+		this.taskDate = (Calendar) taskDate.clone();
 	}
 
 	public String toString () {

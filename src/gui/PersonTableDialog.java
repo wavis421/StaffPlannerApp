@@ -18,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -25,6 +26,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import model.PersonByTaskModel;
+import utilities.Utilities;
 
 public class PersonTableDialog extends JDialog {
 	private static final int PREF_DIALOG_WIDTH = 800;
@@ -35,6 +37,10 @@ public class PersonTableDialog extends JDialog {
 	private static final int CLOSE_BUTTON = 2;
 	private static final int EDIT_ROW_BUTTON = 3;
 	private static final int DELETE_ROW_BUTTON = 4;
+
+	private static final int NO_MATCH = 0;
+	private static final int FLOATER_MATCH = 1;
+	private static final int SUB_MATCH = 2;
 
 	private static final int ROW_GAP = 5;
 
@@ -52,6 +58,7 @@ public class PersonTableDialog extends JDialog {
 	private JList<String> allPersons;
 	private JList<Time> allTimes;
 	private Calendar calendar;
+	private String conflictingTask = null;
 	private PersonTableEvent dialogResponse;
 
 	public PersonTableDialog(JFrame parent, String title, boolean isColumnExpanded,
@@ -99,18 +106,38 @@ public class PersonTableDialog extends JDialog {
 						FloaterEvent floaterResponse = floaterEvent.getDialogResponse();
 
 						if (floaterResponse != null) {
-							PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0,
-									floaterResponse.getPersonName(), floaterResponse.getCalendar(),
-									floaterResponse.getColor());
-							dialogResponse = ev;
+							int isAssigned = isTimeAlreadyAssigned(floaterResponse.getPersonName(),
+									floaterResponse.getCalendar());
+							if (isAssigned == NO_MATCH) {
+								// New time for this person, create event
+								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0,
+										floaterResponse.getPersonName(), floaterResponse.getCalendar(),
+										floaterResponse.getColor());
+								dialogResponse = ev;
+								setVisible(false);
+								dispose();
+
+							} else if (isAssigned == FLOATER_MATCH) {
+								JOptionPane.showMessageDialog(null,
+										floaterResponse.getPersonName() + " is already assigned as Floater at "
+												+ Utilities.formatTime(floaterResponse.getCalendar()),
+										"Failed to add " + floaterResponse.getPersonName() + " as Floater",
+										JOptionPane.ERROR_MESSAGE);
+							} else { // Substitute match
+								JOptionPane.showMessageDialog(null,
+										floaterResponse.getPersonName() + " is already assigned to " + conflictingTask
+												+ " at " + Utilities.formatTime(floaterResponse.getCalendar()),
+										"Failed to add " + floaterResponse.getPersonName() + " as Floater",
+										JOptionPane.ERROR_MESSAGE);
+							}
 						}
 					} else {
 						// Adding task substitute
 						PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0, null, null, 0);
 						dialogResponse = ev;
+						setVisible(false);
+						dispose();
 					}
-					setVisible(false);
-					dispose();
 				}
 			});
 		}
@@ -269,5 +296,22 @@ public class PersonTableDialog extends JDialog {
 
 	public static int getDeleteRowButtonId() {
 		return DELETE_ROW_BUTTON;
+	}
+
+	private int isTimeAlreadyAssigned(String thisPerson, Calendar thisTime) {
+		for (PersonByTaskModel personModel : personList) {
+			String personListValue = personModel.getPerson().getName();
+			Calendar timeListValue = personModel.getTaskDate();
+
+			if (personListValue.equals(thisPerson) && timeListValue.compareTo(thisTime) == 0) {
+				if (personModel.getTask() == null)
+					return FLOATER_MATCH;
+				else {
+					conflictingTask = personModel.getTask().getTaskName();
+					return SUB_MATCH;
+				}
+			}
+		}
+		return NO_MATCH;
 	}
 }
