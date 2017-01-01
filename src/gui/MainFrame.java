@@ -41,6 +41,7 @@ import model.CalendarDayModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
+import utilities.Utilities;
 
 public class MainFrame extends JFrame {
 	/* Private constants */
@@ -472,7 +473,7 @@ public class MainFrame extends JFrame {
 		viewAllPersons.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
-					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
+					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false, null,
 							controller.getAllPersonsList(), "", null, null, null);
 					processViewAllPersonsDialog(ev.getDialogResponse());
 				}
@@ -492,7 +493,7 @@ public class MainFrame extends JFrame {
 					|| event.getButtonId() == PersonTableDialog.getEmailButtonId()) {
 				// For any unimplemented buttons,
 				// refresh data and re-open Person Table dialog
-				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false, null,
 						controller.getAllPersonsList(), "", null, null, null);
 				processViewAllPersonsDialog(ev.getDialogResponse());
 			}
@@ -501,7 +502,7 @@ public class MainFrame extends JFrame {
 				// Edit person and re-open Person Table dialog
 				editPerson(event.getPersonName());
 
-				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false,
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false, null,
 						controller.getAllPersonsList(), "", null, null, null);
 				processViewAllPersonsDialog(ev.getDialogResponse());
 			}
@@ -751,8 +752,10 @@ public class MainFrame extends JFrame {
 					// View assigned persons
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 							"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
-									+ getDisplayDate(selectedCalendar),
-							false, controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person", null, null, null);
+									+ Utilities.getDisplayDate(selectedCalendar),
+							false, selectedTask.getTaskName(),
+							controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person",
+							(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 					processViewRosterByTaskDialog(ev.getDialogResponse());
 				}
 			}
@@ -761,7 +764,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// View all persons
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
+						"Leaders/Volunteers for " + Utilities.getDisplayDate(selectedCalendar), true, null,
 						controller.getPersonsByDay(selectedCalendar), "Add floater",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(),
 						controller.getAllTimesByDay(selectedCalendar));
@@ -773,20 +776,15 @@ public class MainFrame extends JFrame {
 	private void processViewRosterByTaskDialog(PersonTableEvent event) {
 		if (event != null) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
-				FilterListDialog ev1 = new FilterListDialog(MainFrame.this,
-						"Assign person(s) to " + selectedTask.getTaskName() + " on " + getDisplayDate(selectedCalendar),
-						controller.getAllPersonsAsString());
-				JList<String> dialogResponse = ev1.getDialogResponse();
-
-				if (dialogResponse != null && dialogResponse.getModel().getSize() > 0) {
-					controller.addSingleInstanceTask(dialogResponse, selectedCalendar, selectedTask.getTaskName(),
-							selectedTask.getColor());
-				}
+				controller.addSingleInstanceTask(event.getPersonList(), selectedCalendar, selectedTask.getTaskName(),
+						selectedTask.getColor());
 
 				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
-								+ getDisplayDate(selectedCalendar),
-						false, controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person", null, null, null);
+								+ Utilities.getDisplayDate(selectedCalendar),
+						false, selectedTask.getTaskName(),
+						controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person",
+						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev2.getDialogResponse());
 			}
 
@@ -796,8 +794,10 @@ public class MainFrame extends JFrame {
 				// refresh data and re-open Person Table dialog
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
-								+ getDisplayDate(selectedCalendar),
-						false, controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person", null, null, null);
+								+ Utilities.getDisplayDate(selectedCalendar),
+						false, selectedTask.getTaskName(),
+						controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person",
+						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev.getDialogResponse());
 			}
 
@@ -807,8 +807,10 @@ public class MainFrame extends JFrame {
 
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
-								+ getDisplayDate(selectedCalendar),
-						false, controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person", null, null, null);
+								+ Utilities.getDisplayDate(selectedCalendar),
+						false, selectedTask.getTaskName(),
+						controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person",
+						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev.getDialogResponse());
 			}
 
@@ -822,15 +824,11 @@ public class MainFrame extends JFrame {
 	private void processViewCompleteRosterDialog(PersonTableEvent event) {
 		if (event != null) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
-				// Create JList with person name
-				DefaultListModel<String> pModel = new DefaultListModel<String>();
-				pModel.addElement(new String(event.getPersonName()));
-
-				controller.addSingleInstanceTask(new JList<String>(pModel), event.getCalendar(), "", event.getColor());
+				controller.addSingleInstanceTask(event.getPersonList(), event.getCalendar(), "", event.getColor());
 
 				// Create new Person Table Dialog
 				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
+						"Leaders/Volunteers for " + Utilities.getDisplayDate(selectedCalendar), true, null,
 						controller.getPersonsByDay(selectedCalendar), "Add floater",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(),
 						controller.getAllTimesByDay(selectedCalendar));
@@ -840,7 +838,7 @@ public class MainFrame extends JFrame {
 				editPerson(event.getPersonName());
 
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
+						"Leaders/Volunteers for " + Utilities.getDisplayDate(selectedCalendar), true, null,
 						controller.getPersonsByDay(selectedCalendar), "Add floater",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(),
 						controller.getAllTimesByDay(selectedCalendar));
@@ -849,7 +847,7 @@ public class MainFrame extends JFrame {
 			} else if (event.getButtonId() == PersonTableDialog.getDeleteRowButtonId()
 					|| event.getButtonId() == PersonTableDialog.getEmailButtonId()) {
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-						"Leaders/Volunteers for " + getDisplayDate(selectedCalendar), true,
+						"Leaders/Volunteers for " + Utilities.getDisplayDate(selectedCalendar), true, null,
 						controller.getPersonsByDay(selectedCalendar), "Add floater",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(),
 						controller.getAllTimesByDay(selectedCalendar));
@@ -895,11 +893,6 @@ public class MainFrame extends JFrame {
 			selectedFilterId = NO_FILTER;
 		else
 			selectedFilterId = filterId;
-	}
-
-	private String getDisplayDate(Calendar calendar) {
-		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
-				+ calendar.get(Calendar.YEAR));
 	}
 
 	private void setProgramName(String progName) {

@@ -54,4 +54,9 @@ public class Utilities {
 		calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
 		calendar.set(Calendar.AM_PM, timeCal.get(Calendar.AM_PM));
 	}
+	
+	public static String getDisplayDate(Calendar calendar) {
+		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
+				+ calendar.get(Calendar.YEAR));
+	}
 }
