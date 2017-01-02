@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -713,10 +712,8 @@ public class MainFrame extends JFrame {
 
 	private void setCalendarPopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
-		JMenuItem editTaskItem = new JMenuItem("Edit task");
 		JMenuItem viewRosterByTaskItem = new JMenuItem("View roster by task");
 		JMenuItem viewCompleteRosterForToday = new JMenuItem("View complete roster for today");
-		popupMenu.add(editTaskItem);
 		popupMenu.add(viewRosterByTaskItem);
 		popupMenu.add(viewCompleteRosterForToday);
 
@@ -737,15 +734,6 @@ public class MainFrame extends JFrame {
 			}
 		});
 		// Day Box pop-up sub-menus
-		editTaskItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (selectedTask != null) {
-					// Edit task, then update calendar using filters
-					editTask(null, selectedTask.getTaskName());
-					updateMonth(selectedCalendar);
-				}
-			}
-		});
 		viewRosterByTaskItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (selectedTask != null) {
@@ -754,7 +742,7 @@ public class MainFrame extends JFrame {
 							"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 									+ Utilities.getDisplayDate(selectedCalendar),
 							false, selectedTask.getTaskName(),
-							controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person",
+							controller.getPersonsByDay(selectedCalendar), "Add person",
 							(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 					processViewRosterByTaskDialog(ev.getDialogResponse());
 				}
@@ -776,14 +764,14 @@ public class MainFrame extends JFrame {
 	private void processViewRosterByTaskDialog(PersonTableEvent event) {
 		if (event != null) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
-				controller.addSingleInstanceTask(event.getPersonList(), selectedCalendar, selectedTask.getTaskName(),
-						selectedTask.getColor());
+				controller.addSingleInstanceTask(event.getPersonList(), selectedCalendar,
+						selectedTask.getTaskName(), selectedTask.getColor());
 
 				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ Utilities.getDisplayDate(selectedCalendar),
 						false, selectedTask.getTaskName(),
-						controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person",
+						controller.getPersonsByDay(selectedCalendar), "Add person",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev2.getDialogResponse());
 			}
@@ -796,7 +784,7 @@ public class MainFrame extends JFrame {
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ Utilities.getDisplayDate(selectedCalendar),
 						false, selectedTask.getTaskName(),
-						controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person",
+						controller.getPersonsByDay(selectedCalendar), "Add person",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev.getDialogResponse());
 			}
@@ -809,7 +797,7 @@ public class MainFrame extends JFrame {
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ Utilities.getDisplayDate(selectedCalendar),
 						false, selectedTask.getTaskName(),
-						controller.getPersonsByDayByTask(selectedCalendar, selectedTask), "Add person",
+						controller.getPersonsByDay(selectedCalendar), "Add person",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev.getDialogResponse());
 			}

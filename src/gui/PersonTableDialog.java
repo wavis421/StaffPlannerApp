@@ -12,6 +12,7 @@ import java.sql.Time;
 import java.util.Calendar;
 import java.util.LinkedList;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -38,10 +39,6 @@ public class PersonTableDialog extends JDialog {
 	private static final int EDIT_ROW_BUTTON = 3;
 	private static final int DELETE_ROW_BUTTON = 4;
 
-	private static final int NO_MATCH = 0;
-	private static final int FLOATER_MATCH = 1;
-	private static final int SUB_MATCH = 2;
-
 	private static final int ROW_GAP = 5;
 
 	private boolean isColumnExpanded;
@@ -52,6 +49,7 @@ public class PersonTableDialog extends JDialog {
 	private JMenuItem removeItem;
 	private JMenuItem editItem;
 	private LinkedList<PersonByTaskModel> personList;
+	private LinkedList<PersonByTaskModel> fullList = null;
 	private String taskName;
 
 	private String addButtonText;
@@ -72,7 +70,16 @@ public class PersonTableDialog extends JDialog {
 		this.addButtonText = addButtonText;
 		this.isColumnExpanded = isColumnExpanded;
 		this.taskName = taskName;
-		this.personList = personList;
+
+		// Floaters have null task; if task defined, create a sub-list with
+		// matching task
+		if (taskName == null)
+			this.personList = personList;
+		else {
+			this.fullList = personList;
+			this.personList = createPersonListByTask(taskName, fullList);
+		}
+
 		this.allPersons = allPersons;
 		this.allTimes = allTimes;
 		this.calendar = calendar;
@@ -110,9 +117,8 @@ public class PersonTableDialog extends JDialog {
 						FloaterEvent floaterResponse = floaterEvent.getDialogResponse();
 
 						if (floaterResponse != null) {
-							int isAssigned = isTimeAlreadyAssigned(floaterResponse.getPersonName(),
-									floaterResponse.getCalendar());
-							if (isAssigned == NO_MATCH) {
+							if (!isTimeAlreadyAssigned(floaterResponse.getPersonName(),
+									floaterResponse.getCalendar())) {
 								// New time for this person, create event
 								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0,
 										floaterResponse.getPersonName(), floaterResponse.getCalendar(),
@@ -121,18 +127,6 @@ public class PersonTableDialog extends JDialog {
 								setVisible(false);
 								dispose();
 
-							} else if (isAssigned == FLOATER_MATCH) {
-								JOptionPane.showMessageDialog(null,
-										floaterResponse.getPersonName() + " is already assigned as Floater at "
-												+ Utilities.formatTime(floaterResponse.getCalendar()),
-										"Failed to add " + floaterResponse.getPersonName() + " as Floater",
-										JOptionPane.ERROR_MESSAGE);
-							} else { // Substitute match
-								JOptionPane.showMessageDialog(null,
-										floaterResponse.getPersonName() + " is already assigned to " + conflictingTask
-												+ " at " + Utilities.formatTime(floaterResponse.getCalendar()),
-										"Failed to add " + floaterResponse.getPersonName() + " as Floater",
-										JOptionPane.ERROR_MESSAGE);
 							}
 						}
 					} else {
@@ -143,11 +137,14 @@ public class PersonTableDialog extends JDialog {
 						JList<String> filterListResponse = ev1.getDialogResponse();
 
 						if (filterListResponse != null && filterListResponse.getModel().getSize() > 0) {
-							PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0, filterListResponse,
-									null, 0);
-							dialogResponse = ev;
-							setVisible(false);
-							dispose();
+							if (!isPersonAlreadyAssigned(filterListResponse, calendar, taskName)) {
+								// New time for this person, create event
+								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0,
+										filterListResponse, null, 0);
+								dialogResponse = ev;
+								setVisible(false);
+								dispose();
+							}
 						}
 					}
 				}
@@ -245,7 +242,14 @@ public class PersonTableDialog extends JDialog {
 	}
 
 	public void setData(LinkedList<PersonByTaskModel> db) {
-		personList = db;
+		// Floaters have null task; if task defined, create a sub-list with matching task
+		if (taskName == null)
+			personList = db;
+		else {
+			fullList = db;
+			personList = createPersonListByTask(taskName, fullList);
+		}
+
 		tableModel.setData(db);
 		tableModel.fireTableDataChanged();
 	}
@@ -310,20 +314,76 @@ public class PersonTableDialog extends JDialog {
 		return DELETE_ROW_BUTTON;
 	}
 
-	private int isTimeAlreadyAssigned(String thisPerson, Calendar thisTime) {
+	private boolean isTimeAlreadyAssigned(String thisPerson, Calendar thisTime) {
 		for (PersonByTaskModel personModel : personList) {
 			String personListValue = personModel.getPerson().getName();
 			Calendar timeListValue = personModel.getTaskDate();
 
 			if (personListValue.equals(thisPerson) && timeListValue.compareTo(thisTime) == 0) {
-				if (personModel.getTask() == null)
-					return FLOATER_MATCH;
-				else {
+				if (personModel.getTask() == null) {
+					JOptionPane.showMessageDialog(this,
+							thisPerson + " is already assigned as Floater at " + Utilities.formatTime(thisTime),
+							"Failed to add " + thisPerson + " as Floater", JOptionPane.ERROR_MESSAGE);
+					return true;
+				} else {
 					conflictingTask = personModel.getTask().getTaskName();
-					return SUB_MATCH;
+
+					JOptionPane.showMessageDialog(this,
+							thisPerson + " is already assigned to " + conflictingTask + " at "
+									+ Utilities.formatTime(thisTime),
+							"Failed to add " + thisPerson + " as Floater", JOptionPane.ERROR_MESSAGE);
+					return true;
 				}
 			}
 		}
-		return NO_MATCH;
+		return false;
+	}
+
+	private boolean isPersonAlreadyAssigned(JList<String> newPersonList, Calendar calendar, String taskName) {
+		DefaultListModel model = (DefaultListModel) newPersonList.getModel();
+
+		for (int i = 0; i < newPersonList.getModel().getSize(); i++) {
+			String newPersonName = newPersonList.getModel().getElementAt(i);
+
+			for (PersonByTaskModel personByDay : fullList) {
+				String personByDayName = personByDay.getPerson().getName();
+
+				if (personByDayName.equals(newPersonName) && personByDay.getTaskDate().compareTo(calendar) == 0) {
+					// Person already assigned at this time
+					if (personByDay.getTask() == null) // Floater
+						JOptionPane.showMessageDialog(this,
+								personByDayName + " is already assigned as Floater at "
+										+ Utilities.formatTime(calendar),
+								"Failed to add " + personByDayName + " to " + taskName, JOptionPane.ERROR_MESSAGE);
+					else
+						JOptionPane.showMessageDialog(this,
+								personByDayName + " is already assigned to " + personByDay.getTask().getTaskName()
+										+ " at " + Utilities.formatTime(calendar),
+								"Failed to add " + personByDayName + " to " + taskName, JOptionPane.ERROR_MESSAGE);
+
+					// Remove from list
+					model.removeElementAt(i);
+					i--;
+					break;
+				}
+			}
+		}
+
+		if (model.getSize() > 0)
+			// List still contains at least 1 person, then not all were assigned
+			return false;
+		else
+			// List is empty, all persons on original list were assigned
+			return true;
+	}
+
+	private LinkedList<PersonByTaskModel> createPersonListByTask(String taskName,
+			LinkedList<PersonByTaskModel> fullPersonList) {
+		LinkedList<PersonByTaskModel> newPersonList = new LinkedList<PersonByTaskModel>();
+		for (PersonByTaskModel person : fullPersonList) {
+			if (person.getTask() != null && person.getTask().getTaskName().equals(taskName))
+				newPersonList.add(person);
+		}
+		return newPersonList;
 	}
 }

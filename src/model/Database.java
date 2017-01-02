@@ -709,7 +709,7 @@ public class Database {
 			if (checkPersonMatchForTaskByDay(pModel, task.getTaskName(), thisDay, dayOfWeekIdx,
 					dayOfWeekInMonthIdx) >= 0) {
 				Utilities.addTimeToCalendar(calendar, task.getTime());
-				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false, task.getColor(), calendar);
+				PersonByTaskModel personByTask = new PersonByTaskModel(pModel, task, false, task.getColor(), calendar);
 				thisDaysPersons.add(personByTask);
 			}
 		}
