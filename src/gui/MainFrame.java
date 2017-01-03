@@ -147,9 +147,11 @@ public class MainFrame extends JFrame {
 		JMenuItem taskCreateItem = new JMenuItem("Create task");
 		JMenu taskEditMenu = new JMenu("Edit task");
 		JMenu taskCloneMenu = new JMenu("Clone task");
+		JMenuItem taskViewAllItem = new JMenuItem("View All");
 		taskMenu.add(taskCreateItem);
 		taskMenu.add(taskEditMenu);
 		taskMenu.add(taskCloneMenu);
+		taskMenu.add(taskViewAllItem);
 
 		// Add persons sub-menus
 		JMenuItem personAddItem = new JMenuItem("Add person");
@@ -183,7 +185,7 @@ public class MainFrame extends JFrame {
 		createFileMenuListeners(taskMenu, exportProgramItem, exportRosterItem, importProgramItem, importRosterItem,
 				exitItem);
 		createProgramMenuListeners(taskMenu, programCreateItem, programEditMenu, programSelectMenu);
-		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu);
+		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu, taskViewAllItem);
 		createPersonMenuListeners(personAddItem, personEditMenu, personViewAllItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
 				filterByIncompleteRosterItem, filterByLocationItem, filterByTimeItem);
@@ -380,7 +382,8 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createTaskMenuListeners(JMenuItem taskCreateItem, JMenu taskEditMenu, JMenu taskCloneMenu) {
+	private void createTaskMenuListeners(JMenuItem taskCreateItem, JMenu taskEditMenu, JMenu taskCloneMenu,
+			JMenuItem taskViewAllItem) {
 		// Set up listeners for TASK menu
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -435,6 +438,48 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+		taskViewAllItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				TaskTableDialog ev = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
+						controller.getAllTasks(selectedProgramName));
+				processViewAllTasksDialog(ev.getDialogResponse());
+			}
+		});
+	}
+
+	private void processViewAllTasksDialog(TaskTableEvent event) {
+		if (event != null) {
+			if (event.getButtonId() == TaskTableDialog.getAddTaskButton()) {
+				createTask();
+				
+				// Re-open Task Table dialog
+				TaskTableDialog ev = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
+						controller.getAllTasks(selectedProgramName));
+				processViewAllTasksDialog(ev.getDialogResponse());
+			}
+
+			else if (event.getButtonId() == TaskTableDialog.getEditRowButton()) {
+				editTask(selectedProgramName, event.getTaskName());
+				
+				// Re-open Task Table dialog
+				TaskTableDialog ev = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
+						controller.getAllTasks(selectedProgramName));
+				processViewAllTasksDialog(ev.getDialogResponse());
+			}
+			
+			else if (event.getButtonId() == TaskTableDialog.getDeleteRowButton()) {
+				// For any unimplemented buttons,
+				// refresh data and re-open Task Table dialog
+				TaskTableDialog ev = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
+						controller.getAllTasks(selectedProgramName));
+				processViewAllTasksDialog(ev.getDialogResponse());
+			}
+
+			else {
+				// Exiting dialog without any action
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+		}
 	}
 
 	private void createPersonMenuListeners(JMenuItem addPerson, JMenu editPerson, JMenuItem viewAllPersons) {
@@ -741,9 +786,9 @@ public class MainFrame extends JFrame {
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 							"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 									+ Utilities.getDisplayDate(selectedCalendar),
-							false, selectedTask.getTaskName(),
-							controller.getPersonsByDay(selectedCalendar), "Add person",
-							(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
+							false, selectedTask.getTaskName(), controller.getPersonsByDay(selectedCalendar),
+							"Add person", (Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(),
+							null);
 					processViewRosterByTaskDialog(ev.getDialogResponse());
 				}
 			}
@@ -764,14 +809,13 @@ public class MainFrame extends JFrame {
 	private void processViewRosterByTaskDialog(PersonTableEvent event) {
 		if (event != null) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
-				controller.addSingleInstanceTask(event.getPersonList(), selectedCalendar,
-						selectedTask.getTaskName(), selectedTask.getColor());
+				controller.addSingleInstanceTask(event.getPersonList(), selectedCalendar, selectedTask.getTaskName(),
+						selectedTask.getColor());
 
 				PersonTableDialog ev2 = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ Utilities.getDisplayDate(selectedCalendar),
-						false, selectedTask.getTaskName(),
-						controller.getPersonsByDay(selectedCalendar), "Add person",
+						false, selectedTask.getTaskName(), controller.getPersonsByDay(selectedCalendar), "Add person",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev2.getDialogResponse());
 			}
@@ -783,8 +827,7 @@ public class MainFrame extends JFrame {
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ Utilities.getDisplayDate(selectedCalendar),
-						false, selectedTask.getTaskName(),
-						controller.getPersonsByDay(selectedCalendar), "Add person",
+						false, selectedTask.getTaskName(), controller.getPersonsByDay(selectedCalendar), "Add person",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev.getDialogResponse());
 			}
@@ -796,8 +839,7 @@ public class MainFrame extends JFrame {
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
 								+ Utilities.getDisplayDate(selectedCalendar),
-						false, selectedTask.getTaskName(),
-						controller.getPersonsByDay(selectedCalendar), "Add person",
+						false, selectedTask.getTaskName(), controller.getPersonsByDay(selectedCalendar), "Add person",
 						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
 				processViewRosterByTaskDialog(ev.getDialogResponse());
 			}

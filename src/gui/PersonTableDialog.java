@@ -319,11 +319,11 @@ public class PersonTableDialog extends JDialog {
 			String personListValue = personModel.getPerson().getName();
 			Calendar timeListValue = personModel.getTaskDate();
 
-			if (personListValue.equals(thisPerson) && timeListValue.compareTo(thisTime) == 0) {
+			if (personListValue.equals(thisPerson) && Utilities.checkForTimeMatch(timeListValue, thisTime)) {
 				if (personModel.getTask() == null) {
 					JOptionPane.showMessageDialog(this,
 							thisPerson + " is already assigned as Floater at " + Utilities.formatTime(thisTime),
-							"Failed to add " + thisPerson + " as Floater", JOptionPane.ERROR_MESSAGE);
+							"Failed to add " + thisPerson + " as Floater", JOptionPane.WARNING_MESSAGE);
 					return true;
 				} else {
 					conflictingTask = personModel.getTask().getTaskName();
@@ -331,7 +331,7 @@ public class PersonTableDialog extends JDialog {
 					JOptionPane.showMessageDialog(this,
 							thisPerson + " is already assigned to " + conflictingTask + " at "
 									+ Utilities.formatTime(thisTime),
-							"Failed to add " + thisPerson + " as Floater", JOptionPane.ERROR_MESSAGE);
+							"Failed to add " + thisPerson + " as Floater", JOptionPane.WARNING_MESSAGE);
 					return true;
 				}
 			}
@@ -354,12 +354,12 @@ public class PersonTableDialog extends JDialog {
 						JOptionPane.showMessageDialog(this,
 								personByDayName + " is already assigned as Floater at "
 										+ Utilities.formatTime(calendar),
-								"Failed to add " + personByDayName + " to " + taskName, JOptionPane.ERROR_MESSAGE);
+								"Failed to add " + personByDayName + " to " + taskName, JOptionPane.WARNING_MESSAGE);
 					else
 						JOptionPane.showMessageDialog(this,
 								personByDayName + " is already assigned to " + personByDay.getTask().getTaskName()
 										+ " at " + Utilities.formatTime(calendar),
-								"Failed to add " + personByDayName + " to " + taskName, JOptionPane.ERROR_MESSAGE);
+								"Failed to add " + personByDayName + " to " + taskName, JOptionPane.WARNING_MESSAGE);
 
 					// Remove from list
 					model.removeElementAt(i);
