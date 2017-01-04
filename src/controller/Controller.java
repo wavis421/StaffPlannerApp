@@ -173,6 +173,14 @@ public class Controller {
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		return db.getPersonsByDayByTask(calendar, task);
 	}
+	
+	public LinkedList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
+		return db.getPersonsByDayByTime(calendar);
+	}
+
+	public LinkedList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
+		return db.getPersonsByDayByLocation(calendar, location);
+	}
 
 	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		return db.getPersonsByDay(calendar);

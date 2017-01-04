@@ -110,7 +110,7 @@ public class PersonTableDialog extends JDialog {
 
 			addPersonButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if (isColumnExpanded) {
+					if (addButtonText.equals("Add floater")) {
 						// Adding floater
 						FloaterDialog floaterEvent = new FloaterDialog(PersonTableDialog.this, calendar, allPersons,
 								allTimes);

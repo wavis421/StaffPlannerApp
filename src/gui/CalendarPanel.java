@@ -34,6 +34,7 @@ import acm.gui.TableLayout;
 import acm.util.JTFTools;
 import model.CalendarDayModel;
 import model.TaskModel;
+import utilities.Utilities;
 
 /*
  ** http://cs.stanford.edu/people/eroberts/jtf/tutorial/GraphicalUserInterfaces.html
@@ -282,7 +283,13 @@ public class CalendarPanel extends JPanel {
 
 								// Get task model and invoke listener
 								int dayIdx = Integer.parseInt(e.getComponent().getName()) - 1;
-								dayListener.dayBoxClicked(calendar, point, dayBoxTaskList[dayIdx].get(listIdx));
+								CalendarDayModel task = dayBoxTaskList[dayIdx].get(listIdx);
+								if (task.getTask() != null)
+									Utilities.addTimeToCalendar(calendar, task.getTask().getTime());
+								else
+									calendar = task.getFloaterTime();
+
+								dayListener.dayBoxClicked(calendar, point, task);
 							}
 						}
 					}

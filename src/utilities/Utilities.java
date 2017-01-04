@@ -17,7 +17,7 @@ public class Utilities {
 
 	public static String formatTime(Calendar cal) {
 		Calendar localCal = (Calendar) cal.clone();
-		
+
 		// Convert HOUR from 0-11 to 1-12
 		localCal.add(Calendar.HOUR, 1);
 
@@ -28,14 +28,14 @@ public class Utilities {
 
 		return timeFormat.format(localCal.getTime());
 	}
-	
+
 	public static boolean checkForTimeMatch(Time time1, Calendar time2) {
 		Calendar time1Cal = Calendar.getInstance();
 		time1Cal.setTime(time1);
-		
+
 		return checkForTimeMatch(time1Cal, time2);
 	}
-	
+
 	public static boolean checkForTimeMatch(Calendar time1, Calendar time2) {
 		if (time1.get(Calendar.HOUR) == time2.get(Calendar.HOUR)
 				&& time1.get(Calendar.MINUTE) == time2.get(Calendar.MINUTE)
@@ -45,16 +45,25 @@ public class Utilities {
 			return false;
 		}
 	}
-	
+
 	public static void addTimeToCalendar(Calendar calendar, Time time) {
 		Calendar timeCal = Calendar.getInstance();
 		timeCal.setTime(time);
-		
+
 		calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR));
 		calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
 		calendar.set(Calendar.AM_PM, timeCal.get(Calendar.AM_PM));
 	}
-	
+
+	public static Time getTimeFromCalendar(Calendar calendar) {
+		int newHour = calendar.get(Calendar.HOUR);
+		int newMinute = calendar.get(Calendar.MINUTE);
+		if (calendar.get(Calendar.AM_PM) == Calendar.PM)
+			newHour += 12;
+
+		return (Time.valueOf(newHour + ":" + newMinute + ":00"));
+	}
+
 	public static String getDisplayDate(Calendar calendar) {
 		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
 				+ calendar.get(Calendar.YEAR));

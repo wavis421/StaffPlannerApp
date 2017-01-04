@@ -716,6 +716,34 @@ public class Database {
 		return (LinkedList<PersonByTaskModel>) thisDaysPersons.clone();
 	}
 
+	public LinkedList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
+		LinkedList<PersonByTaskModel> persons = getPersonsByDay((Calendar) calendar.clone());
+
+		for (int i = 0; i < persons.size(); i++) {
+			PersonByTaskModel person = persons.get(i);
+
+			if (!Utilities.checkForTimeMatch(person.getTaskDate(), calendar)) {
+				persons.remove(i);
+				i--;
+			}
+		}
+		return (LinkedList<PersonByTaskModel>) persons.clone();
+	}
+
+	public LinkedList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
+		LinkedList<PersonByTaskModel> personList = getPersonsByDay((Calendar) calendar.clone());
+
+		for (int i = 0; i < personList.size(); i++) {
+			PersonByTaskModel person = personList.get(i);
+
+			if (person.getTask() == null || !person.getTask().getLocation().equals(location)) {
+				personList.remove(i);
+				i--;
+			}
+		}
+		return (LinkedList<PersonByTaskModel>) personList.clone();
+	}
+
 	public int getNumPersons() {
 		return personList.size();
 	}
