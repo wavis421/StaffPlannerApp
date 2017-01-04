@@ -265,12 +265,10 @@ public class PersonDialog extends JDialog {
 				String taskName = task.getTaskName();
 				if (taskName.equals("")) {
 					taskName = "Floater";
-					taskModel.addElement(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
-							+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR) + " at "
+					taskModel.addElement(taskName + " on " + Utilities.getDisplayDate(date) + " at "
 							+ Utilities.formatTime(date));
 				} else {
-					taskModel.addElement(taskName + " on " + (date.get(Calendar.MONTH) + 1) + "/"
-							+ date.get(Calendar.DAY_OF_MONTH) + "/" + date.get(Calendar.YEAR));
+					taskModel.addElement(taskName + " on " + Utilities.getDisplayDate(date));
 				}
 			}
 		}

@@ -115,8 +115,7 @@ public class PersonTableDialog extends JDialog {
 						FloaterDialog floaterEvent;
 						if (allTimes.getModel().getSize() > 1)
 							floaterEvent = new FloaterDialog(PersonTableDialog.this,
-									"Add floater for " + (calendar.get(Calendar.MONTH) + 1) + "/"
-											+ calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR),
+									"Add floater for " + Utilities.getDisplayDate(calendar),
 									calendar, allPersons, allTimes);
 						else
 							floaterEvent = new FloaterDialog(PersonTableDialog.this, "Add floater for "
@@ -224,7 +223,7 @@ public class PersonTableDialog extends JDialog {
 		removeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				PersonTableEvent ev = new PersonTableEvent(this, DELETE_ROW_BUTTON, table.getSelectedRow(),
-						(String) null, null, 0);
+						(String) null, calendar, 0);
 				dialogResponse = ev;
 				setVisible(false);
 				dispose();
@@ -237,7 +236,7 @@ public class PersonTableDialog extends JDialog {
 			public void actionPerformed(ActionEvent arg0) {
 				PersonTableEvent ev = new PersonTableEvent(this, EDIT_ROW_BUTTON, 0,
 						(String) tableModel.getValueAt(table.getSelectedRow(), tableModel.getColumnForPersonName()),
-						null, 0);
+						calendar, 0);
 				dialogResponse = ev;
 				setVisible(false);
 				dispose();
