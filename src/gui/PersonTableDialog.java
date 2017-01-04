@@ -158,12 +158,27 @@ public class PersonTableDialog extends JDialog {
 			});
 		}
 
+		JButton selectionButton = new JButton("Select all");
 		JButton sendEmailButton = new JButton("Send email");
 		JButton closeButton = new JButton("Close");
 
+		panel.add(selectionButton);
 		panel.add(sendEmailButton);
 		panel.add(closeButton);
 
+		selectionButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (selectionButton.getText().equals("Select all")) {
+					selectionButton.setText("Select none");
+					table.selectAll();
+				}
+				else {
+					selectionButton.setText("Select all");
+					table.clearSelection();
+				}
+			}
+		});
+		
 		sendEmailButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Send email");
