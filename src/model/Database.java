@@ -658,9 +658,10 @@ public class Database {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = getDay(calendar);
+		Calendar localCalendar = (Calendar) calendar.clone();
 
 		JList<PersonModel> persons = getAllPersons();
-		LinkedList<CalendarDayModel> tasksForToday = getAllTasksByDay(calendar);
+		LinkedList<CalendarDayModel> tasksForToday = getAllTasksByDay(localCalendar);
 		LinkedList<PersonByTaskModel> thisDaysPersons = new LinkedList<PersonByTaskModel>();
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
@@ -675,9 +676,9 @@ public class Database {
 						dayOfWeekInMonthIdx);
 
 				if (match >= 0) {
-					Utilities.addTimeToCalendar(calendar, task.getTime());
+					Utilities.addTimeToCalendar(localCalendar, task.getTime());
 					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, task, match == 0 ? false : true,
-							task.getColor(), calendar);
+							task.getColor(), localCalendar);
 					thisDaysPersons.add(personByTask);
 				}
 			}
@@ -694,6 +695,7 @@ public class Database {
 		return (LinkedList<PersonByTaskModel>) thisDaysPersons.clone();
 	}
 
+	// TODO: Currently not used!
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
@@ -717,7 +719,7 @@ public class Database {
 	}
 
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
-		LinkedList<PersonByTaskModel> persons = getPersonsByDay((Calendar) calendar.clone());
+		LinkedList<PersonByTaskModel> persons = getPersonsByDay(calendar);
 
 		for (int i = 0; i < persons.size(); i++) {
 			PersonByTaskModel person = persons.get(i);
@@ -731,7 +733,7 @@ public class Database {
 	}
 
 	public LinkedList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
-		LinkedList<PersonByTaskModel> personList = getPersonsByDay((Calendar) calendar.clone());
+		LinkedList<PersonByTaskModel> personList = getPersonsByDay(calendar);
 
 		for (int i = 0; i < personList.size(); i++) {
 			PersonByTaskModel person = personList.get(i);

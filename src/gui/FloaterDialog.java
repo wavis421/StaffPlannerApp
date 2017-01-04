@@ -53,9 +53,8 @@ public class FloaterDialog extends JDialog {
 	private FloaterEvent dialogResponse;
 
 	// Constructor for adding floater
-	public FloaterDialog(JDialog parent, Calendar date, JList<String> personsList, JList<Time> timesList) {
-		super(parent, "Add floater for " + (date.get(Calendar.MONTH) + 1) + "/" + date.get(Calendar.DAY_OF_MONTH) + "/"
-				+ date.get(Calendar.YEAR), true);
+	public FloaterDialog(JDialog parent, String title, Calendar date, JList<String> personsList, JList<Time> timesList) {
+		super(parent, title, true);
 
 		this.calendar = date;
 		this.personsList = personsList;

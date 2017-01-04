@@ -112,8 +112,16 @@ public class PersonTableDialog extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					if (addButtonText.equals("Add floater")) {
 						// Adding floater
-						FloaterDialog floaterEvent = new FloaterDialog(PersonTableDialog.this, calendar, allPersons,
-								allTimes);
+						FloaterDialog floaterEvent;
+						if (allTimes.getModel().getSize() > 1)
+							floaterEvent = new FloaterDialog(PersonTableDialog.this,
+									"Add floater for " + (calendar.get(Calendar.MONTH) + 1) + "/"
+											+ calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR),
+									calendar, allPersons, allTimes);
+						else
+							floaterEvent = new FloaterDialog(PersonTableDialog.this, "Add floater for "
+									+ Utilities.getDisplayDate(calendar) + " at " + Utilities.formatTime(calendar),
+									calendar, allPersons, allTimes);
 						FloaterEvent floaterResponse = floaterEvent.getDialogResponse();
 
 						if (floaterResponse != null) {
@@ -140,7 +148,7 @@ public class PersonTableDialog extends JDialog {
 							if (!isPersonAlreadyAssigned(filterListResponse, calendar, taskName)) {
 								// New time for this person, create event
 								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0,
-										filterListResponse, null, 0);
+										filterListResponse, calendar, 0);
 								dialogResponse = ev;
 								setVisible(false);
 								dispose();
@@ -242,7 +250,8 @@ public class PersonTableDialog extends JDialog {
 	}
 
 	public void setData(LinkedList<PersonByTaskModel> db) {
-		// Floaters have null task; if task defined, create a sub-list with matching task
+		// Floaters have null task; if task defined, create a sub-list with
+		// matching task
 		if (taskName == null)
 			personList = db;
 		else {
