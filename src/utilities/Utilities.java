@@ -4,6 +4,9 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+
 public class Utilities {
 	// Time format for hour 1 - 12 and AM/PM field
 	private static final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
@@ -67,5 +70,26 @@ public class Utilities {
 	public static String getDisplayDate(Calendar calendar) {
 		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
 				+ calendar.get(Calendar.YEAR));
+	}
+
+	public static boolean findStringMatchInJList(String findString, JList<String> list) {
+		for (int i = 0; i < list.getModel().getSize(); i++) {
+			if (list.getModel().getElementAt(i).equals(findString))
+				return true;
+		}
+		return false;
+	}
+
+	public static JList<String> removeDuplicateEntriesInJlist(JList<String> inputList) {
+		DefaultListModel<String> newListModel = new DefaultListModel<String>();
+		JList<String> newJList = new JList<String>(newListModel);
+
+		for (int i = 0; i < inputList.getModel().getSize(); i++) {
+			String findString = inputList.getModel().getElementAt(i);
+			if (!findStringMatchInJList(findString, newJList)) {
+				newListModel.addElement(findString);
+			}
+		}
+		return newJList;
 	}
 }

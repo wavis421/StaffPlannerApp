@@ -176,7 +176,7 @@ public class Database {
 
 		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
 			String programName = findProgramByTaskName(thisDaysTasks.get(taskIdx).getTask().getTaskName());
-			if (!findStringMatchInList(programName, programFilterList)) {
+			if (!Utilities.findStringMatchInJList(programName, programFilterList)) {
 				thisDaysTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -230,7 +230,7 @@ public class Database {
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
 			String taskLoc = matchingTasks.get(taskIdx).getTask().getLocation();
-			if (!findStringMatchInList(taskLoc, locations)) {
+			if (!Utilities.findStringMatchInJList(taskLoc, locations)) {
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -244,7 +244,7 @@ public class Database {
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
 			String taskTime = Utilities.formatTime(matchingTasks.get(taskIdx).getTask().getTime());
-			if (!findStringMatchInList(taskTime, timeList)) {
+			if (!Utilities.findStringMatchInJList(taskTime, timeList)) {
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -353,7 +353,7 @@ public class Database {
 			for (int i = 0; i < taskList.getModel().getSize(); i++) {
 				// Check whether already in list before adding
 				String loc = taskList.getModel().getElementAt(i).getLocation();
-				if (!loc.equals("") && !findStringMatchInList(loc, locationList)) {
+				if (!loc.equals("") && !Utilities.findStringMatchInJList(loc, locationList)) {
 					locationModel.addElement(loc);
 				}
 			}
@@ -767,14 +767,6 @@ public class Database {
 				return day.getTask();
 		}
 		return null;
-	}
-
-	private boolean findStringMatchInList(String findString, JList<String> list) {
-		for (int i = 0; i < list.getModel().getSize(); i++) {
-			if (list.getModel().getElementAt(i).equals(findString))
-				return true;
-		}
-		return false;
 	}
 
 	private boolean findTimeMatchInArray(Time findTime, ArrayList<Time> list) {

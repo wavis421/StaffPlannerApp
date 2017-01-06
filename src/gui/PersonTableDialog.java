@@ -193,7 +193,8 @@ public class PersonTableDialog extends JDialog {
 						int row = selectedRows[i];
 						emailModel.addElement((String) tableModel.getValueAt(row, tableModel.getColumnForEmail()));
 					}
-					EmailDialog emailDialog = new EmailDialog(child, new JList<String>(emailModel));
+					JList<String> parsedEmailList = Utilities.removeDuplicateEntriesInJlist(new JList<String>(emailModel));
+					EmailDialog emailDialog = new EmailDialog(child, parsedEmailList);
 				}
 			}
 		});

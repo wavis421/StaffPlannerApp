@@ -171,7 +171,7 @@ public class EmailDialog extends JDialog {
 			message.setFrom(new InternetAddress(userName));
 			message.setSubject(subjectField.getText());
 			message.setText(messageText.getText());
-
+			
 			// Set email recipients
 			for (int i = 0; i < emailRecipients.getModel().getSize(); i++) {
 				message.addRecipient(Message.RecipientType.TO,
