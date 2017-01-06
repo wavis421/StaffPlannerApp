@@ -116,11 +116,13 @@ public class MainFrame extends JFrame {
 		JMenu taskMenu = new JMenu("Task");
 		JMenu personMenu = new JMenu("Leaders/Volunteers");
 		JMenu calendarMenu = new JMenu("Calendar");
+		JMenu settingsMenu = new JMenu("Settings");
 		menuBar.add(fileMenu);
 		menuBar.add(programMenu);
 		menuBar.add(taskMenu);
 		menuBar.add(personMenu);
 		menuBar.add(calendarMenu);
+		menuBar.add(settingsMenu);
 
 		taskMenu.setEnabled(false);
 

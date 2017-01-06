@@ -15,6 +15,7 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final int TIME_COLUMN = 5;
 	private static final int PHONE_COLUMN_EXPANDED = 6;
 	private static final int PHONE_COLUMN_NOT_EXPANDED = 2;
+	private static final int EMAIL_COLUMN = 7;
 	
 	private static final long serialVersionUID = 12340002L;
 	private LinkedList<PersonByTaskModel> personList;
@@ -133,5 +134,9 @@ public class PersonTableModel extends AbstractTableModel {
 			return PHONE_COLUMN_EXPANDED;
 		else
 			return PHONE_COLUMN_NOT_EXPANDED;
+	}
+	
+	public int getColumnForEmail() {
+		return EMAIL_COLUMN;
 	}
 }

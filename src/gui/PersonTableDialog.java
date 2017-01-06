@@ -60,13 +60,15 @@ public class PersonTableDialog extends JDialog {
 	private String conflictingTask = null;
 	private PersonTableEvent dialogResponse;
 	private JFrame parent;
-
+	private JDialog child;
+	
 	public PersonTableDialog(JFrame parent, String title, boolean isColumnExpanded, String taskName,
 			LinkedList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
 			JList<Time> allTimes) {
 		super(parent, true);
 		setTitle(title);
 		this.parent = parent;
+		this.child = this;
 		this.addButtonText = addButtonText;
 		this.isColumnExpanded = isColumnExpanded;
 		this.taskName = taskName;
@@ -181,7 +183,18 @@ public class PersonTableDialog extends JDialog {
 		
 		sendEmailButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Send email");
+				if (table.getSelectedRowCount() == 0)
+					JOptionPane.showMessageDialog(child, "Please first select email recipients.");
+				else {
+					DefaultListModel<String> emailModel = new DefaultListModel<String>();
+					int[] selectedRows = table.getSelectedRows();					
+
+					for (int i = 0; i < selectedRows.length; i++) {
+						int row = selectedRows[i];
+						emailModel.addElement((String) tableModel.getValueAt(row, tableModel.getColumnForEmail()));
+					}
+					EmailDialog emailDialog = new EmailDialog(child, new JList<String>(emailModel));
+				}
 			}
 		});
 
