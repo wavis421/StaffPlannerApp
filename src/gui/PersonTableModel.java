@@ -15,8 +15,9 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final int TIME_COLUMN = 5;
 	private static final int PHONE_COLUMN_EXPANDED = 6;
 	private static final int PHONE_COLUMN_NOT_EXPANDED = 2;
-	private static final int EMAIL_COLUMN = 7;
-	
+	private static final int EMAIL_COLUMN_EXPANDED = 7;
+	private static final int EMAIL_COLUMN_NOT_EXPANDED = 3;
+
 	private static final long serialVersionUID = 12340002L;
 	private LinkedList<PersonByTaskModel> personList;
 	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail" };
@@ -103,40 +104,43 @@ public class PersonTableModel extends AbstractTableModel {
 	public int getColumnForPersonName() {
 		return PERSON_NAME_COLUMN;
 	}
-	
+
 	public int getColumnForLeader() {
 		return LEADER_COLUMN;
 	}
-	
+
 	public int getColumnForSub() {
 		if (expanded)
 			return SUB_COLUMN;
 		else
 			return -1;
 	}
-	
+
 	public int getColumnForTaskName() {
 		if (expanded)
 			return TASK_COLUMN;
 		else
 			return -1;
 	}
-	
+
 	public int getColumnForTime() {
 		if (expanded)
 			return TIME_COLUMN;
 		else
 			return -1;
 	}
-	
+
 	public int getColumnForPhone() {
 		if (expanded)
 			return PHONE_COLUMN_EXPANDED;
 		else
 			return PHONE_COLUMN_NOT_EXPANDED;
 	}
-	
+
 	public int getColumnForEmail() {
-		return EMAIL_COLUMN;
+		if (expanded)
+			return EMAIL_COLUMN_EXPANDED;
+		else
+			return EMAIL_COLUMN_NOT_EXPANDED;
 	}
 }

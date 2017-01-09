@@ -45,6 +45,7 @@ public class EmailDialog extends JDialog {
 	// Private instance variables
 	private static String userName = "";
 	private static String password = "";
+	private static int port;
 	private JList<String> emailRecipients;
 
 	// Dialog panels
@@ -63,6 +64,7 @@ public class EmailDialog extends JDialog {
 			if (dialogResponse != null) {
 				userName = dialogResponse.getUserName();
 				password = dialogResponse.getPassword();
+				port = dialogResponse.getPortNumber();
 			}
 		}
 
@@ -171,11 +173,13 @@ public class EmailDialog extends JDialog {
 			message.setFrom(new InternetAddress(userName));
 			message.setSubject(subjectField.getText());
 			message.setText(messageText.getText());
-			
+
 			// Set email recipients
 			for (int i = 0; i < emailRecipients.getModel().getSize(); i++) {
-				message.addRecipient(Message.RecipientType.TO,
-						new InternetAddress(emailRecipients.getModel().getElementAt(i)));
+				if (emailRecipients.getModel().getElementAt(i) != null) {
+					message.addRecipient(Message.RecipientType.TO,
+							new InternetAddress(emailRecipients.getModel().getElementAt(i)));
+				}
 			}
 
 			// Send email

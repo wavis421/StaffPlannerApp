@@ -74,6 +74,9 @@ public class Utilities {
 
 	public static boolean findStringMatchInJList(String findString, JList<String> list) {
 		for (int i = 0; i < list.getModel().getSize(); i++) {
+			if (findString == null || list.getModel().getElementAt(i) == null)
+				return false;
+			
 			if (list.getModel().getElementAt(i).equals(findString))
 				return true;
 		}

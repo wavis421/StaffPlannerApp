@@ -61,7 +61,7 @@ public class PersonTableDialog extends JDialog {
 	private PersonTableEvent dialogResponse;
 	private JFrame parent;
 	private JDialog child;
-	
+
 	public PersonTableDialog(JFrame parent, String title, boolean isColumnExpanded, String taskName,
 			LinkedList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
 			JList<Time> allTimes) {
@@ -117,8 +117,8 @@ public class PersonTableDialog extends JDialog {
 						FloaterDialog floaterEvent;
 						if (allTimes.getModel().getSize() > 1)
 							floaterEvent = new FloaterDialog(PersonTableDialog.this,
-									"Add floater for " + Utilities.getDisplayDate(calendar),
-									calendar, allPersons, allTimes);
+									"Add floater for " + Utilities.getDisplayDate(calendar), calendar, allPersons,
+									allTimes);
 						else
 							floaterEvent = new FloaterDialog(PersonTableDialog.this, "Add floater for "
 									+ Utilities.getDisplayDate(calendar) + " at " + Utilities.formatTime(calendar),
@@ -173,28 +173,34 @@ public class PersonTableDialog extends JDialog {
 				if (selectionButton.getText().equals("Select all")) {
 					selectionButton.setText("Select none");
 					table.selectAll();
-				}
-				else {
+				} else {
 					selectionButton.setText("Select all");
 					table.clearSelection();
 				}
 			}
 		});
-		
+
 		sendEmailButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (table.getSelectedRowCount() == 0)
 					JOptionPane.showMessageDialog(child, "Please first select email recipients.");
 				else {
 					DefaultListModel<String> emailModel = new DefaultListModel<String>();
-					int[] selectedRows = table.getSelectedRows();					
+					int[] selectedRows = table.getSelectedRows();
 
 					for (int i = 0; i < selectedRows.length; i++) {
 						int row = selectedRows[i];
-						emailModel.addElement((String) tableModel.getValueAt(row, tableModel.getColumnForEmail()));
+						String emailElement = (String) tableModel.getValueAt(row, tableModel.getColumnForEmail());
+						if (emailElement != null && !emailElement.equals(""))
+							emailModel.addElement(emailElement);
 					}
-					JList<String> parsedEmailList = Utilities.removeDuplicateEntriesInJlist(new JList<String>(emailModel));
-					EmailDialog emailDialog = new EmailDialog(child, parsedEmailList);
+					if (emailModel.getSize() > 0) {
+						JList<String> parsedEmailList = Utilities
+								.removeDuplicateEntriesInJlist(new JList<String>(emailModel));
+						EmailDialog emailDialog = new EmailDialog(child, parsedEmailList);
+					} else
+						JOptionPane.showMessageDialog(child,
+								"Please first select email recipients\n      with email field filled in.");
 				}
 			}
 		});

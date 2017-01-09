@@ -166,6 +166,10 @@ public class Controller {
 		return db.getAllPersonsAsString();
 	}
 
+	public JList<String> getAvailPersonsAsString(Calendar today) {
+		return db.getAvailPersonsAsString(today);
+	}
+	
 	public JList<PersonModel> getAllPersons() {
 		return db.getAllPersons();
 	}

@@ -634,6 +634,19 @@ public class Database {
 		return (new JList<String>(nameModel));
 	}
 
+	public JList<String> getAvailPersonsAsString(Calendar today) {
+		Date thisDay = getDay(today);
+		
+		// Get all persons who are available today
+		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+
+		for (PersonModel p : personList) {
+			if (isPersonAvailable(p, thisDay))
+				nameModel.addElement(new String(p.getName()));
+		}
+		return (new JList<String>(nameModel));
+	}
+
 	public JList<PersonModel> getAllPersons() {
 		DefaultListModel<PersonModel> personModel = new DefaultListModel<>();
 		for (PersonModel p : personList) {
@@ -666,6 +679,8 @@ public class Database {
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
+			if (!isPersonAvailable(pModel, thisDay))
+				continue;
 
 			// Search through today's tasks for a person match
 			for (int taskIdx = 0; taskIdx < tasksForToday.size(); taskIdx++) {
@@ -696,6 +711,7 @@ public class Database {
 	}
 
 	// TODO: Currently not used!
+	// If it is used later, add check for 'isPersonAvailable'.
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;

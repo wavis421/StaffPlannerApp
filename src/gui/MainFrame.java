@@ -114,7 +114,7 @@ public class MainFrame extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu programMenu = new JMenu("Program");
 		JMenu taskMenu = new JMenu("Task");
-		JMenu personMenu = new JMenu("Leaders/Volunteers");
+		JMenu personMenu = new JMenu("Roster");
 		JMenu calendarMenu = new JMenu("Calendar");
 		JMenu settingsMenu = new JMenu("Settings");
 		menuBar.add(fileMenu);
@@ -521,7 +521,7 @@ public class MainFrame extends JFrame {
 		viewAllPersons.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
-					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false, null,
+					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster", false, null,
 							controller.getAllPersonsList(), "", null, null, null);
 					processViewAllPersonsDialog(ev.getDialogResponse());
 				}
@@ -530,35 +530,18 @@ public class MainFrame extends JFrame {
 	}
 
 	private void processViewAllPersonsDialog(PersonTableEvent event) {
-		if (event != null) {
-			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
-				// Add button is not defined for this dialog option
-				JOptionPane.showMessageDialog(null,
-						"processViewAllPersonsDialog with Add Person button should never occur");
-			}
-
-			else if (event.getButtonId() == PersonTableDialog.getDeleteRowButtonId()
-					|| event.getButtonId() == PersonTableDialog.getEmailButtonId()) {
-				// For any unimplemented buttons,
-				// refresh data and re-open Person Table dialog
-				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false, null,
-						controller.getAllPersonsList(), "", null, null, null);
-				processViewAllPersonsDialog(ev.getDialogResponse());
-			}
-
-			else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
-				// Edit person and re-open Person Table dialog
+		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
+			if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
+				// Edit person
 				editPerson(event.getPersonName());
-
-				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Leaders/Volunteers", false, null,
-						controller.getAllPersonsList(), "", null, null, null);
-				processViewAllPersonsDialog(ev.getDialogResponse());
-			}
-
-			else {
-				// Exiting dialog without any action
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
+
 			}
+
+			// Refresh data and re-open Person Table dialog
+			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster", false, null,
+					controller.getAllPersonsList(), "", null, null, null);
+			processViewAllPersonsDialog(ev.getDialogResponse());
 		}
 	}
 
@@ -792,10 +775,11 @@ public class MainFrame extends JFrame {
 				if (selectedTask != null) {
 					// View assigned persons
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-							"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
+							"Roster for " + selectedTask.getTaskName() + " on "
 									+ Utilities.getDisplayDate(selectedCalendar),
 							true, selectedTask.getTaskName(), controller.getPersonsByDay(selectedCalendar), "Add sub",
-							(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
+							(Calendar) selectedCalendar.clone(), controller.getAvailPersonsAsString(selectedCalendar),
+							null);
 					processViewRosterByTaskDialog(ev.getDialogResponse());
 				}
 			}
@@ -810,10 +794,11 @@ public class MainFrame extends JFrame {
 
 				// View assigned persons by time
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-						"Leaders/Volunteers for " + Utilities.getDisplayDate(selectedCalendar) + " at "
+						"Roster for " + Utilities.getDisplayDate(selectedCalendar) + " at "
 								+ Utilities.formatTime(selectedCalendar),
 						true, null, controller.getPersonsByDayByTime(selectedCalendar), "Add floater",
-						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), timeList);
+						(Calendar) selectedCalendar.clone(), controller.getAvailPersonsAsString(selectedCalendar),
+						timeList);
 				processViewRosterByTimeDialog(ev.getDialogResponse());
 			}
 		});
@@ -823,11 +808,12 @@ public class MainFrame extends JFrame {
 						&& !selectedTask.getLocation().equals("")) {
 					// View assigned persons by location
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-							"Leaders/Volunteers at " + selectedTask.getLocation() + " for "
+							"Roster at " + selectedTask.getLocation() + " for "
 									+ Utilities.getDisplayDate(selectedCalendar),
 							true, null,
 							controller.getPersonsByDayByLocation(selectedCalendar, selectedTask.getLocation()), "",
-							(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
+							(Calendar) selectedCalendar.clone(), controller.getAvailPersonsAsString(selectedCalendar),
+							null);
 					processViewRosterByLocationDialog(ev.getDialogResponse());
 				}
 			}
@@ -836,9 +822,9 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// View all persons
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-						"Leaders/Volunteers for " + Utilities.getDisplayDate(selectedCalendar), true, null,
+						"Roster for " + Utilities.getDisplayDate(selectedCalendar), true, null,
 						controller.getPersonsByDay(selectedCalendar), "Add floater",
-						(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(),
+						(Calendar) selectedCalendar.clone(), controller.getAvailPersonsAsString(selectedCalendar),
 						controller.getAllTimesByDay(selectedCalendar));
 				processViewCompleteRosterDialog(ev.getDialogResponse());
 			}
@@ -860,10 +846,9 @@ public class MainFrame extends JFrame {
 
 			// Refresh data and re-open Person Table Dialog
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-					"Leaders/Volunteers for " + selectedTask.getTaskName() + " on "
-							+ Utilities.getDisplayDate(selectedCalendar),
+					"Roster for " + selectedTask.getTaskName() + " on " + Utilities.getDisplayDate(selectedCalendar),
 					true, selectedTask.getTaskName(), controller.getPersonsByDay(selectedCalendar), "Add sub",
-					(Calendar) selectedCalendar.clone(), controller.getAllPersonsAsString(), null);
+					(Calendar) selectedCalendar.clone(), controller.getAvailPersonsAsString(selectedCalendar), null);
 			processViewRosterByTaskDialog(ev.getDialogResponse());
 		}
 	}
@@ -888,10 +873,11 @@ public class MainFrame extends JFrame {
 
 			// Refresh data and re-open Person Table dialog
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-					"Leaders/Volunteers for " + Utilities.getDisplayDate(event.getCalendar()) + " at "
+					"Roster for " + Utilities.getDisplayDate(event.getCalendar()) + " at "
 							+ Utilities.formatTime(event.getCalendar()),
 					true, null, controller.getPersonsByDayByTime(event.getCalendar()), "Add floater",
-					(Calendar) event.getCalendar().clone(), controller.getAllPersonsAsString(), timeList);
+					(Calendar) event.getCalendar().clone(), controller.getAvailPersonsAsString(event.getCalendar()),
+					timeList);
 			processViewRosterByTimeDialog(ev.getDialogResponse());
 		}
 	}
@@ -905,8 +891,7 @@ public class MainFrame extends JFrame {
 
 			// Remaining events not implemented. Re-open Person Table dialog.
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-					"Leaders/Volunteers at " + selectedTask.getLocation() + " for "
-							+ Utilities.getDisplayDate(selectedCalendar),
+					"Roster at " + selectedTask.getLocation() + " for " + Utilities.getDisplayDate(selectedCalendar),
 					true, null, controller.getPersonsByDayByLocation(selectedCalendar, selectedTask.getLocation()), "",
 					(Calendar) selectedCalendar.clone(), null, null);
 			processViewRosterByLocationDialog(ev.getDialogResponse());
@@ -926,9 +911,10 @@ public class MainFrame extends JFrame {
 
 			// Refresh data and re-open Person Table Dialog
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-					"Leaders/Volunteers for " + Utilities.getDisplayDate(selectedCalendar), true, null,
+					"Roster for " + Utilities.getDisplayDate(selectedCalendar), true, null,
 					controller.getPersonsByDay(selectedCalendar), "Add floater", (Calendar) selectedCalendar.clone(),
-					controller.getAllPersonsAsString(), controller.getAllTimesByDay(selectedCalendar));
+					controller.getAvailPersonsAsString(selectedCalendar),
+					controller.getAllTimesByDay(selectedCalendar));
 			processViewCompleteRosterDialog(ev.getDialogResponse());
 		}
 	}
