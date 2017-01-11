@@ -15,6 +15,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.PasswordAuthentication;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.swing.BorderFactory;
@@ -44,7 +45,7 @@ public class EmailDialog extends JDialog {
 
 	// Private instance variables
 	private static String userName = "";
-	private static String password = "";
+	private static char[] password;
 	private static int port;
 	private JList<String> emailRecipients;
 
@@ -56,7 +57,7 @@ public class EmailDialog extends JDialog {
 		super(parent, "Send email...", true);
 		this.emailRecipients = emailRecipients;
 
-		if (userName.equals("")) {
+		if (userName.equals("") || password.length == 0) {
 			// Get username & password
 			EmailSettingsDialog ev = new EmailSettingsDialog(this);
 			EmailSettingsEvent dialogResponse = ev.getDialogResponse();
@@ -160,12 +161,18 @@ public class EmailDialog extends JDialog {
 	private void generateAndSendEmail() {
 		// Currently hard-coded to send using gmail SMTP
 		Properties properties = System.getProperties();
-		properties.put("mail.smtp.port", "587");
 		properties.put("mail.smtp.auth", "true");
-		properties.put("mail.smtp.starttls.enable", "true");
 		properties.put("mail.smtp.host", "smtp.gmail.com");
+		properties.put("mail.smtp.socketFactory.port", "465");
+		properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		properties.put("mail.smtp.port", "465");
 
-		Session session = Session.getDefaultInstance(properties, null);
+		// Session session = Session.getDefaultInstance(properties, null);
+		Session session = Session.getDefaultInstance(properties, new javax.mail.Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(userName, new String(password));
+			}
+		});
 
 		try {
 			// Set message fields
@@ -182,8 +189,8 @@ public class EmailDialog extends JDialog {
 				}
 			}
 
-			// Send email
-			Transport.send(message, message.getAllRecipients(), userName, password);
+			// Send email (commented out line is if not authenticated above
+			Transport.send(message);
 			JOptionPane.showMessageDialog(getParent(), "Email sent successfully!");
 
 		} catch (MessagingException ex) {

@@ -95,4 +95,14 @@ public class Utilities {
 		}
 		return newJList;
 	}
+	
+	public static void memoryCheck (String codeLocation) {
+	    // Get the Java runtime
+	    Runtime runtime = Runtime.getRuntime();
+	    runtime.gc();
+	    
+	    long memory = runtime.totalMemory() - runtime.freeMemory();
+	    System.out.println("Used memory in bytes (" + codeLocation + "): " + memory);
+	    
+	}
 }

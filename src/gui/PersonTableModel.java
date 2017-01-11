@@ -24,7 +24,7 @@ public class PersonTableModel extends AbstractTableModel {
 	private String colNamesExpanded[] = { "Name", "Ldr", "Sub", "Task", "Location", "Time", "Phone #", "E-Mail" };
 	private String colNames[];
 	private boolean expanded;
-
+	
 	public PersonTableModel(boolean isColumnExpanded, LinkedList<PersonByTaskModel> personList) {
 		this.personList = personList;
 		this.expanded = isColumnExpanded;

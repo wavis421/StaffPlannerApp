@@ -270,7 +270,7 @@ public class Database {
 				}
 			}
 		}
-		return (LinkedList<CalendarDayModel>) thisDaysTasks.clone();
+		return (LinkedList<CalendarDayModel>) thisDaysTasks;
 	}
 
 	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
@@ -662,7 +662,7 @@ public class Database {
 			PersonByTaskModel person = new PersonByTaskModel(p, null, false, 0, null);
 			personsByTask.add(person);
 		}
-		return (LinkedList<PersonByTaskModel>) personsByTask.clone();
+		return (LinkedList<PersonByTaskModel>) personsByTask;
 	}
 
 	// Return list of all persons assigned to this day, including single
@@ -707,7 +707,7 @@ public class Database {
 				}
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) thisDaysPersons.clone();
+		return (LinkedList<PersonByTaskModel>) thisDaysPersons;
 	}
 
 	// TODO: Currently not used!
@@ -731,7 +731,7 @@ public class Database {
 				thisDaysPersons.add(personByTask);
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) thisDaysPersons.clone();
+		return (LinkedList<PersonByTaskModel>) thisDaysPersons;
 	}
 
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
@@ -745,7 +745,7 @@ public class Database {
 				i--;
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) persons.clone();
+		return (LinkedList<PersonByTaskModel>) persons;
 	}
 
 	public LinkedList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
@@ -759,7 +759,7 @@ public class Database {
 				i--;
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) personList.clone();
+		return (LinkedList<PersonByTaskModel>) personList;
 	}
 
 	public int getNumPersons() {

@@ -66,6 +66,7 @@ public class PersonTableDialog extends JDialog {
 			LinkedList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
 			JList<Time> allTimes) {
 		super(parent, true);
+	    
 		setTitle(title);
 		this.parent = parent;
 		this.child = this;
@@ -135,7 +136,6 @@ public class PersonTableDialog extends JDialog {
 								dialogResponse = ev;
 								setVisible(false);
 								dispose();
-
 							}
 						}
 					} else {

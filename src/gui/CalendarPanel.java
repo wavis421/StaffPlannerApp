@@ -33,7 +33,6 @@ import javax.swing.border.LineBorder;
 import acm.gui.TableLayout;
 import acm.util.JTFTools;
 import model.CalendarDayModel;
-import model.TaskModel;
 import utilities.Utilities;
 
 /*
@@ -52,18 +51,18 @@ public class CalendarPanel extends JPanel {
 	private JLabel leftLabel, rightLabel;
 	private LinkedList<CalendarDayModel>[] dayBoxTaskList;
 	private JLabel programLabel = new JLabel("   ");
-	private static TableLayout layout = new TableLayout();
-	private static Locale locale = new Locale("en", "US", "");
-	private static DateFormatSymbols symbols = new DateFormatSymbols(locale);
+	private TableLayout layout = new TableLayout();
+	private Locale locale = new Locale("en", "US", "");
+	private DateFormatSymbols symbols = new DateFormatSymbols(locale);
 	private DayBoxListener dayListener;
 	private CalendarUpdateListener updateListener;
 
 	// Private calendar variables
 	private Calendar currentCalendar;
-	private int firstDayOfWeek;
-	private static String[] monthNames = symbols.getMonths();
-	private static String[] weekdayNames = symbols.getWeekdays();
+	private String[] monthNames = symbols.getMonths();
+	private String[] weekdayNames = symbols.getWeekdays();
 	private Border innerDayBorder, outerDayBorder;
+	private JLabel[] weekdayLabels = new JLabel[7];
 
 	public CalendarPanel() {
 		// Create borders
@@ -74,11 +73,21 @@ public class CalendarPanel extends JPanel {
 		innerDayBorder = BorderFactory.createLineBorder(Color.decode(Integer.toString(0xF00000)), 2);
 		outerDayBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
+		programLabel.setHorizontalAlignment(JLabel.CENTER);
+		programLabel.setFont(JTFTools.decodeFont(PROGRAM_FONT));
+
 		// Initialize calendar parameters and display this month's calendar
 		currentCalendar = Calendar.getInstance(locale);
-		firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
+		currentCalendar.setFirstDayOfWeek(Calendar.SUNDAY);
+		createWeekdayLabels();
+		CreateMonthUpdateLabels();
+
 		layout.setColumnCount(7);
 		dayBoxTaskList = new LinkedList[31];
+
+		// Set table layout
+		setLayout(layout);
+
 		updateCalendarDisplay(currentCalendar);
 	}
 
@@ -98,6 +107,8 @@ public class CalendarPanel extends JPanel {
 
 	// Update the tasks for the indicated calendar day
 	public void updateTasksByDay(int dayIdx, LinkedList<CalendarDayModel> tasks) {
+		if (dayBoxTaskList[dayIdx] != null)
+			dayBoxTaskList[dayIdx].clear();
 		dayBoxTaskList[dayIdx] = tasks;
 	}
 
@@ -116,22 +127,16 @@ public class CalendarPanel extends JPanel {
 		// Remove components from the calendar table
 		removeAll();
 
-		// Set table layout
-		setLayout(layout);
-
-		// Add month set buttons and month label
-		CreateMonthUpdateLabels();
+		// Add month labels
 		add(leftLabel);
 		add(createMonthLabel(calendar), "gridwidth=5 bottom=0");
 		add(rightLabel);
 
-		programLabel.setHorizontalAlignment(JLabel.CENTER);
-		programLabel.setFont(JTFTools.decodeFont(PROGRAM_FONT));
 		add(programLabel, "gridwidth=7 weightx=1 bottom=12");
 
 		// Add weekday labels
 		for (int i = 0; i < 7; i++) {
-			add(createWeekdayLabel(i), "weightx=1 width=1 bottom=2");
+			add(weekdayLabels[i], "weightx=1 width=1 bottom=2");
 		}
 
 		// Add null boxes for first week until first day
@@ -159,6 +164,7 @@ public class CalendarPanel extends JPanel {
 	private void CreateMonthUpdateLabels() {
 		leftLabel = new JLabel("<<", SwingConstants.RIGHT);
 		rightLabel = new JLabel(">>");
+
 		leftLabel.setFont(JTFTools.decodeFont(TITLE_BOLD_FONT));
 		rightLabel.setFont(JTFTools.decodeFont(TITLE_BOLD_FONT));
 
@@ -184,6 +190,7 @@ public class CalendarPanel extends JPanel {
 		int month = calendar.get(Calendar.MONTH);
 		int year = calendar.get(Calendar.YEAR);
 		String monthName = capitalize(monthNames[month]);
+
 		JLabel label = new JLabel(monthName + " " + year);
 		label.setFont(JTFTools.decodeFont(TITLE_FONT));
 		label.setHorizontalAlignment(JLabel.CENTER);
@@ -191,12 +198,14 @@ public class CalendarPanel extends JPanel {
 	}
 
 	// Create a label for the weekday header at the specified index
-	private JLabel createWeekdayLabel(int index) {
-		int weekday = (firstDayOfWeek + index + 6) % 7 + 1;
-		JLabel label = new JLabel(capitalize(weekdayNames[weekday]));
-		label.setFont(JTFTools.decodeFont(LABEL_FONT));
-		label.setHorizontalAlignment(JLabel.CENTER);
-		return label;
+	private void createWeekdayLabels() {
+		for (int i = 0; i < 7; i++) {
+			int weekday = (Calendar.SUNDAY + i + 6) % 7 + 1;
+			weekdayLabels[i] = new JLabel(capitalize(weekdayNames[weekday]));
+
+			weekdayLabels[i].setFont(JTFTools.decodeFont(LABEL_FONT));
+			weekdayLabels[i].setHorizontalAlignment(JLabel.CENTER);
+		}
 	}
 
 	// Compute the number of days in the current month
@@ -216,12 +225,12 @@ public class CalendarPanel extends JPanel {
 	private int getFirstWeekdayIndex(Calendar calendar) {
 		int day = calendar.get(Calendar.DAY_OF_MONTH);
 		int weekday = calendar.get(Calendar.DAY_OF_WEEK);
-		int weekdayIndex = (weekday + 7 - firstDayOfWeek) % 7;
+		int weekdayIndex = (weekday + 7 - Calendar.SUNDAY) % 7;
 		return ((5 * 7 + 1) + weekdayIndex - day) % 7;
 	}
 
 	// Create a box for a calendar day containing the specified text
-	private Component createDayBox(String text) {
+	private JPanel createDayBox(String text) {
 		// Single table panel
 		JPanel dayBox = new JPanel(new BorderLayout());
 		JScrollPane scrollPane;

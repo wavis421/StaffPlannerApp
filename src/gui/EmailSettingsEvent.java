@@ -4,14 +4,14 @@ import java.util.EventObject;
 
 public class EmailSettingsEvent extends EventObject {
 	private String userName;
-	private String password;
+	private char[] password;
 	private int portNumber;
 
 	public EmailSettingsEvent(Object source) {
 		super(source);
 	}
 
-	public EmailSettingsEvent(Object source, String userName, String password, int portNumber) {
+	public EmailSettingsEvent(Object source, String userName, char[] password, int portNumber) {
 		super(source);
 
 		this.userName = userName;
@@ -23,7 +23,7 @@ public class EmailSettingsEvent extends EventObject {
 		return userName;
 	}
 
-	public String getPassword() {
+	public char[] getPassword() {
 		return password;
 	}
 

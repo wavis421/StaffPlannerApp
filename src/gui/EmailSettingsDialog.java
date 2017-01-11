@@ -56,7 +56,7 @@ public class EmailSettingsDialog extends JDialog {
 				Integer port = (Integer) portSpinner.getValue();
 				
 				// Create event and set response
-				EmailSettingsEvent ev = new EmailSettingsEvent(this, user, new String(pw), port);
+				EmailSettingsEvent ev = new EmailSettingsEvent(this, user, pw, port);
 				dialogResponse = ev;
 
 				setVisible(false);
