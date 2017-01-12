@@ -55,7 +55,7 @@ public class PersonDialog extends JDialog {
 	private static final int TEXT_FIELD_SIZE = 30;
 	private static final int TASK_COMBO_WIDTH = 334;
 	private static final int TASK_COMBO_HEIGHT = 30;
-	
+
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 
@@ -71,7 +71,7 @@ public class PersonDialog extends JDialog {
 	private JDatePickerImpl startDayPicker, endDayPicker;
 	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
 	private LinkedList<AssignedTasksModel> assignedTaskChanges;
-	private DateRangeModel datesUnavailable;
+	private LinkedList<DateRangeModel> datesUnavailable;
 	private JComboBox<String> singleInstanceTaskCombo;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
@@ -98,10 +98,10 @@ public class PersonDialog extends JDialog {
 		createTrees(assignedTasksTree, taskTree);
 		this.leaderButton.setSelected(true);
 		this.assignedTaskChanges = new LinkedList<AssignedTasksModel>();
-		this.datesUnavailable = new DateRangeModel("", "");
+		this.datesUnavailable = new LinkedList<DateRangeModel>();
 
 		createSingleInstanceTaskCombo(null);
-		
+
 		setupPersonDialog();
 	}
 
@@ -121,10 +121,10 @@ public class PersonDialog extends JDialog {
 		else
 			this.volunteerButton.setSelected(true);
 		this.assignedTaskChanges = assignedTaskChanges;
-		this.datesUnavailable = person.getDatesUnavailable();
+		this.datesUnavailable = (LinkedList<DateRangeModel>) person.getDatesUnavailable().clone();
 
 		createSingleInstanceTaskCombo(person.getSingleInstanceTasks());
-		
+
 		setupPersonDialog();
 	}
 
@@ -156,11 +156,9 @@ public class PersonDialog extends JDialog {
 					if (personName.getText().equals("")) {
 						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 					} else {
-						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
-						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText().trim(), phone.getText().trim(),
 								email.getText().trim(), leaderButton.isSelected() ? true : false, processNotesArea(),
-								assignedTaskChanges, null, datesUnavailable);
+								assignedTaskChanges, null, getDatesUnavailList());
 						okToSave = true;
 						dialogResponse = ev;
 						setVisible(false);
@@ -226,7 +224,7 @@ public class PersonDialog extends JDialog {
 		setLayout(new BorderLayout());
 		add(controlsPanel, BorderLayout.CENTER);
 		add(buttonsPanel, BorderLayout.SOUTH);
-		
+
 		// make OK & cancel buttons the same size
 		Dimension btnSize = cancelButton.getPreferredSize();
 		okButton.setPreferredSize(btnSize);
@@ -265,8 +263,8 @@ public class PersonDialog extends JDialog {
 				String taskName = task.getTaskName();
 				if (taskName.equals("")) {
 					taskName = "Floater";
-					taskModel.addElement(taskName + " on " + Utilities.getDisplayDate(date) + " at "
-							+ Utilities.formatTime(date));
+					taskModel.addElement(
+							taskName + " on " + Utilities.getDisplayDate(date) + " at " + Utilities.formatTime(date));
 				} else {
 					taskModel.addElement(taskName + " on " + Utilities.getDisplayDate(date));
 				}
@@ -281,12 +279,37 @@ public class PersonDialog extends JDialog {
 	}
 
 	private void createDateSelectors() {
-		startDayPicker = createDatePicker(datesUnavailable.getStartDate(), "start");
-		endDayPicker = createDatePicker(datesUnavailable.getEndDate(), "end");
+		for (DateRangeModel dateUnavail : datesUnavailable) {
+			if (Utilities.isDateInThePast(dateUnavail.getEndDate(), "Error parsing Unavailable Date(s)"))
+				datesUnavailable.remove(dateUnavail);
+
+			else {
+				startDayPicker = createDatePicker(dateUnavail.getStartDate(), "start");
+				endDayPicker = createDatePicker(dateUnavail.getEndDate(), "end");
+			}
+		}
+
+		if (datesUnavailable.size() == 0) {
+			startDayPicker = createDatePicker("", "start");
+			endDayPicker = createDatePicker("", "end");
+		}
 
 		datePanel.add(startDayPicker);
 		datePanel.add(new JLabel(" to "));
 		datePanel.add(endDayPicker);
+	}
+
+	private LinkedList<DateRangeModel> getDatesUnavailList() {
+		datesUnavailable.clear();
+
+		String start = startDayPicker.getJFormattedTextField().getText();
+		String end = endDayPicker.getJFormattedTextField().getText();
+
+		if (!start.equals("") && !end.equals("")) {
+			DateRangeModel dateRange = new DateRangeModel(start, end);
+			datesUnavailable.add(dateRange);
+		}
+		return datesUnavailable;
 	}
 
 	private JDatePickerImpl createDatePicker(String lastDate, String name) {
@@ -360,6 +383,7 @@ public class PersonDialog extends JDialog {
 				}
 			}
 		});
+
 		datePicker.setPreferredSize(new Dimension(150, 26));
 		datePicker.setName(name);
 		return datePicker;
@@ -425,11 +449,9 @@ public class PersonDialog extends JDialog {
 						removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
 						assignedTaskChanges.add(lastAssignedTask);
 
-						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
-						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, datesUnavailable);
+								lastAssignedTask, getDatesUnavailList());
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -471,11 +493,9 @@ public class PersonDialog extends JDialog {
 								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
 						assignedTaskChanges.add(lastAssignedTask);
 
-						datesUnavailable.setStartDate(startDayPicker.getJFormattedTextField().getText());
-						datesUnavailable.setEndDate(endDayPicker.getJFormattedTextField().getText());
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, datesUnavailable);
+								lastAssignedTask, getDatesUnavailList());
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();

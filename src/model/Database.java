@@ -533,15 +533,14 @@ public class Database {
 		if (today == null)
 			return true; // impossible?
 
-		if (!person.getDatesUnavailable().getStartDate().equals("")) {
+		for (DateRangeModel datesUnavail : person.getDatesUnavailable()) {
 			try {
-				Date startDate = dateFormatter.parse(person.getDatesUnavailable().getStartDate());
-				Date endDate = dateFormatter.parse(person.getDatesUnavailable().getEndDate());
+				Date startDate = dateFormatter.parse(datesUnavail.getStartDate());
+				Date endDate = dateFormatter.parse(datesUnavail.getEndDate());
 				if (today.compareTo(startDate) >= 0 && today.compareTo(endDate) <= 0) {
 					// Person unavailable, today is between start and end
 					return false;
-				} else
-					return true;
+				}
 
 			} catch (ParseException e) {
 				JOptionPane.showMessageDialog(null,
@@ -557,7 +556,7 @@ public class Database {
 	 * ------- Person data -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
+			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<DateRangeModel> datesUnavailable) {
 		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable,
 				new LinkedList<SingleInstanceTaskModel>()));
 		Collections.sort(personList);
@@ -565,7 +564,7 @@ public class Database {
 
 	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
 			String personNotes, LinkedList<AssignedTasksModel> personAssignedTasks,
-			DateRangeModel personDatesUnavailable) {
+			LinkedList<DateRangeModel> personDatesUnavailable) {
 
 		int personIdx = getPersonIndexByName(personName);
 		if (personIdx != -1) {
@@ -636,7 +635,7 @@ public class Database {
 
 	public JList<String> getAvailPersonsAsString(Calendar today) {
 		Date thisDay = getDay(today);
-		
+
 		// Get all persons who are available today
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
 

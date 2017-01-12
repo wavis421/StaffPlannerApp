@@ -1,15 +1,19 @@
 package utilities;
 
 import java.sql.Time;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 
 public class Utilities {
 	// Time format for hour 1 - 12 and AM/PM field
 	private static final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 	public static String formatTime(Time time) {
 		// Set time and convert to String
@@ -72,11 +76,34 @@ public class Utilities {
 				+ calendar.get(Calendar.YEAR));
 	}
 
+	public static boolean isDateInThePast(String dateString, String errorString) {
+		Calendar today = Calendar.getInstance();
+		Calendar date = Calendar.getInstance();
+
+		try {
+			date.setTime(dateFormatter.parse(dateString));
+			
+		} catch (ParseException e) {
+			JOptionPane.showMessageDialog(null,
+					"Unable to parse date '" + dateString + "': " + e.getMessage(),
+					errorString, JOptionPane.ERROR_MESSAGE);
+			return true;
+		}
+
+		// Can't use compareTo since today will include non-zero time
+		if (today.get(Calendar.YEAR) >= date.get(Calendar.YEAR) &&
+				today.get(Calendar.MONTH) >= date.get(Calendar.MONTH) &&
+				today.get(Calendar.DAY_OF_MONTH) > date.get(Calendar.DAY_OF_MONTH))
+			return true;
+		else
+			return false;
+	}
+
 	public static boolean findStringMatchInJList(String findString, JList<String> list) {
 		for (int i = 0; i < list.getModel().getSize(); i++) {
 			if (findString == null || list.getModel().getElementAt(i) == null)
 				return false;
-			
+
 			if (list.getModel().getElementAt(i).equals(findString))
 				return true;
 		}
@@ -95,14 +122,14 @@ public class Utilities {
 		}
 		return newJList;
 	}
-	
-	public static void memoryCheck (String codeLocation) {
-	    // Get the Java runtime
-	    Runtime runtime = Runtime.getRuntime();
-	    runtime.gc();
-	    
-	    long memory = runtime.totalMemory() - runtime.freeMemory();
-	    System.out.println("Used memory in bytes (" + codeLocation + "): " + memory);
-	    
+
+	public static void memoryCheck(String codeLocation) {
+		// Get the Java runtime
+		Runtime runtime = Runtime.getRuntime();
+		runtime.gc();
+
+		long memory = runtime.totalMemory() - runtime.freeMemory();
+		System.out.println("Used memory in bytes (" + codeLocation + "): " + memory);
+
 	}
 }

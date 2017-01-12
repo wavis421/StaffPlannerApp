@@ -139,7 +139,7 @@ public class Controller {
 	 * ------- Persons -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, DateRangeModel datesUnavailable) {
+			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<DateRangeModel> datesUnavailable) {
 		db.addPerson(name, phone, email, leader, notes, assignedTasks, datesUnavailable);
 	}
 
