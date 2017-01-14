@@ -3,6 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,8 +37,8 @@ public class PersonTableDialog extends JDialog {
 	private static final int ADD_PERSON_BUTTON = 0;
 	private static final int EMAIL_BUTTON = 1;
 	private static final int CLOSE_BUTTON = 2;
-	private static final int EDIT_ROW_BUTTON = 3;
-	private static final int DELETE_ROW_BUTTON = 4;
+	private static final int EDIT_PERSON_ROW_BUTTON = 3;
+	private static final int REMOVE_PERSON_ROW_BUTTON = 4;
 
 	private static final int ROW_GAP = 5;
 
@@ -66,7 +67,7 @@ public class PersonTableDialog extends JDialog {
 			LinkedList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
 			JList<Time> allTimes) {
 		super(parent, true);
-	    
+
 		setTitle(title);
 		this.parent = parent;
 		this.child = this;
@@ -236,29 +237,32 @@ public class PersonTableDialog extends JDialog {
 		table.setAutoCreateRowSorter(true);
 
 		popup = new JPopupMenu();
-		removeItem = new JMenuItem("Delete row");
-		editItem = new JMenuItem("Edit row");
+		popup.setPreferredSize(new Dimension(240, 50));
+		removeItem = new JMenuItem("Remove person for today");
+		editItem = new JMenuItem("Edit person");
 		popup.add(removeItem);
 		popup.add(editItem);
 
-		// Detect right mouse click on table, then pop-up "Delete/Edit row"
+		// Detect right mouse click on table, then pop-up "Remove/Edit row"
 		// and select row
 		table.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON3) {
 					popup.show(table, e.getX(), e.getY());
 					int row = table.rowAtPoint(e.getPoint());
+					removeItem.setText("Mark person unavailable for " + Utilities.getDisplayDate(calendar));
 					table.getSelectionModel().setSelectionInterval(row, row);
 				}
 			}
 		});
 
-		// When "Delete row" selected, then trigger PersonTableListener action
-		// for this row
+		// When "Remove person" selected, then trigger PersonTableListener
+		// action for this row
 		removeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				PersonTableEvent ev = new PersonTableEvent(this, DELETE_ROW_BUTTON, table.getSelectedRow(),
-						(String) null, calendar, 0);
+				PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON, table.getSelectedRow(),
+						(String) tableModel.getValueAt(table.getSelectedRow(), tableModel.getColumnForPersonName()),
+						calendar, 0);
 				dialogResponse = ev;
 				setVisible(false);
 				dispose();
@@ -269,7 +273,7 @@ public class PersonTableDialog extends JDialog {
 		// for this row
 		editItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				PersonTableEvent ev = new PersonTableEvent(this, EDIT_ROW_BUTTON, 0,
+				PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON, 0,
 						(String) tableModel.getValueAt(table.getSelectedRow(), tableModel.getColumnForPersonName()),
 						calendar, 0);
 				dialogResponse = ev;
@@ -350,11 +354,11 @@ public class PersonTableDialog extends JDialog {
 	}
 
 	public static int getEditRowButtonId() {
-		return EDIT_ROW_BUTTON;
+		return EDIT_PERSON_ROW_BUTTON;
 	}
 
-	public static int getDeleteRowButtonId() {
-		return DELETE_ROW_BUTTON;
+	public static int getRemovePersonRowButtonId() {
+		return REMOVE_PERSON_ROW_BUTTON;
 	}
 
 	private boolean isTimeAlreadyAssigned(String thisPerson, Calendar thisTime) {

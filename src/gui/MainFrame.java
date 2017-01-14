@@ -843,6 +843,11 @@ public class MainFrame extends JFrame {
 				editPerson(event.getPersonName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
+			
+			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
+				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
 
 			// Refresh data and re-open Person Table Dialog
 			LinkedList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
@@ -866,6 +871,11 @@ public class MainFrame extends JFrame {
 
 			} else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				editPerson(event.getPersonName());
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+			
+			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
+				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 
@@ -895,6 +905,11 @@ public class MainFrame extends JFrame {
 				editPerson(event.getPersonName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
+			
+			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
+				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
 
 			// Remaining events not implemented. Re-open Person Table dialog.
 			LinkedList<PersonByTaskModel> personsByLoc = controller.getPersonsByDayByLocation(selectedCalendar,
@@ -917,6 +932,11 @@ public class MainFrame extends JFrame {
 
 			} else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				editPerson(event.getPersonName());
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+			
+			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
+				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 

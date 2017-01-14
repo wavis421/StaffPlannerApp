@@ -157,6 +157,10 @@ public class Controller {
 	public void renamePerson(String oldName, String newName) {
 		db.renamePerson(oldName, newName);
 	}
+	
+	public void markPersonUnavail (String personName, Calendar today) {
+		db.markPersonUnavail (personName, today);
+	}
 
 	public PersonModel getPersonByName(String name) {
 		return db.getPersonByName(name);

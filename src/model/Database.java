@@ -615,6 +615,18 @@ public class Database {
 			JOptionPane.showMessageDialog(null, "Person '" + oldName + "' not found!");
 	}
 
+	public void markPersonUnavail(String personName, Calendar today) {
+		// Get person
+		PersonModel person = getPersonByName(personName);
+
+		if (person != null) {
+			// Mark person unavailable for today
+			DateRangeModel dateModel = new DateRangeModel(Utilities.getDisplayDate(today),
+					Utilities.getDisplayDate(today));
+			person.getDatesUnavailable().add(dateModel);
+		}
+	}
+
 	public PersonModel getPersonByName(String name) {
 		for (PersonModel p : personList) {
 			if (p.getName().equals(name)) {
