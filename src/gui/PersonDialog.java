@@ -10,12 +10,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedList;
-import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -39,10 +35,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.jdatepicker.impl.JDatePanelImpl;
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
-
 import model.AssignedTasksModel;
 import model.DateRangeModel;
 import model.PersonModel;
@@ -53,11 +45,12 @@ import utilities.Utilities;
 public class PersonDialog extends JDialog {
 	// Constants
 	private static final int TEXT_FIELD_SIZE = 30;
-	private static final int TASK_COMBO_WIDTH = 334;
-	private static final int TASK_COMBO_HEIGHT = 30;
+	private static final int COMBO_BOX_WIDTH = 334;
+	private static final int COMBO_BOX_HEIGHT = 30;
 
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
+	private JButton unavailDatesButton = new JButton("Unavail Dates");
 
 	// Private instance variables
 	private JTextField personName = new JTextField(TEXT_FIELD_SIZE);
@@ -67,8 +60,7 @@ public class PersonDialog extends JDialog {
 	private JRadioButton volunteerButton = new JRadioButton("Volunteer");
 	private ButtonGroup staffGroup = new ButtonGroup();
 	private JPanel staffPanel = new JPanel();
-	private JPanel datePanel = new JPanel();
-	private JDatePickerImpl startDayPicker, endDayPicker;
+	private JComboBox dateUnavailCombo;
 	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
 	private LinkedList<AssignedTasksModel> assignedTaskChanges;
 	private LinkedList<DateRangeModel> datesUnavailable;
@@ -138,7 +130,7 @@ public class PersonDialog extends JDialog {
 
 	private void setupPersonDialog() {
 		createStaffSelector();
-		createDateSelectors();
+		createUnavailDateCombo();
 		singleInstanceTaskCombo.setEditable(false);
 
 		// Force the text area not to expand when user types more than 3 lines!!
@@ -149,24 +141,33 @@ public class PersonDialog extends JDialog {
 		notesArea.setAutoscrolls(false);
 		notesArea.setPreferredSize(notesArea.getPreferredSize());
 
+		unavailDatesButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DateRangeDialog ev = new DateRangeDialog(PersonDialog.this);
+				DateRangeModel dialogResponse = ev.getDialogResponse();
+				if (dialogResponse != null) {
+					if (!dialogResponse.getStartDate().equals("") && !dialogResponse.getEndDate().equals("")) {
+						// Date range valid. Add to Linked List and Combo Box.
+						datesUnavailable.add(dialogResponse);
+						DefaultComboBoxModel dateModel = (DefaultComboBoxModel) dateUnavailCombo.getModel();
+						dateModel.addElement(dialogResponse.getStartDate() + "  to  " + dialogResponse.getEndDate());
+					}
+				}
+			}
+		});
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					// Make sure that person name has been entered
-					if (personName.getText().equals("")) {
-						JOptionPane.showMessageDialog(okButton, "Person's name field is required");
-					} else {
-						PersonEvent ev = new PersonEvent(this, personName.getText().trim(), phone.getText().trim(),
-								email.getText().trim(), leaderButton.isSelected() ? true : false, processNotesArea(),
-								assignedTaskChanges, null, getDatesUnavailList());
-						okToSave = true;
-						dialogResponse = ev;
-						setVisible(false);
-						dispose();
-					}
-
-				} catch (IllegalArgumentException ev) {
-					JOptionPane.showMessageDialog(okButton, "TBD exception message");
+				// Make sure that person name has been entered
+				if (personName.getText().equals("")) {
+					JOptionPane.showMessageDialog(okButton, "Person's name field is required");
+				} else {
+					PersonEvent ev = new PersonEvent(this, personName.getText().trim(), phone.getText().trim(),
+							email.getText().trim(), leaderButton.isSelected() ? true : false, processNotesArea(),
+							assignedTaskChanges, null, datesUnavailable);
+					okToSave = true;
+					dialogResponse = ev;
+					setVisible(false);
+					dispose();
 				}
 			}
 		});
@@ -208,7 +209,7 @@ public class PersonDialog extends JDialog {
 		addRowToControlPanel(gc, phoneLabel, phone, gridY++);
 		addRowToControlPanel(gc, emailLabel, email, gridY++);
 		addRowToControlPanel(gc, staffLabel, staffPanel, gridY++);
-		addRowToControlPanel(gc, datesLabel, datePanel, gridY++);
+		addRowToControlPanel(gc, datesLabel, dateUnavailCombo, gridY++);
 		addRowToControlPanel(gc, singleTaskLabel, singleInstanceTaskCombo, gridY++);
 		addRowToControlPanel(gc, notesLabel, notesArea, gridY++);
 		addRowToControlPanel(gc, taskTreeScrollPane, assignedTasksScrollPane, gridY++);
@@ -216,6 +217,8 @@ public class PersonDialog extends JDialog {
 		// Buttons row
 		gc.gridy++;
 		gc.gridx = 0;
+		buttonsPanel.add(unavailDatesButton);
+		gc.gridx++;
 		buttonsPanel.add(okButton);
 		gc.gridx++;
 		buttonsPanel.add(cancelButton);
@@ -275,134 +278,24 @@ public class PersonDialog extends JDialog {
 		if (taskModel.getSize() > 0)
 			singleInstanceTaskCombo.setSelectedIndex(0);
 		singleInstanceTaskCombo.setBorder(BorderFactory.createEtchedBorder());
-		singleInstanceTaskCombo.setPreferredSize(new Dimension(TASK_COMBO_WIDTH, TASK_COMBO_HEIGHT));
+		singleInstanceTaskCombo.setPreferredSize(new Dimension(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT));
 	}
 
-	private void createDateSelectors() {
+	private void createUnavailDateCombo() {
+		DefaultComboBoxModel<String> dateModel = new DefaultComboBoxModel<String>();
+
 		for (DateRangeModel dateUnavail : datesUnavailable) {
 			if (Utilities.isDateInThePast(dateUnavail.getEndDate(), "Error parsing Unavailable Date(s)"))
+				// Date range has passed; remove from list
 				datesUnavailable.remove(dateUnavail);
-
-			else {
-				startDayPicker = createDatePicker(dateUnavail.getStartDate(), "start");
-				endDayPicker = createDatePicker(dateUnavail.getEndDate(), "end");
-			}
+			else
+				// Add date range to list
+				dateModel.addElement(dateUnavail.getStartDate() + "  to  " + dateUnavail.getEndDate());
 		}
 
-		if (datesUnavailable.size() == 0) {
-			startDayPicker = createDatePicker("", "start");
-			endDayPicker = createDatePicker("", "end");
-		}
-
-		datePanel.add(startDayPicker);
-		datePanel.add(new JLabel(" to "));
-		datePanel.add(endDayPicker);
-	}
-
-	private LinkedList<DateRangeModel> getDatesUnavailList() {
-		datesUnavailable.clear();
-
-		String start = startDayPicker.getJFormattedTextField().getText();
-		String end = endDayPicker.getJFormattedTextField().getText();
-
-		if (!start.equals("") && !end.equals("")) {
-			DateRangeModel dateRange = new DateRangeModel(start, end);
-			datesUnavailable.add(dateRange);
-		}
-		return datesUnavailable;
-	}
-
-	private JDatePickerImpl createDatePicker(String lastDate, String name) {
-		UtilDateModel dateModel = new UtilDateModel();
-		Properties prop = new Properties();
-		JDatePanelImpl datePanel;
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-
-		prop.put("text.today", "today");
-		prop.put("text.month", "month");
-		prop.put("text.year", "year");
-
-		datePanel = new JDatePanelImpl(dateModel, prop);
-		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
-
-		if (lastDate != null && !lastDate.equals("")) {
-			try {
-				// Initialize date picker using database date string
-				Date date = dateFormatter.parse(lastDate);
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(date);
-				datePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
-						cal.get(Calendar.DAY_OF_MONTH));
-
-				datePicker.getModel().setSelected(true);
-
-			} catch (ParseException ex) {
-				JOptionPane.showMessageDialog(this, "Invalid date, expecting MM/dd/yyyy", "Parsing Exception",
-						JOptionPane.WARNING_MESSAGE);
-			}
-		}
-
-		// Add action listener
-		datePicker.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String startText = startDayPicker.getJFormattedTextField().getText();
-				String endText = endDayPicker.getJFormattedTextField().getText();
-
-				// If end date is NULL, set it to start day
-				if (name.equals("start") && !startText.equals("")) {
-					if (endText.equals("")) {
-						endDayPicker = setDate(startText, endDayPicker);
-						endDayPicker.getJFormattedTextField().setText(startText);
-						endText = startText;
-					}
-					startDayPicker.getModel().setSelected(true);
-				}
-				// If start date is NULL, set it to end day
-				if (name.equals("end") && !endText.equals("")) {
-					if (startText.equals("")) {
-						startDayPicker = setDate(endText, startDayPicker);
-						startDayPicker.getJFormattedTextField().setText(endText);
-						startText = endText;
-					}
-					endDayPicker.getModel().setSelected(true);
-				}
-
-				if (!startText.equals("") && !endText.equals("")) {
-					// If end date is before start date, set to start date
-					try {
-						Date startDate = dateFormatter.parse(startText);
-						if (startDate.compareTo(dateFormatter.parse(endText)) > 0) {
-							endDayPicker.getJFormattedTextField().setText(startText);
-						}
-
-					} catch (ParseException ex) {
-						JOptionPane.showMessageDialog(null, "Unable to parse date.", "Parse Exception",
-								JOptionPane.WARNING_MESSAGE);
-						// e1.printStackTrace();
-					}
-				}
-			}
-		});
-
-		datePicker.setPreferredSize(new Dimension(150, 26));
-		datePicker.setName(name);
-		return datePicker;
-	}
-
-	private JDatePickerImpl setDate(String dateText, JDatePickerImpl datePicker) {
-		try {
-			SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-			Date date = dateFormatter.parse(dateText);
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date);
-			datePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
-					cal.get(Calendar.DAY_OF_MONTH));
-
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return datePicker;
+		dateUnavailCombo = new JComboBox<String>(dateModel);
+		dateUnavailCombo.setBorder(BorderFactory.createEtchedBorder());
+		dateUnavailCombo.setPreferredSize(new Dimension(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT));
 	}
 
 	private String processNotesArea() {
@@ -451,7 +344,7 @@ public class PersonDialog extends JDialog {
 
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, getDatesUnavailList());
+								lastAssignedTask, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -495,7 +388,7 @@ public class PersonDialog extends JDialog {
 
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, getDatesUnavailList());
+								lastAssignedTask, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
