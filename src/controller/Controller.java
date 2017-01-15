@@ -18,6 +18,7 @@ import model.DateRangeModel;
 import model.PersonByTaskModel;
 import model.PersonModel;
 import model.ProgramModel;
+import model.SingleInstanceTaskModel;
 import model.TaskModel;
 
 public class Controller {
@@ -113,8 +114,12 @@ public class Controller {
 	 * public List<TaskModel> getAllTasks() { return db.getAllTasks(); }
 	 */
 
-	public JList<TaskModel> getAllTasks(String programName) {
-		return db.getAllTasks(programName);
+	public JList<TaskModel> getAllTasksByProgram(String programName) {
+		return db.getAllTasksByProgram(programName);
+	}
+
+	public JList<TaskModel> getAllTasks() {
+		return db.getAllTasks();
 	}
 
 	public JList<String> getAllLocationsAsString() {
@@ -139,13 +144,14 @@ public class Controller {
 	 * ------- Persons -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<DateRangeModel> datesUnavailable) {
-		db.addPerson(name, phone, email, leader, notes, assignedTasks, datesUnavailable);
+			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraDates,
+			LinkedList<DateRangeModel> datesUnavailable) {
+		db.addPerson(name, phone, email, leader, notes, assignedTasks, extraDates, datesUnavailable);
 	}
 
 	public void updatePerson(PersonEvent ev) {
 		db.updatePerson(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
-				ev.getAssignedTaskChanges(), ev.getDatesUnavailable());
+				ev.getAssignedTaskChanges(), ev.getExtraDates(), ev.getDatesUnavailable());
 	}
 
 	public void addSingleInstanceTask(JList<String> personList, Calendar day, String taskName, int color) {
@@ -157,9 +163,9 @@ public class Controller {
 	public void renamePerson(String oldName, String newName) {
 		db.renamePerson(oldName, newName);
 	}
-	
-	public void markPersonUnavail (String personName, Calendar today) {
-		db.markPersonUnavail (personName, today);
+
+	public void markPersonUnavail(String personName, Calendar today) {
+		db.markPersonUnavail(personName, today);
 	}
 
 	public PersonModel getPersonByName(String name) {
@@ -173,7 +179,7 @@ public class Controller {
 	public JList<String> getAvailPersonsAsString(Calendar today) {
 		return db.getAvailPersonsAsString(today);
 	}
-	
+
 	public JList<PersonModel> getAllPersons() {
 		return db.getAllPersons();
 	}
@@ -181,7 +187,7 @@ public class Controller {
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		return db.getPersonsByDayByTask(calendar, task);
 	}
-	
+
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
 		return db.getPersonsByDayByTime(calendar);
 	}

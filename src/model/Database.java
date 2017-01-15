@@ -333,15 +333,25 @@ public class Database {
 	 * Collections.unmodifiableList(taskList); }
 	 */
 
-	public JList<TaskModel> getAllTasks(String programName) {
+	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
-		JList<TaskModel> taskList = new JList<TaskModel>(taskModel);
 		ProgramModel program = getProgramByName(programName);
 
 		for (TaskModel t : program.getTaskList()) {
 			taskModel.addElement(t);
 		}
-		return taskList;
+		return new JList<TaskModel>(taskModel);
+	}
+
+	public JList<TaskModel> getAllTasks() {
+		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
+
+		for (ProgramModel p : programList) {
+			for (TaskModel t : p.getTaskList()) {
+				taskModel.addElement(t);
+			}
+		}
+		return (new JList<TaskModel>(taskModel));
 	}
 
 	public JList<String> getAllLocationsAsString() {
@@ -349,7 +359,7 @@ public class Database {
 		JList<String> locationList = new JList<String>(locationModel);
 
 		for (ProgramModel prog : programList) {
-			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
+			JList<TaskModel> taskList = getAllTasksByProgram(prog.getProgramName());
 			for (int i = 0; i < taskList.getModel().getSize(); i++) {
 				// Check whether already in list before adding
 				String loc = taskList.getModel().getElementAt(i).getLocation();
@@ -366,7 +376,7 @@ public class Database {
 		ArrayList<Time> timeArray = new ArrayList<Time>();
 
 		for (ProgramModel prog : programList) {
-			JList<TaskModel> taskList = getAllTasks(prog.getProgramName());
+			JList<TaskModel> taskList = getAllTasksByProgram(prog.getProgramName());
 			for (int i = 0; i < taskList.getModel().getSize(); i++) {
 				// Check whether already in list before adding
 				Time time = taskList.getModel().getElementAt(i).getTime();
@@ -556,15 +566,15 @@ public class Database {
 	 * ------- Person data -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<DateRangeModel> datesUnavailable) {
-		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable,
-				new LinkedList<SingleInstanceTaskModel>()));
+			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraTasks,
+			LinkedList<DateRangeModel> datesUnavailable) {
+		personList.add(new PersonModel(name, phone, email, leader, notes, assignedTasks, datesUnavailable, extraTasks));
 		Collections.sort(personList);
 	}
 
 	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
 			String personNotes, LinkedList<AssignedTasksModel> personAssignedTasks,
-			LinkedList<DateRangeModel> personDatesUnavailable) {
+			LinkedList<SingleInstanceTaskModel> extraTasks, LinkedList<DateRangeModel> personDatesUnavailable) {
 
 		int personIdx = getPersonIndexByName(personName);
 		if (personIdx != -1) {
@@ -584,13 +594,25 @@ public class Database {
 					thisPerson.getAssignedTasks().add(assignedTask);
 			}
 
-			// Now update remaining fields (except one-time assignments)
+			// Add extraTasks (list only contains additions for now!!)
+			for (SingleInstanceTaskModel singleTasks : extraTasks) {
+				thisPerson.getSingleInstanceTasks().add(new SingleInstanceTaskModel(singleTasks.getTaskName(),
+						singleTasks.getTaskDate(), singleTasks.getColor()));
+			}
+			Collections.sort(thisPerson.getSingleInstanceTasks());
+
+			// For now, dates unavailable is complete list so clear and add all
+			thisPerson.getDatesUnavailable().clear();
+			for (DateRangeModel date : personDatesUnavailable) {
+				thisPerson.getDatesUnavailable().add(date);
+			}
+
+			// Now update remaining fields
 			thisPerson.setName(personName);
 			thisPerson.setPhone(personPhone);
 			thisPerson.setEmail(personEmail);
 			thisPerson.setLeader(personIsLeader);
 			thisPerson.setNotes(personNotes);
-			thisPerson.setDatesUnavailable(personDatesUnavailable);
 
 		} else
 			JOptionPane.showMessageDialog(null, "Person '" + personName + "' not found!");

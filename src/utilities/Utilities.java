@@ -72,7 +72,8 @@ public class Utilities {
 	}
 
 	public static String getDisplayDate(Calendar calendar) {
-		return ((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
+		String month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
+		return (month + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
 				+ calendar.get(Calendar.YEAR));
 	}
 
@@ -90,10 +91,13 @@ public class Utilities {
 			return true;
 		}
 
-		// Can't use compareTo since today will include non-zero time
-		if (today.get(Calendar.YEAR) >= date.get(Calendar.YEAR) &&
-				today.get(Calendar.MONTH) >= date.get(Calendar.MONTH) &&
-				today.get(Calendar.DAY_OF_MONTH) > date.get(Calendar.DAY_OF_MONTH))
+		// Ignore time
+		today.set(Calendar.HOUR_OF_DAY, 0);
+		today.set(Calendar.MINUTE, 0);
+		today.set(Calendar.SECOND, 0);
+		today.set(Calendar.MILLISECOND, 0);
+		
+		if (today.compareTo(date) > 0)
 			return true;
 		else
 			return false;

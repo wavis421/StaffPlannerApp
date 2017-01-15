@@ -401,7 +401,7 @@ public class MainFrame extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				taskEditMenu.removeAll();
 
-				JList<TaskModel> taskList = controller.getAllTasks(selectedProgramName);
+				JList<TaskModel> taskList = controller.getAllTasksByProgram(selectedProgramName);
 				taskList.setCellRenderer(new TaskRenderer());
 
 				for (int i = 0; i < taskList.getModel().getSize(); i++) {
@@ -426,7 +426,7 @@ public class MainFrame extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				taskCloneMenu.removeAll();
 
-				JList<TaskModel> taskList = controller.getAllTasks(selectedProgramName);
+				JList<TaskModel> taskList = controller.getAllTasksByProgram(selectedProgramName);
 				taskList.setCellRenderer(new TaskRenderer());
 
 				for (int i = 0; i < taskList.getModel().getSize(); i++) {
@@ -447,7 +447,7 @@ public class MainFrame extends JFrame {
 		});
 		taskViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JList<TaskModel> allTasks = controller.getAllTasks(selectedProgramName);
+				JList<TaskModel> allTasks = controller.getAllTasksByProgram(selectedProgramName);
 				TaskTableDialog ev = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
 						allTasks);
 				processViewAllTasksDialog(ev.getDialogResponse());
@@ -466,7 +466,7 @@ public class MainFrame extends JFrame {
 			}
 
 			// Refresh data and re-open Task Table dialog
-			JList<TaskModel> allTasks = controller.getAllTasks(selectedProgramName);
+			JList<TaskModel> allTasks = controller.getAllTasksByProgram(selectedProgramName);
 			TaskTableDialog ev = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName, allTasks);
 			processViewAllTasksDialog(ev.getDialogResponse());
 		}
@@ -478,9 +478,9 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				LinkedList<AssignedTasksModel> assignedList = new LinkedList<AssignedTasksModel>();
 				JTree taskTree = createTaskTree(assignedList);
-				PersonDialog personEvent = new PersonDialog(MainFrame.this,
+				PersonDialog ev = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
-				processAddPersonDialog(personEvent);
+				processAddPersonDialog(ev);
 			}
 		});
 		editPerson.addChangeListener(new ChangeListener() {
@@ -668,7 +668,7 @@ public class MainFrame extends JFrame {
 				// Do not save; go back and edit person
 				LinkedList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTaskChanges();
 				JTree taskTree = createTaskTree(assignedTaskList);
-				personEvent = new PersonDialog(MainFrame.this,
+				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(), assignedTaskList,
 								dialogResponse.getDatesUnavailable(), null),
@@ -680,7 +680,8 @@ public class MainFrame extends JFrame {
 			} else {
 				// Add person to database
 				controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-						dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTaskChanges(),
+						dialogResponse.isLeader(), dialogResponse.getNotes(),
+						dialogResponse.getAssignedTaskChanges(), dialogResponse.getExtraDates(),
 						dialogResponse.getDatesUnavailable());
 				if (controller.getNumPersons() > 1)
 					filterByPersonMenuItem.setEnabled(true);
@@ -701,7 +702,7 @@ public class MainFrame extends JFrame {
 				LinkedList<AssignedTasksModel> assignedListMerged = mergeAssignedTaskList(assignedTasks,
 						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedListMerged);
-				personEvent = new PersonDialog(MainFrame.this,
+				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						new PersonModel(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
 								dialogResponse.isLeader(), dialogResponse.getNotes(),
 								dialogResponse.getAssignedTaskChanges(), dialogResponse.getDatesUnavailable(),
@@ -727,8 +728,9 @@ public class MainFrame extends JFrame {
 		else {
 			LinkedList<AssignedTasksModel> assignedList = person.getAssignedTasks();
 			JTree taskTree = createTaskTree(assignedList);
-			PersonDialog personEvent = new PersonDialog(MainFrame.this, person, new LinkedList<AssignedTasksModel>(),
-					createAssignedTasksTree(null, taskTree, assignedList), taskTree);
+			PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(), person,
+					new LinkedList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
+					taskTree);
 			processEditPersonDialog(personEvent, origName);
 		}
 	}
@@ -843,7 +845,7 @@ public class MainFrame extends JFrame {
 				editPerson(event.getPersonName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
-			
+
 			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
 				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
@@ -873,7 +875,7 @@ public class MainFrame extends JFrame {
 				editPerson(event.getPersonName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
-			
+
 			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
 				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
@@ -905,7 +907,7 @@ public class MainFrame extends JFrame {
 				editPerson(event.getPersonName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
-			
+
 			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
 				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
@@ -934,7 +936,7 @@ public class MainFrame extends JFrame {
 				editPerson(event.getPersonName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
-			
+
 			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
 				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
@@ -1006,7 +1008,7 @@ public class MainFrame extends JFrame {
 			DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(p);
 			rootNode.add(pNode);
 
-			JList<TaskModel> taskList = controller.getAllTasks(p.getProgramName());
+			JList<TaskModel> taskList = controller.getAllTasksByProgram(p.getProgramName());
 
 			// For each task in this program, add to program only if not yet
 			// assigned

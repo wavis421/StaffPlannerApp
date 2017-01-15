@@ -16,18 +16,21 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
+import org.jdatepicker.impl.UtilCalendarModel;
 
-import model.DateRangeModel;
+import model.TaskModel;
 
 public class DateRangeDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
@@ -37,28 +40,44 @@ public class DateRangeDialog extends JDialog {
 	private JDatePickerImpl startDatePicker;
 	private JDatePickerImpl endDatePicker;
 	private JPanel datePanel = new JPanel();
+	private String dateLabelText;
+	private JList<TaskModel> allTasks;
+	private JComboBox<TaskModel> taskCombo;
 
 	// Dialog panels
 	private JPanel controlsPanel;
 	private JPanel buttonsPanel;
-	private DateRangeModel dialogResponse;
+	private DateRangeEvent dialogResponse;
 
-	public DateRangeDialog(JDialog parent) {
-		super(parent, "Select unavailable date range...", true);
+	public DateRangeDialog(JDialog parent, String title, String dateLabel, JList<TaskModel> allTasks) {
+		super(parent, title, true);
+		this.dateLabelText = dateLabel;
+		this.allTasks = allTasks;
 		setupDialog();
 	}
 
-	public DateRangeModel getDialogResponse() {
+	public DateRangeEvent getDialogResponse() {
 		return dialogResponse;
 	}
 
 	private void setupDialog() {
 		startDatePicker = createDatePicker("start");
 		endDatePicker = createDatePicker("end");
-
 		datePanel.add(startDatePicker);
-		datePanel.add(new JLabel(" to "));
-		datePanel.add(endDatePicker);
+
+		if (allTasks == null) {
+			// When all tasks null, then require a date range
+			datePanel.add(new JLabel(" to "));
+			datePanel.add(endDatePicker);
+
+		} else {
+			// Add task combo box
+			DefaultComboBoxModel<String> taskModel = new DefaultComboBoxModel<String>();
+			for (int i = 0; i < allTasks.getModel().getSize(); i++)
+				taskModel.addElement(allTasks.getModel().getElementAt(i).toString());
+			taskCombo = new JComboBox(taskModel);
+			taskCombo.setEditable(false);
+		}
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -68,9 +87,28 @@ public class DateRangeDialog extends JDialog {
 					String endDate = endDatePicker.getJFormattedTextField().getText();
 
 					if (!startDate.equals("") && !endDate.equals("")) {
-						dialogResponse = new DateRangeModel(startDate, endDate);
-						setVisible(false);
-						dispose();
+						if (taskCombo == null) {
+							// No task in dialog
+							dialogResponse = new DateRangeEvent(DateRangeDialog.this, null,
+									(Calendar) startDatePicker.getModel().getValue(),
+									(Calendar) endDatePicker.getModel().getValue());
+							setVisible(false);
+							dispose();
+
+						} else if (taskCombo.getSelectedItem() == null) {
+							// Expecting a task, none selected
+							JOptionPane.showMessageDialog(DateRangeDialog.this,
+									"Please select which task to assign a substitute");
+
+						} else {
+							// Task selected
+							int idx = taskCombo.getSelectedIndex();
+							dialogResponse = new DateRangeEvent(DateRangeDialog.this,
+									(TaskModel) allTasks.getModel().getElementAt(idx),
+									(Calendar) startDatePicker.getModel().getValue(), null);
+							setVisible(false);
+							dispose();
+						}
 					}
 
 				} catch (IllegalArgumentException ev) {
@@ -80,16 +118,18 @@ public class DateRangeDialog extends JDialog {
 			}
 		});
 		cancelButton.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				dialogResponse = null;
 				setVisible(false);
 				dispose();
 			}
+
 		});
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setLayout();
-		setSize(550, 180);
+		setSize(560, 180);
 		setVisible(true);
 	}
 
@@ -112,7 +152,9 @@ public class DateRangeDialog extends JDialog {
 		gc.fill = GridBagConstraints.NONE;
 
 		// Add unavailable date row
-		addRowToControlPanel(gc, new JLabel("Dates Unavailable: "), datePanel, gridY++);
+		if (taskCombo != null)
+			addRowToControlPanel(gc, new JLabel("Select task: "), taskCombo, gridY++);
+		addRowToControlPanel(gc, new JLabel(dateLabelText), datePanel, gridY++);
 
 		// Buttons row
 		gc.gridy++;
@@ -145,17 +187,17 @@ public class DateRangeDialog extends JDialog {
 	}
 
 	private JDatePickerImpl createDatePicker(String name) {
-		UtilDateModel dateModel = new UtilDateModel();
+		UtilCalendarModel dateModel = new UtilCalendarModel();
 		Properties prop = new Properties();
-		JDatePanelImpl datePanel;
+		JDatePanelImpl datePickerPanel;
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 		prop.put("text.today", "today");
 		prop.put("text.month", "month");
 		prop.put("text.year", "year");
 
-		datePanel = new JDatePanelImpl(dateModel, prop);
-		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+		datePickerPanel = new JDatePanelImpl(dateModel, prop);
+		JDatePickerImpl datePicker = new JDatePickerImpl(datePickerPanel, new DateLabelFormatter());
 
 		// Add action listener
 		datePicker.addActionListener(new ActionListener() {
@@ -166,19 +208,21 @@ public class DateRangeDialog extends JDialog {
 				// If end date is NULL, set it to start day
 				if (name.equals("start") && !startText.equals("")) {
 					if (endText.equals("")) {
-						endDatePicker = setDate(startText, endDatePicker);
+						endDatePicker = setDate(startDatePicker, endDatePicker);
 						endDatePicker.getJFormattedTextField().setText(startText);
 						endText = startText;
 					}
 					startDatePicker.getModel().setSelected(true);
+					endDatePicker.getModel().setSelected(true);
 				}
 				// If start date is NULL, set it to end day
 				if (name.equals("end") && !endText.equals("")) {
 					if (startText.equals("")) {
-						startDatePicker = setDate(endText, startDatePicker);
+						startDatePicker = setDate(endDatePicker, startDatePicker);
 						startDatePicker.getJFormattedTextField().setText(endText);
 						startText = endText;
 					}
+					startDatePicker.getModel().setSelected(true);
 					endDatePicker.getModel().setSelected(true);
 				}
 
@@ -203,19 +247,11 @@ public class DateRangeDialog extends JDialog {
 		return datePicker;
 	}
 
-	private JDatePickerImpl setDate(String dateText, JDatePickerImpl datePicker) {
-		try {
-			SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-			Date date = dateFormatter.parse(dateText);
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date);
-			datePicker.getModel().setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
-					cal.get(Calendar.DAY_OF_MONTH));
+	private JDatePickerImpl setDate(JDatePickerImpl datePickerFrom, JDatePickerImpl datePickerTo) {
+		Calendar calFrom = (Calendar) datePickerFrom.getModel().getValue();
+		datePickerTo.getModel().setDate(calFrom.get(Calendar.YEAR), calFrom.get(Calendar.MONTH),
+				calFrom.get(Calendar.DAY_OF_MONTH));
 
-		} catch (ParseException e) {
-			JOptionPane.showMessageDialog(null, "Error formatting date: " + e.getMessage(), "Formatting Exception",
-					JOptionPane.WARNING_MESSAGE);
-		}
-		return datePicker;
+		return datePickerTo;
 	}
 }

@@ -21,6 +21,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -51,6 +52,7 @@ public class PersonDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
 	private JButton unavailDatesButton = new JButton("Unavail Dates");
+	private JButton extraDatesButton = new JButton("Extra Dates");
 
 	// Private instance variables
 	private JTextField personName = new JTextField(TEXT_FIELD_SIZE);
@@ -60,13 +62,17 @@ public class PersonDialog extends JDialog {
 	private JRadioButton volunteerButton = new JRadioButton("Volunteer");
 	private ButtonGroup staffGroup = new ButtonGroup();
 	private JPanel staffPanel = new JPanel();
-	private JComboBox dateUnavailCombo;
+	private JComboBox<String> dateUnavailCombo;
 	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
 	private LinkedList<AssignedTasksModel> assignedTaskChanges;
 	private LinkedList<DateRangeModel> datesUnavailable;
 	private JComboBox<String> singleInstanceTaskCombo;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
+	private JList<TaskModel> allTasks;
+
+	private static boolean okToSave;
+	private static LinkedList<SingleInstanceTaskModel> newSingleInstanceTasks;
 
 	// Labels
 	private JLabel nameLabel = new JLabel("Person's name: ");
@@ -81,15 +87,20 @@ public class PersonDialog extends JDialog {
 	private JPanel controlsPanel;
 	private JPanel buttonsPanel;
 	private PersonEvent dialogResponse;
-	private boolean okToSave = false;
 
-	public PersonDialog(JFrame parent, JTree assignedTasksTree, JTree taskTree) {
+	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, JTree assignedTasksTree, JTree taskTree) {
 		// super(parent, "Add person...", true);
 		super(parent, "Add person...");
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
+
+		this.allTasks = allTasks;
 		this.leaderButton.setSelected(true);
 		this.assignedTaskChanges = new LinkedList<AssignedTasksModel>();
+		if (newSingleInstanceTasks != null)
+			newSingleInstanceTasks.clear();
+		else
+			newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
 		this.datesUnavailable = new LinkedList<DateRangeModel>();
 
 		createSingleInstanceTaskCombo(null);
@@ -98,8 +109,8 @@ public class PersonDialog extends JDialog {
 	}
 
 	// Constructor for updating existing person, PersonModel contains values
-	public PersonDialog(JFrame parent, PersonModel person, LinkedList<AssignedTasksModel> assignedTaskChanges,
-			JTree assignedTasksTree, JTree taskTree) {
+	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, PersonModel person,
+			LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
@@ -108,12 +119,24 @@ public class PersonDialog extends JDialog {
 		this.phone.setText(person.getPhone());
 		this.email.setText(person.getEmail());
 		this.notesArea.setText(person.getNotes());
+
 		if (person.isLeader())
 			this.leaderButton.setSelected(true);
 		else
 			this.volunteerButton.setSelected(true);
 		this.assignedTaskChanges = assignedTaskChanges;
+
+		if (okToSave) {
+			// This list was processed and can be cleared
+			newSingleInstanceTasks.clear();
+			okToSave = false;
+		} else if (newSingleInstanceTasks == null) {
+			// Create list first time after startup
+			newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+		}
+
 		this.datesUnavailable = (LinkedList<DateRangeModel>) person.getDatesUnavailable().clone();
+		this.allTasks = allTasks;
 
 		createSingleInstanceTaskCombo(person.getSingleInstanceTasks());
 
@@ -131,7 +154,6 @@ public class PersonDialog extends JDialog {
 	private void setupPersonDialog() {
 		createStaffSelector();
 		createUnavailDateCombo();
-		singleInstanceTaskCombo.setEditable(false);
 
 		// Force the text area not to expand when user types more than 3 lines!!
 		notesArea.setBorder(BorderFactory.createEtchedBorder());
@@ -143,15 +165,30 @@ public class PersonDialog extends JDialog {
 
 		unavailDatesButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DateRangeDialog ev = new DateRangeDialog(PersonDialog.this);
-				DateRangeModel dialogResponse = ev.getDialogResponse();
+				DateRangeDialog ev = new DateRangeDialog(PersonDialog.this, "Select unavailable date range...",
+						"Dates Unavailable: ", null);
+				DateRangeEvent dialogResponse = ev.getDialogResponse();
 				if (dialogResponse != null) {
-					if (!dialogResponse.getStartDate().equals("") && !dialogResponse.getEndDate().equals("")) {
-						// Date range valid. Add to Linked List and Combo Box.
-						datesUnavailable.add(dialogResponse);
-						DefaultComboBoxModel dateModel = (DefaultComboBoxModel) dateUnavailCombo.getModel();
-						dateModel.addElement(dialogResponse.getStartDate() + "  to  " + dialogResponse.getEndDate());
-					}
+					// Date range valid. Add to Linked List and Combo Box.
+					datesUnavailable.add(dialogResponse.getDateRange());
+					DefaultComboBoxModel<String> dateModel = (DefaultComboBoxModel<String>) dateUnavailCombo.getModel();
+					dateModel.addElement(dialogResponse.toString());
+				}
+			}
+		});
+		extraDatesButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DateRangeDialog ev = new DateRangeDialog(PersonDialog.this, "Select extra dates...",
+						"Select Date: ", allTasks);
+				DateRangeEvent dialogResponse = ev.getDialogResponse();
+				if (dialogResponse != null && dialogResponse.getTask() != null) {
+					// Date and task valid. Add single instance task.
+					newSingleInstanceTasks.add(new SingleInstanceTaskModel(dialogResponse.getTask().getTaskName(),
+							dialogResponse.getStartDate(), dialogResponse.getTask().getColor()));
+					DefaultComboBoxModel<String> extraDateModel = (DefaultComboBoxModel<String>) singleInstanceTaskCombo
+							.getModel();
+					extraDateModel.addElement(dialogResponse.getTask().getTaskName() + " on "
+							+ Utilities.getDisplayDate(dialogResponse.getStartDate()));
 				}
 			}
 		});
@@ -163,7 +200,7 @@ public class PersonDialog extends JDialog {
 				} else {
 					PersonEvent ev = new PersonEvent(this, personName.getText().trim(), phone.getText().trim(),
 							email.getText().trim(), leaderButton.isSelected() ? true : false, processNotesArea(),
-							assignedTaskChanges, null, datesUnavailable);
+							assignedTaskChanges, null, newSingleInstanceTasks, datesUnavailable);
 					okToSave = true;
 					dialogResponse = ev;
 					setVisible(false);
@@ -173,6 +210,7 @@ public class PersonDialog extends JDialog {
 		});
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				okToSave = true;
 				dialogResponse = null;
 				setVisible(false);
 				dispose();
@@ -218,6 +256,8 @@ public class PersonDialog extends JDialog {
 		gc.gridy++;
 		gc.gridx = 0;
 		buttonsPanel.add(unavailDatesButton);
+		gc.gridx++;
+		buttonsPanel.add(extraDatesButton);
 		gc.gridx++;
 		buttonsPanel.add(okButton);
 		gc.gridx++;
@@ -273,10 +313,14 @@ public class PersonDialog extends JDialog {
 				}
 			}
 		}
+		if (newSingleInstanceTasks != null) {
+			for (SingleInstanceTaskModel task : newSingleInstanceTasks) {
+				taskModel.addElement(task.getTaskName() + " on " + Utilities.getDisplayDate(task.getTaskDate()));
+			}
+		}
 
 		singleInstanceTaskCombo = new JComboBox<String>(taskModel);
-		if (taskModel.getSize() > 0)
-			singleInstanceTaskCombo.setSelectedIndex(0);
+		singleInstanceTaskCombo.setEditable(false);
 		singleInstanceTaskCombo.setBorder(BorderFactory.createEtchedBorder());
 		singleInstanceTaskCombo.setPreferredSize(new Dimension(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT));
 	}
@@ -294,6 +338,7 @@ public class PersonDialog extends JDialog {
 		}
 
 		dateUnavailCombo = new JComboBox<String>(dateModel);
+		dateUnavailCombo.setEditable(false);
 		dateUnavailCombo.setBorder(BorderFactory.createEtchedBorder());
 		dateUnavailCombo.setPreferredSize(new Dimension(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT));
 	}
@@ -344,7 +389,7 @@ public class PersonDialog extends JDialog {
 
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, datesUnavailable);
+								lastAssignedTask, newSingleInstanceTasks, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -388,7 +433,7 @@ public class PersonDialog extends JDialog {
 
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, datesUnavailable);
+								lastAssignedTask, newSingleInstanceTasks, datesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
