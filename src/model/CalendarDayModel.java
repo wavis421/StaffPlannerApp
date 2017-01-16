@@ -9,14 +9,16 @@ public class CalendarDayModel implements Serializable, Comparable<CalendarDayMod
 	private static final long serialVersionUID = 12340002L;
 	private TaskModel task;
 	private int personCount;
+	private int leaderCount;
 	private int textColor;
 	private Calendar floaterTime;
 	private String floaterTaskName;
 
-	public CalendarDayModel(TaskModel task, int personCount, int textColor, Calendar floaterTime,
+	public CalendarDayModel(TaskModel task, int personCount, int leaderCount, int textColor, Calendar floaterTime,
 			String floaterTaskName) {
 		this.task = task;
 		this.personCount = personCount;
+		this.leaderCount = leaderCount;
 		this.textColor = textColor;
 		this.floaterTime = floaterTime;
 		this.floaterTaskName = floaterTaskName;
@@ -35,6 +37,10 @@ public class CalendarDayModel implements Serializable, Comparable<CalendarDayMod
 
 	public int getPersonCount() {
 		return personCount;
+	}
+
+	public int getLeaderCount() {
+		return leaderCount;
 	}
 
 	public int getTextColor() {

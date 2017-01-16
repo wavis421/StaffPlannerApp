@@ -216,8 +216,10 @@ public class Database {
 		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
 		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-			if (thisDaysTasks.get(taskIdx).getPersonCount() >= thisDaysTasks.get(taskIdx).getTask()
-					.getTotalPersonsReqd()) {
+			if ((thisDaysTasks.get(taskIdx).getPersonCount() >= thisDaysTasks.get(taskIdx).getTask()
+					.getTotalPersonsReqd())
+					&& (thisDaysTasks.get(taskIdx).getLeaderCount() >= thisDaysTasks.get(taskIdx).getTask()
+							.getNumLeadersReqd())) {
 				thisDaysTasks.remove(taskIdx);
 				taskIdx--;
 			}
@@ -264,8 +266,8 @@ public class Database {
 
 			for (TaskModel task : prog.getTaskList()) {
 				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
-					thisDaysTasks.add(new CalendarDayModel(task,
-							getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx),
+					int count = getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx);
+					thisDaysTasks.add(new CalendarDayModel(task, count & 0xFFFF, (count >> 16) & 0xFFFF,
 							task.getColor(), null, null));
 				}
 			}
@@ -286,7 +288,7 @@ public class Database {
 			// Check if person is a floater (not associated with task).
 			for (SingleInstanceTaskModel task : person.getSingleInstanceTasks()) {
 				if (checkSingleInstanceTaskMatch(task, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-					thisDaysTasks.add(new CalendarDayModel(null, 0, task.getColor(), task.getTaskDate(), "Floater"));
+					thisDaysTasks.add(new CalendarDayModel(null, 0, 0, task.getColor(), task.getTaskDate(), "Floater"));
 				}
 			}
 		}
@@ -482,15 +484,19 @@ public class Database {
 
 	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
 		JList<PersonModel> persons = getAllPersons();
-		int count = 0;
+		short personCount = 0;
+		short leaderCount = 0;
 
 		for (int idx = 0; idx < persons.getModel().getSize(); idx++) {
 			PersonModel person = persons.getModel().getElementAt(idx);
 			// -1 = no match, 0 = assigned task, 1 = single instance task
-			if (checkPersonMatchForTaskByDay(person, task.getTaskName(), today, dayOfWeekIdx, dowInMonthIdx) >= 0)
-				count++;
+			if (checkPersonMatchForTaskByDay(person, task.getTaskName(), today, dayOfWeekIdx, dowInMonthIdx) >= 0) {
+				personCount++;
+				if (person.isLeader())
+					leaderCount++;
+			}
 		}
-		return count;
+		return (personCount | (leaderCount << 16));
 	}
 
 	private Date getDay(Calendar calendar) {
