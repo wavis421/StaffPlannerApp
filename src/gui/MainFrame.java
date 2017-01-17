@@ -448,14 +448,16 @@ public class MainFrame extends JFrame {
 		taskViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JList<TaskModel> allTasks = controller.getAllTasksByProgram(selectedProgramName);
-				TaskTableDialog ev = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
+				TaskTableDialog taskEvent = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
 						allTasks);
-				processViewAllTasksDialog(ev.getDialogResponse());
+				do {
+					taskEvent = processViewAllTasksDialog(taskEvent.getDialogResponse());
+				} while (taskEvent != null);
 			}
 		});
 	}
 
-	private void processViewAllTasksDialog(TaskTableEvent event) {
+	private TaskTableDialog processViewAllTasksDialog(TaskTableEvent event) {
 		if (event != null && event.getButtonId() != TaskTableDialog.getCloseButton()) {
 			if (event.getButtonId() == TaskTableDialog.getAddTaskButton()) {
 				createTask();
@@ -468,29 +470,33 @@ public class MainFrame extends JFrame {
 			// Refresh data and re-open Task Table dialog
 			JList<TaskModel> allTasks = controller.getAllTasksByProgram(selectedProgramName);
 			TaskTableDialog ev = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName, allTasks);
-			processViewAllTasksDialog(ev.getDialogResponse());
+			return (ev);
 		}
+		return null;
 	}
 
-	private void createPersonMenuListeners(JMenuItem addPerson, JMenu editPerson, JMenuItem viewAllPersons) {
+	private void createPersonMenuListeners(JMenuItem addPersonItem, JMenu editPersonMenu,
+			JMenuItem viewAllPersonsItem) {
 		// Set up listeners for PERSONS menu
-		addPerson.addActionListener(new ActionListener() {
+		addPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				LinkedList<AssignedTasksModel> assignedList = new LinkedList<AssignedTasksModel>();
 				JTree taskTree = createTaskTree(assignedList);
-				PersonDialog ev = new PersonDialog(MainFrame.this, controller.getAllTasks(),
+				PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
-				processAddPersonDialog(ev);
+				do {
+					personEvent = processAddPersonDialog(personEvent);
+				} while (personEvent != null);
 			}
 		});
-		editPerson.addChangeListener(new ChangeListener() {
+		editPersonMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				editPerson.removeAll();
+				editPersonMenu.removeAll();
 				JList<PersonModel> personList = controller.getAllPersons();
 
 				for (int i = 0; i < personList.getModel().getSize(); i++) {
 					JMenuItem personItem = new JMenuItem(personList.getModel().getElementAt(i).toString());
-					editPerson.add(personItem);
+					editPersonMenu.add(personItem);
 
 					personItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent ev) {
@@ -498,25 +504,27 @@ public class MainFrame extends JFrame {
 							editPerson(origName);
 
 							personList.removeAll();
-							editPerson.removeAll();
+							editPersonMenu.removeAll();
 						}
 					});
 				}
 			}
 		});
-		viewAllPersons.addActionListener(new ActionListener() {
+		viewAllPersonsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
 					LinkedList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster", false, null,
 							allPersons, "", null, null, null);
-					processViewAllPersonsDialog(ev.getDialogResponse());
+					do {
+						ev = processViewAllPersonsDialog(ev.getDialogResponse());
+					} while (ev != null);
 				}
 			}
 		});
 	}
 
-	private void processViewAllPersonsDialog(PersonTableEvent event) {
+	private PersonTableDialog processViewAllPersonsDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				// Edit person
@@ -528,8 +536,9 @@ public class MainFrame extends JFrame {
 			LinkedList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster", false, null, allPersons, "",
 					null, null, null);
-			processViewAllPersonsDialog(ev.getDialogResponse());
+			return ev;
 		}
+		return null;
 	}
 
 	private void createCalendarMenuListeners(JMenuItem filterNoneItem, JMenuItem filterByProgramItem,
@@ -597,34 +606,7 @@ public class MainFrame extends JFrame {
 
 	private void createTask() {
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, selectedProgramName);
-		processCreateTaskDialog(taskEvent);
-	}
-
-	private void createTaskRetry(TaskEvent ev) {
-		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev);
-		processCreateTaskDialog(taskEvent);
-	}
-
-	private void processCreateTaskDialog(TaskDialog taskEvent) {
-		TaskEvent dialogResponse = taskEvent.getDialogResponse();
-
-		if (dialogResponse != null) {
-			TaskModel task = controller.getTaskByName(dialogResponse.getProgramName(), dialogResponse.getTaskName());
-			if (task != null) {
-				// Task already exists!
-				int confirm = JOptionPane.showConfirmDialog(MainFrame.this,
-						"Task " + dialogResponse.getTaskName() + " already exists. Do you want to edit existing task?");
-				if (confirm == JOptionPane.OK_OPTION)
-					editTask(dialogResponse.getProgramName(), dialogResponse.getTaskName());
-				else if (confirm == JOptionPane.NO_OPTION)
-					createTaskRetry(dialogResponse);
-
-			} else {
-				// Add task and refresh calendar
-				controller.addTask(dialogResponse);
-				updateMonth((Calendar) calPanel.getCurrentCalendar());
-			}
-		}
+		processCreateTaskDialog(taskEvent, null);
 	}
 
 	private void editTask(String programName, String origTaskName) {
@@ -633,15 +615,7 @@ public class MainFrame extends JFrame {
 
 		TaskModel task = controller.getTaskByName(programName, origTaskName);
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, programName, task);
-		TaskEvent dialogResponse = taskEvent.getDialogResponse();
-
-		if (dialogResponse != null) {
-			// Update task list and refresh calendar
-			if (!origTaskName.equals(dialogResponse.getTaskName()))
-				controller.renameTask(programName, origTaskName, dialogResponse.getTaskName());
-			controller.updateTask(dialogResponse);
-			updateMonth((Calendar) calPanel.getCurrentCalendar());
-		}
+		processCreateTaskDialog(taskEvent, origTaskName);
 	}
 
 	private void cloneTask(TaskModel task) {
@@ -650,14 +624,57 @@ public class MainFrame extends JFrame {
 				task.getTime(), task.getColor());
 
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev);
-		processCreateTaskDialog(taskEvent);
+		processCreateTaskDialog(taskEvent, null);
 	}
 
-	private void processAddPersonDialog(PersonDialog personEvent) {
+	private void processCreateTaskDialog(TaskDialog taskEvent, String origTaskName) {
+		// Loop until user enters valid and unique task name OR cancels
+		while (taskEvent.getDialogResponse() != null) {
+			TaskEvent dialogResponse = taskEvent.getDialogResponse();
+			TaskModel task = controller.getTaskByName(dialogResponse.getProgramName(), dialogResponse.getTaskName());
+
+			if (task != null && (origTaskName == null || !origTaskName.equals(dialogResponse.getTaskName()))) {
+				// Task already exists!
+				int confirm = JOptionPane.showConfirmDialog(MainFrame.this,
+						"Task '" + dialogResponse.getTaskName() + "' already Exists.\n"
+								+ "Do you want to switch to editing " + dialogResponse.getTaskName() + "?");
+
+				if (confirm == JOptionPane.OK_OPTION) {
+					// Edit existing task with this name
+					origTaskName = dialogResponse.getTaskName();
+					taskEvent = new TaskDialog(MainFrame.this, dialogResponse.getProgramName(), task);
+
+				} else if (confirm == JOptionPane.NO_OPTION) {
+					// Re-try creating this task
+					taskEvent = new TaskDialog(MainFrame.this, dialogResponse);
+
+				} else { // Cancel
+					break;
+				}
+
+			} else if (origTaskName == null) {
+				// Add new task and refresh calendar
+				controller.addTask(dialogResponse);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+				break;
+
+			} else {
+				// Editing existing task, so update task and refresh calendar
+				if (!origTaskName.equals(dialogResponse.getTaskName()))
+					controller.renameTask(dialogResponse.getProgramName(), origTaskName, dialogResponse.getTaskName());
+
+				controller.updateTask(dialogResponse);
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+				break;
+			}
+		}
+	}
+
+	private PersonDialog processAddPersonDialog(PersonDialog personEvent) {
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
-		boolean okToSave = personEvent.getOkToSaveStatus();
 
 		if (dialogResponse != null) {
+			boolean okToSave = personEvent.getOkToSaveStatus();
 			PersonModel person = controller.getPersonByName(dialogResponse.getName());
 			if (!okToSave || person != null) {
 				if (okToSave)
@@ -675,27 +692,26 @@ public class MainFrame extends JFrame {
 						assignedTaskList,
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
-				processAddPersonDialog(personEvent);
+				return personEvent;
 
 			} else {
 				// Add person to database
 				controller.addPerson(dialogResponse.getName(), dialogResponse.getPhone(), dialogResponse.getEmail(),
-						dialogResponse.isLeader(), dialogResponse.getNotes(),
-						dialogResponse.getAssignedTaskChanges(), dialogResponse.getExtraDates(),
-						dialogResponse.getDatesUnavailable());
+						dialogResponse.isLeader(), dialogResponse.getNotes(), dialogResponse.getAssignedTaskChanges(),
+						dialogResponse.getExtraDates(), dialogResponse.getDatesUnavailable());
 				if (controller.getNumPersons() > 1)
 					filterByPersonMenuItem.setEnabled(true);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 		}
+		return null;
 	}
 
-	private void processEditPersonDialog(PersonDialog personEvent, String origName) {
+	private PersonDialog processEditPersonDialog(PersonDialog personEvent, String origName) {
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
-		boolean isOkToSave = personEvent.getOkToSaveStatus();
 
 		if (dialogResponse != null) {
-			if (!isOkToSave) {
+			if (!personEvent.getOkToSaveStatus()) { // is OK to save?
 				PersonModel thisPerson = controller.getPersonByName(origName);
 				LinkedList<AssignedTasksModel> assignedTasks = (LinkedList<AssignedTasksModel>) thisPerson
 						.getAssignedTasks().clone();
@@ -710,7 +726,7 @@ public class MainFrame extends JFrame {
 						dialogResponse.getAssignedTaskChanges(),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedListMerged),
 						taskTree);
-				processEditPersonDialog(personEvent, origName);
+				return personEvent;
 			} else {
 				// Update task list and refresh calendar
 				if (!origName.equals(dialogResponse.getName()))
@@ -719,6 +735,7 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 		}
+		return null;
 	}
 
 	private void editPerson(String origName) {
@@ -731,7 +748,9 @@ public class MainFrame extends JFrame {
 			PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(), person,
 					new LinkedList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
 					taskTree);
-			processEditPersonDialog(personEvent, origName);
+			do {
+				personEvent = processEditPersonDialog(personEvent, origName);
+			} while (personEvent != null);
 		}
 	}
 
@@ -774,7 +793,9 @@ public class MainFrame extends JFrame {
 							"Roster for " + selectedTask.getTaskName() + " on "
 									+ Utilities.getDisplayDate(selectedCalendar),
 							true, selectedTask.getTaskName(), personsToday, "Add sub", calendar, personsAvail, null);
-					processViewRosterByTaskDialog(ev.getDialogResponse());
+					do {
+						ev = processViewRosterByTaskDialog(ev.getDialogResponse());
+					} while (ev != null);
 				}
 			}
 		});
@@ -795,7 +816,9 @@ public class MainFrame extends JFrame {
 						"Roster for " + Utilities.getDisplayDate(selectedCalendar) + " at "
 								+ Utilities.formatTime(selectedCalendar),
 						true, null, personsByTime, "Add floater", calendar, personsAvail, timeList);
-				processViewRosterByTimeDialog(ev.getDialogResponse());
+				do {
+					ev = processViewRosterByTimeDialog(ev.getDialogResponse());
+				} while (ev != null);
 			}
 		});
 		viewRosterByLocationItem.addActionListener(new ActionListener() {
@@ -812,7 +835,9 @@ public class MainFrame extends JFrame {
 							"Roster at " + selectedTask.getLocation() + " for "
 									+ Utilities.getDisplayDate(selectedCalendar),
 							true, null, personsByLoc, "", calendar, personsAvail, null);
-					processViewRosterByLocationDialog(ev.getDialogResponse());
+					do {
+						ev = processViewRosterByLocationDialog(ev.getDialogResponse());
+					} while (ev != null);
 				}
 			}
 		});
@@ -827,13 +852,14 @@ public class MainFrame extends JFrame {
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Roster for " + Utilities.getDisplayDate(selectedCalendar), true, null, personsByTask,
 						"Add floater", calendar, personsAvail, timesToday);
-
-				processViewCompleteRosterDialog(ev.getDialogResponse());
+				do {
+					ev = processViewCompleteRosterDialog(ev.getDialogResponse());
+				} while (ev != null);
 			}
 		});
 	}
 
-	private void processViewRosterByTaskDialog(PersonTableEvent event) {
+	private PersonTableDialog processViewRosterByTaskDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				controller.addSingleInstanceTask(event.getPersonList(), selectedCalendar, selectedTask.getTaskName(),
@@ -860,11 +886,12 @@ public class MainFrame extends JFrame {
 					"Roster for " + selectedTask.getTaskName() + " on " + Utilities.getDisplayDate(selectedCalendar),
 					true, selectedTask.getTaskName(), personsToday, "Add sub", calendar, personsAvail, null);
 
-			processViewRosterByTaskDialog(ev.getDialogResponse());
+			return ev;
 		}
+		return null;
 	}
 
-	private void processViewRosterByTimeDialog(PersonTableEvent event) {
+	private PersonTableDialog processViewRosterByTimeDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				// Adding floater
@@ -897,11 +924,12 @@ public class MainFrame extends JFrame {
 							+ Utilities.formatTime(event.getCalendar()),
 					true, null, personsByTime, "Add floater", calendar, personsAvail, timeList);
 
-			processViewRosterByTimeDialog(ev.getDialogResponse());
+			return ev;
 		}
+		return null;
 	}
 
-	private void processViewRosterByLocationDialog(PersonTableEvent event) {
+	private PersonTableDialog processViewRosterByLocationDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				editPerson(event.getPersonName());
@@ -922,11 +950,12 @@ public class MainFrame extends JFrame {
 					"Roster at " + selectedTask.getLocation() + " for " + Utilities.getDisplayDate(selectedCalendar),
 					true, null, personsByLoc, "", calendar, null, null);
 
-			processViewRosterByLocationDialog(ev.getDialogResponse());
+			return ev;
 		}
+		return null;
 	}
 
-	private void processViewCompleteRosterDialog(PersonTableEvent event) {
+	private PersonTableDialog processViewCompleteRosterDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				controller.addSingleInstanceTask(event.getPersonList(), event.getCalendar(), "", event.getColor());
@@ -952,8 +981,9 @@ public class MainFrame extends JFrame {
 					"Roster for " + Utilities.getDisplayDate(selectedCalendar), true, null, personsToday, "Add floater",
 					calendar, personsAvail, timesToday);
 
-			processViewCompleteRosterDialog(ev.getDialogResponse());
+			return ev;
 		}
+		return null;
 	}
 
 	private void updateMonth(Calendar calendar) {

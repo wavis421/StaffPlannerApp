@@ -4,7 +4,6 @@ import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -15,6 +14,7 @@ public class Utilities {
 	private static final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
+	/* <<<<<<<<<< Calendar & Time Utilities >>>>>>>>>> */
 	public static String formatTime(Time time) {
 		// Set time and convert to String
 		Calendar cal = Calendar.getInstance();
@@ -73,8 +73,7 @@ public class Utilities {
 
 	public static String getDisplayDate(Calendar calendar) {
 		String month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
-		return (month + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/"
-				+ calendar.get(Calendar.YEAR));
+		return (month + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR));
 	}
 
 	public static boolean isDateInThePast(String dateString, String errorString) {
@@ -83,10 +82,9 @@ public class Utilities {
 
 		try {
 			date.setTime(dateFormatter.parse(dateString));
-			
+
 		} catch (ParseException e) {
-			JOptionPane.showMessageDialog(null,
-					"Unable to parse date '" + dateString + "': " + e.getMessage(),
+			JOptionPane.showMessageDialog(null, "Unable to parse date '" + dateString + "': " + e.getMessage(),
 					errorString, JOptionPane.ERROR_MESSAGE);
 			return true;
 		}
@@ -96,13 +94,14 @@ public class Utilities {
 		today.set(Calendar.MINUTE, 0);
 		today.set(Calendar.SECOND, 0);
 		today.set(Calendar.MILLISECOND, 0);
-		
+
 		if (today.compareTo(date) > 0)
 			return true;
 		else
 			return false;
 	}
 
+	/* <<<<<<<<<< List Utilities >>>>>>>>>> */
 	public static boolean findStringMatchInJList(String findString, JList<String> list) {
 		for (int i = 0; i < list.getModel().getSize(); i++) {
 			if (findString == null || list.getModel().getElementAt(i) == null)
@@ -127,6 +126,7 @@ public class Utilities {
 		return newJList;
 	}
 
+	/* <<<<<<<<<< Memory Utilities >>>>>>>>>> */
 	public static void memoryCheck(String codeLocation) {
 		// Get the Java runtime
 		Runtime runtime = Runtime.getRuntime();
