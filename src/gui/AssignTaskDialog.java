@@ -183,25 +183,43 @@ public class AssignTaskDialog extends JDialog {
 
 	private void createDayOfWeekButtons(boolean[] currentDayOfWeek) {
 		String[] dayName = { "Sun", "Mon", "Tue", "Wed", "Th", "Fri", "Sat" };
+		int selectedCount = 0, selectedIdx = 0;
 
 		for (int i = 0; i < dayOfWeekButtons.length; i++) {
 			dayOfWeekButtons[i] = new JRadioButton(dayName[i]);
 			if (task.getDayOfWeek()[i] == false)
 				dayOfWeekButtons[i].setEnabled(false);
-			else
+			else {
+				selectedCount++;
+				selectedIdx = i;
 				dayOfWeekButtons[i].setSelected(currentDayOfWeek[i]);
+			}
+		}
+
+		// If only 1 button is enabled, then select it
+		if (selectedCount == 1) {
+			dayOfWeekButtons[selectedIdx].doClick();
 		}
 	}
 
 	private void createWeekOfMonthButtons(boolean[] currentWeekOfMonth) {
 		String[] weekName = { "1st", "2nd", "3rd", "4th", "5th" };
+		int selectedCount = 0, selectedIdx = 0;
 
 		for (int i = 0; i < weekOfMonthButtons.length; i++) {
 			weekOfMonthButtons[i] = new JRadioButton(weekName[i]);
 			if (task.getWeekOfMonth()[i] == false)
 				weekOfMonthButtons[i].setEnabled(false);
-			else
+			else {
+				selectedCount++;
+				selectedIdx = i;
 				weekOfMonthButtons[i].setSelected(currentWeekOfMonth[i]);
+			}
+		}
+		
+		// If only 1 button is enabled, then select it
+		if (selectedCount == 1) {
+			weekOfMonthButtons[selectedIdx].doClick();
 		}
 	}
 }
