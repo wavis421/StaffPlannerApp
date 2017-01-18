@@ -97,12 +97,14 @@ public class PersonDialog extends JDialog {
 		this.allTasks = allTasks;
 		this.leaderButton.setSelected(true);
 		this.assignedTaskChanges = new LinkedList<AssignedTasksModel>();
+
 		if (newSingleInstanceTasks != null)
 			newSingleInstanceTasks.clear();
 		else
 			newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
 		this.datesUnavailable = new LinkedList<DateRangeModel>();
 
+		okToSave = false;
 		createSingleInstanceTaskCombo(null);
 
 		setupPersonDialog();
@@ -178,8 +180,8 @@ public class PersonDialog extends JDialog {
 		});
 		extraDatesButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DateRangeDialog ev = new DateRangeDialog(PersonDialog.this, "Select extra dates...",
-						"Select Date: ", allTasks);
+				DateRangeDialog ev = new DateRangeDialog(PersonDialog.this, "Select extra dates...", "Select Date: ",
+						allTasks);
 				DateRangeEvent dialogResponse = ev.getDialogResponse();
 				if (dialogResponse != null && dialogResponse.getTask() != null) {
 					// Date and task valid. Add single instance task.
@@ -195,7 +197,7 @@ public class PersonDialog extends JDialog {
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Make sure that person name has been entered
-				if (personName.getText().equals("")) {
+				if (personName.getText().trim().equals("")) {
 					JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 				} else {
 					PersonEvent ev = new PersonEvent(this, personName.getText().trim(), phone.getText().trim(),

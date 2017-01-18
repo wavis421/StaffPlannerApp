@@ -133,14 +133,32 @@ public class AssignTaskDialog extends JDialog {
 		for (int i = 0; i < dayOfWeekButtons.length; i++) {
 			dayOfWeekPanel.add(dayOfWeekButtons[i]);
 		}
+		
+		JPanel womSubPanel = new JPanel();
 		for (int i = 0; i < weekOfMonthButtons.length; i++) {
-			weekOfMonthPanel.add(weekOfMonthButtons[i]);
+			womSubPanel.add(weekOfMonthButtons[i]);
 		}
+		JRadioButton allWeeksButton = new JRadioButton("All");
+		weekOfMonthPanel.add(womSubPanel);
+		weekOfMonthPanel.add(allWeeksButton);
+
+		// Add listener to "all" button
+		allWeeksButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (allWeeksButton.isSelected()) {
+					for (int i = 0; i < weekOfMonthButtons.length; i++) {
+						weekOfMonthButtons[i].setSelected(true);
+					}
+				}
+			}
+		});
 
 		// controlsPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		Border bevelBorder = BorderFactory.createTitledBorder(programName + ": " + task.getTaskName());
 		Border spaceBorder = BorderFactory.createEmptyBorder(15, 15, 15, 15);
 		controlsPanel.setBorder(BorderFactory.createCompoundBorder(spaceBorder, bevelBorder));
+		dayOfWeekPanel.setBorder(BorderFactory.createEtchedBorder());
+		womSubPanel.setBorder(BorderFactory.createEtchedBorder());
 
 		GridBagConstraints gc = new GridBagConstraints();
 
