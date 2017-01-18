@@ -31,6 +31,7 @@ import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilCalendarModel;
 
 import model.TaskModel;
+import utilities.Utilities;
 
 public class DateRangeDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
@@ -190,7 +191,6 @@ public class DateRangeDialog extends JDialog {
 		UtilCalendarModel dateModel = new UtilCalendarModel();
 		Properties prop = new Properties();
 		JDatePanelImpl datePickerPanel;
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 		prop.put("text.today", "today");
 		prop.put("text.month", "month");
@@ -202,56 +202,12 @@ public class DateRangeDialog extends JDialog {
 		// Add action listener
 		datePicker.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String startText = startDatePicker.getJFormattedTextField().getText();
-				String endText = endDatePicker.getJFormattedTextField().getText();
-
-				// If end date is NULL, set it to start day
-				if (name.equals("start") && !startText.equals("")) {
-					if (endText.equals("")) {
-						endDatePicker = setDate(startDatePicker, endDatePicker);
-						endDatePicker.getJFormattedTextField().setText(startText);
-						endText = startText;
-					}
-					startDatePicker.getModel().setSelected(true);
-					endDatePicker.getModel().setSelected(true);
-				}
-				// If start date is NULL, set it to end day
-				if (name.equals("end") && !endText.equals("")) {
-					if (startText.equals("")) {
-						startDatePicker = setDate(endDatePicker, startDatePicker);
-						startDatePicker.getJFormattedTextField().setText(endText);
-						startText = endText;
-					}
-					startDatePicker.getModel().setSelected(true);
-					endDatePicker.getModel().setSelected(true);
-				}
-
-				if (!startText.equals("") && !endText.equals("")) {
-					// If end date is before start date, set to start date
-					try {
-						Date startDate = dateFormatter.parse(startText);
-						if (startDate.compareTo(dateFormatter.parse(endText)) > 0) {
-							endDatePicker.getJFormattedTextField().setText(startText);
-						}
-
-					} catch (ParseException ex) {
-						JOptionPane.showMessageDialog(null, "Error parsing date: " + ex.getMessage(),
-								"Date Parsing Exception", JOptionPane.WARNING_MESSAGE);
-					}
-				}
+				Utilities.checkStartEndDatePicker(name, startDatePicker, endDatePicker);
 			}
 		});
 
 		datePicker.setPreferredSize(new Dimension(150, 26));
 		datePicker.setName(name);
 		return datePicker;
-	}
-
-	private JDatePickerImpl setDate(JDatePickerImpl datePickerFrom, JDatePickerImpl datePickerTo) {
-		Calendar calFrom = (Calendar) datePickerFrom.getModel().getValue();
-		datePickerTo.getModel().setDate(calFrom.get(Calendar.YEAR), calFrom.get(Calendar.MONTH),
-				calFrom.get(Calendar.DAY_OF_MONTH));
-
-		return datePickerTo;
 	}
 }

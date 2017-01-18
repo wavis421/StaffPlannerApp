@@ -28,9 +28,11 @@ import javax.swing.border.Border;
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilCalendarModel;
 import org.jdatepicker.impl.UtilDateModel;
 
 import model.ProgramModel;
+import utilities.Utilities;
 
 public class ProgramDialog extends JDialog {
 	private JButton okButton = new JButton("OK");
@@ -88,9 +90,9 @@ public class ProgramDialog extends JDialog {
 	}
 
 	private void setupProgramDialog(boolean isStartDateEnabled, boolean isEndDateEnabled) {
-		startDatePicker = createDatePicker(isStartDateEnabled, enableStartDateButton, lastStartDate);
-		endDatePicker = createDatePicker(isEndDateEnabled, enableEndDateButton, lastEndDate);
-		
+		startDatePicker = createDatePicker("start", isStartDateEnabled, enableStartDateButton, lastStartDate);
+		endDatePicker = createDatePicker("end", isEndDateEnabled, enableEndDateButton, lastEndDate);
+
 		if (numPrograms == 0)
 			selectActiveProgramButton.setSelected(true);
 
@@ -110,7 +112,7 @@ public class ProgramDialog extends JDialog {
 
 						ProgramEvent ev = new ProgramEvent(this, programName.getText().trim(), startDate, endDate,
 								selectActiveProgramButton.isSelected() ? true : false);
-						
+
 						// Generate start/end date for tracking last used dates
 						dialogResponse = ev;
 						String startDateText = startDatePicker.getJFormattedTextField().getText();
@@ -139,7 +141,7 @@ public class ProgramDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setProgramLayout();
-		setSize(450, 220);
+		setSize(450, 250);
 		setVisible(true);
 	}
 
@@ -198,8 +200,9 @@ public class ProgramDialog extends JDialog {
 		controlsPanel.add(value2, gcon);
 	}
 
-	private JDatePickerImpl createDatePicker(boolean isDateEnabled, JRadioButton enableDateButton, String lastDate) {
-		UtilDateModel dateModel = new UtilDateModel();
+	private JDatePickerImpl createDatePicker(String name, boolean isDateEnabled, JRadioButton enableDateButton,
+			String lastDate) {
+		UtilCalendarModel dateModel = new UtilCalendarModel();
 		Properties prop = new Properties();
 		JDatePanelImpl datePanel;
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
@@ -210,6 +213,7 @@ public class ProgramDialog extends JDialog {
 
 		datePanel = new JDatePanelImpl(dateModel, prop);
 		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+		datePicker.setName(name);
 
 		if (lastDate != null && !lastDate.equals("")) {
 			try {
@@ -222,27 +226,21 @@ public class ProgramDialog extends JDialog {
 
 				// Select button and date picker
 				datePicker.getModel().setSelected(true);
-				if (isDateEnabled) {
+				if (isDateEnabled)
 					enableDateButton.setSelected(true);
-					datePicker.setTextEditable(true);
-				}
 
 			} catch (ParseException ex) {
 				System.out.println("Exception in ProgramDialog: " + ex);
 			}
 		}
 
-		// Add listeners to enable start-date and date buttons
-		enableDateButton.addActionListener(new ActionListener() {
+		// Add action listener
+		datePicker.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (enableDateButton.isSelected()) {
-					datePicker.setTextEditable(true);
-				} else {
-					datePicker.setTextEditable(false);
-				}
+				Utilities.checkStartEndDatePicker(name, startDatePicker, endDatePicker);
 			}
 		});
-		
+
 		return datePicker;
 	}
 }

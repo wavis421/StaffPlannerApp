@@ -356,6 +356,10 @@ public class MainFrame extends JFrame {
 								}
 								controller.updateProgram(dialogResponse.getProgramName(), dialogResponse.getStartDate(),
 										dialogResponse.getEndDate());
+								
+								if (dialogResponse.isSelectedActive())
+									setProgramName(dialogResponse.getProgramName());
+
 								updateMonth((Calendar) calPanel.getCurrentCalendar());
 							}
 
