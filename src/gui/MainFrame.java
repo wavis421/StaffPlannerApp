@@ -49,6 +49,7 @@ public class MainFrame extends JFrame {
 	/* Private constants */
 	private static final int PREF_FRAME_WIDTH = 975;
 	private static final int PREF_FRAME_HEIGHT = 700;
+	private static final Dimension PREF_FRAME_DIMENSION = new Dimension(PREF_FRAME_WIDTH - 15, PREF_FRAME_HEIGHT - 60);
 
 	/* Private instance variables */
 	private static Controller controller;
@@ -81,7 +82,7 @@ public class MainFrame extends JFrame {
 
 		// Create components
 		controller = new Controller();
-		calPanel = new CalendarPanel();
+		calPanel = new CalendarPanel(PREF_FRAME_DIMENSION);
 		fileChooser = new JFileChooser();
 		fileFilter = new TaskFileFilter();
 
@@ -90,8 +91,7 @@ public class MainFrame extends JFrame {
 		fileChooser.addChoosableFileFilter(fileFilter);
 		fileChooser.setFileFilter(fileFilter);
 
-		// Set up Calendar Panel and update month listener
-		calPanel.setPreferredSize(new Dimension(PREF_FRAME_WIDTH - 15, PREF_FRAME_HEIGHT - 60));
+		// Create update month listener
 		calPanel.setUpdateCalendarListener(new CalendarUpdateListener() {
 			public void updateCalendar(Calendar calendar) {
 				updateMonth(calendar);
