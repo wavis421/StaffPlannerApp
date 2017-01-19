@@ -12,6 +12,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DateFormatSymbols;
@@ -76,6 +78,13 @@ public class CalendarPanel extends JPanel {
 		setLayout(null);
 		setPreferredSize(calPanelSize);
 		calPanel.setBounds(0, 0, (int) calPanelSize.getWidth(), (int) calPanelSize.getHeight());
+		addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				// Adjust calendar panel based on base panel size
+				calPanel.setSize(getWidth(), getHeight());
+		        refresh();           
+		    }
+		});
 		
 		/***** Set up CALENDAR panel *****/
 		// Create borders
