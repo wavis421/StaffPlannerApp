@@ -301,9 +301,7 @@ public class CalendarPanel extends JPanel {
 			label.addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent e) {
 					// Select calendar day to enlarge
-					Point point = new Point();
-					point.setLocation(dayBox.getX(), dayBox.getY());
-					configureDayPanel(scrollPane, label, dayIdx, point);
+					configureDayPanel(scrollPane, label, dayIdx, (int) dayBox.getX(), (int) dayBox.getY());
 				}
 			});
 
@@ -346,7 +344,7 @@ public class CalendarPanel extends JPanel {
 		return dayBox;
 	}
 	
-	private void configureDayPanel(JScrollPane scrollPane, JLabel label, int dayIdx, Point point) {
+	private void configureDayPanel(JScrollPane scrollPane, JLabel label, int dayIdx, int xPos, int yPos) {
 		dayPanel.setVisible(false);
 		dayPanel.removeAll();
 		JScrollPane localScrollPane = scrollPane;
@@ -360,8 +358,18 @@ public class CalendarPanel extends JPanel {
 			dayPanelIdx = dayIdx;
 			dayPanel.setLayout(new BorderLayout());
 			dayPanel.setBorder(new LineBorder(Color.BLACK));
-			dayPanel.setBounds((int) point.getX(), (int) point.getY(), DAY_PANEL_WIDTH, DAY_PANEL_HEIGHT);
 			localScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			
+			// Calculate position, adjust for panel edges
+			int adjust = this.getWidth() - (xPos + DAY_PANEL_WIDTH);
+			if (adjust < 0)
+				xPos += adjust;
+			
+			adjust = this.getHeight() - (yPos + DAY_PANEL_HEIGHT);
+			if (adjust < 0)
+				yPos += adjust;
+			
+			dayPanel.setBounds(xPos, yPos, DAY_PANEL_WIDTH, DAY_PANEL_HEIGHT);
 			
 			// Add calendar day components
 			dayPanel.add(label, BorderLayout.BEFORE_FIRST_LINE);
