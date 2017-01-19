@@ -47,7 +47,7 @@ public class CalendarPanel extends JPanel {
 	private static final String LABEL_FONT = "Serif-bold-14";
 	private static final String DATE_FONT = "Serif-11";
 	private static final int DAY_PANEL_WIDTH = 300;
-	private static final int DAY_PANEL_HEIGHT = 150;
+	private static final int DAY_PANEL_HEIGHT = 200;
 
 	// Base panel contains CAL panel and Day panel, overlayed
 	private JPanel calPanel = new JPanel();
@@ -58,7 +58,7 @@ public class CalendarPanel extends JPanel {
 	private JLabel leftLabel, rightLabel;
 	private LinkedList<CalendarDayModel>[] dayBoxTaskList = new LinkedList[31];
 	private JLabel programLabel = new JLabel("   ");
-	private TableLayout layout = new TableLayout();
+	private TableLayout calLayout = new TableLayout();
 	private Locale locale = new Locale("en", "US", "");
 	private DateFormatSymbols symbols = new DateFormatSymbols(locale);
 	private DayBoxListener dayListener;
@@ -97,8 +97,8 @@ public class CalendarPanel extends JPanel {
 		CreateMonthUpdateLabels();
 
 		// Set table layout
-		layout.setColumnCount(7);
-		calPanel.setLayout(layout);
+		calLayout.setColumnCount(7);
+		calPanel.setLayout(calLayout);
 
 		// Display this month's calendar
 		updateCalendarDisplay(currentCalendar);
@@ -358,18 +358,14 @@ public class CalendarPanel extends JPanel {
 		else {			
 			// Expand selected day
 			dayPanelIdx = dayIdx;
-			dayPanel.setLayout(null);
+			dayPanel.setLayout(new BorderLayout());
 			dayPanel.setBorder(new LineBorder(Color.BLACK));
 			dayPanel.setBounds((int) point.getX(), (int) point.getY(), DAY_PANEL_WIDTH, DAY_PANEL_HEIGHT);
-
-			// Configure scroll pane
 			localScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			localScrollPane.setPreferredSize(
-					new Dimension((int) dayPanel.getMinimumSize().getWidth(), (int) dayPanel.getMinimumSize().getHeight()));
 			
 			// Add calendar day components
-			dayPanel.add(label);
-			dayPanel.add(localScrollPane);
+			dayPanel.add(label, BorderLayout.BEFORE_FIRST_LINE);
+			dayPanel.add(localScrollPane, BorderLayout.CENTER);
 			dayPanel.setVisible(true);
 		}
 		updateCalendarDisplay(currentCalendar);
