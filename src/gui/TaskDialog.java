@@ -231,7 +231,7 @@ public class TaskDialog extends JDialog {
 		addRowToControlPanel(gc, locationLabel, locationTextField, gridY++);
 		addRowToControlPanel(gc, timeLabel, timePanel, gridY++);
 		addRowToControlPanel(gc, new JLabel("Minimum # leaders req'd: "), numLeadersSpinner, gridY++);
-		addRowToControlPanel(gc, new JLabel("Total leaders/volunteers req'd: "), totalPersonsSpinner, gridY++);
+		addRowToControlPanel(gc, new JLabel("Total leaders/assistants req'd: "), totalPersonsSpinner, gridY++);
 		addRowToControlPanel(gc, dayOfWeekLabel, dayOfWeekPanel, gridY++);
 		addRowToControlPanel(gc, weekOfMonthLabel, weekOfMonthPanel, gridY++);
 		addRowToControlPanel(gc, colorChooserLabel, colorPanel, gridY++);

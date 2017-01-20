@@ -59,7 +59,7 @@ public class PersonDialog extends JDialog {
 	private JTextField phone = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField email = new JTextField(TEXT_FIELD_SIZE);
 	private JRadioButton leaderButton = new JRadioButton("Leader");
-	private JRadioButton volunteerButton = new JRadioButton("Volunteer");
+	private JRadioButton assistantButton = new JRadioButton("Assistant");
 	private ButtonGroup staffGroup = new ButtonGroup();
 	private JPanel staffPanel = new JPanel();
 	private JComboBox<String> dateUnavailCombo;
@@ -78,7 +78,7 @@ public class PersonDialog extends JDialog {
 	private JLabel nameLabel = new JLabel("Person's name: ");
 	private JLabel phoneLabel = new JLabel("Phone #: ");
 	private JLabel emailLabel = new JLabel("Email: ");
-	private JLabel staffLabel = new JLabel("Leader or volunteer: ");
+	private JLabel staffLabel = new JLabel("Leader or assistant: ");
 	private JLabel notesLabel = new JLabel("Notes: ");
 	private JLabel datesLabel = new JLabel("Dates Unavailable: ");
 	private JLabel singleTaskLabel = new JLabel("Extra Dates: ");
@@ -125,7 +125,7 @@ public class PersonDialog extends JDialog {
 		if (person.isLeader())
 			this.leaderButton.setSelected(true);
 		else
-			this.volunteerButton.setSelected(true);
+			this.assistantButton.setSelected(true);
 		this.assignedTaskChanges = assignedTaskChanges;
 
 		if (okToSave) {
@@ -290,13 +290,13 @@ public class PersonDialog extends JDialog {
 
 	private void createStaffSelector() {
 		leaderButton.setActionCommand("leader");
-		volunteerButton.setActionCommand("volunteer");
+		assistantButton.setActionCommand("assistant");
 
 		staffPanel.add(leaderButton);
-		staffPanel.add(volunteerButton);
+		staffPanel.add(assistantButton);
 
 		staffGroup.add(leaderButton);
-		staffGroup.add(volunteerButton);
+		staffGroup.add(assistantButton);
 	}
 
 	private void createSingleInstanceTaskCombo(LinkedList<SingleInstanceTaskModel> taskList) {

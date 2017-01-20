@@ -8,7 +8,7 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 	private String name;
 	private String phone;
 	private String email;
-	private boolean leader; // Leader or volunteer
+	private boolean leader; // Leader or assistant
 	private String notes;
 	private LinkedList<AssignedTasksModel> assignedTasks;
 	private LinkedList<DateRangeModel> datesUnavailable;

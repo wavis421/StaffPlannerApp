@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
 import java.util.Calendar;
@@ -72,6 +73,7 @@ public class MainFrame extends JFrame {
 	private int selectedFilterId = NO_FILTER;
 	private JList<String> filteredList = null;
 
+	private JMenu taskMenu;
 	private JMenuItem filterByProgramMenuItem;
 	private JMenuItem filterByPersonMenuItem;
 
@@ -106,6 +108,30 @@ public class MainFrame extends JFrame {
 		setSize(PREF_FRAME_WIDTH, PREF_FRAME_HEIGHT);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
+
+		// Optionally load sample database
+		loadSampleDatabase();
+	}
+
+	private void loadSampleDatabase() {
+		DefaultListModel<String> sampleDatabase = new DefaultListModel<String>();
+		sampleDatabase.addElement(new String("Kindergarten"));
+		JList<String> sampleList = new JList<String>(sampleDatabase);
+		FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select sample database to load", sampleList);
+		JList<String> dialogResponse = ev.getDialogResponse();
+		if (dialogResponse != null) {
+			try {
+				controller.loadProgramFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_prog.tsk"));
+				controller.loadRosterFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_staff.tsk"));
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+
+				processImportProgram();
+				processImportRoster();
+
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(this, "Could not find sample database files");
+			}
+		}
 	}
 
 	private JMenuBar createMenuBar() {
@@ -114,7 +140,7 @@ public class MainFrame extends JFrame {
 		// Set up top level menus and add to menu bar
 		JMenu fileMenu = new JMenu("File");
 		JMenu programMenu = new JMenu("Program");
-		JMenu taskMenu = new JMenu("Task");
+		taskMenu = new JMenu("Task");
 		JMenu personMenu = new JMenu("Roster");
 		JMenu calendarMenu = new JMenu("Calendar");
 		JMenu settingsMenu = new JMenu("Settings");
@@ -232,23 +258,7 @@ public class MainFrame extends JFrame {
 						updateMonth((Calendar) calPanel.getCurrentCalendar());
 
 						// Select active program and enable program filter menu
-						int numPrograms = controller.getNumPrograms();
-						if (numPrograms > 1)
-							filterByProgramMenuItem.setEnabled(true);
-						if (numPrograms == 1) {
-							JList<String> programList = controller.getAllProgramsAsString();
-							setProgramName(programList.getModel().getElementAt(0));
-							taskMenu.setEnabled(true);
-
-						} else if (numPrograms > 1 && selectedProgramName == null) {
-							JList<String> programList = controller.getAllProgramsAsString();
-							SelectActiveProgramDialog ev = new SelectActiveProgramDialog(MainFrame.this, programList);
-							String dialogResponse = ev.getDialogResponse();
-							if (dialogResponse != null) {
-								setProgramName(dialogResponse);
-								taskMenu.setEnabled(true);
-							}
-						}
+						processImportProgram();
 
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -281,9 +291,8 @@ public class MainFrame extends JFrame {
 
 						updateMonth((Calendar) calPanel.getCurrentCalendar());
 
-						// Enable person filter menu
-						if (controller.getNumPersons() > 1)
-							filterByPersonMenuItem.setEnabled(true);
+						// Process import roster
+						processImportRoster();
 
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -298,6 +307,33 @@ public class MainFrame extends JFrame {
 				System.gc();
 			}
 		});
+	}
+
+	private void processImportProgram() {
+		// Select active program and enable program filter menu
+		int numPrograms = controller.getNumPrograms();
+		if (numPrograms > 1)
+			filterByProgramMenuItem.setEnabled(true);
+		if (numPrograms == 1) {
+			JList<String> programList = controller.getAllProgramsAsString();
+			setProgramName(programList.getModel().getElementAt(0));
+			taskMenu.setEnabled(true);
+
+		} else if (numPrograms > 1 && selectedProgramName == null) {
+			JList<String> programList = controller.getAllProgramsAsString();
+			SelectActiveProgramDialog ev = new SelectActiveProgramDialog(MainFrame.this, programList);
+			String dialogResponse = ev.getDialogResponse();
+			if (dialogResponse != null) {
+				setProgramName(dialogResponse);
+				taskMenu.setEnabled(true);
+			}
+		}
+	}
+
+	private void processImportRoster() {
+		// Enable person filter menu
+		if (controller.getNumPersons() > 1)
+			filterByPersonMenuItem.setEnabled(true);
 	}
 
 	private void createProgramMenuListeners(JMenu taskMenu, JMenuItem programCreateItem, JMenu programEditMenu,
@@ -356,7 +392,7 @@ public class MainFrame extends JFrame {
 								}
 								controller.updateProgram(dialogResponse.getProgramName(), dialogResponse.getStartDate(),
 										dialogResponse.getEndDate());
-								
+
 								if (dialogResponse.isSelectedActive())
 									setProgramName(dialogResponse.getProgramName());
 
