@@ -100,8 +100,8 @@ public class PersonDialog extends JDialog {
 
 		if (newSingleInstanceTasks != null)
 			newSingleInstanceTasks.clear();
-		else
-			newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+		newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+
 		this.datesUnavailable = new LinkedList<DateRangeModel>();
 
 		okToSave = false;
@@ -131,6 +131,7 @@ public class PersonDialog extends JDialog {
 		if (okToSave) {
 			// This list was processed and can be cleared
 			newSingleInstanceTasks.clear();
+			newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
 			okToSave = false;
 		} else if (newSingleInstanceTasks == null) {
 			// Create list first time after startup

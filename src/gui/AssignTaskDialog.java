@@ -216,7 +216,7 @@ public class AssignTaskDialog extends JDialog {
 
 		// If only 1 button is enabled, then select it
 		if (selectedCount == 1) {
-			dayOfWeekButtons[selectedIdx].doClick();
+			dayOfWeekButtons[selectedIdx].setSelected(true);
 		}
 	}
 
@@ -237,7 +237,7 @@ public class AssignTaskDialog extends JDialog {
 		
 		// If only 1 button is enabled, then select it
 		if (selectedCount == 1) {
-			weekOfMonthButtons[selectedIdx].doClick();
+			weekOfMonthButtons[selectedIdx].setSelected(true);
 		}
 	}
 }

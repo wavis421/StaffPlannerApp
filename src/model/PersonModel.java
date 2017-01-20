@@ -83,7 +83,7 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 		this.datesUnavailable.clear();
 		this.datesUnavailable = datesUnavail;
 	}
-	
+
 	public LinkedList<SingleInstanceTaskModel> getSingleInstanceTasks() {
 		return singleInstanceTasks;
 	}

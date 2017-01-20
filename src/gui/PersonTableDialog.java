@@ -236,41 +236,13 @@ public class PersonTableDialog extends JDialog {
 		table.setDefaultRenderer(Object.class, new PersonTableRenderer());
 		table.setAutoCreateRowSorter(true);
 
+		// *** POP UP CONTAINS "Edit row" and "Remove person'
 		popup = new JPopupMenu();
-		popup.setPreferredSize(new Dimension(240, 50));
-		removeItem = new JMenuItem("Remove person for today");
-		editItem = new JMenuItem("Edit person");
-		popup.add(removeItem);
-		popup.add(editItem);
-
-		// Detect right mouse click on table, then pop-up "Remove/Edit row"
-		// and select row
-		table.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON3) {
-					popup.show(table, e.getX(), e.getY());
-					int row = table.rowAtPoint(e.getPoint());
-					removeItem.setText("Mark person unavailable for " + Utilities.getDisplayDate(calendar));
-					table.getSelectionModel().setSelectionInterval(row, row);
-				}
-			}
-		});
-
-		// When "Remove person" selected, then trigger PersonTableListener
-		// action for this row
-		removeItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON, table.getSelectedRow(),
-						(String) tableModel.getValueAt(table.getSelectedRow(), tableModel.getColumnForPersonName()),
-						calendar, 0);
-				dialogResponse = ev;
-				setVisible(false);
-				dispose();
-			}
-		});
 
 		// When "Edit row" selected, then trigger PersonTableListener action
 		// for this row
+		editItem = new JMenuItem("Edit person");
+		popup.add(editItem);
 		editItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON, 0,
@@ -279,6 +251,37 @@ public class PersonTableDialog extends JDialog {
 				dialogResponse = ev;
 				setVisible(false);
 				dispose();
+			}
+		});
+		// When "Remove person" selected, then trigger PersonTableListener
+		// action for this row
+		if (calendar != null) {
+			removeItem = new JMenuItem("");
+			popup.add(removeItem);
+			removeItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON, table.getSelectedRow(),
+							(String) tableModel.getValueAt(table.getSelectedRow(), tableModel.getColumnForPersonName()),
+							calendar, 0);
+					dialogResponse = ev;
+					setVisible(false);
+					dispose();
+				}
+			});
+			popup.setPreferredSize(new Dimension(240, 50));
+		} else
+			popup.setPreferredSize(new Dimension(240, 30));
+
+		// Detect right mouse click on table and show pop up menu
+		table.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					popup.show(table, e.getX(), e.getY());
+					int row = table.rowAtPoint(e.getPoint());
+					if (calendar != null)
+						removeItem.setText("Mark person unavailable for " + Utilities.getDisplayDate(calendar));
+					table.getSelectionModel().setSelectionInterval(row, row);
+				}
 			}
 		});
 
