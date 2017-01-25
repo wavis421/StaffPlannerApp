@@ -34,7 +34,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
 import model.AssignedTasksModel;
 import model.DateRangeModel;
@@ -108,6 +107,7 @@ public class PersonDialog extends JDialog {
 		createSingleInstanceTaskCombo(null);
 
 		setupPersonDialog();
+		setVisible(true);
 	}
 
 	// Constructor for updating existing person, PersonModel contains values
@@ -144,6 +144,7 @@ public class PersonDialog extends JDialog {
 		createSingleInstanceTaskCombo(person.getSingleInstanceTasks());
 
 		setupPersonDialog();
+		setVisible(true);
 	}
 
 	public PersonEvent getDialogResponse() {
@@ -175,7 +176,12 @@ public class PersonDialog extends JDialog {
 					// Date range valid. Add to Linked List and Combo Box.
 					datesUnavailable.add(dialogResponse.getDateRange());
 					DefaultComboBoxModel<String> dateModel = (DefaultComboBoxModel<String>) dateUnavailCombo.getModel();
-					dateModel.addElement(dialogResponse.toString());
+					if (dialogResponse.getDateRange().getStartDate().equals(dialogResponse.getDateRange().getEndDate()))
+						// Add single date to list
+						dateModel.addElement(dialogResponse.getDateRange().getStartDate());
+					else
+						// Add date range to list
+						dateModel.addElement(dialogResponse.toString());
 				}
 			}
 		});
@@ -223,7 +229,6 @@ public class PersonDialog extends JDialog {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setPersonLayout();
 		setSize(750, 500);
-		setVisible(true);
 	}
 
 	private void setPersonLayout() {
@@ -335,6 +340,9 @@ public class PersonDialog extends JDialog {
 			if (Utilities.isDateInThePast(dateUnavail.getEndDate(), "Error parsing Unavailable Date(s)"))
 				// Date range has passed; remove from list
 				datesUnavailable.remove(dateUnavail);
+			else if (dateUnavail.getStartDate().equals(dateUnavail.getEndDate()))
+				// Add single date to list
+				dateModel.addElement(dateUnavail.getStartDate());
 			else
 				// Add date range to list
 				dateModel.addElement(dateUnavail.getStartDate() + "  to  " + dateUnavail.getEndDate());
@@ -362,10 +370,11 @@ public class PersonDialog extends JDialog {
 	}
 
 	private void createTrees(JTree assignedTasksTree, JTree taskTree) {
+		/* Create assigned task tree */
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
 				(int) notesArea.getPreferredSize().getHeight() * 3));
-		assignedTasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		assignedTasksTree.setCellRenderer(new AssignTaskTreeRenderer());
 
 		/* Add tree listener */
 		assignedTasksTree.addTreeSelectionListener(new TreeSelectionListener() {
@@ -402,10 +411,11 @@ public class PersonDialog extends JDialog {
 			}
 		});
 
+		/* Create unassigned task tree */
 		taskTreeScrollPane = new JScrollPane(taskTree);
 		taskTreeScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
 				(int) notesArea.getPreferredSize().getHeight() * 3));
-		taskTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		taskTree.setCellRenderer(new TaskTreeRenderer());
 
 		/* Add tree listener */
 		taskTree.addTreeSelectionListener(new TreeSelectionListener() {

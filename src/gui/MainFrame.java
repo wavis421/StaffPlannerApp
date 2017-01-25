@@ -1091,7 +1091,6 @@ public class MainFrame extends JFrame {
 		JTree tree = new JTree(treeModel);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.setShowsRootHandles(true);
-		tree.setCellRenderer(new TaskTreeRenderer());
 		return (tree);
 	}
 
@@ -1147,7 +1146,6 @@ public class MainFrame extends JFrame {
 
 		assignedTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		assignedTree.setShowsRootHandles(true);
-		assignedTree.setCellRenderer(new AssignTaskTreeRenderer());
 		return (assignedTree);
 	}
 
