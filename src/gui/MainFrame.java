@@ -73,6 +73,8 @@ public class MainFrame extends JFrame {
 	private int selectedFilterId = NO_FILTER;
 	private JList<String> filteredList = null;
 
+	private final String[] filterNames = { "", "Program", "Persons", "Incomplete Roster", "Location", "Time" };
+
 	private JMenu taskMenu;
 	private JMenuItem filterByProgramMenuItem;
 	private JMenuItem filterByPersonMenuItem;
@@ -116,21 +118,30 @@ public class MainFrame extends JFrame {
 	private void loadSampleDatabase() {
 		DefaultListModel<String> sampleDatabase = new DefaultListModel<String>();
 		sampleDatabase.addElement(new String("Kindergarten"));
+		sampleDatabase.addElement(new String("ChildMinistries"));
 		JList<String> sampleList = new JList<String>(sampleDatabase);
 		FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select sample database to load", sampleList);
 		JList<String> dialogResponse = ev.getDialogResponse();
 		if (dialogResponse != null) {
 			try {
 				controller.loadProgramFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_prog.tsk"));
-				controller.loadRosterFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_staff.tsk"));
-				updateMonth((Calendar) calPanel.getCurrentCalendar());
-
 				processImportProgram();
+
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(this,
+						"Failed to load database file " + dialogResponse.getModel().getElementAt(0) + "_prog.tsk");
+			}
+
+			try {
+				controller.loadRosterFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_staff.tsk"));
 				processImportRoster();
 
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "Could not find sample database files");
+				JOptionPane.showMessageDialog(this,
+						"Failed to load database file " + dialogResponse.getModel().getElementAt(0) + "_staff.tsk");
 			}
+
+			updateMonth((Calendar) calPanel.getCurrentCalendar());
 		}
 	}
 
@@ -1060,6 +1071,8 @@ public class MainFrame extends JFrame {
 			selectedFilterId = NO_FILTER;
 		else
 			selectedFilterId = filterId;
+
+		calPanel.setCalendarFilter(filterNames[selectedFilterId]);
 	}
 
 	private void setProgramName(String progName) {
