@@ -13,7 +13,8 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final int LEADER_COLUMN = 1;
 	private static final int SUB_COLUMN = 2;
 	private static final int TASK_COLUMN = 3;
-	private static final int TIME_COLUMN = 5;
+	private static final int TIME_COLUMN = 4;
+	private static final int LOCATION_COLUMN = 5;
 	private static final int PHONE_COLUMN_EXPANDED = 6;
 	private static final int PHONE_COLUMN_NOT_EXPANDED = 2;
 	private static final int EMAIL_COLUMN_EXPANDED = 7;
@@ -22,7 +23,7 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 12340002L;
 	private LinkedList<PersonByTaskModel> personList;
 	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail" };
-	private String colNamesExpanded[] = { "Name", "Ldr", "Sub", "Task", "Location", "Time", "Phone #", "E-Mail" };
+	private String colNamesExpanded[] = { "Name", "Ldr", "Sub", "Task", "Time", "Location", "Phone #", "E-Mail" };
 	private String colNames[];
 	private boolean expanded;
 
@@ -58,7 +59,7 @@ public class PersonTableModel extends AbstractTableModel {
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
-		case 5: // Time
+		case 4: // Time
 			return TimeModel.class;
 
 		default:
@@ -82,17 +83,17 @@ public class PersonTableModel extends AbstractTableModel {
 					return "Floater";
 				else
 					return person.getTask().getTaskName();
-			case 4: // Location
-				if (person.getTask() == null)
-					return "";
-				else
-					return person.getTask().getLocation();
-			case 5: // Time
+			case 4: // Time
 				if (person.getTask() == null) {
 					return new TimeModel(person.getTaskDate());
 				} else {
 					return person.getTask().getTime();
 				}
+			case 5: // Location
+				if (person.getTask() == null)
+					return "";
+				else
+					return person.getTask().getLocation();
 			case 6: // Phone number
 				return person.getPerson().getPhone();
 			case 7: // email
@@ -142,6 +143,13 @@ public class PersonTableModel extends AbstractTableModel {
 			return -1;
 	}
 
+	public int getColumnForLocation() {
+		if (expanded)
+			return LOCATION_COLUMN;
+		else
+			return -1;
+	}
+	
 	public int getColumnForPhone() {
 		if (expanded)
 			return PHONE_COLUMN_EXPANDED;

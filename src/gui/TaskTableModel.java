@@ -9,14 +9,14 @@ import utilities.Utilities;
 
 public class TaskTableModel extends AbstractTableModel {
 	private static final int TASK_NAME_COLUMN = 0;
-	private static final int LOCATION_COLUMN = 1;
-	private static final int TIME_COLUMN = 2;
+	private static final int TIME_COLUMN = 1;
+	private static final int LOCATION_COLUMN = 2;
 	private static final int DAY_OF_WEEK_COLUMN = 3;
 	private static final int DOW_IN_MONTH_COLUMN = 4;
 
 	private static final long serialVersionUID = 12340001L;
 	private JList<TaskModel> taskList;
-	private String colNames[] = { "Task", "Location", "Time", "Day of Week", "Week of Month" };
+	private String colNames[] = { "Task", "Time", "Location", "Day of Week", "Week of Month" };
 
 	public TaskTableModel(JList<TaskModel> taskList) {
 		this.taskList = taskList;
@@ -43,7 +43,7 @@ public class TaskTableModel extends AbstractTableModel {
 
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
-		case 2: // Time
+		case 1: // Time
 			return TimeModel.class;
 
 		default:
@@ -58,10 +58,10 @@ public class TaskTableModel extends AbstractTableModel {
 		switch (col) {
 		case 0: // task name
 			return task.getTaskName();
-		case 1: // location
-			return task.getLocation();
-		case 2: // time
+		case 1: // time
 			return task.getTime();
+		case 2: // location
+			return task.getLocation();
 		case 3: // day of week
 			return getDayOfWeekString(task.getDayOfWeek());
 		case 4: // DOW in month
