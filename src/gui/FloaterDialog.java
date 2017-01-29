@@ -10,7 +10,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Time;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
@@ -25,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
+import model.TimeModel;
 import utilities.Utilities;
 
 public class FloaterDialog extends JDialog {
@@ -36,7 +36,7 @@ public class FloaterDialog extends JDialog {
 	// Private instance variables
 	private JList<String> personsList;
 	private JComboBox<String> personCombo;
-	private JList<Time> timesList;
+	private JList<TimeModel> timesList;
 	private JComboBox<String> timeCombo;
 	private Calendar calendar;
 	private JPanel colorPanel = new JPanel();
@@ -53,7 +53,7 @@ public class FloaterDialog extends JDialog {
 	private FloaterEvent dialogResponse;
 
 	// Constructor for adding floater
-	public FloaterDialog(JDialog parent, String title, Calendar date, JList<String> personsList, JList<Time> timesList) {
+	public FloaterDialog(JDialog parent, String title, Calendar date, JList<String> personsList, JList<TimeModel> timesList) {
 		super(parent, title, true);
 
 		this.calendar = date;
@@ -165,11 +165,11 @@ public class FloaterDialog extends JDialog {
 		personCombo.setMaximumSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
 	}
 
-	private void createTimesComboBox(JList<Time> times) {
+	private void createTimesComboBox(JList<TimeModel> times) {
 		DefaultComboBoxModel<String> timeModel = new DefaultComboBoxModel<String>();
 
 		for (int i = 0; i < times.getModel().getSize(); i++) {
-			String timeString = Utilities.formatTime(times.getModel().getElementAt(i));
+			String timeString = times.getModel().getElementAt(i).toString();
 			timeModel.addElement(timeString);
 		}
 

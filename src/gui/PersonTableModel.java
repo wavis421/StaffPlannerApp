@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import javax.swing.table.AbstractTableModel;
 
 import model.PersonByTaskModel;
+import model.TimeModel;
 import utilities.Utilities;
 
 public class PersonTableModel extends AbstractTableModel {
@@ -24,7 +25,7 @@ public class PersonTableModel extends AbstractTableModel {
 	private String colNamesExpanded[] = { "Name", "Ldr", "Sub", "Task", "Location", "Time", "Phone #", "E-Mail" };
 	private String colNames[];
 	private boolean expanded;
-	
+
 	public PersonTableModel(boolean isColumnExpanded, LinkedList<PersonByTaskModel> personList) {
 		this.personList = personList;
 		this.expanded = isColumnExpanded;
@@ -55,6 +56,17 @@ public class PersonTableModel extends AbstractTableModel {
 	}
 
 	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		switch (columnIndex) {
+		case 5: // Time
+			return TimeModel.class;
+
+		default:
+			return String.class;
+		}
+	}
+
+	@Override
 	public Object getValueAt(int row, int col) {
 		PersonByTaskModel person = personList.get(row);
 		if (expanded) {
@@ -77,9 +89,9 @@ public class PersonTableModel extends AbstractTableModel {
 					return person.getTask().getLocation();
 			case 5: // Time
 				if (person.getTask() == null) {
-					return Utilities.formatTime(person.getTaskDate());
+					return new TimeModel(person.getTaskDate());
 				} else {
-					return Utilities.formatTime(person.getTask().getTime());
+					return person.getTask().getTime();
 				}
 			case 6: // Phone number
 				return person.getPerson().getPhone();

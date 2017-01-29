@@ -1,6 +1,5 @@
 package utilities;
 
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -12,38 +11,23 @@ import javax.swing.JOptionPane;
 
 import org.jdatepicker.impl.JDatePickerImpl;
 
+import model.TimeModel;
+
 public class Utilities {
 	// Time format for hour 1 - 12 and AM/PM field
 	private static final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 	/* <<<<<<<<<< Calendar & Time Utilities >>>>>>>>>> */
-	public static String formatTime(Time time) {
-		// Set time and convert to String
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(time);
-		return formatTime(cal);
-	}
-
 	public static String formatTime(Calendar cal) {
 		Calendar localCal = (Calendar) cal.clone();
 
-		// Convert HOUR from 0-11 to 1-12
-		localCal.add(Calendar.HOUR, 1);
-
-		// If hour transitioned to 12:00 am/pm, then switch the AM/PM
 		int hour = localCal.get(Calendar.HOUR);
-		if (hour == 0 || hour == 12)
-			localCal.set(Calendar.AM_PM, localCal.get(Calendar.AM_PM) == Calendar.AM ? Calendar.PM : Calendar.AM);
-
+		if (hour == 0) {
+			localCal.set(Calendar.HOUR, 12);
+			localCal.set(Calendar.AM_PM, Calendar.AM);
+		}
 		return timeFormat.format(localCal.getTime());
-	}
-
-	public static boolean checkForTimeMatch(Time time1, Calendar time2) {
-		Calendar time1Cal = Calendar.getInstance();
-		time1Cal.setTime(time1);
-
-		return checkForTimeMatch(time1Cal, time2);
 	}
 
 	public static boolean checkForTimeMatch(Calendar time1, Calendar time2) {
@@ -56,22 +40,10 @@ public class Utilities {
 		}
 	}
 
-	public static void addTimeToCalendar(Calendar calendar, Time time) {
-		Calendar timeCal = Calendar.getInstance();
-		timeCal.setTime(time);
-
-		calendar.set(Calendar.HOUR, timeCal.get(Calendar.HOUR));
-		calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
-		calendar.set(Calendar.AM_PM, timeCal.get(Calendar.AM_PM));
-	}
-
-	public static Time getTimeFromCalendar(Calendar calendar) {
-		int newHour = calendar.get(Calendar.HOUR);
-		int newMinute = calendar.get(Calendar.MINUTE);
-		if (calendar.get(Calendar.AM_PM) == Calendar.PM)
-			newHour += 12;
-
-		return (Time.valueOf(newHour + ":" + newMinute + ":00"));
+	public static void addTimeToCalendar(Calendar calendar, TimeModel time) {
+		calendar.set(Calendar.HOUR, time.getHour());
+		calendar.set(Calendar.MINUTE, time.getMinute());
+		calendar.set(Calendar.AM_PM, time.getAmPm());
 	}
 
 	public static String getDisplayDate(Calendar calendar) {

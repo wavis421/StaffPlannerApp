@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Time;
 import java.util.Calendar;
 import java.util.LinkedList;
 
@@ -28,6 +27,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import model.PersonByTaskModel;
+import model.TimeModel;
 import utilities.Utilities;
 
 public class PersonTableDialog extends JDialog {
@@ -56,7 +56,7 @@ public class PersonTableDialog extends JDialog {
 	private String addButtonText;
 
 	private JList<String> allPersons;
-	private JList<Time> allTimes;
+	private JList<TimeModel> allTimes;
 	private Calendar calendar;
 	private String conflictingTask = null;
 	private PersonTableEvent dialogResponse;
@@ -65,7 +65,7 @@ public class PersonTableDialog extends JDialog {
 
 	public PersonTableDialog(JFrame parent, String title, boolean isColumnExpanded, String taskName,
 			LinkedList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
-			JList<Time> allTimes) {
+			JList<TimeModel> allTimes) {
 		super(parent, true);
 
 		setTitle(title);
@@ -316,8 +316,8 @@ public class PersonTableDialog extends JDialog {
 
 			if (value instanceof String)
 				setText((String) value);
-			else if (value instanceof Time)
-				setText((String) value.toString());
+			else if (value instanceof TimeModel)
+				setText(((TimeModel)value).toString());
 
 			if (column != -1) {
 				Color textColor = Color.black;
@@ -335,8 +335,10 @@ public class PersonTableDialog extends JDialog {
 				else
 					super.setBackground(Color.WHITE);
 
-				if (column == tableModel.getColumnForPersonName())
+				if (column == tableModel.getColumnForPersonName()) {
+					super.setText(" " + super.getText());
 					super.setHorizontalAlignment(LEFT);
+				}
 				else
 					super.setHorizontalAlignment(CENTER);
 			}

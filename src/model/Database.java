@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -245,7 +245,7 @@ public class Database {
 		Collections.sort(matchingTasks);
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
-			String taskTime = Utilities.formatTime(matchingTasks.get(taskIdx).getTask().getTime());
+			String taskTime = matchingTasks.get(taskIdx).getTask().getTime().toString();
 			if (!Utilities.findStringMatchInJList(taskTime, timeList)) {
 				matchingTasks.remove(taskIdx);
 				taskIdx--;
@@ -375,13 +375,13 @@ public class Database {
 
 	public JList<String> getAllTimesAsString() {
 		DefaultListModel<String> timeModel = new DefaultListModel<String>();
-		ArrayList<Time> timeArray = new ArrayList<Time>();
+		ArrayList<TimeModel> timeArray = new ArrayList<TimeModel>();
 
 		for (ProgramModel prog : programList) {
 			JList<TaskModel> taskList = getAllTasksByProgram(prog.getProgramName());
 			for (int i = 0; i < taskList.getModel().getSize(); i++) {
 				// Check whether already in list before adding
-				Time time = taskList.getModel().getElementAt(i).getTime();
+				TimeModel time = taskList.getModel().getElementAt(i).getTime();
 				if (!findTimeMatchInArray(time, timeArray)) {
 					timeArray.add(time);
 				}
@@ -389,27 +389,27 @@ public class Database {
 		}
 		Collections.sort(timeArray);
 		for (int i = 0; i < timeArray.size(); i++)
-			timeModel.addElement(Utilities.formatTime(timeArray.get(i)));
+			timeModel.addElement(timeArray.get(i).toString());
 
 		return (new JList<String>(timeModel));
 	}
 
-	public JList<Time> getAllTimesByDay(Calendar calendar) {
-		DefaultListModel<Time> timeModel = new DefaultListModel<Time>();
-		ArrayList<Time> timeArray = new ArrayList<Time>();
+	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
+		DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
+		ArrayList<TimeModel> timeArray = new ArrayList<TimeModel>();
 
 		LinkedList<CalendarDayModel> taskList = getAllTasksByDay(calendar);
 		for (int taskIdx = 0; taskIdx < taskList.size(); taskIdx++) {
 			// Check whether already in list before adding
-			Time taskTime = taskList.get(taskIdx).getTask().getTime();
+			TimeModel taskTime = taskList.get(taskIdx).getTask().getTime();
 			if (!findTimeMatchInArray(taskTime, timeArray))
 				timeArray.add(taskTime);
 		}
 
-		Collections.sort(timeArray);
+		Collections.sort((ArrayList<TimeModel>) timeArray);
 		for (int i = 0; i < timeArray.size(); i++)
 			timeModel.addElement(timeArray.get(i));
-		JList<Time> timeList = new JList<Time>(timeModel);
+		JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
 		return timeList;
 	}
 
@@ -824,7 +824,7 @@ public class Database {
 		return null;
 	}
 
-	private boolean findTimeMatchInArray(Time findTime, ArrayList<Time> list) {
+	private boolean findTimeMatchInArray(TimeModel findTime, ArrayList<TimeModel> list) {
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).compareTo(findTime) == 0)
 				return true;

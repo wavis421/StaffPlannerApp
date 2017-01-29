@@ -2,7 +2,6 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Time;
 import java.util.Calendar;
 import java.util.LinkedList;
 
@@ -20,6 +19,7 @@ import model.PersonModel;
 import model.ProgramModel;
 import model.SingleInstanceTaskModel;
 import model.TaskModel;
+import model.TimeModel;
 
 public class Controller {
 	Database db = new Database();
@@ -130,7 +130,7 @@ public class Controller {
 		return db.getAllTimesAsString();
 	}
 
-	public JList<Time> getAllTimesByDay(Calendar calendar) {
+	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
 		return db.getAllTimesByDay(calendar);
 	}
 

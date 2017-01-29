@@ -1,9 +1,7 @@
 package model;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.util.Calendar;
-import java.util.Date;
 
 public class CalendarDayModel implements Serializable, Comparable<CalendarDayModel> {
 	private static final long serialVersionUID = 12340002L;
@@ -61,26 +59,19 @@ public class CalendarDayModel implements Serializable, Comparable<CalendarDayMod
 
 	@Override
 	public int compareTo(CalendarDayModel otherTask) {
-		Time otherTaskTime, thisTaskTime;
+		TimeModel otherTaskTime, thisTaskTime;
 
 		if (otherTask.getTask() == null) {
-			Calendar cal = otherTask.getFloaterTime();
-			if (cal.get(Calendar.AM_PM) == Calendar.PM)
-				otherTaskTime = Time.valueOf((cal.get(Calendar.HOUR) + 12) + ":" + cal.get(Calendar.MINUTE) + ":00");
-			else
-				otherTaskTime = Time.valueOf(cal.get(Calendar.HOUR) + ":" + cal.get(Calendar.MINUTE) + ":00");
+			otherTaskTime = new TimeModel(otherTask.getFloaterTime());
 		} else {
-			otherTaskTime = (Time) otherTask.getTask().getTime();
+			otherTaskTime = otherTask.getTask().getTime();
 		}
 
 		if (task == null) {
-			Calendar cal = floaterTime;
-			if (cal.get(Calendar.AM_PM) == Calendar.PM)
-				thisTaskTime = Time.valueOf((cal.get(Calendar.HOUR) + 12) + ":" + cal.get(Calendar.MINUTE) + ":00");
-			else
-				thisTaskTime = Time.valueOf(cal.get(Calendar.HOUR) + ":" + cal.get(Calendar.MINUTE) + ":00");
+			thisTaskTime = new TimeModel(floaterTime);
+
 		} else {
-			thisTaskTime = (Time) task.getTime();
+			thisTaskTime = task.getTime();
 		}
 
 		return (thisTaskTime.compareTo(otherTaskTime));

@@ -1,7 +1,8 @@
 package gui;
 
-import java.sql.Time;
 import java.util.EventObject;
+
+import model.TimeModel;
 
 public class TaskEvent extends EventObject {
 
@@ -12,7 +13,7 @@ public class TaskEvent extends EventObject {
 	private int totalPersonsReqd;
 	private boolean[] dayOfWeek;
 	private boolean[] weekOfMonth;
-	private Time time;
+	private TimeModel time;
 	private int color;
 
 	public TaskEvent(Object source) {
@@ -20,7 +21,7 @@ public class TaskEvent extends EventObject {
 	}
 
 	public TaskEvent(Object source, String programName, String taskName, String location, int numLeadersReqd,
-			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, Time time, int color) {
+			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
 		super(source);
 
 		this.programName = programName;
@@ -66,7 +67,7 @@ public class TaskEvent extends EventObject {
 		return weekOfMonth;
 	}
 
-	public Time getTime() {
+	public TimeModel getTime() {
 		return time;
 	}
 

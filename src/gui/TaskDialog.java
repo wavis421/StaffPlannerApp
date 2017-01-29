@@ -10,7 +10,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Time;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
@@ -32,6 +31,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import model.TaskModel;
+import model.TimeModel;
 
 public class TaskDialog extends JDialog {
 	private static final int TEXT_FIELD_WIDTH = 30;
@@ -354,15 +354,15 @@ public class TaskDialog extends JDialog {
 			totalPersonsSpinner.setValue((Integer) numLeadersSpinner.getValue());
 	}
 
-	private void createTimePanel(Time time) {
-		if (time == null)
-			time = Time.valueOf(DEFAULT_HOUR + ":" + DEFAULT_MINUTE + ":00");
+	private void createTimePanel(TimeModel timeModel) {
+		if (timeModel == null)
+			timeModel = new TimeModel(DEFAULT_HOUR, DEFAULT_MINUTE);
 
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(time);
-
-		hourSpinner = new NumberSpinnerHandler(cal.get(Calendar.HOUR) + 1, 1, 12, 1);
-		minuteSpinner = new NumberSpinnerHandler(cal.get(Calendar.MINUTE), 0, 59, 5);
+		if (timeModel.getHour() == 0)
+			hourSpinner = new NumberSpinnerHandler(12, 1, 12, 1);
+		else
+			hourSpinner = new NumberSpinnerHandler(timeModel.getHour(), 1, 12, 1);
+		minuteSpinner = new NumberSpinnerHandler(timeModel.getMinute(), 0, 59, 5);
 
 		hourSpinner.setPreferredSize(new Dimension(35, hourSpinner.getPreferredSize().height));
 		minuteSpinner.setPreferredSize(new Dimension(35, minuteSpinner.getPreferredSize().height));
@@ -371,7 +371,7 @@ public class TaskDialog extends JDialog {
 		modelAmPm.addElement("AM");
 		modelAmPm.addElement("PM");
 		comboAmPm = new JComboBox<String>(modelAmPm);
-		comboAmPm.setSelectedIndex(cal.get(Calendar.AM_PM));
+		comboAmPm.setSelectedIndex(timeModel.getAmPm());
 		comboAmPm.setEditable(false);
 		comboAmPm.setBorder(BorderFactory.createEtchedBorder());
 
@@ -383,11 +383,14 @@ public class TaskDialog extends JDialog {
 		timePanel.add(comboAmPm);
 	}
 
-	private Time getTime(NumberSpinnerHandler hour, NumberSpinnerHandler minute) {
-		int newHour = hour.getCurrentValue() - 1;
-		if (comboAmPm.getSelectedIndex() == 1) // PM
+	private TimeModel getTime(NumberSpinnerHandler hour, NumberSpinnerHandler minute) {
+		int newHour = hour.getCurrentValue();
+
+		if (newHour == 12 && comboAmPm.getSelectedIndex() == Calendar.AM)
+			newHour = 0;  // Back to 0
+        if (comboAmPm.getSelectedIndex() == Calendar.PM)
 			newHour += 12;
 
-		return (Time.valueOf(newHour + ":" + minuteSpinner.getCurrentValue() + ":00"));
+		return (new TimeModel(newHour, minute.getCurrentValue()));
 	}
 }

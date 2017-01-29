@@ -4,6 +4,7 @@ import javax.swing.JList;
 import javax.swing.table.AbstractTableModel;
 
 import model.TaskModel;
+import model.TimeModel;
 import utilities.Utilities;
 
 public class TaskTableModel extends AbstractTableModel {
@@ -40,6 +41,16 @@ public class TaskTableModel extends AbstractTableModel {
 		return taskList.getModel().getSize();
 	}
 
+	public Class<?> getColumnClass(int columnIndex) {
+		switch (columnIndex) {
+		case 2: // Time
+			return TimeModel.class;
+
+		default:
+			return String.class;
+		}
+	}
+	
 	@Override
 	public Object getValueAt(int row, int col) {
 		TaskModel task = (TaskModel) taskList.getModel().getElementAt(row);
@@ -50,7 +61,7 @@ public class TaskTableModel extends AbstractTableModel {
 		case 1: // location
 			return task.getLocation();
 		case 2: // time
-			return Utilities.formatTime(task.getTime());
+			return task.getTime();
 		case 3: // day of week
 			return getDayOfWeekString(task.getDayOfWeek());
 		case 4: // DOW in month

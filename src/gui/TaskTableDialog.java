@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Time;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -23,6 +22,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import model.TaskModel;
+import model.TimeModel;
 
 public class TaskTableDialog extends JDialog {
 	private static final int PREF_DIALOG_WIDTH = 800;
@@ -172,9 +172,9 @@ public class TaskTableDialog extends JDialog {
 
 			if (value instanceof String)
 				setText((String) value);
-			else if (value instanceof Time)
+			else if (value instanceof TimeModel)
 				setText((String) value.toString());
-
+			
 			if (column != -1) {
 				Color textColor = Color.black;
 				if (column == tableModel.getColumnForTaskName()) {

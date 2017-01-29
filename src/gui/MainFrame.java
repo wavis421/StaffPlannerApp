@@ -14,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Time;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -44,6 +43,7 @@ import model.PersonByTaskModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
+import model.TimeModel;
 import utilities.Utilities;
 
 public class MainFrame extends JFrame {
@@ -118,7 +118,6 @@ public class MainFrame extends JFrame {
 	private void loadSampleDatabase() {
 		DefaultListModel<String> sampleDatabase = new DefaultListModel<String>();
 		sampleDatabase.addElement(new String("Kindergarten"));
-		sampleDatabase.addElement(new String("ChildMinistries"));
 		JList<String> sampleList = new JList<String>(sampleDatabase);
 		FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select sample database to load", sampleList);
 		JList<String> dialogResponse = ev.getDialogResponse();
@@ -853,10 +852,10 @@ public class MainFrame extends JFrame {
 		viewRosterByTimeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Create time list with single time element
-				DefaultListModel<Time> timeModel = new DefaultListModel<Time>();
-				Time thisTime = Utilities.getTimeFromCalendar(selectedCalendar);
+				DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
+				TimeModel thisTime = new TimeModel(selectedCalendar);
 				timeModel.addElement(thisTime);
-				JList<Time> timeList = new JList<Time>(timeModel);
+				JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
 
 				// View assigned persons by time
 				LinkedList<PersonByTaskModel> personsByTime = controller.getPersonsByDayByTime(selectedCalendar);
@@ -897,7 +896,7 @@ public class MainFrame extends JFrame {
 				// View all persons
 				LinkedList<PersonByTaskModel> personsByTask = controller.getPersonsByDay(selectedCalendar);
 				JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
-				JList<Time> timesToday = controller.getAllTimesByDay(selectedCalendar);
+				JList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
 				Calendar calendar = (Calendar) selectedCalendar.clone();
 
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
@@ -960,10 +959,10 @@ public class MainFrame extends JFrame {
 			}
 
 			// Create time list with single time element
-			DefaultListModel<Time> timeModel = new DefaultListModel<Time>();
-			Time thisTime = Utilities.getTimeFromCalendar(event.getCalendar());
+			DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
+			TimeModel thisTime = new TimeModel(event.getCalendar());
 			timeModel.addElement(thisTime);
-			JList<Time> timeList = new JList<Time>(timeModel);
+			JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
 
 			// Refresh data and re-open Person Table dialog
 			LinkedList<PersonByTaskModel> personsByTime = controller.getPersonsByDayByTime(event.getCalendar());
@@ -1025,7 +1024,7 @@ public class MainFrame extends JFrame {
 			// Refresh data and re-open Person Table Dialog
 			LinkedList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
 			JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
-			JList<Time> timesToday = controller.getAllTimesByDay(selectedCalendar);
+			JList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
 			Calendar calendar = (Calendar) selectedCalendar.clone();
 
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,

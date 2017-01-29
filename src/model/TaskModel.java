@@ -1,12 +1,11 @@
 package model;
 
 import java.io.Serializable;
-import java.sql.Time;
 
 public class TaskModel implements Serializable, Comparable<TaskModel> {
 	private static final long serialVersionUID = 12340001L;
 	private String taskName;
-	private Time time;
+	private TimeModel time;
 	private String location;
 	private int numLeadersReqd;
 	private int totalPersonsReqd;
@@ -15,7 +14,7 @@ public class TaskModel implements Serializable, Comparable<TaskModel> {
 	private int color;
 
 	public TaskModel(String taskName, String location, int numLeadersReqd, int totalPersonsReqd, boolean[] dayOfWeek,
-			boolean[] weekOfMonth, Time time, int color) {
+			boolean[] weekOfMonth, TimeModel time, int color) {
 		this.taskName = taskName;
 		this.location = location;
 		this.numLeadersReqd = numLeadersReqd;
@@ -38,7 +37,7 @@ public class TaskModel implements Serializable, Comparable<TaskModel> {
 		this.taskName = taskName;
 	}
 
-	public Time getTime() {
+	public TimeModel getTime() {
 		return time;
 	}
 
