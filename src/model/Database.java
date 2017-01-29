@@ -63,7 +63,8 @@ public class Database {
 	}
 
 	public ProgramModel getProgramByName(String programName) {
-		for (ProgramModel p : programList) {
+		for (int i = 0; i < programList.size(); i++) {
+			ProgramModel p = programList.get(i);
 			if (p.getProgramName().equals(programName)) {
 				return p;
 			}
@@ -73,7 +74,8 @@ public class Database {
 
 	public JList<String> getAllProgramsAsString() {
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
-		for (ProgramModel p : programList) {
+		for (int i = 0; i < programList.size(); i++) {
+			ProgramModel p = programList.get(i);
 			nameModel.addElement(new String(p.getProgramName()));
 		}
 		return (new JList<String>(nameModel));
@@ -90,19 +92,22 @@ public class Database {
 	}
 
 	private int getProgramIndexByName(String programName) {
-		int i = 0;
+		int progIdx = 0;
 
-		for (ProgramModel p : programList) {
+		for (int i = 0; progIdx < programList.size(); i++) {
+			ProgramModel p = programList.get(i);
 			if (p.getProgramName().equals(programName))
-				return i;
-			i++;
+				return progIdx;
+			progIdx++;
 		}
 		return -1;
 	}
 
 	private void updateProgramNameByPerson(String oldName, String newName) {
-		for (PersonModel person : personList) {
-			for (AssignedTasksModel assignedTask : person.getAssignedTasks()) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel person = personList.get(i);
+			for (int j = 0; j < person.getAssignedTasks().size(); j++) {
+				AssignedTasksModel assignedTask = person.getAssignedTasks().get(j);
 				if (assignedTask.getProgramName().equals(oldName))
 					assignedTask.setProgramName(newName);
 			}
@@ -152,7 +157,8 @@ public class Database {
 		if (program == null)
 			return null;
 
-		for (TaskModel t : program.getTaskList()) {
+		for (int i = 0; i < program.getTaskList().size(); i++) {
+			TaskModel t = program.getTaskList().get(i);
 			if (t.getTaskName().equals(taskName)) {
 				return t;
 			}
@@ -162,8 +168,10 @@ public class Database {
 
 	public String findProgramByTaskName(String taskName) {
 		LinkedList<ProgramModel> allPrograms = getAllPrograms();
-		for (ProgramModel p : allPrograms) {
-			for (TaskModel t : p.getTaskList()) {
+		for (int i = 0; i < allPrograms.size(); i++) {
+			ProgramModel p = allPrograms.get(i);
+			for (int j = 0; j < p.getTaskList().size(); j++) {
+				TaskModel t = p.getTaskList().get(j);
 				if (t.getTaskName().equals(taskName))
 					return p.getProgramName();
 			}
@@ -260,11 +268,13 @@ public class Database {
 		Date thisDay = getDay(calendar);
 
 		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
-		for (ProgramModel prog : programList) {
+		for (int i = 0; i < programList.size(); i++) {
+			ProgramModel prog = programList.get(i);
 			if (isProgramExpired(thisDay, prog))
 				continue;
 
-			for (TaskModel task : prog.getTaskList()) {
+			for (int j = 0; j < prog.getTaskList().size(); j++) {
+				TaskModel task = prog.getTaskList().get(j);
 				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
 					int count = getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx);
 					thisDaysTasks.add(new CalendarDayModel(task, count & 0xFFFF, (count >> 16) & 0xFFFF,
@@ -284,9 +294,12 @@ public class Database {
 		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
 		// Now add floaters to the list
-		for (PersonModel person : personList) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel person = personList.get(i);
+			
 			// Check if person is a floater (not associated with task).
-			for (SingleInstanceTaskModel task : person.getSingleInstanceTasks()) {
+			for (int j = 0; j < person.getSingleInstanceTasks().size(); j++) {
+				SingleInstanceTaskModel task = person.getSingleInstanceTasks().get(j);
 				if (checkSingleInstanceTaskMatch(task, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
 					thisDaysTasks.add(new CalendarDayModel(null, 0, 0, task.getColor(), task.getTaskDate(), "Floater"));
 				}
@@ -339,7 +352,8 @@ public class Database {
 		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
 		ProgramModel program = getProgramByName(programName);
 
-		for (TaskModel t : program.getTaskList()) {
+		for (int i = 0; i < program.getTaskList().size(); i++) {
+			TaskModel t = program.getTaskList().get(i);
 			taskModel.addElement(t);
 		}
 		return new JList<TaskModel>(taskModel);
@@ -348,8 +362,11 @@ public class Database {
 	public JList<TaskModel> getAllTasks() {
 		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
 
-		for (ProgramModel p : programList) {
-			for (TaskModel t : p.getTaskList()) {
+		for (int i = 0; i < programList.size(); i++) {
+			ProgramModel p = programList.get(i);
+			
+			for (int j = 0; j < p.getTaskList().size(); j++) {
+				TaskModel t = p.getTaskList().get(j);
 				taskModel.addElement(t);
 			}
 		}
@@ -360,11 +377,12 @@ public class Database {
 		DefaultListModel<String> locationModel = new DefaultListModel<String>();
 		JList<String> locationList = new JList<String>(locationModel);
 
-		for (ProgramModel prog : programList) {
+		for (int i = 0; i < programList.size(); i++) {
+			ProgramModel prog = programList.get(i);
 			JList<TaskModel> taskList = getAllTasksByProgram(prog.getProgramName());
-			for (int i = 0; i < taskList.getModel().getSize(); i++) {
+			for (int j = 0; j < taskList.getModel().getSize(); j++) {
 				// Check whether already in list before adding
-				String loc = taskList.getModel().getElementAt(i).getLocation();
+				String loc = taskList.getModel().getElementAt(j).getLocation();
 				if (!loc.equals("") && !Utilities.findStringMatchInJList(loc, locationList)) {
 					locationModel.addElement(loc);
 				}
@@ -377,11 +395,12 @@ public class Database {
 		DefaultListModel<String> timeModel = new DefaultListModel<String>();
 		ArrayList<TimeModel> timeArray = new ArrayList<TimeModel>();
 
-		for (ProgramModel prog : programList) {
+		for (int i = 0; i < programList.size(); i++) {
+			ProgramModel prog = programList.get(i);
 			JList<TaskModel> taskList = getAllTasksByProgram(prog.getProgramName());
-			for (int i = 0; i < taskList.getModel().getSize(); i++) {
+			for (int j = 0; j < taskList.getModel().getSize(); j++) {
 				// Check whether already in list before adding
-				TimeModel time = taskList.getModel().getElementAt(i).getTime();
+				TimeModel time = taskList.getModel().getElementAt(j).getTime();
 				if (!findTimeMatchInArray(time, timeArray)) {
 					timeArray.add(time);
 				}
@@ -414,19 +433,23 @@ public class Database {
 	}
 
 	private int getTaskIndexByName(ProgramModel program, String taskName) {
-		int i = 0;
+		int taskIdx = 0;
 
-		for (TaskModel t : program.getTaskList()) {
+		for (int i = 0; i < program.getTaskList().size(); i++) {
+			TaskModel t = program.getTaskList().get(i);
 			if (t.getTaskName().equals(taskName))
-				return i;
-			i++;
+				return taskIdx;
+			taskIdx++;
 		}
 		return -1;
 	}
 
 	private void updateTaskNameByPerson(String oldTaskName, String newTaskName) {
-		for (PersonModel person : personList) {
-			for (AssignedTasksModel assignedTask : person.getAssignedTasks()) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel person = personList.get(i);
+			
+			for (int j = 0; j < person.getAssignedTasks().size(); j++) {
+				AssignedTasksModel assignedTask = person.getAssignedTasks().get(j);
 				if (assignedTask.getTaskName().equals(oldTaskName))
 					assignedTask.setTaskName(newTaskName);
 			}
@@ -439,14 +462,16 @@ public class Database {
 			LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
 
 			// Check if task is in person's assigned task list for today
-			for (AssignedTasksModel assignedTask : assignedTaskList) {
+			for (int i = 0; i < assignedTaskList.size(); i++) {
+				AssignedTasksModel assignedTask = assignedTaskList.get(i);
 				if (assignedTask.getTaskName().equals(taskName) && assignedTask.getDaysOfWeek()[dayOfWeekIdx]
 						&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
 					return 0;
 				}
 			}
 
-			for (SingleInstanceTaskModel singleInstanceTask : person.getSingleInstanceTasks()) {
+			for (int i = 0; i < person.getSingleInstanceTasks().size(); i++) {
+				SingleInstanceTaskModel singleInstanceTask = person.getSingleInstanceTasks().get(i);
 				// Check if this person is a sub for today
 				Calendar subCalendar = singleInstanceTask.getTaskDate();
 				if (singleInstanceTask.getTaskName().equals(taskName)
@@ -549,7 +574,8 @@ public class Database {
 		if (today == null)
 			return true; // impossible?
 
-		for (DateRangeModel datesUnavail : person.getDatesUnavailable()) {
+		for (int i = 0; i < person.getDatesUnavailable().size(); i++) {
+			DateRangeModel datesUnavail = person.getDatesUnavailable().get(i);
 			try {
 				Date startDate = dateFormatter.parse(datesUnavail.getStartDate());
 				Date endDate = dateFormatter.parse(datesUnavail.getEndDate());
@@ -590,7 +616,8 @@ public class Database {
 			PersonModel thisPerson = personList.get(personIdx);
 			LinkedList<AssignedTasksModel> dbAssignedTaskList = thisPerson.getAssignedTasks();
 
-			for (AssignedTasksModel assignedTask : personAssignedTasks) {
+			for (int i = 0; i < personAssignedTasks.size(); i++) {
+				AssignedTasksModel assignedTask = personAssignedTasks.get(i);
 				taskIdx = findAssignedTaskIdx(assignedTask.getTaskName(), dbAssignedTaskList);
 				if (taskIdx != -1)
 					// Assigned task already in database, so update
@@ -601,7 +628,8 @@ public class Database {
 			}
 
 			// Add extraTasks (list only contains additions for now!!)
-			for (SingleInstanceTaskModel singleTasks : extraTasks) {
+			for (int i = 0; i < extraTasks.size(); i++) {
+				SingleInstanceTaskModel singleTasks = extraTasks.get(i);
 				thisPerson.getSingleInstanceTasks().add(new SingleInstanceTaskModel(singleTasks.getTaskName(),
 						singleTasks.getTaskDate(), singleTasks.getColor()));
 			}
@@ -609,7 +637,8 @@ public class Database {
 
 			// For now, dates unavailable is complete list so clear and add all
 			thisPerson.getDatesUnavailable().clear();
-			for (DateRangeModel date : personDatesUnavailable) {
+			for (int i = 0; i < personDatesUnavailable.size(); i++) {
+				DateRangeModel date = personDatesUnavailable.get(i);
 				thisPerson.getDatesUnavailable().add(date);
 			}
 
@@ -656,7 +685,8 @@ public class Database {
 	}
 
 	public PersonModel getPersonByName(String name) {
-		for (PersonModel p : personList) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel p = personList.get(i);
 			if (p.getName().equals(name)) {
 				return p;
 			}
@@ -667,7 +697,8 @@ public class Database {
 	public JList<String> getAllPersonsAsString() {
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
 
-		for (PersonModel p : personList) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel p = personList.get(i);
 			nameModel.addElement(new String(p.getName()));
 		}
 		return (new JList<String>(nameModel));
@@ -679,7 +710,8 @@ public class Database {
 		// Get all persons who are available today
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
 
-		for (PersonModel p : personList) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel p = personList.get(i);
 			if (isPersonAvailable(p, thisDay))
 				nameModel.addElement(new String(p.getName()));
 		}
@@ -688,7 +720,8 @@ public class Database {
 
 	public JList<PersonModel> getAllPersons() {
 		DefaultListModel<PersonModel> personModel = new DefaultListModel<>();
-		for (PersonModel p : personList) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel p = personList.get(i);
 			personModel.addElement(p);
 		}
 		JList<PersonModel> list = new JList<>(personModel);
@@ -697,7 +730,8 @@ public class Database {
 
 	public LinkedList<PersonByTaskModel> getAllPersonsList() {
 		LinkedList<PersonByTaskModel> personsByTask = new LinkedList<PersonByTaskModel>();
-		for (PersonModel p : personList) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel p = personList.get(i);
 			PersonByTaskModel person = new PersonByTaskModel(p, null, false, 0, null);
 			personsByTask.add(person);
 		}
@@ -738,7 +772,8 @@ public class Database {
 			}
 
 			// Check if person is a floater (not associated with task)
-			for (SingleInstanceTaskModel task : pModel.getSingleInstanceTasks()) {
+			for (int j = 0; j < pModel.getSingleInstanceTasks().size(); j++) {
+				SingleInstanceTaskModel task = pModel.getSingleInstanceTasks().get(j);
 				if (checkSingleInstanceTaskMatch(task, "", thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
 					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false, task.getColor(),
 							task.getTaskDate());
@@ -806,18 +841,20 @@ public class Database {
 	}
 
 	private int getPersonIndexByName(String personName) {
-		int i = 0;
+		int personIdx = 0;
 
-		for (PersonModel p : personList) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonModel p = personList.get(i);
 			if (p.getName().equals(personName))
-				return i;
-			i++;
+				return personIdx;
+			personIdx++;
 		}
 		return -1;
 	}
 
 	private TaskModel findTaskInList(String taskName, LinkedList<CalendarDayModel> dayList) {
-		for (CalendarDayModel day : dayList) {
+		for (int i = 0; i < dayList.size(); i++) {
+			CalendarDayModel day = dayList.get(i);
 			if (day.getTask().getTaskName().equals(taskName))
 				return day.getTask();
 		}
@@ -833,12 +870,13 @@ public class Database {
 	}
 
 	private int findAssignedTaskIdx(String taskName, LinkedList<AssignedTasksModel> assignedTaskList) {
-		int i = 0;
+		int taskIdx = 0;
 
-		for (AssignedTasksModel task : assignedTaskList) {
+		for (int i = 0; i < assignedTaskList.size(); i++) {
+			AssignedTasksModel task = assignedTaskList.get(i);
 			if (task.getTaskName().equals(taskName))
-				return i;
-			i++;
+				return taskIdx;
+			taskIdx++;
 		}
 		return -1;
 	}
@@ -870,7 +908,8 @@ public class Database {
 		try {
 			// Convert from array to program
 			ProgramModel[] programs = (ProgramModel[]) ois.readObject();
-			for (ProgramModel p : programs) {
+			for (int i = 0; i < programs.length; i++) {
+				ProgramModel p = programs[i];
 				// Check if program already exists, if so then replace it
 				int index = getProgramIndexByName(p.getProgramName());
 				if (index >= 0)

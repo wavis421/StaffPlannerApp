@@ -309,7 +309,8 @@ public class PersonDialog extends JDialog {
 		DefaultComboBoxModel<String> taskModel = new DefaultComboBoxModel<String>();
 
 		if (taskList != null) {
-			for (SingleInstanceTaskModel task : taskList) {
+			for (int i = 0; i < taskList.size(); i++) {
+				SingleInstanceTaskModel task = taskList.get(i);
 				Calendar date = task.getTaskDate();
 				String taskName = task.getTaskName();
 				if (taskName.equals("")) {
@@ -322,7 +323,8 @@ public class PersonDialog extends JDialog {
 			}
 		}
 		if (newSingleInstanceTasks != null) {
-			for (SingleInstanceTaskModel task : newSingleInstanceTasks) {
+			for (int i = 0; i < newSingleInstanceTasks.size(); i++) {
+				SingleInstanceTaskModel task = newSingleInstanceTasks.get(i);
 				taskModel.addElement(task.getTaskName() + " on " + Utilities.getDisplayDate(task.getTaskDate()));
 			}
 		}
@@ -336,7 +338,8 @@ public class PersonDialog extends JDialog {
 	private void createUnavailDateCombo() {
 		DefaultComboBoxModel<String> dateModel = new DefaultComboBoxModel<String>();
 
-		for (DateRangeModel dateUnavail : datesUnavailable) {
+		for (int i = 0; i < datesUnavailable.size(); i++) {
+			DateRangeModel dateUnavail = datesUnavailable.get(i);
 			if (Utilities.isDateInThePast(dateUnavail.getEndDate(), "Error parsing Unavailable Date(s)"))
 				// Date range has passed; remove from list
 				datesUnavailable.remove(dateUnavail);
@@ -458,7 +461,8 @@ public class PersonDialog extends JDialog {
 	}
 
 	private void removeNodeFromAssignedTaskList(String taskName) {
-		for (AssignedTasksModel t : assignedTaskChanges) {
+		for (int i = 0; i < assignedTaskChanges.size(); i++) {
+			AssignedTasksModel t = assignedTaskChanges.get(i);
 			if (t.getTaskName().equals(taskName)) {
 				int idx = assignedTaskChanges.indexOf(t);
 				assignedTaskChanges.remove(idx);

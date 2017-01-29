@@ -1113,9 +1113,10 @@ public class MainFrame extends JFrame {
 		JTree assignedTree = new JTree(treeModel);
 		TreePath path;
 
-		for (AssignedTasksModel item : taskList) {
-			// Check to see if this task is currently valid; if not then leave
-			// disabled
+		for (int i = 0; i < taskList.size(); i++) {
+			AssignedTasksModel item = taskList.get(i);
+			
+			// Check to see if this task is currently valid; if not, leave disabled
 			TaskModel thisTask = controller.getTaskByName(item.getProgramName(), item.getTaskName());
 			if (thisTask == null) {
 				System.out.println("Dropping program " + item.getProgramName() + ", task " + item.getTaskName());
@@ -1201,7 +1202,9 @@ public class MainFrame extends JFrame {
 	private LinkedList<AssignedTasksModel> mergeAssignedTaskList(LinkedList<AssignedTasksModel> mergeTaskList,
 			LinkedList<AssignedTasksModel> assignedTaskChangeList) {
 		// Merge tasks changed list into merge list
-		for (AssignedTasksModel task : assignedTaskChangeList) {
+		for (int i = 0; i < assignedTaskChangeList.size(); i++) {
+			AssignedTasksModel task = assignedTaskChangeList.get(i);
+			
 			int foundIdx = findNodeInAssignedTaskList(mergeTaskList, task.getTaskName());
 			if (foundIdx == -1) { // Not in list
 				mergeTaskList.add(task);

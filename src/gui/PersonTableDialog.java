@@ -367,7 +367,8 @@ public class PersonTableDialog extends JDialog {
 	}
 
 	private boolean isTimeAlreadyAssigned(String thisPerson, Calendar thisTime) {
-		for (PersonByTaskModel personModel : personList) {
+		for (int i = 0; i < personList.size(); i++) {
+			PersonByTaskModel personModel = personList.get(i);
 			String personListValue = personModel.getPerson().getName();
 			Calendar timeListValue = personModel.getTaskDate();
 
@@ -397,7 +398,8 @@ public class PersonTableDialog extends JDialog {
 		for (int i = 0; i < newPersonList.getModel().getSize(); i++) {
 			String newPersonName = newPersonList.getModel().getElementAt(i);
 
-			for (PersonByTaskModel personByDay : fullList) {
+			for (int j = 0; j < fullList.size(); j++) {
+				PersonByTaskModel personByDay = fullList.get(j);
 				String personByDayName = personByDay.getPerson().getName();
 
 				if (personByDayName.equals(newPersonName) && personByDay.getTaskDate().compareTo(calendar) == 0) {
@@ -432,7 +434,8 @@ public class PersonTableDialog extends JDialog {
 	private LinkedList<PersonByTaskModel> createPersonListByTask(String taskName,
 			LinkedList<PersonByTaskModel> fullPersonList) {
 		LinkedList<PersonByTaskModel> newPersonList = new LinkedList<PersonByTaskModel>();
-		for (PersonByTaskModel person : fullPersonList) {
+		for (int i = 0; i < fullPersonList.size(); i++) {
+			PersonByTaskModel person = fullPersonList.get(i);
 			if (person.getTask() != null && person.getTask().getTaskName().equals(taskName))
 				newPersonList.add(person);
 		}
