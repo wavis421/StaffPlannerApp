@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -13,9 +14,9 @@ import java.util.Properties;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.PasswordAuthentication;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.swing.BorderFactory;
@@ -174,6 +175,9 @@ public class EmailDialog extends JDialog {
 			}
 		});
 
+		// Set cursor to "wait" cursor
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		
 		try {
 			// Set message fields
 			MimeMessage message = new MimeMessage(session);
@@ -189,12 +193,14 @@ public class EmailDialog extends JDialog {
 				}
 			}
 
-			// Send email (commented out line is if not authenticated above
+			// Send email (commented out line is if not authenticated above)
 			Transport.send(message);
-			JOptionPane.showMessageDialog(getParent(), "Email sent successfully!");
 
 		} catch (MessagingException ex) {
-			JOptionPane.showMessageDialog(getParent(), "Failed to send email: " + ex.getMessage());
+			JOptionPane.showMessageDialog(getParent(), "ERROR sending email: " + ex.getMessage());
 		}
+		
+		// Set cursor back to default
+		this.setCursor(Cursor.getDefaultCursor());
 	}
 }
