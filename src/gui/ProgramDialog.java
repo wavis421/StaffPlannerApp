@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
@@ -58,6 +59,8 @@ public class ProgramDialog extends JDialog {
 
 	public ProgramDialog(JFrame parent, int numPrograms) {
 		super(parent, "Create program...", true);
+		setLocation(new Point(100,100));
+		
 		this.numPrograms = numPrograms;
 
 		setupProgramDialog(false, false);
@@ -65,6 +68,8 @@ public class ProgramDialog extends JDialog {
 
 	public ProgramDialog(JFrame parent, int numPrograms, ProgramModel program) {
 		super(parent, "Edit program...", true);
+		setLocation(new Point(100,100));
+		
 		this.programName.setText(program.getProgramName());
 		if (numPrograms > 0)
 			numPrograms--;

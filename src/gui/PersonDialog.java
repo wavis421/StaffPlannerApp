@@ -8,6 +8,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
@@ -90,7 +91,9 @@ public class PersonDialog extends JDialog {
 	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, JTree assignedTasksTree, JTree taskTree) {
 		// super(parent, "Add person...", true);
 		super(parent, "Add person...");
+		setLocation(new Point(100,100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
+		
 		createTrees(assignedTasksTree, taskTree);
 
 		this.allTasks = allTasks;
@@ -114,6 +117,7 @@ public class PersonDialog extends JDialog {
 	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, PersonModel person,
 			LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
+		setLocation(new Point(100,100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
 

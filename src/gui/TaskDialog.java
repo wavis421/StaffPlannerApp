@@ -8,6 +8,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
@@ -78,6 +79,8 @@ public class TaskDialog extends JDialog {
 	// Constructor for creating new task
 	public TaskDialog(JFrame parent, String programName) {
 		super(parent, programName, true);
+		setLocation(new Point(100,100));
+		
 		currentProgramName = new String(programName);
 		currentTask = null;
 		createTimePanel(null);
@@ -88,6 +91,7 @@ public class TaskDialog extends JDialog {
 	// Constructor for updating existing task, TaskModel contains task values
 	public TaskDialog(JFrame parent, String programName, TaskModel task) {
 		super(parent, programName, true);
+		setLocation(new Point(100,100));
 
 		currentProgramName = programName;
 		currentTask = task;
@@ -104,6 +108,7 @@ public class TaskDialog extends JDialog {
 	// Constructor for re-try of task create, TaskEvent content re-loaded
 	public TaskDialog(JFrame parent, TaskEvent event) {
 		super(parent, event.getProgramName(), true);
+		setLocation(new Point(100,100));
 
 		// Set up task, but leave name field empty since it was found to be a
 		// duplicate

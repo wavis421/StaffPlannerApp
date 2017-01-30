@@ -565,7 +565,7 @@ public class MainFrame extends JFrame {
 				if (controller.getNumPersons() > 0) {
 					LinkedList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster", false, null,
-							allPersons, "", null, null, null);
+							allPersons, "Add person", null, null, null);
 					do {
 						ev = processViewAllPersonsDialog(ev.getDialogResponse());
 					} while (ev != null);
@@ -576,7 +576,17 @@ public class MainFrame extends JFrame {
 
 	private PersonTableDialog processViewAllPersonsDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
-			if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
+			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
+				// Add new person
+				LinkedList<AssignedTasksModel> assignedList = new LinkedList<AssignedTasksModel>();
+				JTree taskTree = createTaskTree(assignedList);
+				PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
+						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
+				do {
+					personEvent = processAddPersonDialog(personEvent);
+				} while (personEvent != null);
+			}
+			else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				// Edit person
 				editPerson(event.getPersonName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
@@ -584,7 +594,7 @@ public class MainFrame extends JFrame {
 
 			// Refresh data and re-open Person Table dialog
 			LinkedList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
-			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster", false, null, allPersons, "",
+			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster", false, null, allPersons, "Add person",
 					null, null, null);
 			return ev;
 		}
@@ -791,7 +801,7 @@ public class MainFrame extends JFrame {
 	private void editPerson(String origName) {
 		PersonModel person = controller.getPersonByName(origName);
 		if (person == null)
-			JOptionPane.showMessageDialog(null, "Person does not exist");
+			JOptionPane.showMessageDialog(MainFrame.this, "Person does not exist");
 		else {
 			LinkedList<AssignedTasksModel> assignedList = person.getAssignedTasks();
 			JTree taskTree = createTaskTree(assignedList);
