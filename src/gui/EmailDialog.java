@@ -8,6 +8,9 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Properties;
@@ -37,6 +40,7 @@ public class EmailDialog extends JDialog {
 	private static final int TO_PANE_HEIGHT = 60;
 	private static final int MESSAGE_PANE_HEIGHT = 200;
 
+	private JButton copyButton = new JButton("Copy address list");
 	private JButton sendButton = new JButton("Send");
 	private JButton cancelButton = new JButton("Cancel");
 	private JTextPane toField = new JTextPane();
@@ -70,6 +74,27 @@ public class EmailDialog extends JDialog {
 			}
 		}
 
+		copyButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String delims = "[, ]+";
+				String[] elements = toField.getText().split(delims);
+
+				if (elements.length == 0)
+					JOptionPane.showMessageDialog(getParent(), "Address list is empty");
+				else {
+					String addressString = "";
+					for (int i = 0; i < elements.length; i++) {
+						if (!addressString.equals(""))
+							addressString += ", ";
+						addressString += elements[i];
+					}
+
+					StringSelection stringSelection = new StringSelection(addressString);
+					Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+					clip.setContents(stringSelection, null);
+				}
+			}
+		});
 		sendButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				generateAndSendEmail();
@@ -132,6 +157,8 @@ public class EmailDialog extends JDialog {
 		// Buttons row
 		gc.gridy++;
 		gc.gridx = 0;
+		buttonsPanel.add(copyButton);
+		gc.gridx++;
 		buttonsPanel.add(sendButton);
 		gc.gridx++;
 		buttonsPanel.add(cancelButton);
@@ -177,7 +204,7 @@ public class EmailDialog extends JDialog {
 
 		// Set cursor to "wait" cursor
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		
+
 		try {
 			// Set message fields
 			MimeMessage message = new MimeMessage(session);
@@ -186,11 +213,10 @@ public class EmailDialog extends JDialog {
 			message.setText(messageText.getText());
 
 			// Set email recipients
-			for (int i = 0; i < emailRecipients.getModel().getSize(); i++) {
-				if (emailRecipients.getModel().getElementAt(i) != null) {
-					message.addRecipient(Message.RecipientType.TO,
-							new InternetAddress(emailRecipients.getModel().getElementAt(i)));
-				}
+			String delims = "[, ]+";
+			String[] elements = toField.getText().split(delims);
+			for (int i = 0; i < elements.length; i++) {
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(elements[i]));
 			}
 
 			// Send email (commented out line is if not authenticated above)
@@ -199,7 +225,7 @@ public class EmailDialog extends JDialog {
 		} catch (MessagingException ex) {
 			JOptionPane.showMessageDialog(getParent(), "ERROR sending email: " + ex.getMessage());
 		}
-		
+
 		// Set cursor back to default
 		this.setCursor(Cursor.getDefaultCursor());
 	}
