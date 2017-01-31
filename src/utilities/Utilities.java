@@ -150,6 +150,23 @@ public class Utilities {
 		return newJList;
 	}
 
+	/* <<<<<<<<<< Color Utilities >>>>>>>>>> */
+	public static int[] getColorSelection() {
+		int[] colorSelections = { 0x000000, // Black
+				0xE60000, // Red
+				0x109010, // Forest green
+				0x10E010, // Light green
+				0x0000FF, // Blue
+				0x20D0F0, // Lighter blue
+				0xFF00FF, // Pink
+				0xB030B0, // Purple
+				0xF28500, // Orange
+				0xAA7000, // Brown
+				0x909090  // Grey
+		};
+		return colorSelections;
+	}
+	
 	/* <<<<<<<<<< Memory Utilities >>>>>>>>>> */
 	public static void memoryCheck(String codeLocation) {
 		// Get the Java runtime

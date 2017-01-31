@@ -33,6 +33,7 @@ import javax.swing.event.ChangeListener;
 
 import model.TaskModel;
 import model.TimeModel;
+import utilities.Utilities;
 
 public class TaskDialog extends JDialog {
 	private static final int TEXT_FIELD_WIDTH = 30;
@@ -79,8 +80,8 @@ public class TaskDialog extends JDialog {
 	// Constructor for creating new task
 	public TaskDialog(JFrame parent, String programName) {
 		super(parent, programName, true);
-		setLocation(new Point(100,100));
-		
+		setLocation(new Point(100, 100));
+
 		currentProgramName = new String(programName);
 		currentTask = null;
 		createTimePanel(null);
@@ -91,7 +92,7 @@ public class TaskDialog extends JDialog {
 	// Constructor for updating existing task, TaskModel contains task values
 	public TaskDialog(JFrame parent, String programName, TaskModel task) {
 		super(parent, programName, true);
-		setLocation(new Point(100,100));
+		setLocation(new Point(100, 100));
 
 		currentProgramName = programName;
 		currentTask = task;
@@ -108,7 +109,7 @@ public class TaskDialog extends JDialog {
 	// Constructor for re-try of task create, TaskEvent content re-loaded
 	public TaskDialog(JFrame parent, TaskEvent event) {
 		super(parent, event.getProgramName(), true);
-		setLocation(new Point(100,100));
+		setLocation(new Point(100, 100));
 
 		// Set up task, but leave name field empty since it was found to be a
 		// duplicate
@@ -303,18 +304,7 @@ public class TaskDialog extends JDialog {
 
 	private void createColorSelector() {
 		colorGroup = new ButtonGroup();
-		int[] colorSelections = { 0x000000, // Black
-				0xDC143C, // Crimson
-				0xF28500, // Tangerine
-				0x008000, // Green
-				0x7CFC00, // Lawn green
-				0x003399, // Dark powder blue
-				0x5082B6, // Moderate blue
-				0x8B008B, // Dark magenta
-				0x966FD6, // Dark Pastel purple
-				0x988344, // Dark Khaki
-				0x7D7D7D // Dark gray
-		};
+		int[] colorSelections = Utilities.getColorSelection();
 		JRadioButton[] buttons = new JRadioButton[colorSelections.length];
 
 		int taskColor, colorMatchIdx = -1;
@@ -339,6 +329,8 @@ public class TaskDialog extends JDialog {
 		// If color match found in color table, than highlight the selection
 		if (colorMatchIdx != -1)
 			buttons[colorMatchIdx].setSelected(true);
+		else
+			buttons[0].setSelected(true);
 	}
 
 	private void createSpinnerListeners() {
@@ -392,8 +384,8 @@ public class TaskDialog extends JDialog {
 		int newHour = hour.getCurrentValue();
 
 		if (newHour == 12 && comboAmPm.getSelectedIndex() == Calendar.AM)
-			newHour = 0;  // Back to 0
-        if (comboAmPm.getSelectedIndex() == Calendar.PM)
+			newHour = 0; // Back to 0
+		if (comboAmPm.getSelectedIndex() == Calendar.PM)
 			newHour += 12;
 
 		return (new TimeModel(newHour, minute.getCurrentValue()));
