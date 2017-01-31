@@ -385,7 +385,7 @@ public class TaskDialog extends JDialog {
 
 		if (newHour == 12 && comboAmPm.getSelectedIndex() == Calendar.AM)
 			newHour = 0; // Back to 0
-		if (comboAmPm.getSelectedIndex() == Calendar.PM)
+		else if (comboAmPm.getSelectedIndex() == Calendar.PM && newHour < 12)
 			newHour += 12;
 
 		return (new TimeModel(newHour, minute.getCurrentValue()));
