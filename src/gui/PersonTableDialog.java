@@ -199,7 +199,7 @@ public class PersonTableDialog extends JDialog {
 					int[] selectedRows = table.getSelectedRows();
 
 					for (int i = 0; i < selectedRows.length; i++) {
-						int row = selectedRows[i];
+						int row = table.convertRowIndexToModel(selectedRows[i]);
 						String emailElement = (String) tableModel.getValueAt(row, tableModel.getColumnForEmail());
 						if (emailElement != null && !emailElement.equals(""))
 							emailModel.addElement(emailElement);
@@ -253,9 +253,10 @@ public class PersonTableDialog extends JDialog {
 		editItem = new JMenuItem("Edit person");
 		popup.add(editItem);
 		editItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent event) {
+				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON, 0,
-						(String) tableModel.getValueAt(table.getSelectedRow(), tableModel.getColumnForPersonName()),
+						(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()),
 						calendar, 0);
 				dialogResponse = ev;
 				setVisible(false);
@@ -268,9 +269,10 @@ public class PersonTableDialog extends JDialog {
 			removeItem = new JMenuItem("");
 			popup.add(removeItem);
 			removeItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
+				public void actionPerformed(ActionEvent event) {
+					int row = table.convertRowIndexToModel(table.getSelectedRow());
 					PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON, table.getSelectedRow(),
-							(String) tableModel.getValueAt(table.getSelectedRow(), tableModel.getColumnForPersonName()),
+							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()),
 							calendar, 0);
 					dialogResponse = ev;
 					setVisible(false);
