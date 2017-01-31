@@ -9,17 +9,15 @@ import javax.swing.JList;
 public class PersonTableEvent extends EventObject {
 
 	private int buttonId;
-	private int row;
 	private String personName = "";
 	private JList<String> personList;
 	private Calendar calendar;
 	private int color;
 
-	public PersonTableEvent(Object source, int buttonId, int row, String personName, Calendar calendar, int color) {
+	public PersonTableEvent(Object source, int buttonId, String personName, Calendar calendar, int color) {
 		super(source);
 
 		this.buttonId = buttonId;
-		this.row = row;
 		this.calendar = calendar;
 		this.color = color;
 		this.personName = personName;
@@ -32,12 +30,11 @@ public class PersonTableEvent extends EventObject {
 		}
 	}
 
-	public PersonTableEvent(Object source, int buttonId, int row, JList<String> personList, Calendar calendar,
+	public PersonTableEvent(Object source, int buttonId, JList<String> personList, Calendar calendar,
 			int color) {
 		super(source);
 
 		this.buttonId = buttonId;
-		this.row = row;
 		this.calendar = calendar;
 		this.color = color;
 		this.personName = "";
@@ -46,10 +43,6 @@ public class PersonTableEvent extends EventObject {
 
 	public int getButtonId() {
 		return buttonId;
-	}
-
-	public int getRow() {
-		return row;
 	}
 
 	public String getPersonName() {

@@ -133,7 +133,7 @@ public class PersonTableDialog extends JDialog {
 							if (!isTimeAlreadyAssigned(floaterResponse.getPersonName(),
 									floaterResponse.getCalendar())) {
 								// New time for this person, create event
-								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0,
+								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON,
 										floaterResponse.getPersonName(), floaterResponse.getCalendar(),
 										floaterResponse.getColor());
 								dialogResponse = ev;
@@ -143,7 +143,7 @@ public class PersonTableDialog extends JDialog {
 						}
 					} else if (addButtonText.equals("Add person")) {
 						// Adding new person
-						PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0, (String) null, null, 0);
+						PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, (String) null, null, 0);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -158,7 +158,7 @@ public class PersonTableDialog extends JDialog {
 						if (filterListResponse != null && filterListResponse.getModel().getSize() > 0) {
 							if (!isPersonAlreadyAssigned(filterListResponse, calendar, taskName)) {
 								// New time for this person, create event
-								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, 0,
+								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON,
 										filterListResponse, calendar, 0);
 								dialogResponse = ev;
 								setVisible(false);
@@ -217,7 +217,7 @@ public class PersonTableDialog extends JDialog {
 
 		closeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				PersonTableEvent ev = new PersonTableEvent(this, CLOSE_BUTTON, 0, (String) null, null, 0);
+				PersonTableEvent ev = new PersonTableEvent(this, CLOSE_BUTTON, (String) null, null, 0);
 				dialogResponse = ev;
 				setVisible(false);
 				dispose();
@@ -255,7 +255,7 @@ public class PersonTableDialog extends JDialog {
 		editItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
-				PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON, 0,
+				PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON,
 						(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()),
 						calendar, 0);
 				dialogResponse = ev;
@@ -271,7 +271,7 @@ public class PersonTableDialog extends JDialog {
 			removeItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
 					int row = table.convertRowIndexToModel(table.getSelectedRow());
-					PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON, table.getSelectedRow(),
+					PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON,
 							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()),
 							calendar, 0);
 					dialogResponse = ev;

@@ -129,7 +129,7 @@ public class TaskTableDialog extends JDialog {
 		// for this row
 		removeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				int row = table.getSelectedRow();
+				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				TaskTableEvent ev = new TaskTableEvent(this, DELETE_ROW_BUTTON, 
 						taskList.getModel().getElementAt(row).getTaskName());
 				dialogResponse = ev;
@@ -142,7 +142,7 @@ public class TaskTableDialog extends JDialog {
 		// for this row
 		editItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				int row = table.getSelectedRow();
+				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				TaskTableEvent ev = new TaskTableEvent(this, EDIT_ROW_BUTTON,
 						taskList.getModel().getElementAt(row).getTaskName());
 				dialogResponse = ev;
@@ -180,7 +180,8 @@ public class TaskTableDialog extends JDialog {
 			if (column != -1) {
 				Color textColor = Color.black;
 				if (column == tableModel.getColumnForTaskName()) {
-					TaskModel task = (TaskModel) taskList.getModel().getElementAt(row);
+					int modelRow = table.convertRowIndexToModel(row);
+					TaskModel task = (TaskModel) taskList.getModel().getElementAt(modelRow);
 						textColor = new Color(task.getColor());
 				}
 				super.setForeground(textColor);
