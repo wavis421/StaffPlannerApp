@@ -63,9 +63,9 @@ public class TaskTableModel extends AbstractTableModel {
 		case 2: // location
 			return task.getLocation();
 		case 3: // day of week
-			return getDayOfWeekString(task.getDayOfWeek());
+			return Utilities.getDayOfWeekString(task.getDayOfWeek());
 		case 4: // DOW in month
-			return getWeekOfMonthString(task.getWeekOfMonth());
+			return Utilities.getWeekOfMonthString(task.getWeekOfMonth());
 		}
 		return null;
 	}
@@ -88,31 +88,5 @@ public class TaskTableModel extends AbstractTableModel {
 
 	public int getColumnForDowInMonth() {
 		return DOW_IN_MONTH_COLUMN;
-	}
-	
-	private String getDayOfWeekString(boolean[] dow) {
-		String[] dayName = { "Sun", "Mon", "Tue", "Wed", "Th", "Fri", "Sat" };
-		String dowString = "";
-		for (int i = 0; i < dow.length; i++) {
-			if (dow[i]) {
-				if (!dowString.equals(""))
-					dowString += "/"; 
-				dowString += dayName[i];
-			}
-		}
-		return dowString;
-	}
-	
-	private String getWeekOfMonthString(boolean[] wom) {
-		String[] weekName = { "1", "2", "3", "4", "5" };
-		String womString = "";
-		for (int i = 0; i < wom.length; i++) {
-			if (wom[i]) {
-				if (!womString.equals(""))
-					womString += ", "; 
-				womString += weekName[i];
-			}
-		}
-		return womString;
-	}
+	}	
 }

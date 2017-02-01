@@ -1,37 +1,63 @@
+/**
+ * PersonTableModel: Model for displaying a roster. There are 3 types of field expansion levels
+ * 		which display the following:
+ * 			Expansion level 0 (MINIMUM expansion): Name, leader, Phone #, EMail
+ * 			Expansion level 1 (BY DAY expansion):  Name, leader, Sub, Task, Time, Location, Phone #, EMail
+ * 			Expansion Level 2 (BY TASK expansion): Name, leader, DOW, WOM, Phone #, EMail, 
+ */
+
 package gui;
 
 import java.util.LinkedList;
 
 import javax.swing.table.AbstractTableModel;
 
+import model.AssignedTasksModel;
 import model.PersonByTaskModel;
 import model.TimeModel;
 import utilities.Utilities;
 
 public class PersonTableModel extends AbstractTableModel {
+	// Expansion levels
+	private static final int PERSON_TABLE_MINIMUM_EXPANSION = 0;
+	private static final int PERSON_TABLE_EXPAND_BY_DAY = 1;
+	private static final int PERSON_TABLE_EXPAND_BY_TASK = 2;
+	
+	// Columns for PERSON_TABLE_MINIMUM_EXPANSION
 	private static final int PERSON_NAME_COLUMN = 0;
 	private static final int LEADER_COLUMN = 1;
+	private static final int PHONE_COLUMN_MIN_EXPANSION = 2;
+	private static final int EMAIL_COLUMN_MIN_EXPANSION = 3;
+
+	// Columns for PERSON_TABLE_EXPAND_BY_DAY
 	private static final int SUB_COLUMN = 2;
 	private static final int TASK_COLUMN = 3;
 	private static final int TIME_COLUMN = 4;
 	private static final int LOCATION_COLUMN = 5;
-	private static final int PHONE_COLUMN_EXPANDED = 6;
-	private static final int PHONE_COLUMN_NOT_EXPANDED = 2;
-	private static final int EMAIL_COLUMN_EXPANDED = 7;
-	private static final int EMAIL_COLUMN_NOT_EXPANDED = 3;
+	private static final int PHONE_COLUMN_EXPAND_BY_DAY = 6;
+	private static final int EMAIL_COLUMN_EXPAND_BY_DAY = 7;
+
+	// PERSON_TABLE_EXPAND_BY_TASK
+	private static final int DOW_COLUMN = 2;
+	private static final int WOM_COLUMN = 3;
+	private static final int PHONE_COLUMN_EXPAND_BY_TASK = 4;
+	private static final int EMAIL_COLUMN_EXPAND_BY_TASK = 5;
 
 	private static final long serialVersionUID = 12340002L;
 	private LinkedList<PersonByTaskModel> personList;
 	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail" };
-	private String colNamesExpanded[] = { "Name", "Ldr", "Sub", "Task", "Time", "Location", "Phone #", "E-Mail" };
+	private String colNamesExpandByDay[] = { "Name", "Ldr", "Sub", "Task", "Time", "Location", "Phone #", "E-Mail" };
+	private String colNamesExpandByTask[] = { "Name", "Ldr", "DOW", "WOM", "Phone #", "E-Mail" };
 	private String colNames[];
-	private boolean expanded;
+	private int expansionLevel;
 
-	public PersonTableModel(boolean isColumnExpanded, LinkedList<PersonByTaskModel> personList) {
+	public PersonTableModel(int columnExpansionLevel, LinkedList<PersonByTaskModel> personList) {
 		this.personList = personList;
-		this.expanded = isColumnExpanded;
-		if (expanded) {
-			colNames = colNamesExpanded;
+		this.expansionLevel = columnExpansionLevel;
+		if (columnExpansionLevel == PERSON_TABLE_EXPAND_BY_DAY) {
+			colNames = colNamesExpandByDay;
+		} else if (columnExpansionLevel == PERSON_TABLE_EXPAND_BY_TASK) {
+			colNames = colNamesExpandByTask;
 		} else {
 			colNames = colNamesBasic;
 		}
@@ -58,19 +84,16 @@ public class PersonTableModel extends AbstractTableModel {
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		switch (columnIndex) {
-		case 4: // Time
+		if (columnIndex == TIME_COLUMN && expansionLevel == PERSON_TABLE_EXPAND_BY_DAY)
 			return TimeModel.class;
-
-		default:
+		else
 			return String.class;
-		}
 	}
 
 	@Override
 	public Object getValueAt(int row, int col) {
 		PersonByTaskModel person = personList.get(row);
-		if (expanded) {
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_DAY) {
 			switch (col) {
 			case 0: // person name
 				return person.getPerson().getName();
@@ -99,7 +122,26 @@ public class PersonTableModel extends AbstractTableModel {
 			case 7: // email
 				return person.getPerson().getEmail();
 			}
-		} else {
+		} else if (expansionLevel == PERSON_TABLE_EXPAND_BY_TASK) {
+			switch (col) {
+			case 0: // person name
+				return person.getPerson().getName();
+			case 1: // is leader?
+				return (String) (Character.toString(person.getPerson().isLeader() ? '\u2713' : ' '));
+			case 2: // DOW
+				AssignedTasksModel taskDOW = getTaskMatchInAssignedTaskList(person.getTask().getTaskName(),
+						person.getPerson().getAssignedTasks());
+				return Utilities.getDayOfWeekString(taskDOW.getDaysOfWeek());
+			case 3: // WOM
+				AssignedTasksModel taskWOM = getTaskMatchInAssignedTaskList(person.getTask().getTaskName(),
+						person.getPerson().getAssignedTasks());
+				return Utilities.getWeekOfMonthString(taskWOM.getWeeksOfMonth());
+			case 4: // Phone number
+				return person.getPerson().getPhone();
+			case 5: // email
+				return person.getPerson().getEmail();
+			}
+		} else { // Minimum expansion
 			switch (col) {
 			case 0: // Person name
 				return person.getPerson().getName();
@@ -123,44 +165,82 @@ public class PersonTableModel extends AbstractTableModel {
 	}
 
 	public int getColumnForSub() {
-		if (expanded)
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_DAY)
 			return SUB_COLUMN;
 		else
 			return -1;
 	}
 
 	public int getColumnForTaskName() {
-		if (expanded)
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_DAY)
 			return TASK_COLUMN;
 		else
 			return -1;
 	}
 
 	public int getColumnForTime() {
-		if (expanded)
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_DAY)
 			return TIME_COLUMN;
 		else
 			return -1;
 	}
 
 	public int getColumnForLocation() {
-		if (expanded)
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_DAY)
 			return LOCATION_COLUMN;
 		else
 			return -1;
 	}
-	
+
 	public int getColumnForPhone() {
-		if (expanded)
-			return PHONE_COLUMN_EXPANDED;
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_DAY)
+			return PHONE_COLUMN_EXPAND_BY_DAY;
+		else if (expansionLevel == PERSON_TABLE_EXPAND_BY_TASK)
+			return PHONE_COLUMN_EXPAND_BY_TASK;
 		else
-			return PHONE_COLUMN_NOT_EXPANDED;
+			return PHONE_COLUMN_MIN_EXPANSION;
 	}
 
 	public int getColumnForEmail() {
-		if (expanded)
-			return EMAIL_COLUMN_EXPANDED;
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_DAY)
+			return EMAIL_COLUMN_EXPAND_BY_DAY;
+		else if (expansionLevel == PERSON_TABLE_EXPAND_BY_TASK)
+			return EMAIL_COLUMN_EXPAND_BY_TASK;
 		else
-			return EMAIL_COLUMN_NOT_EXPANDED;
+			return EMAIL_COLUMN_MIN_EXPANSION;
+	}
+
+	public int getColumnForDow() {
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_TASK)
+			return DOW_COLUMN;
+		else
+			return -1;
+	}
+
+	public int getColumnForWom() {
+		if (expansionLevel == PERSON_TABLE_EXPAND_BY_TASK)
+			return WOM_COLUMN;
+		else
+			return -1;
+	}
+
+	public static int getMinimumExpansion() {
+		return PERSON_TABLE_MINIMUM_EXPANSION;
+	}
+
+	public static int getExpansionByDay() {
+		return PERSON_TABLE_EXPAND_BY_DAY;
+	}
+
+	public static int getExpansionByTask() {
+		return PERSON_TABLE_EXPAND_BY_TASK;
+	}
+
+	private AssignedTasksModel getTaskMatchInAssignedTaskList(String taskName, LinkedList<AssignedTasksModel> list) {
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getTaskName().equals(taskName))
+				return list.get(i);
+		}
+		return null;
 	}
 }

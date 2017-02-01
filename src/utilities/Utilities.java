@@ -20,14 +20,13 @@ public class Utilities {
 
 	/* <<<<<<<<<< Calendar & Time Utilities >>>>>>>>>> */
 	public static String formatTime(Calendar cal) {
-		Calendar localCal = (Calendar) cal.clone();
+		return getFormattedTime((Calendar) cal.clone());
+	}
 
-		int hour = localCal.get(Calendar.HOUR);
-		if (hour == 0) {
-			localCal.set(Calendar.HOUR, 12);
-			localCal.set(Calendar.AM_PM, Calendar.AM);
-		}
-		return timeFormat.format(localCal.getTime());
+	public static String formatTime(TimeModel time) {
+		Calendar localCal = Calendar.getInstance();
+		addTimeToCalendar(localCal, time);
+		return getFormattedTime(localCal);
 	}
 
 	public static boolean checkForTimeMatch(Calendar time1, Calendar time2) {
@@ -75,8 +74,9 @@ public class Utilities {
 		else
 			return false;
 	}
-	
-	public static void checkStartEndDatePicker (String name, JDatePickerImpl startDatePicker, JDatePickerImpl endDatePicker) {
+
+	public static void checkStartEndDatePicker(String name, JDatePickerImpl startDatePicker,
+			JDatePickerImpl endDatePicker) {
 		String startText = startDatePicker.getJFormattedTextField().getText();
 		String endText = endDatePicker.getJFormattedTextField().getText();
 
@@ -111,12 +111,48 @@ public class Utilities {
 				}
 
 			} catch (ParseException ex) {
-				JOptionPane.showMessageDialog(null, "Error parsing date: " + ex.getMessage(),
-						"Date Parsing Exception", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Error parsing date: " + ex.getMessage(), "Date Parsing Exception",
+						JOptionPane.WARNING_MESSAGE);
 			}
 		}
 	}
-	
+
+	public static String getDayOfWeekString(boolean[] dow) {
+		String[] dayName = { "Sun", "Mon", "Tue", "Wed", "Th", "Fri", "Sat" };
+		String dowString = "";
+		for (int i = 0; i < dow.length; i++) {
+			if (dow[i]) {
+				if (!dowString.equals(""))
+					dowString += "/";
+				dowString += dayName[i];
+			}
+		}
+		return dowString;
+	}
+
+	public static String getWeekOfMonthString(boolean[] wom) {
+		String[] weekName = { "1", "2", "3", "4", "5" };
+		String womString = "";
+		for (int i = 0; i < wom.length; i++) {
+			if (wom[i]) {
+				if (!womString.equals(""))
+					womString += ", ";
+				womString += weekName[i];
+			}
+		}
+		return womString;
+	}
+
+	private static String getFormattedTime(Calendar cal) {
+		// This method assumes that the calendar is already cloned...
+		int hour = cal.get(Calendar.HOUR);
+		if (hour == 0) {
+			cal.set(Calendar.HOUR, 12);
+			cal.set(Calendar.AM_PM, Calendar.AM);
+		}
+		return timeFormat.format(cal.getTime());
+	}
+
 	private static JDatePickerImpl setDate(JDatePickerImpl datePickerFrom, JDatePickerImpl datePickerTo) {
 		Calendar calFrom = (Calendar) datePickerFrom.getModel().getValue();
 		datePickerTo.getModel().setDate(calFrom.get(Calendar.YEAR), calFrom.get(Calendar.MONTH),
@@ -162,11 +198,11 @@ public class Utilities {
 				0xB030B0, // Purple
 				0xF28500, // Orange
 				0xAA7000, // Brown
-				0x909090  // Grey
+				0x909090 // Grey
 		};
 		return colorSelections;
 	}
-	
+
 	/* <<<<<<<<<< Memory Utilities >>>>>>>>>> */
 	public static void memoryCheck(String codeLocation) {
 		// Get the Java runtime

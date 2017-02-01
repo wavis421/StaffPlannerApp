@@ -296,7 +296,7 @@ public class Database {
 		// Now add floaters to the list
 		for (int i = 0; i < personList.size(); i++) {
 			PersonModel person = personList.get(i);
-			
+
 			// Check if person is a floater (not associated with task).
 			for (int j = 0; j < person.getSingleInstanceTasks().size(); j++) {
 				SingleInstanceTaskModel task = person.getSingleInstanceTasks().get(j);
@@ -364,7 +364,7 @@ public class Database {
 
 		for (int i = 0; i < programList.size(); i++) {
 			ProgramModel p = programList.get(i);
-			
+
 			for (int j = 0; j < p.getTaskList().size(); j++) {
 				TaskModel t = p.getTaskList().get(j);
 				taskModel.addElement(t);
@@ -447,13 +447,26 @@ public class Database {
 	private void updateTaskNameByPerson(String oldTaskName, String newTaskName) {
 		for (int i = 0; i < personList.size(); i++) {
 			PersonModel person = personList.get(i);
-			
+
 			for (int j = 0; j < person.getAssignedTasks().size(); j++) {
 				AssignedTasksModel assignedTask = person.getAssignedTasks().get(j);
 				if (assignedTask.getTaskName().equals(oldTaskName))
 					assignedTask.setTaskName(newTaskName);
 			}
 		}
+	}
+
+	private int checkPersonMatchForTask(PersonModel person, String taskName) {
+		LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+
+		// Check if task is in person's assigned task list
+		for (int i = 0; i < assignedTaskList.size(); i++) {
+			AssignedTasksModel assignedTask = assignedTaskList.get(i);
+			if (assignedTask.getTaskName().equals(taskName)) {
+				return 0;
+			}
+		}
+		return -1;
 	}
 
 	private int checkPersonMatchForTaskByDay(PersonModel person, String taskName, Date today, int dayOfWeekIdx,
@@ -736,6 +749,22 @@ public class Database {
 			personsByTask.add(person);
 		}
 		return (LinkedList<PersonByTaskModel>) personsByTask;
+	}
+
+	public LinkedList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
+		JList<PersonModel> persons = getAllPersons();
+		LinkedList<PersonByTaskModel> thisTasksPersons = new LinkedList<PersonByTaskModel>();
+
+		for (int i = 0; i < persons.getModel().getSize(); i++) {
+			PersonModel pModel = persons.getModel().getElementAt(i);
+
+			// -1 = no match, 0 = assigned task
+			if (checkPersonMatchForTask(pModel, task.getTaskName()) == 0) {
+				// Match found, add to list
+				thisTasksPersons.add(new PersonByTaskModel(pModel, task, false, task.getColor(), null));
+			}
+		}
+		return thisTasksPersons;
 	}
 
 	// Return list of all persons assigned to this day, including single

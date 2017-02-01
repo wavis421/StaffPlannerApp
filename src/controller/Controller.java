@@ -184,6 +184,10 @@ public class Controller {
 		return db.getAllPersons();
 	}
 
+	public LinkedList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
+		return db.getPersonsByTask(task);
+	}
+	
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		return db.getPersonsByDayByTask(calendar, task);
 	}

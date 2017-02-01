@@ -43,7 +43,7 @@ public class PersonTableDialog extends JDialog {
 
 	private static final int ROW_GAP = 5;
 
-	private boolean isColumnExpanded;
+	private int columnExpansionLevel;
 	private JPanel tablePanel;
 	private JTable table;
 	private PersonTableModel tableModel;
@@ -64,17 +64,17 @@ public class PersonTableDialog extends JDialog {
 	private JFrame parent;
 	private JDialog child;
 
-	public PersonTableDialog(JFrame parent, String title, boolean isColumnExpanded, String taskName,
+	public PersonTableDialog(JFrame parent, String title, int columnExpansionLevel, String taskName,
 			LinkedList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
 			JList<TimeModel> allTimes) {
 		super(parent, true);
-		setLocation(new Point(100,100));
+		setLocation(new Point(100, 100));
 
 		setTitle(title);
 		this.parent = parent;
 		this.child = this;
 		this.addButtonText = addButtonText;
-		this.isColumnExpanded = isColumnExpanded;
+		this.columnExpansionLevel = columnExpansionLevel;
 		this.taskName = taskName;
 
 		// Floaters have null task; if task defined, create a sub-list with
@@ -141,14 +141,7 @@ public class PersonTableDialog extends JDialog {
 								dispose();
 							}
 						}
-					} else if (addButtonText.equals("Add person")) {
-						// Adding new person
-						PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, (String) null, null, 0);
-						dialogResponse = ev;
-						setVisible(false);
-						dispose();
-						
-					} else {
+					} else if (addButtonText.equals("Add sub")) {
 						// Adding task substitute
 						FilterListDialog ev1 = new FilterListDialog(parent,
 								"Assign person(s) to " + taskName + " on " + Utilities.getDisplayDate(calendar),
@@ -158,13 +151,32 @@ public class PersonTableDialog extends JDialog {
 						if (filterListResponse != null && filterListResponse.getModel().getSize() > 0) {
 							if (!isPersonAlreadyAssigned(filterListResponse, calendar, taskName)) {
 								// New time for this person, create event
-								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON,
-										filterListResponse, calendar, 0);
+								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, filterListResponse,
+										calendar, 0);
 								dialogResponse = ev;
 								setVisible(false);
 								dispose();
 							}
 						}
+					} else if (columnExpansionLevel == PersonTableModel.getExpansionByTask()) {
+						// Adding person to task
+						FilterListDialog ev1 = new FilterListDialog(parent, "Assign person(s) to " + taskName,
+								allPersons);
+						JList<String> filterListResponse = ev1.getDialogResponse();
+
+						if (filterListResponse != null && filterListResponse.getModel().getSize() > 0) {
+							PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, filterListResponse,
+									null, 0);
+							dialogResponse = ev;
+							setVisible(false);
+							dispose();
+						}
+					} else {
+						// Adding new person
+						PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, (String) null, null, 0);
+						dialogResponse = ev;
+						setVisible(false);
+						dispose();
 					}
 				}
 			});
@@ -229,7 +241,7 @@ public class PersonTableDialog extends JDialog {
 
 	private JPanel createPersonTablePanel() {
 		JPanel panel = new JPanel();
-		tableModel = new PersonTableModel(isColumnExpanded, personList);
+		tableModel = new PersonTableModel(columnExpansionLevel, personList);
 		table = new JTable(tableModel);
 
 		table.setFont(new Font("Serif", Font.PLAIN, 14));
@@ -238,9 +250,14 @@ public class PersonTableDialog extends JDialog {
 		table.getColumnModel().getColumn(tableModel.getColumnForLeader()).setMaxWidth(35);
 		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setMaxWidth(100);
 		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setPreferredWidth(95);
-		if (isColumnExpanded) {
+		if (columnExpansionLevel == PersonTableModel.getExpansionByDay()) {
 			table.getColumnModel().getColumn(tableModel.getColumnForSub()).setMaxWidth(35);
 			table.getColumnModel().getColumn(tableModel.getColumnForTime()).setMaxWidth(75);
+		} else if (columnExpansionLevel == PersonTableModel.getExpansionByTask()) {
+			table.getColumnModel().getColumn(tableModel.getColumnForDow()).setMaxWidth(140);
+			table.getColumnModel().getColumn(tableModel.getColumnForDow()).setPreferredWidth(140);
+			table.getColumnModel().getColumn(tableModel.getColumnForWom()).setMaxWidth(90);
+			table.getColumnModel().getColumn(tableModel.getColumnForWom()).setPreferredWidth(90);
 		}
 		table.setDefaultRenderer(Object.class, new PersonTableRenderer());
 		table.setAutoCreateRowSorter(true);
@@ -256,8 +273,7 @@ public class PersonTableDialog extends JDialog {
 			public void actionPerformed(ActionEvent event) {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON,
-						(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()),
-						calendar, 0);
+						(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
 				dialogResponse = ev;
 				setVisible(false);
 				dispose();
@@ -272,8 +288,7 @@ public class PersonTableDialog extends JDialog {
 				public void actionPerformed(ActionEvent event) {
 					int row = table.convertRowIndexToModel(table.getSelectedRow());
 					PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON,
-							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()),
-							calendar, 0);
+							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
 					dialogResponse = ev;
 					setVisible(false);
 					dispose();
