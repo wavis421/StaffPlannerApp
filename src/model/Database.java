@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,50 +30,6 @@ public class Database {
 	public Database() {
 		programList = new LinkedList<ProgramModel>();
 		personList = new LinkedList<PersonModel>();
-	}
-
-	private Connection dbConnection;
-
-	public boolean connect() throws Exception {
-		if (dbConnection != null)
-			return true;
-
-		try {
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			
-		} catch (ClassNotFoundException e) {
-			System.out.println("Database driver not found");
-		}
-
-		try {
-			String url = "jdbc:mysql://107.180.57.27:3306/home/wavis421/ProgramPlanner";
-			dbConnection = DriverManager.getConnection(url, "SB_EZrLNfcZ44OLw", "Fis13002-");
-			System.out.println("Connected!!");
-			return true;
-			
-		} catch (Exception e) {
-			System.out.print("Failed to connect to database: " + e.getMessage());
-			return false;
-		}
-	}
-
-	public boolean isConnected() {
-		if (dbConnection == null) 
-			return false;
-		
-		try {
-			return dbConnection.isValid(0);
-		} catch (SQLException e) {
-			return false;
-		}
-	}
-	public void disconnect() {
-		if (dbConnection != null)
-			try {
-				dbConnection.close();
-			} catch (SQLException e) {
-				System.out.println("Can't close database connection");
-			}
 	}
 
 	/*
