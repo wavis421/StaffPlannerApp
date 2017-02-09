@@ -995,8 +995,9 @@ public class Database {
 		ois.close();
 		
 		try {
-			TestDatabase.initializeDatabase(personList);
-			TestDatabase.importPersonDatabase();
+			TestDatabase.initializeDatabase();
+			TestDatabase.importPersonDatabase(personList);
+			TestDatabase.importProgramsDatabase(programList);
 			
 		} catch (Exception e) {
 			System.out.println("Failed to import database: " + e.getMessage());
