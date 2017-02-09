@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
@@ -27,7 +28,8 @@ public class TestDatabase {
 
 	private static JFrame frame = new JFrame("Database connector");
 	private static JButton connectButton = new JButton();
-	private static JButton showButton = new JButton("Show");
+	private static JButton showRosterButton = new JButton("Show Roster");
+	private static JButton showTasksButton = new JButton("Show Tasks");
 	private static LinkedList<PersonModel> personList;
 	private static LinkedList<ProgramModel> programList;
 
@@ -59,15 +61,22 @@ public class TestDatabase {
 			}
 		});
 
-		showButton.addActionListener(new ActionListener() {
+		showRosterButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				showDatabase();
+				showRosterDatabase();
+			}
+		});
+
+		showTasksButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showTasksDatabase();
 			}
 		});
 
 		frame.setLayout(new FlowLayout(FlowLayout.CENTER));
 		frame.add(connectButton);
-		frame.add(showButton);
+		frame.add(showRosterButton);
+		frame.add(showTasksButton);
 		frame.pack();
 		frame.setVisible(true);
 	}
@@ -86,7 +95,7 @@ public class TestDatabase {
 
 		try {
 			String url = "jdbc:mysql://www.programplanner.org:3306/ProgramPlanner";
-			dbConnection = DriverManager.getConnection(url, "SB_hpfMnj6YZBdQM", "Apk13002");
+			dbConnection = DriverManager.getConnection(url, "SB_nAzSqi6pAaluq", "Apk13002");
 			return dbConnection;
 
 		} catch (SQLException e) {
@@ -141,7 +150,7 @@ public class TestDatabase {
 			}
 	}
 
-	public static void showDatabase() {
+	public static void showRosterDatabase() {
 		try {
 			PreparedStatement checkStmt = dbConnection.prepareStatement("SELECT * FROM Persons");
 			ResultSet result = checkStmt.executeQuery();
@@ -155,6 +164,35 @@ public class TestDatabase {
 					break;
 
 				System.out.println("Row " + row + ": " + result.getString("PersonName"));
+			}
+
+			checkStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public static void showTasksDatabase() {
+		try {
+			PreparedStatement checkStmt = dbConnection.prepareStatement("SELECT * FROM Tasks, Programs");
+			ResultSet result = checkStmt.executeQuery();
+			int row;
+
+			while (true) {
+				result.next();
+
+				row = result.getRow();
+				if (row == 0)
+					break;
+
+				String location = result.getString("Location");
+				if (location == null || location.equals(""))
+					System.out.println("Row " + row + ": " + result.getString("ProgramName") + " - "
+							+ result.getString("TaskName"));
+				else
+					System.out.println("Row " + row + ": " + result.getString("ProgramName") + " - "
+							+ result.getString("TaskName") + " at " + result.getString("Location"));
 			}
 
 			checkStmt.close();
@@ -178,9 +216,8 @@ public class TestDatabase {
 				checkStmt.setString(1, personName);
 				result = checkStmt.executeQuery();
 				result.next();
-				String sqlName = result.getString(1);
 
-				if (sqlName == null || sqlName.equals("") || sqlName.equals("0")) {
+				if (result.getInt("count") == 0) {
 					// Add new person
 					PersonModel person = personList.get(i);
 					int col = 1;
@@ -206,11 +243,13 @@ public class TestDatabase {
 
 	public static void importProgramsDatabase(LinkedList<ProgramModel> programs) {
 		programList = programs;
+		int progID = 0;
 		try {
-			PreparedStatement checkProgramStmt = dbConnection
-					.prepareStatement("SELECT COUNT(*) AS count FROM Programs WHERE ProgramName=?");
-			PreparedStatement addProgramStmt = dbConnection
-					.prepareStatement("INSERT INTO Programs (ProgramName, StartDate, EndDate) VALUES (?, ?, ?)");
+			PreparedStatement checkProgramStmt = dbConnection.prepareStatement(
+					"SELECT COUNT(*) AS count, ProgramID as progID FROM Programs WHERE ProgramName=?");
+			PreparedStatement addProgramStmt = dbConnection.prepareStatement(
+					"INSERT INTO Programs (ProgramName, StartDate, EndDate) VALUES (?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
 			ResultSet result;
 
 			for (int i = 0; i < programList.size(); i++) {
@@ -218,10 +257,9 @@ public class TestDatabase {
 				checkProgramStmt.setString(1, programName);
 				result = checkProgramStmt.executeQuery();
 				result.next();
-				String sqlProgName = result.getString(1);
 
 				ProgramModel program = programList.get(i);
-				if (sqlProgName == null || sqlProgName.equals("") || sqlProgName.equals("0")) {
+				if (result.getInt("count") == 0) {
 					// Add new program
 					int col = 1;
 					addProgramStmt.setString(col++, programName);
@@ -229,12 +267,16 @@ public class TestDatabase {
 					addProgramStmt.setString(col++, program.getEndDate());
 
 					addProgramStmt.executeUpdate();
-					System.out.println("Adding " + programName);
-				} else {
-					System.out.println("Program " + programName + " already exists!");
-				}
+					result = addProgramStmt.getGeneratedKeys();
+					result.next();
+					progID = result.getInt(1);
+					System.out.println("Adding " + programName + ", ID " + progID);
 
-				addTasksByProgram(program);
+				} else {
+					progID = result.getInt("progID");
+					System.out.println("Program " + progID + ":" + programName + " already exists!");
+				}
+				addTasksByProgram(program, progID);
 			}
 
 			addProgramStmt.close();
@@ -246,40 +288,41 @@ public class TestDatabase {
 		}
 	}
 
-	private static void addTasksByProgram(ProgramModel program) {
+	private static void addTasksByProgram(ProgramModel program, int progID) {
 		try {
-			PreparedStatement checkTaskStmt = dbConnection.prepareStatement("SELECT COUNT(*) AS count FROM Tasks WHERE TaskName=?");
+			PreparedStatement checkTaskStmt = dbConnection
+					.prepareStatement("SELECT COUNT(*) AS count FROM Tasks WHERE TaskName=?");
 			PreparedStatement addTaskStmt = dbConnection.prepareStatement(
-					"INSERT INTO Tasks (TaskName, Location, NumLeadersReqd, TotalPersonsReqd, DaysOfWeek, DowInMonth, Color) VALUES "
-							+ "(?, ?, ?, ?, ?, ?, ?)");
+					"INSERT INTO Tasks (ProgramID, TaskName, Location, NumLeadersReqd, TotalPersonsReqd, DaysOfWeek, DowInMonth, Color) VALUES "
+							+ "(?, ?, ?, ?, ?, ?, ?, ?)");
 			ResultSet result;
+			LinkedList<TaskModel> tasks = program.getTaskList();
 
 			// Add task for this program
-			LinkedList<TaskModel> tasks = program.getTaskList();
 			for (int j = 0; j < tasks.size(); j++) {
-				String taskName = tasks.get(j).getTaskName();
+				TaskModel thisTask = tasks.get(j);
+				String taskName = thisTask.getTaskName();
 				checkTaskStmt.setString(1, taskName);
 				result = checkTaskStmt.executeQuery();
 				result.next();
-				String sqlTaskName = result.getString(1);
 
-				if (sqlTaskName == null || sqlTaskName.equals("") || sqlTaskName.equals("0")) {
+				if (result.getInt("count") == 0) {
 					// Add new task
-					TaskModel task = tasks.get(j);
 					int dow = 0, wom = 0;
 					for (int k = 0; k < 7; k++)
-						dow = (dow << 1) | (task.getDayOfWeek()[k] ? 1 : 0);
+						dow = (dow << 1) | (thisTask.getDayOfWeek()[k] ? 1 : 0);
 					for (int k = 0; k < 5; k++)
-						wom = (wom << 1) | (task.getWeekOfMonth()[k] ? 1 : 0);
+						wom = (wom << 1) | (thisTask.getWeekOfMonth()[k] ? 1 : 0);
 
 					int col = 1;
+					addTaskStmt.setInt(col++, progID);
 					addTaskStmt.setString(col++, taskName);
-					addTaskStmt.setString(col++, task.getLocation());
-					addTaskStmt.setInt(col++, task.getNumLeadersReqd());
-					addTaskStmt.setInt(col++, task.getTotalPersonsReqd());
+					addTaskStmt.setString(col++, thisTask.getLocation());
+					addTaskStmt.setInt(col++, thisTask.getNumLeadersReqd());
+					addTaskStmt.setInt(col++, thisTask.getTotalPersonsReqd());
 					addTaskStmt.setInt(col++, dow);
 					addTaskStmt.setInt(col++, wom);
-					addTaskStmt.setInt(col++, task.getColor());
+					addTaskStmt.setInt(col++, thisTask.getColor());
 
 					addTaskStmt.executeUpdate();
 					System.out.println("Adding task " + taskName);
@@ -290,7 +333,7 @@ public class TestDatabase {
 			addTaskStmt.close();
 			checkTaskStmt.close();
 			System.out.println("Connection status = " + isDatabaseConnected());
-			
+
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
