@@ -20,6 +20,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
+import TestDatabase.TestDatabase;
 import utilities.Utilities;
 
 public class Database {
@@ -992,5 +993,13 @@ public class Database {
 					JOptionPane.ERROR_MESSAGE);
 		}
 		ois.close();
+		
+		try {
+			TestDatabase.initializeDatabase(personList);
+			TestDatabase.importPersonDatabase();
+			
+		} catch (Exception e) {
+			System.out.println("Failed to import database: " + e.getMessage());
+		}
 	}
 }

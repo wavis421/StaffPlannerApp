@@ -1,5 +1,6 @@
 package TestDatabase;
 
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -8,12 +9,15 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-import model.Database;
+import model.PersonModel;
 
 public class TestDatabase {
 	private static Connection dbConnection;
@@ -21,12 +25,15 @@ public class TestDatabase {
 
 	private static JFrame frame = new JFrame("Database connector");
 	private static JButton connectButton = new JButton();
+	private static JButton showButton = new JButton("Show");
+	private static JButton importButton = new JButton("Import");
+	private static LinkedList<PersonModel> personList;
 
-	public static void main(String[] args) {
-		Database db = new Database();
-
+	public static void initializeDatabase(LinkedList<PersonModel> list) {
+		personList = list;
 		try {
 			dbConnection = connectDatabase();
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.out.println(e.getMessage());
@@ -51,7 +58,22 @@ public class TestDatabase {
 			}
 		});
 
+		showButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showDatabase();
+			}
+		});
+
+		importButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				importPersonDatabase();
+			}
+		});
+
+		frame.setLayout(new FlowLayout(FlowLayout.CENTER));
 		frame.add(connectButton);
+		frame.add(showButton);
+		frame.add(importButton);
 		frame.pack();
 		frame.setVisible(true);
 	}
@@ -123,6 +145,69 @@ public class TestDatabase {
 			} catch (SQLException e) {
 				System.out.println("Can't close database connection: " + e.getMessage());
 			}
+	}
+
+	public static void showDatabase() {
+		try {
+			PreparedStatement checkStmt = dbConnection.prepareStatement("SELECT * FROM Persons");
+			ResultSet result = checkStmt.executeQuery();
+			int row;
+
+			while (true) {
+				result.next();
+
+				row = result.getRow();
+				if (row == 0)
+					break;
+
+				System.out.println("Row " + row + ": " + result.getString("PersonName"));
+			}
+
+			checkStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public static void importPersonDatabase() {
+		try {
+			PreparedStatement checkStmt = dbConnection
+					.prepareStatement("SELECT COUNT(*) AS count FROM Persons WHERE PersonName=?");
+			PreparedStatement addStmt = dbConnection.prepareStatement(
+					"INSERT INTO Persons (PersonName, PhoneNumber, EMail, isLeader) " + " VALUES (?, ?, ?, ?)");
+			ResultSet result;
+			int row, count;
+
+			for (int i = 0; i < personList.size(); i++) {
+				String personName = personList.get(i).getName();
+				checkStmt.setString(1, personName);
+				result = checkStmt.executeQuery();
+				result.next();
+				String sqlName = result.getString(1);
+
+				if (sqlName == null || sqlName.equals("") || sqlName.equals("0")) {
+					// Add new person
+					PersonModel person = personList.get(i);
+					int col = 1;
+					addStmt.setString(col++, personName);
+					addStmt.setString(col++, person.getPhone());
+					addStmt.setString(col++, person.getEmail());
+					addStmt.setBoolean(col, person.isLeader());
+
+					addStmt.executeUpdate();
+					System.out.println("Adding " + personName);
+				} else
+					System.out.println("Person " + personName + " already exists!");
+			}
+
+			addStmt.close();
+			checkStmt.close();
+			System.out.println("Connection status = " + isDatabaseConnected());
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	private static void updateConnectionStatus() {
