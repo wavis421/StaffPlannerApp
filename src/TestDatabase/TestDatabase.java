@@ -290,7 +290,7 @@ public class TestDatabase {
 
 			while (results.next()) {
 				int progID = results.getInt("ProgramID");
-				progList.add(new ProgramModel(results.getString("ProgramName"), results.getString("StartDate"),
+				progList.add(new ProgramModel(progID, results.getString("ProgramName"), results.getString("StartDate"),
 						results.getString("EndDate"), loadTasks(progID)));
 			}
 			results.close();

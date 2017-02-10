@@ -5,12 +5,14 @@ import java.util.LinkedList;
 
 public class ProgramModel implements Serializable, Comparable<ProgramModel> {
 	private static final long serialVersionUID = 12340001L;
+	private int programID;
 	private String programName;
 	private String startDate, endDate;
 	private LinkedList<TaskModel> taskList;
 	
 	// Create new program with null task list
-	public ProgramModel(String programName, String startDate, String endDate, LinkedList<TaskModel> taskList) {
+	public ProgramModel(int programID, String programName, String startDate, String endDate, LinkedList<TaskModel> taskList) {
+		this.programID = programID;
 		this.programName = programName;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -19,6 +21,10 @@ public class ProgramModel implements Serializable, Comparable<ProgramModel> {
 
 	public String toString () {
 		return programName;
+	}
+	
+	public int getProgramID() {
+		return programID;
 	}
 	
 	public String getProgramName() {

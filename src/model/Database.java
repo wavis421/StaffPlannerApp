@@ -40,11 +40,14 @@ public class Database {
 	 * ------- Programs -------
 	 */
 	public void addProgram(String programName, String startDate, String endDate) {
-		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
-		programList.add(new ProgramModel(programName, startDate, endDate, taskList));
-		Collections.sort(programList);
-
 		TestDatabase.addProgram(programName, startDate, endDate);
+		programList = TestDatabase.loadPrograms();
+		
+		/*
+		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
+		programList.add(new ProgramModel(programID, programName, startDate, endDate, taskList));
+		Collections.sort(programList);
+		*/
 	}
 
 	public void updateProgram(String programName, String startDate, String endDate) {
