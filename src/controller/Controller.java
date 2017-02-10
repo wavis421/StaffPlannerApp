@@ -223,6 +223,10 @@ public class Controller {
 		db.loadProgramFromFile(file);
 	}
 
+        public void loadProgramFromDatabase () {
+            db.loadProgramFromDatabase();
+        }
+
 	public void saveRosterToFile(File file) throws IOException {
 		db.saveRosterToFile(file);
 	}

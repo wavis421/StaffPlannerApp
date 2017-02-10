@@ -122,6 +122,9 @@ public class MainFrame extends JFrame {
 		FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select sample database to load", sampleList);
 		JList<String> dialogResponse = ev.getDialogResponse();
 		if (dialogResponse != null) {
+			controller.loadProgramFromDatabase();
+			processImportProgram();
+			/*
 			try {
 				controller.loadProgramFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_prog.tsk"));
 				processImportProgram();
@@ -130,6 +133,7 @@ public class MainFrame extends JFrame {
 				JOptionPane.showMessageDialog(this,
 						"Failed to load database file " + dialogResponse.getModel().getElementAt(0) + "_prog.tsk");
 			}
+			*/
 
 			try {
 				controller.loadRosterFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_staff.tsk"));

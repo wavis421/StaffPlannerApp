@@ -18,6 +18,7 @@ import javax.swing.JFrame;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
+import model.TimeModel;
 
 public class TestDatabase {
 	private static Connection dbConnection;
@@ -140,7 +141,7 @@ public class TestDatabase {
 
 				System.out.println("Row " + row + ": " + result.getString("PersonName"));
 			}
-
+			result.close();
 			checkStmt.close();
 
 		} catch (SQLException e) {
@@ -169,7 +170,7 @@ public class TestDatabase {
 					System.out.println("Row " + row + ": " + result.getString("ProgramName") + " - "
 							+ result.getString("TaskName") + " at " + result.getString("Location"));
 			}
-
+			result.close();
 			checkStmt.close();
 
 		} catch (SQLException e) {
@@ -184,7 +185,7 @@ public class TestDatabase {
 					.prepareStatement("SELECT COUNT(*) AS count FROM Persons WHERE PersonName=?");
 			PreparedStatement addStmt = dbConnection.prepareStatement(
 					"INSERT INTO Persons (PersonName, PhoneNumber, EMail, isLeader) " + " VALUES (?, ?, ?, ?)");
-			ResultSet result;
+			ResultSet result = null;
 
 			for (int i = 0; i < personList.size(); i++) {
 				String personName = personList.get(i).getName();
@@ -204,7 +205,8 @@ public class TestDatabase {
 					addStmt.executeUpdate();
 				}
 			}
-
+			if (result != null)
+				result.close();
 			addStmt.close();
 			checkStmt.close();
 
@@ -213,13 +215,13 @@ public class TestDatabase {
 		}
 	}
 
-	public static void importProgramsDatabase(LinkedList<ProgramModel> programs) {
+	public static void importProgramDatabase(LinkedList<ProgramModel> programs) {
 		programList = programs;
 		int progID = 0;
 		try {
 			PreparedStatement checkProgramStmt = dbConnection.prepareStatement(
 					"SELECT COUNT(*) AS count, ProgramID as progID FROM Programs WHERE ProgramName=?");
-			ResultSet result;
+			ResultSet result = null;
 
 			for (int i = 0; i < programList.size(); i++) {
 				String programName = programList.get(i).getProgramName();
@@ -237,7 +239,8 @@ public class TestDatabase {
 				}
 				addTasksByProgram(program, progID);
 			}
-
+			if (result != null)
+				result.close();
 			checkProgramStmt.close();
 
 		} catch (SQLException e) {
@@ -245,11 +248,107 @@ public class TestDatabase {
 		}
 	}
 
+	public static LinkedList<PersonModel> loadRoster() {
+		try {
+			connectDatabase();
+		} catch (Exception e1) {
+			System.out.println("Unable to connect to database: " + e1.getMessage());
+		}
+
+		LinkedList<PersonModel> personList = new LinkedList<PersonModel>();
+		try {
+			Statement selectStmt = dbConnection.createStatement();
+			ResultSet results = selectStmt.executeQuery("SELECT PersonID, PersonName FROM Persons ORDER BY PersonName");
+
+			while (results.next()) {
+				int personID = results.getInt("PersonID");
+				System.out.println("Found person " + results.getString("PersonName") + " with ID " + personID);
+			}
+			results.close();
+			selectStmt.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return personList;
+	}
+
+	public static LinkedList<ProgramModel> loadPrograms() {
+		try {
+			connectDatabase();
+		} catch (Exception e1) {
+			System.out.println("Unable to connect to database: " + e1.getMessage());
+		}
+
+		LinkedList<ProgramModel> progList = new LinkedList<ProgramModel>();
+		try {
+			Statement selectStmt = dbConnection.createStatement();
+			ResultSet results = selectStmt.executeQuery(
+					"SELECT ProgramID, ProgramName, StartDate, EndDate FROM Programs ORDER BY ProgramName");
+
+			while (results.next()) {
+				int progID = results.getInt("ProgramID");
+				progList.add(new ProgramModel(results.getString("ProgramName"), results.getString("StartDate"),
+						results.getString("EndDate"), loadTasks(progID)));
+			}
+			results.close();
+			selectStmt.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return progList;
+	}
+
+	public static LinkedList<TaskModel> loadTasks(int progID) {
+		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
+		try {
+			PreparedStatement selectStmt = dbConnection.prepareStatement(
+					"SELECT TaskID, Tasks.ProgramID, Programs.ProgramID, TaskName, Location, NumLeadersReqd, TotalPersonsReqd, "
+							+ "Color, DaysOfWeek, DowInMonth, Hour, Minute FROM Programs, Tasks "
+							+ "WHERE Programs.ProgramID = Tasks.ProgramID AND Programs.ProgramID=? ORDER BY Hour, Minute");
+
+			selectStmt.setInt(1, progID);
+			ResultSet results = selectStmt.executeQuery();
+
+			while (results.next()) {
+				int dow = results.getInt("DaysOfWeek");
+				boolean[] dowBool = { false, false, false, false, false, false, false };
+				for (int i = 6; i >= 0; i--) {
+					if ((dow & 1) == 1)
+						dowBool[i] = true;
+					dow >>= 1;
+				}
+				int wom = results.getInt("DowInMonth");
+				boolean[] womBool = { false, false, false, false, false };
+				for (int i = 4; i >= 0; i--) {
+					if ((wom & 1) == 1)
+						womBool[i] = true;
+					wom >>= 1;
+				}
+
+				taskList.add(new TaskModel(results.getString("TaskName"), results.getString("Location"),
+						results.getInt("NumLeadersReqd"), results.getInt("TotalPersonsReqd"), dowBool, womBool,
+						new TimeModel(results.getInt("Hour"), results.getInt("Minute")), results.getInt("Color")));
+			}
+			results.close();
+			selectStmt.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return taskList;
+	}
+
 	private static void addTasksByProgram(ProgramModel program, int progID) {
 		try {
 			PreparedStatement checkTaskStmt = dbConnection
 					.prepareStatement("SELECT COUNT(*) AS count FROM Tasks WHERE TaskName=?");
-			ResultSet result;
+			ResultSet result = null;
 			LinkedList<TaskModel> tasks = program.getTaskList();
 
 			// Add task for this program
@@ -265,7 +364,8 @@ public class TestDatabase {
 					addTask(progID, thisTask);
 				}
 			}
-
+			if (result != null)
+				result.close();
 			checkTaskStmt.close();
 
 		} catch (SQLException e) {
@@ -293,7 +393,6 @@ public class TestDatabase {
 			PreparedStatement addProgramStmt = dbConnection.prepareStatement(
 					"INSERT INTO Programs (ProgramName, StartDate, EndDate) VALUES (?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
-			ResultSet result;
 
 			// Add new program
 			int col = 1;
@@ -302,10 +401,11 @@ public class TestDatabase {
 			addProgramStmt.setString(col++, endDate);
 
 			addProgramStmt.executeUpdate();
-			result = addProgramStmt.getGeneratedKeys();
+			ResultSet result = addProgramStmt.getGeneratedKeys();
 			result.next();
 			progID = result.getInt(1);
 
+			result.close();
 			addProgramStmt.close();
 
 		} catch (SQLException e) {
@@ -340,8 +440,6 @@ public class TestDatabase {
 			addTaskStmt.setInt(col++, dow);
 			addTaskStmt.setInt(col++, wom);
 			addTaskStmt.setInt(col++, task.getColor());
-
-			System.out.println("Add " + task.getTaskName() + " for time " + task.getTime());
 
 			addTaskStmt.executeUpdate();
 			addTaskStmt.close();

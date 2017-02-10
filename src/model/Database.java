@@ -29,6 +29,9 @@ public class Database {
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 	public Database() {
+		// First connect to database
+		TestDatabase.initializeDatabase();
+		
 		programList = new LinkedList<ProgramModel>();
 		personList = new LinkedList<PersonModel>();
 	}
@@ -40,7 +43,7 @@ public class Database {
 		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
 		programList.add(new ProgramModel(programName, startDate, endDate, taskList));
 		Collections.sort(programList);
-		
+
 		TestDatabase.addProgram(programName, startDate, endDate);
 	}
 
@@ -123,7 +126,7 @@ public class Database {
 		ProgramModel program = getProgramByName(programName);
 		program.getTaskList().add(task);
 		Collections.sort(program.getTaskList());
-		
+
 		// TODO: remove hard-coding of progID once this is added to TaskModel
 		TestDatabase.addTask(12, task);
 	}
@@ -935,6 +938,10 @@ public class Database {
 		oos.close();
 	}
 
+	public void loadProgramFromDatabase() {
+		programList = TestDatabase.loadPrograms();
+	}
+
 	public void loadProgramFromFile(File file) throws IOException {
 		FileInputStream fis = new FileInputStream(file);
 		ObjectInputStream ois = new ObjectInputStream(fis);
@@ -998,12 +1005,11 @@ public class Database {
 					JOptionPane.ERROR_MESSAGE);
 		}
 		ois.close();
-		
+
 		try {
-			TestDatabase.initializeDatabase();
 			TestDatabase.importPersonDatabase(personList);
-			TestDatabase.importProgramsDatabase(programList);
-			
+			TestDatabase.loadRoster();
+
 		} catch (Exception e) {
 			System.out.println("Failed to import database: " + e.getMessage());
 		}
