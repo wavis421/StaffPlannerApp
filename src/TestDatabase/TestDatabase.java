@@ -3,9 +3,6 @@ package TestDatabase;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -100,28 +97,6 @@ public class TestDatabase {
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-		}
-
-		return null;
-	}
-
-	public URLConnection connectUrl() throws Exception {
-		if (urlConnection != null)
-			return urlConnection;
-
-		try {
-			URL dbURL = new URL("http://www.programplanner.org/");
-			URLConnection urlConnection = dbURL.openConnection();
-			urlConnection.connect();
-			return urlConnection;
-
-		} catch (MalformedURLException e) {
-			// new URL() failed
-			System.out.println("Database URL failed: " + e.getMessage());
-
-		} catch (IOException e) {
-			// openConnection() failed
-			System.out.println("Database connection failed: " + e.getMessage());
 		}
 
 		return null;
@@ -227,14 +202,11 @@ public class TestDatabase {
 					addStmt.setBoolean(col, person.isLeader());
 
 					addStmt.executeUpdate();
-					System.out.println("Adding " + personName);
-				} else
-					System.out.println("Person " + personName + " already exists!");
+				}
 			}
 
 			addStmt.close();
 			checkStmt.close();
-			System.out.println("Connection status = " + isDatabaseConnected());
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -247,9 +219,6 @@ public class TestDatabase {
 		try {
 			PreparedStatement checkProgramStmt = dbConnection.prepareStatement(
 					"SELECT COUNT(*) AS count, ProgramID as progID FROM Programs WHERE ProgramName=?");
-			PreparedStatement addProgramStmt = dbConnection.prepareStatement(
-					"INSERT INTO Programs (ProgramName, StartDate, EndDate) VALUES (?, ?, ?)",
-					Statement.RETURN_GENERATED_KEYS);
 			ResultSet result;
 
 			for (int i = 0; i < programList.size(); i++) {
@@ -261,27 +230,15 @@ public class TestDatabase {
 				ProgramModel program = programList.get(i);
 				if (result.getInt("count") == 0) {
 					// Add new program
-					int col = 1;
-					addProgramStmt.setString(col++, programName);
-					addProgramStmt.setString(col++, program.getStartDate());
-					addProgramStmt.setString(col++, program.getEndDate());
-
-					addProgramStmt.executeUpdate();
-					result = addProgramStmt.getGeneratedKeys();
-					result.next();
-					progID = result.getInt(1);
-					System.out.println("Adding " + programName + ", ID " + progID);
-
+					progID = addProgram(programName, program.getStartDate(), program.getEndDate());
 				} else {
+					// Program already exists
 					progID = result.getInt("progID");
-					System.out.println("Program " + progID + ":" + programName + " already exists!");
 				}
 				addTasksByProgram(program, progID);
 			}
 
-			addProgramStmt.close();
 			checkProgramStmt.close();
-			System.out.println("Connection status = " + isDatabaseConnected());
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -292,9 +249,6 @@ public class TestDatabase {
 		try {
 			PreparedStatement checkTaskStmt = dbConnection
 					.prepareStatement("SELECT COUNT(*) AS count FROM Tasks WHERE TaskName=?");
-			PreparedStatement addTaskStmt = dbConnection.prepareStatement(
-					"INSERT INTO Tasks (ProgramID, TaskName, Location, NumLeadersReqd, TotalPersonsReqd, DaysOfWeek, DowInMonth, Color) VALUES "
-							+ "(?, ?, ?, ?, ?, ?, ?, ?)");
 			ResultSet result;
 			LinkedList<TaskModel> tasks = program.getTaskList();
 
@@ -308,31 +262,11 @@ public class TestDatabase {
 
 				if (result.getInt("count") == 0) {
 					// Add new task
-					int dow = 0, wom = 0;
-					for (int k = 0; k < 7; k++)
-						dow = (dow << 1) | (thisTask.getDayOfWeek()[k] ? 1 : 0);
-					for (int k = 0; k < 5; k++)
-						wom = (wom << 1) | (thisTask.getWeekOfMonth()[k] ? 1 : 0);
-
-					int col = 1;
-					addTaskStmt.setInt(col++, progID);
-					addTaskStmt.setString(col++, taskName);
-					addTaskStmt.setString(col++, thisTask.getLocation());
-					addTaskStmt.setInt(col++, thisTask.getNumLeadersReqd());
-					addTaskStmt.setInt(col++, thisTask.getTotalPersonsReqd());
-					addTaskStmt.setInt(col++, dow);
-					addTaskStmt.setInt(col++, wom);
-					addTaskStmt.setInt(col++, thisTask.getColor());
-
-					addTaskStmt.executeUpdate();
-					System.out.println("Adding task " + taskName);
-				} else
-					System.out.println("Task " + taskName + " already exists!");
+					addTask(progID, thisTask);
+				}
 			}
 
-			addTaskStmt.close();
 			checkTaskStmt.close();
-			System.out.println("Connection status = " + isDatabaseConnected());
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -346,6 +280,74 @@ public class TestDatabase {
 		} else {
 			frame.setTitle("Disconnected");
 			connectButton.setText("Connect");
+		}
+	}
+
+	/*
+	 * ------- Programs -------
+	 */
+	public static int addProgram(String programName, String startDate, String endDate) {
+		int progID = 0;
+
+		try {
+			PreparedStatement addProgramStmt = dbConnection.prepareStatement(
+					"INSERT INTO Programs (ProgramName, StartDate, EndDate) VALUES (?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+			ResultSet result;
+
+			// Add new program
+			int col = 1;
+			addProgramStmt.setString(col++, programName);
+			addProgramStmt.setString(col++, startDate);
+			addProgramStmt.setString(col++, endDate);
+
+			addProgramStmt.executeUpdate();
+			result = addProgramStmt.getGeneratedKeys();
+			result.next();
+			progID = result.getInt(1);
+
+			addProgramStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return progID;
+	}
+
+	/*
+	 * ------- Task data -------
+	 */
+	public static void addTask(int progID, TaskModel task) {
+		try {
+			PreparedStatement addTaskStmt = dbConnection.prepareStatement(
+					"INSERT INTO Tasks (ProgramID, TaskName, Hour, Minute, Location, NumLeadersReqd, TotalPersonsReqd, DaysOfWeek, DowInMonth, Color) VALUES "
+							+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			int dow = 0, wom = 0;
+
+			for (int k = 0; k < 7; k++)
+				dow = (dow << 1) | (task.getDayOfWeek()[k] ? 1 : 0);
+			for (int k = 0; k < 5; k++)
+				wom = (wom << 1) | (task.getWeekOfMonth()[k] ? 1 : 0);
+
+			int col = 1;
+			addTaskStmt.setInt(col++, progID);
+			addTaskStmt.setString(col++, task.getTaskName());
+			addTaskStmt.setInt(col++, task.getTime().get24Hour());
+			addTaskStmt.setInt(col++, task.getTime().getMinute());
+			addTaskStmt.setString(col++, task.getLocation());
+			addTaskStmt.setInt(col++, task.getNumLeadersReqd());
+			addTaskStmt.setInt(col++, task.getTotalPersonsReqd());
+			addTaskStmt.setInt(col++, dow);
+			addTaskStmt.setInt(col++, wom);
+			addTaskStmt.setInt(col++, task.getColor());
+
+			System.out.println("Add " + task.getTaskName() + " for time " + task.getTime());
+
+			addTaskStmt.executeUpdate();
+			addTaskStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
 		}
 	}
 }

@@ -40,6 +40,8 @@ public class Database {
 		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
 		programList.add(new ProgramModel(programName, startDate, endDate, taskList));
 		Collections.sort(programList);
+		
+		TestDatabase.addProgram(programName, startDate, endDate);
 	}
 
 	public void updateProgram(String programName, String startDate, String endDate) {
@@ -121,6 +123,9 @@ public class Database {
 		ProgramModel program = getProgramByName(programName);
 		program.getTaskList().add(task);
 		Collections.sort(program.getTaskList());
+		
+		// TODO: remove hard-coding of progID once this is added to TaskModel
+		TestDatabase.addTask(12, task);
 	}
 
 	public void updateTask(String programName, TaskModel task) {

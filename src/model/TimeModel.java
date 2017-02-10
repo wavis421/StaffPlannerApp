@@ -40,6 +40,13 @@ public class TimeModel implements Comparable<TimeModel>, Serializable {
 		return calTime.get(Calendar.HOUR);
 	}
 	
+	public int get24Hour() {
+		if (getAmPm() == Calendar.PM)
+			return getHour() + 12;
+		else
+			return getHour();
+	}
+	
 	public int getMinute() {
 		return calTime.get(Calendar.MINUTE);
 	}
