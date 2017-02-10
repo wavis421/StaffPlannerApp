@@ -79,6 +79,9 @@ public class TestDatabase {
 		frame.setVisible(true);
 	}
 
+	/*
+	 * ------- Database Connections -------
+	 */
 	public static Connection connectDatabase() throws Exception {
 		if (isDatabaseConnected())
 			return dbConnection;
@@ -93,7 +96,7 @@ public class TestDatabase {
 
 		try {
 			String url = "jdbc:mysql://www.programplanner.org:3306/ProgramPlanner";
-			dbConnection = DriverManager.getConnection(url, "SB_nAzSqi6pAaluq", "Apk13002");
+			dbConnection = DriverManager.getConnection(url, "SB_2WVe5OlBZXFLH", "Apk13002");
 			return dbConnection;
 
 		} catch (SQLException e) {
@@ -101,6 +104,16 @@ public class TestDatabase {
 		}
 
 		return null;
+	}
+
+	public static void disconnectDatabase() {
+		if (dbConnection != null)
+			try {
+				dbConnection.close();
+				dbConnection = null;
+			} catch (SQLException e) {
+				System.out.println("Can't close database connection: " + e.getMessage());
+			}
 	}
 
 	public static boolean isDatabaseConnected() {
@@ -115,17 +128,20 @@ public class TestDatabase {
 			return false;
 		}
 	}
-
-	public static void disconnectDatabase() {
-		if (dbConnection != null)
-			try {
-				dbConnection.close();
-				dbConnection = null;
-			} catch (SQLException e) {
-				System.out.println("Can't close database connection: " + e.getMessage());
-			}
+	
+	private static void updateConnectionStatus() {
+		if (isDatabaseConnected()) {
+			frame.setTitle("Connected");
+			connectButton.setText("Disconnect");
+		} else {
+			frame.setTitle("Disconnected");
+			connectButton.setText("Connect");
+		}
 	}
 
+	/*
+	 * ------- Showing Database Content -------
+	 */
 	public static void showRosterDatabase() {
 		try {
 			PreparedStatement checkStmt = dbConnection.prepareStatement("SELECT * FROM Persons");
@@ -178,6 +194,9 @@ public class TestDatabase {
 		}
 	}
 
+	/*
+	 * ------- Importing Files to SQL Database -------
+	 */
 	public static void importPersonDatabase(LinkedList<PersonModel> persons) {
 		personList = persons;
 		try {
@@ -237,7 +256,7 @@ public class TestDatabase {
 					// Program already exists
 					progID = result.getInt("progID");
 				}
-				addTasksByProgram(program, progID);
+				importTasksByProgram(program, progID);
 			}
 			if (result != null)
 				result.close();
@@ -247,7 +266,40 @@ public class TestDatabase {
 			System.out.println(e.getMessage());
 		}
 	}
+	
+	private static void importTasksByProgram(ProgramModel program, int progID) {
+		try {
+			PreparedStatement checkTaskStmt = dbConnection
+					.prepareStatement("SELECT COUNT(*) AS count FROM Tasks WHERE TaskName=?");
+			ResultSet result = null;
+			LinkedList<TaskModel> tasks = program.getTaskList();
 
+			// Add task for this program
+			for (int j = 0; j < tasks.size(); j++) {
+				TaskModel thisTask = tasks.get(j);
+				String taskName = thisTask.getTaskName();
+				checkTaskStmt.setString(1, taskName);
+				result = checkTaskStmt.executeQuery();
+				result.next();
+
+				if (result.getInt("count") == 0) {
+					// Add new task
+					addTask(progID, taskName, thisTask.getLocation(), thisTask.getNumLeadersReqd(), thisTask.getTotalPersonsReqd(),
+							thisTask.getDayOfWeek(), thisTask.getWeekOfMonth(), thisTask.getTime(), thisTask.getColor());
+				}
+			}
+			if (result != null)
+				result.close();
+			checkTaskStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	/*
+	 * ------- Loading SQL Database into Application -------
+	 */
 	public static LinkedList<PersonModel> loadRoster() {
 		try {
 			connectDatabase();
@@ -268,8 +320,7 @@ public class TestDatabase {
 			selectStmt.close();
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 
 		return personList;
@@ -297,8 +348,7 @@ public class TestDatabase {
 			selectStmt.close();
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 		return progList;
 	}
@@ -339,54 +389,13 @@ public class TestDatabase {
 			selectStmt.close();
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 		return taskList;
 	}
 
-	private static void addTasksByProgram(ProgramModel program, int progID) {
-		try {
-			PreparedStatement checkTaskStmt = dbConnection
-					.prepareStatement("SELECT COUNT(*) AS count FROM Tasks WHERE TaskName=?");
-			ResultSet result = null;
-			LinkedList<TaskModel> tasks = program.getTaskList();
-
-			// Add task for this program
-			for (int j = 0; j < tasks.size(); j++) {
-				TaskModel thisTask = tasks.get(j);
-				String taskName = thisTask.getTaskName();
-				checkTaskStmt.setString(1, taskName);
-				result = checkTaskStmt.executeQuery();
-				result.next();
-
-				if (result.getInt("count") == 0) {
-					// Add new task
-					addTask(progID, taskName, thisTask.getLocation(), thisTask.getNumLeadersReqd(), thisTask.getTotalPersonsReqd(),
-							thisTask.getDayOfWeek(), thisTask.getWeekOfMonth(), thisTask.getTime(), thisTask.getColor());
-				}
-			}
-			if (result != null)
-				result.close();
-			checkTaskStmt.close();
-
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	private static void updateConnectionStatus() {
-		if (isDatabaseConnected()) {
-			frame.setTitle("Connected");
-			connectButton.setText("Disconnect");
-		} else {
-			frame.setTitle("Disconnected");
-			connectButton.setText("Connect");
-		}
-	}
-
 	/*
-	 * ------- Programs -------
+	 * ------- Programs Database addition/updates -------
 	 */
 	public static int addProgram(String programName, String startDate, String endDate) {
 		int progID = 0;
@@ -417,7 +426,7 @@ public class TestDatabase {
 	}
 
 	/*
-	 * ------- Task data -------
+	 * ------- Task Database additions/updates -------
 	 */
 	public static void addTask(int progID, String taskName, String location, int numLeadersReqd, int totalPersonsReqd,
 			boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
