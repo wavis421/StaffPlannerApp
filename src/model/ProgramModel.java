@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 public class ProgramModel implements Serializable, Comparable<ProgramModel> {
-	private static final long serialVersionUID = 12340001L;
+	private static final long serialVersionUID = 12340002L;
 	private int programID;
 	private String programName;
 	private String startDate, endDate;

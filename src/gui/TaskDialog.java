@@ -107,14 +107,14 @@ public class TaskDialog extends JDialog {
 	}
 
 	// Constructor for re-try of task create, TaskEvent content re-loaded
-	public TaskDialog(JFrame parent, TaskEvent event) {
+	public TaskDialog(JFrame parent, TaskEvent event, int taskID, int programID) {
 		super(parent, event.getProgramName(), true);
 		setLocation(new Point(100, 100));
 
 		// Set up task, but leave name field empty since it was found to be a
 		// duplicate
 		currentProgramName = event.getProgramName();
-		currentTask = new TaskModel(event.getTaskName(), event.getLocation(), event.getNumLeadersReqd(),
+		currentTask = new TaskModel(taskID, programID, event.getTaskName(), event.getLocation(), event.getNumLeadersReqd(),
 				event.getTotalPersonsReqd(), event.getDayOfWeek(), event.getWeekOfMonth(), event.getTime(),
 				event.getColor());
 

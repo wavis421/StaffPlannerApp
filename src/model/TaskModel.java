@@ -3,7 +3,8 @@ package model;
 import java.io.Serializable;
 
 public class TaskModel implements Serializable, Comparable<TaskModel> {
-	private static final long serialVersionUID = 12340001L;
+	private static final long serialVersionUID = 12340002L;
+	private int taskID, programID;
 	private String taskName;
 	private TimeModel time;
 	private String location;
@@ -13,8 +14,10 @@ public class TaskModel implements Serializable, Comparable<TaskModel> {
 	private boolean[] weekOfMonth;
 	private int color;
 
-	public TaskModel(String taskName, String location, int numLeadersReqd, int totalPersonsReqd, boolean[] dayOfWeek,
-			boolean[] weekOfMonth, TimeModel time, int color) {
+	public TaskModel(int taskID, int programID, String taskName, String location, int numLeadersReqd,
+			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
+		this.taskID = taskID;
+		this.programID = programID;
 		this.taskName = taskName;
 		this.location = location;
 		this.numLeadersReqd = numLeadersReqd;
@@ -27,6 +30,14 @@ public class TaskModel implements Serializable, Comparable<TaskModel> {
 
 	public String toString() {
 		return taskName;
+	}
+
+	public int getTaskID() {
+		return taskID;
+	}
+
+	public int getProgramID() {
+		return programID;
 	}
 
 	public String getTaskName() {

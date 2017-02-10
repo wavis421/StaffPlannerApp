@@ -330,8 +330,9 @@ public class TestDatabase {
 					wom >>= 1;
 				}
 
-				taskList.add(new TaskModel(results.getString("TaskName"), results.getString("Location"),
-						results.getInt("NumLeadersReqd"), results.getInt("TotalPersonsReqd"), dowBool, womBool,
+				taskList.add(new TaskModel(results.getInt("TaskID"), results.getInt("Tasks.ProgramID"),
+						results.getString("TaskName"), results.getString("Location"), results.getInt("NumLeadersReqd"),
+						results.getInt("TotalPersonsReqd"), dowBool, womBool,
 						new TimeModel(results.getInt("Hour"), results.getInt("Minute")), results.getInt("Color")));
 			}
 			results.close();
@@ -361,7 +362,8 @@ public class TestDatabase {
 
 				if (result.getInt("count") == 0) {
 					// Add new task
-					addTask(progID, thisTask);
+					addTask(progID, taskName, thisTask.getLocation(), thisTask.getNumLeadersReqd(), thisTask.getTotalPersonsReqd(),
+							thisTask.getDayOfWeek(), thisTask.getWeekOfMonth(), thisTask.getTime(), thisTask.getColor());
 				}
 			}
 			if (result != null)
@@ -417,29 +419,30 @@ public class TestDatabase {
 	/*
 	 * ------- Task data -------
 	 */
-	public static void addTask(int progID, TaskModel task) {
+	public static void addTask(int progID, String taskName, String location, int numLeadersReqd, int totalPersonsReqd,
+			boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
 		try {
 			PreparedStatement addTaskStmt = dbConnection.prepareStatement(
-					"INSERT INTO Tasks (ProgramID, TaskName, Hour, Minute, Location, NumLeadersReqd, TotalPersonsReqd, DaysOfWeek, DowInMonth, Color) VALUES "
-							+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+					"INSERT INTO Tasks (ProgramID, TaskName, Hour, Minute, Location, NumLeadersReqd, TotalPersonsReqd, "
+							+ "DaysOfWeek, DowInMonth, Color) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			int dow = 0, wom = 0;
 
 			for (int k = 0; k < 7; k++)
-				dow = (dow << 1) | (task.getDayOfWeek()[k] ? 1 : 0);
+				dow = (dow << 1) | (dayOfWeek[k] ? 1 : 0);
 			for (int k = 0; k < 5; k++)
-				wom = (wom << 1) | (task.getWeekOfMonth()[k] ? 1 : 0);
+				wom = (wom << 1) | (weekOfMonth[k] ? 1 : 0);
 
 			int col = 1;
 			addTaskStmt.setInt(col++, progID);
-			addTaskStmt.setString(col++, task.getTaskName());
-			addTaskStmt.setInt(col++, task.getTime().get24Hour());
-			addTaskStmt.setInt(col++, task.getTime().getMinute());
-			addTaskStmt.setString(col++, task.getLocation());
-			addTaskStmt.setInt(col++, task.getNumLeadersReqd());
-			addTaskStmt.setInt(col++, task.getTotalPersonsReqd());
+			addTaskStmt.setString(col++, taskName);
+			addTaskStmt.setInt(col++, time.get24Hour());
+			addTaskStmt.setInt(col++, time.getMinute());
+			addTaskStmt.setString(col++, location);
+			addTaskStmt.setInt(col++, numLeadersReqd);
+			addTaskStmt.setInt(col++, totalPersonsReqd);
 			addTaskStmt.setInt(col++, dow);
 			addTaskStmt.setInt(col++, wom);
-			addTaskStmt.setInt(col++, task.getColor());
+			addTaskStmt.setInt(col++, color);
 
 			addTaskStmt.executeUpdate();
 			addTaskStmt.close();

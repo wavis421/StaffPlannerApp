@@ -31,7 +31,7 @@ public class Database {
 	public Database() {
 		// First connect to database
 		TestDatabase.initializeDatabase();
-		
+
 		programList = new LinkedList<ProgramModel>();
 		personList = new LinkedList<PersonModel>();
 	}
@@ -42,12 +42,12 @@ public class Database {
 	public void addProgram(String programName, String startDate, String endDate) {
 		TestDatabase.addProgram(programName, startDate, endDate);
 		programList = TestDatabase.loadPrograms();
-		
+
 		/*
-		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
-		programList.add(new ProgramModel(programID, programName, startDate, endDate, taskList));
-		Collections.sort(programList);
-		*/
+		 * LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
+		 * programList.add(new ProgramModel(programID, programName, startDate,
+		 * endDate, taskList)); Collections.sort(programList);
+		 */
 	}
 
 	public void updateProgram(String programName, String startDate, String endDate) {
@@ -125,23 +125,31 @@ public class Database {
 	/*
 	 * ------- Task data -------
 	 */
-	public void addTask(String programName, TaskModel task) {
+	public void addTask(String programName, String taskName, String location, int numLeadersReqd, int totalPersonsReqd,
+			boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
 		ProgramModel program = getProgramByName(programName);
-		program.getTaskList().add(task);
-		Collections.sort(program.getTaskList());
+		TestDatabase.addTask(program.getProgramID(), taskName, location, numLeadersReqd, totalPersonsReqd, dayOfWeek,
+				weekOfMonth, time, color);
 
-		// TODO: remove hard-coding of progID once this is added to TaskModel
-		TestDatabase.addTask(12, task);
+		/*
+		 * program.getTaskList().add(task);
+		 * Collections.sort(program.getTaskList());
+		 */
 	}
 
-	public void updateTask(String programName, TaskModel task) {
+	public void updateTask(String programName, String taskName, String location, int numLeadersReqd,
+			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
 		ProgramModel program = getProgramByName(programName);
-		int taskIdx = getTaskIndexByName(program, task.getTaskName());
+		TaskModel task = getTaskByName(programName, taskName);
+		TaskModel newTask = new TaskModel(task.getTaskID(), task.getProgramID(), taskName, location, numLeadersReqd,
+				totalPersonsReqd, dayOfWeek, weekOfMonth, time, color);
+
+		int taskIdx = getTaskIndexByName(program, taskName);
 		if (taskIdx != -1) {
-			program.getTaskList().set(taskIdx, task);
+			program.getTaskList().set(taskIdx, newTask);
 			Collections.sort(program.getTaskList());
 		} else
-			JOptionPane.showMessageDialog(null, "Task '" + task.getTaskName() + "' not found!", "Error updating task",
+			JOptionPane.showMessageDialog(null, "Task '" + taskName + "' not found!", "Error updating task",
 					JOptionPane.ERROR_MESSAGE);
 	}
 

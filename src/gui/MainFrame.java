@@ -720,7 +720,7 @@ public class MainFrame extends JFrame {
 				task.getNumLeadersReqd(), task.getTotalPersonsReqd(), task.getDayOfWeek(), task.getWeekOfMonth(),
 				task.getTime(), task.getColor());
 
-		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev);
+		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev, task.getTaskID(), task.getProgramID());
 		processCreateTaskDialog(taskEvent, null);
 	}
 
@@ -743,7 +743,7 @@ public class MainFrame extends JFrame {
 
 				} else if (confirm == JOptionPane.NO_OPTION) {
 					// Re-try creating this task
-					taskEvent = new TaskDialog(MainFrame.this, dialogResponse);
+					taskEvent = new TaskDialog(MainFrame.this, dialogResponse, task.getTaskID(), task.getProgramID());
 
 				} else { // Cancel
 					break;
