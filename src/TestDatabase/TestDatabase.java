@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import model.AssignedTasksModel;
+import model.DateRangeModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
@@ -101,7 +102,7 @@ public class TestDatabase {
 
 		try {
 			String url = "jdbc:mysql://www.programplanner.org:3306/ProgramPlanner";
-			dbConnection = DriverManager.getConnection(url, "SB_2WVe5OlBZXFLH", "Apk13002");
+			dbConnection = DriverManager.getConnection(url, "admin_12345", "Apk13002-");
 			return dbConnection;
 
 		} catch (SQLException e) {
@@ -225,6 +226,7 @@ public class TestDatabase {
 					personID = result.getInt("personID");
 				}
 				importAssignedTasks(person.getAssignedTasks(), personID);
+				importUnavailDates(person.getDatesUnavailable(), personID);
 			}
 			if (result != null)
 				result.close();
@@ -259,6 +261,36 @@ public class TestDatabase {
 			if (result != null)
 				result.close();
 			checkTaskStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public static void importUnavailDates(LinkedList<DateRangeModel> unavailDates, int personID) {
+		try {
+			PreparedStatement checkDateRangeStmt = dbConnection
+					.prepareStatement("SELECT COUNT(*) AS count FROM UnavailDates, Persons WHERE "
+							+ "Persons.PersonID = UnavailDates.PersonID AND "
+							+ "UnavailDates.StartDate = ? AND UnavailDates.EndDate = ?");
+			ResultSet result = null;
+
+			// Add Unavail Dates for this person
+			for (int j = 0; j < unavailDates.size(); j++) {
+				DateRangeModel dateRange = unavailDates.get(j);
+				checkDateRangeStmt.setString(1, dateRange.getStartDate());
+				checkDateRangeStmt.setString(2, dateRange.getEndDate());
+				result = checkDateRangeStmt.executeQuery();
+				result.next();
+
+				if (result.getInt("count") == 0) {
+					// Date range match found
+					addUnavailDates(personID, dateRange.getStartDate(), dateRange.getEndDate());
+				} 
+			}
+			if (result != null)
+				result.close();
+			checkDateRangeStmt.close();
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -557,5 +589,31 @@ public class TestDatabase {
 			System.out.println(e.getMessage());
 		}
 		return assignedTaskID;
+	}
+	
+	public static int addUnavailDates (int personID, String startDate, String endDate) {
+		int unavailDatesID = 0;
+		try {
+			PreparedStatement addUnavailDatesStmt = dbConnection.prepareStatement(
+					"INSERT INTO UnavailDates (PersonID, StartDate, EndDate) VALUES (?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+
+			// Add new Unavail Dates
+			addUnavailDatesStmt.setInt(1, personID);
+			addUnavailDatesStmt.setString(2, startDate);
+			addUnavailDatesStmt.setString(3, endDate);
+
+			addUnavailDatesStmt.executeUpdate();
+			ResultSet result = addUnavailDatesStmt.getGeneratedKeys();
+			result.next();
+			unavailDatesID = result.getInt(1);
+
+			result.close();
+			addUnavailDatesStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return unavailDatesID;
 	}
 }
