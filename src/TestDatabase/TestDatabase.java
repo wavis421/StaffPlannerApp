@@ -3,7 +3,6 @@ package TestDatabase;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,6 +14,7 @@ import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+import model.AssignedTasksModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
@@ -22,7 +22,7 @@ import model.TimeModel;
 
 public class TestDatabase {
 	private static Connection dbConnection;
-	private static URLConnection urlConnection;
+	private static boolean initialized = false;
 
 	private static JFrame frame = new JFrame("Database connector");
 	private static JButton connectButton = new JButton();
@@ -32,6 +32,9 @@ public class TestDatabase {
 	private static LinkedList<ProgramModel> programList;
 
 	public static void initializeDatabase() {
+		if (initialized)
+			return;
+
 		try {
 			dbConnection = connectDatabase();
 
@@ -77,6 +80,8 @@ public class TestDatabase {
 		frame.add(showTasksButton);
 		frame.pack();
 		frame.setVisible(true);
+
+		initialized = true;
 	}
 
 	/*
@@ -128,7 +133,7 @@ public class TestDatabase {
 			return false;
 		}
 	}
-	
+
 	private static void updateConnectionStatus() {
 		if (isDatabaseConnected()) {
 			frame.setTitle("Connected");
@@ -199,11 +204,10 @@ public class TestDatabase {
 	 */
 	public static void importPersonDatabase(LinkedList<PersonModel> persons) {
 		personList = persons;
+		int personID = 0;
 		try {
 			PreparedStatement checkStmt = dbConnection
-					.prepareStatement("SELECT COUNT(*) AS count FROM Persons WHERE PersonName=?");
-			PreparedStatement addStmt = dbConnection.prepareStatement(
-					"INSERT INTO Persons (PersonName, PhoneNumber, EMail, isLeader) " + " VALUES (?, ?, ?, ?)");
+					.prepareStatement("SELECT COUNT(*) AS count, PersonID as personID FROM Persons WHERE PersonName=?");
 			ResultSet result = null;
 
 			for (int i = 0; i < personList.size(); i++) {
@@ -212,22 +216,49 @@ public class TestDatabase {
 				result = checkStmt.executeQuery();
 				result.next();
 
+				PersonModel person = personList.get(i);
 				if (result.getInt("count") == 0) {
 					// Add new person
-					PersonModel person = personList.get(i);
-					int col = 1;
-					addStmt.setString(col++, personName);
-					addStmt.setString(col++, person.getPhone());
-					addStmt.setString(col++, person.getEmail());
-					addStmt.setBoolean(col, person.isLeader());
-
-					addStmt.executeUpdate();
+					personID = addPerson(person.getName(), person.getPhone(), person.getEmail(), person.isLeader());
+				} else {
+					// Program already exists
+					personID = result.getInt("personID");
 				}
+				importAssignedTasks(person.getAssignedTasks(), personID);
 			}
 			if (result != null)
 				result.close();
-			addStmt.close();
 			checkStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public static void importAssignedTasks(LinkedList<AssignedTasksModel> assignedTasks, int personID) {
+		try {
+			PreparedStatement checkTaskStmt = dbConnection
+					.prepareStatement("SELECT COUNT(*) AS count, TaskID AS taskID FROM Tasks WHERE TaskName=?");
+			ResultSet result = null;
+
+			// Add assigned tasks for this person
+			for (int j = 0; j < assignedTasks.size(); j++) {
+				AssignedTasksModel assignedTask = assignedTasks.get(j);
+				String taskName = assignedTask.getTaskName();
+				checkTaskStmt.setString(1, taskName);
+				result = checkTaskStmt.executeQuery();
+				result.next();
+
+				if (result.getInt("count") > 0) {
+					// Task match found, add new assigned task
+					addAssignedTask(personID, result.getInt("taskID"), assignedTask.getDaysOfWeek(),
+							assignedTask.getWeeksOfMonth());
+				} else
+					System.out.println("Assigned task name '" + taskName + "' not found in Task Database!!");
+			}
+			if (result != null)
+				result.close();
+			checkTaskStmt.close();
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -266,7 +297,7 @@ public class TestDatabase {
 			System.out.println(e.getMessage());
 		}
 	}
-	
+
 	private static void importTasksByProgram(ProgramModel program, int progID) {
 		try {
 			PreparedStatement checkTaskStmt = dbConnection
@@ -284,8 +315,9 @@ public class TestDatabase {
 
 				if (result.getInt("count") == 0) {
 					// Add new task
-					addTask(progID, taskName, thisTask.getLocation(), thisTask.getNumLeadersReqd(), thisTask.getTotalPersonsReqd(),
-							thisTask.getDayOfWeek(), thisTask.getWeekOfMonth(), thisTask.getTime(), thisTask.getColor());
+					addTask(progID, taskName, thisTask.getLocation(), thisTask.getNumLeadersReqd(),
+							thisTask.getTotalPersonsReqd(), thisTask.getDayOfWeek(), thisTask.getWeekOfMonth(),
+							thisTask.getTime(), thisTask.getColor());
 				}
 			}
 			if (result != null)
@@ -459,5 +491,71 @@ public class TestDatabase {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
+	}
+
+	/*
+	 * ------- Person Database additions/updates -------
+	 */
+	public static int addPerson(String personName, String phone, String email, boolean leader) {
+		int personID = 0;
+		try {
+			PreparedStatement addPersonStmt = dbConnection.prepareStatement(
+					"INSERT INTO Persons (PersonName, PhoneNumber, EMail, isLeader) " + " VALUES (?, ?, ?, ?),",
+					Statement.RETURN_GENERATED_KEYS);
+
+			// Add new person
+			int col = 1;
+			addPersonStmt.setString(col++, personName);
+			addPersonStmt.setString(col++, phone);
+			addPersonStmt.setString(col++, email);
+			addPersonStmt.setBoolean(col, leader);
+
+			addPersonStmt.executeUpdate();
+			ResultSet result = addPersonStmt.getGeneratedKeys();
+			result.next();
+			personID = result.getInt(1);
+
+			result.close();
+			addPersonStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return personID;
+	}
+
+	public static int addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+		int assignedTaskID = 0;
+		int dow = 0, wom = 0;
+
+		try {
+			PreparedStatement addAssignedTaskStmt = dbConnection.prepareStatement(
+					"INSERT INTO AssignedTasks (PersonID, taskID, DaysOfWeek, DowInMonth) VALUES (?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+
+			for (int k = 0; k < 7; k++)
+				dow = (dow << 1) | (daysOfWeek[k] ? 1 : 0);
+			for (int k = 0; k < 5; k++)
+				wom = (wom << 1) | (weeksOfMonth[k] ? 1 : 0);
+
+			// Add new assigned task
+			int col = 1;
+			addAssignedTaskStmt.setInt(col++, personID);
+			addAssignedTaskStmt.setInt(col++, taskID);
+			addAssignedTaskStmt.setInt(col++, dow);
+			addAssignedTaskStmt.setInt(col++, wom);
+
+			addAssignedTaskStmt.executeUpdate();
+			ResultSet result = addAssignedTaskStmt.getGeneratedKeys();
+			result.next();
+			assignedTaskID = result.getInt(1);
+
+			result.close();
+			addAssignedTaskStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return assignedTaskID;
 	}
 }
