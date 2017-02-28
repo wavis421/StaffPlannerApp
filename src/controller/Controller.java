@@ -27,7 +27,7 @@ public class Controller {
 	/*
 	 * ------- Programs -------
 	 */
-	public void addProgram(ProgramEvent ev) {
+	public void addProgram(ProgramEvent ev) throws Exception {
 		db.addProgram(ev.getProgramName(), ev.getStartDate(), ev.getEndDate());
 	}
 
@@ -58,7 +58,7 @@ public class Controller {
 	/*
 	 * ------- Task data -------
 	 */
-	public void addTask(TaskEvent ev) {
+	public void addTask(TaskEvent ev) throws Exception {
 		db.addTask(ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
 				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 	}
@@ -143,18 +143,18 @@ public class Controller {
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraDates,
-			LinkedList<DateRangeModel> datesUnavailable) {
+			LinkedList<DateRangeModel> datesUnavailable) throws Exception {
 		db.addPerson(name, phone, email, leader, notes, assignedTasks, extraDates, datesUnavailable);
 	}
 
-	public void updatePerson(PersonEvent ev) {
+	public void updatePerson(PersonEvent ev) throws Exception {
 		db.updatePerson(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
 				ev.getAssignedTaskChanges(), ev.getExtraDates(), ev.getDatesUnavailable());
 	}
 
-	public void addSingleInstanceTask(JList<String> personList, Calendar day, String taskName, int color) {
+	public void addSingleInstanceTask(JList<String> personList, Calendar day, TaskModel task, int color) throws Exception {
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			db.addSingleInstanceTask(personList.getModel().getElementAt(i), day, taskName, color);
+			db.addSingleInstanceTask(personList.getModel().getElementAt(i), day, task, color);
 		}
 	}
 
@@ -162,7 +162,7 @@ public class Controller {
 		db.renamePerson(oldName, newName);
 	}
 
-	public void markPersonUnavail(String personName, Calendar today) {
+	public void markPersonUnavail(String personName, Calendar today) throws Exception {
 		db.markPersonUnavail(personName, today);
 	}
 
@@ -185,7 +185,7 @@ public class Controller {
 	public LinkedList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
 		return db.getPersonsByTask(task);
 	}
-	
+
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		return db.getPersonsByDayByTask(calendar, task);
 	}
@@ -221,9 +221,13 @@ public class Controller {
 		db.loadProgramFromFile(file);
 	}
 
-        public void loadProgramFromDatabase () {
-            db.loadProgramFromDatabase();
-        }
+	public void loadProgramFromDatabase() throws Exception {
+		db.loadProgramFromDatabase();
+	}
+
+	public void loadRosterFromDatabase() throws Exception {
+		db.loadRosterFromDatabase();
+	}
 
 	public void saveRosterToFile(File file) throws IOException {
 		db.saveRosterToFile(file);

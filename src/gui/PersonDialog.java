@@ -91,9 +91,9 @@ public class PersonDialog extends JDialog {
 	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, JTree assignedTasksTree, JTree taskTree) {
 		// super(parent, "Add person...", true);
 		super(parent, "Add person...");
-		setLocation(new Point(100,100));
+		setLocation(new Point(100, 100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
-		
+
 		createTrees(assignedTasksTree, taskTree);
 
 		this.allTasks = allTasks;
@@ -117,7 +117,7 @@ public class PersonDialog extends JDialog {
 	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, PersonModel person,
 			LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
-		setLocation(new Point(100,100));
+		setLocation(new Point(100, 100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
 
@@ -196,7 +196,9 @@ public class PersonDialog extends JDialog {
 				DateRangeEvent dialogResponse = ev.getDialogResponse();
 				if (dialogResponse != null && dialogResponse.getTask() != null) {
 					// Date and task valid. Add single instance task.
-					newSingleInstanceTasks.add(new SingleInstanceTaskModel(dialogResponse.getTask().getTaskName(),
+					Utilities.addTimeToCalendar(dialogResponse.getStartDate(), dialogResponse.getTask().getTime());
+					newSingleInstanceTasks.add(new SingleInstanceTaskModel(0, 0, dialogResponse.getTask().getTaskID(),
+							dialogResponse.getTask().getTaskName(),
 							dialogResponse.getStartDate(), dialogResponse.getTask().getColor()));
 					DefaultComboBoxModel<String> extraDateModel = (DefaultComboBoxModel<String>) singleInstanceTaskCombo
 							.getModel();
@@ -400,7 +402,8 @@ public class PersonDialog extends JDialog {
 					AssignTaskEvent eventResponse = event.getDialogResponse();
 					if (eventResponse != null) {
 						// Update assigned task with new node info
-						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getProgramName(),
+						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(0, 0, eventResponse.getTask().getTaskID(),
+								eventResponse.getProgramName(),
 								eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
 								eventResponse.getWeeksOfMonth());
 						removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
@@ -447,7 +450,8 @@ public class PersonDialog extends JDialog {
 
 					AssignTaskEvent eventResponse = event.getDialogResponse();
 					if (eventResponse != null) {
-						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(node.getParent().toString(),
+						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(0, 0, eventResponse.getTask().getTaskID(),
+								node.getParent().toString(),
 								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
 						assignedTaskChanges.add(lastAssignedTask);
 

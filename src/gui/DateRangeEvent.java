@@ -37,7 +37,7 @@ public class DateRangeEvent extends EventObject {
 	}
 
 	public DateRangeModel getDateRange() {
-		return new DateRangeModel(Utilities.getDisplayDate(startDate), Utilities.getDisplayDate(endDate));
+		return new DateRangeModel(0, 0, Utilities.getDisplayDate(startDate), Utilities.getDisplayDate(endDate));
 	}
 }
 

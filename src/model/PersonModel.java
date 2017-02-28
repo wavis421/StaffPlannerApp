@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 public class PersonModel implements Serializable, Comparable<PersonModel> {
-	private static final long serialVersionUID = 12340003L;
+	private static final long serialVersionUID = 12340004L;
+	private int personID;
 	private String name;
 	private String phone;
 	private String email;
@@ -14,9 +15,10 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 	private LinkedList<DateRangeModel> datesUnavailable;
 	private LinkedList<SingleInstanceTaskModel> singleInstanceTasks;
 
-	public PersonModel(String name, String phone, String email, boolean leader, String notes,
+	public PersonModel(int personID, String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<DateRangeModel> datesUnavailable,
 			LinkedList<SingleInstanceTaskModel> singleInstanceTaskAssignment) {
+		this.personID = personID;
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
@@ -29,6 +31,10 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 
 	public String toString() {
 		return name;
+	}
+
+	public int getPersonID() {
+		return personID;
 	}
 
 	public String getName() {

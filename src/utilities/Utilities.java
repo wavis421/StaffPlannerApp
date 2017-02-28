@@ -1,5 +1,7 @@
 package utilities;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,16 +19,18 @@ public class Utilities {
 	// Time format for hour 1 - 12 and AM/PM field
 	private static final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+	private static final SimpleDateFormat sqlDateFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
 	/* <<<<<<<<<< Calendar & Time Utilities >>>>>>>>>> */
 	public static String formatTime(Calendar cal) {
-		return getFormattedTime((Calendar) cal.clone());
+		Calendar localCal = (Calendar) cal.clone();
+		return timeFormat.format(localCal.getTime());
 	}
 
 	public static String formatTime(TimeModel time) {
 		Calendar localCal = Calendar.getInstance();
 		addTimeToCalendar(localCal, time);
-		return getFormattedTime(localCal);
+		return timeFormat.format(localCal.getTime());
 	}
 
 	public static boolean checkForTimeMatch(Calendar time1, Calendar time2) {
@@ -47,7 +51,38 @@ public class Utilities {
 
 	public static String getDisplayDate(Calendar calendar) {
 		String month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
+
 		return (month + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR));
+	}
+
+	public static String getSqlTimestamp(Calendar calendar) {
+		int hour = calendar.get(Calendar.HOUR);
+		if (calendar.get(Calendar.AM_PM) == Calendar.PM)
+			hour += 12;
+
+		return (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
+				+ calendar.get(Calendar.DAY_OF_MONTH) + " " + String.format("%02d", hour) + ":"
+				+ String.format("%02d", calendar.get(Calendar.MINUTE)) + ":00");
+	}
+
+	public static String getSqlDate(Calendar calendar) {
+		return (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
+				+ calendar.get(Calendar.DAY_OF_MONTH));
+	}
+
+	public static Calendar convertSqlDateTime(java.sql.Date sqlDate, java.sql.Time sqlTime) {
+		try {
+			Calendar cal = Calendar.getInstance();
+			Date date = sqlDateFormatter.parse(sqlDate.toString() + " " + sqlTime.toString());
+			cal.setTime(date);
+			return cal;
+			
+		} catch (ParseException e) {
+			JOptionPane.showMessageDialog(null,
+					"Unable to parse date '" + sqlDate.toString() + " " + sqlTime.toString() + "': " + e.getMessage(),
+					"Parsing Error", JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
 	}
 
 	public static boolean isDateInThePast(String dateString, String errorString) {
