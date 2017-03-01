@@ -59,8 +59,8 @@ public class ProgramDialog extends JDialog {
 
 	public ProgramDialog(JFrame parent, int numPrograms) {
 		super(parent, "Create program...", true);
-		setLocation(new Point(100,100));
-		
+		setLocation(new Point(100, 100));
+
 		this.numPrograms = numPrograms;
 
 		setupProgramDialog(false, false);
@@ -68,8 +68,8 @@ public class ProgramDialog extends JDialog {
 
 	public ProgramDialog(JFrame parent, int numPrograms, ProgramModel program) {
 		super(parent, "Edit program...", true);
-		setLocation(new Point(100,100));
-		
+		setLocation(new Point(100, 100));
+
 		this.programName.setText(program.getProgramName());
 		if (numPrograms > 0)
 			numPrograms--;
@@ -103,36 +103,31 @@ public class ProgramDialog extends JDialog {
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					// Make sure that program name has been entered
-					if (programName.getText().equals("")) {
-						JOptionPane.showMessageDialog(okButton, "Program name field is required");
-					} else {
-						// Set up start/end dates for creating event
-						String startDate = null, endDate = null;
-						if (enableStartDateButton.isSelected())
-							startDate = startDatePicker.getJFormattedTextField().getText();
-						if (enableEndDateButton.isSelected())
-							endDate = endDatePicker.getJFormattedTextField().getText();
+				// Make sure that program name has been entered
+				if (programName.getText().equals("")) {
+					JOptionPane.showMessageDialog(okButton, "Program name field is required");
+				} else {
+					// Set up start/end dates for creating event
+					String startDate = null, endDate = null;
+					if (enableStartDateButton.isSelected())
+						startDate = startDatePicker.getJFormattedTextField().getText();
+					if (enableEndDateButton.isSelected())
+						endDate = endDatePicker.getJFormattedTextField().getText();
 
-						ProgramEvent ev = new ProgramEvent(this, programName.getText().trim(), startDate, endDate,
-								selectActiveProgramButton.isSelected() ? true : false);
+					ProgramEvent ev = new ProgramEvent(this, programName.getText().trim(), startDate, endDate,
+							selectActiveProgramButton.isSelected() ? true : false);
 
-						// Generate start/end date for tracking last used dates
-						dialogResponse = ev;
-						String startDateText = startDatePicker.getJFormattedTextField().getText();
-						if (startDateText != null && !startDateText.equals(""))
-							lastStartDate = startDateText;
-						String endDateText = endDatePicker.getJFormattedTextField().getText();
-						if (endDateText != null && !endDateText.equals(""))
-							lastEndDate = endDateText;
+					// Generate start/end date for tracking last used dates
+					dialogResponse = ev;
+					String startDateText = startDatePicker.getJFormattedTextField().getText();
+					if (startDateText != null && !startDateText.equals(""))
+						lastStartDate = startDateText;
+					String endDateText = endDatePicker.getJFormattedTextField().getText();
+					if (endDateText != null && !endDateText.equals(""))
+						lastEndDate = endDateText;
 
-						setVisible(false);
-						dispose();
-					}
-
-				} catch (IllegalArgumentException ev) {
-					JOptionPane.showMessageDialog(okButton, "TBD exception message");
+					setVisible(false);
+					dispose();
 				}
 			}
 		});

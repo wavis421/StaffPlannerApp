@@ -2,7 +2,7 @@ package model;
 
 import java.io.Serializable;
 
-public class DateRangeModel implements Serializable{
+public class DateRangeModel implements Serializable, Comparable<DateRangeModel> {
 	private static final long serialVersionUID = 12340002L;
 	private int unavailDatesID, personID;
 	private String startDate;
@@ -37,5 +37,15 @@ public class DateRangeModel implements Serializable{
 
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
+	}
+	
+	public int compareTo(DateRangeModel otherDate) {
+		int dateCompareStart = this.startDate.compareTo(otherDate.getStartDate());
+		int dateCompareEnd = this.endDate.compareTo(otherDate.getEndDate());
+		
+		if (dateCompareStart != 0)
+			return dateCompareStart;
+		else
+			return dateCompareEnd;
 	}
 }

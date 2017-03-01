@@ -78,47 +78,42 @@ public class AssignTaskDialog extends JDialog {
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					// Create days of week array
-					int numSelected = 0;
-					int numDaysInWeek = dayOfWeekButtons.length;
-					boolean[] daysOfWeekSelected = new boolean[numDaysInWeek];
-					for (int i = 0; i < numDaysInWeek; i++) {
-						if (dayOfWeekButtons[i].isSelected()) {
-							numSelected++;
-							daysOfWeekSelected[i] = true;
-						}
+				// Create days of week array
+				int numSelected = 0;
+				int numDaysInWeek = dayOfWeekButtons.length;
+				boolean[] daysOfWeekSelected = new boolean[numDaysInWeek];
+				for (int i = 0; i < numDaysInWeek; i++) {
+					if (dayOfWeekButtons[i].isSelected()) {
+						numSelected++;
+						daysOfWeekSelected[i] = true;
 					}
-					if (numSelected == 0) {
-						JOptionPane.showMessageDialog(okButton, "Please assign the Day(s) of the Week");
-						return;
-					}
-
-					// Create weeks of month array
-					numSelected = 0;
-					int numWeeksInMonth = weekOfMonthButtons.length;
-					boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
-					for (int i = 0; i < numWeeksInMonth; i++) {
-						if (weekOfMonthButtons[i].isSelected()) {
-							numSelected++;
-							weeksOfMonthSelected[i] = true;
-						}
-					}
-					if (numSelected == 0) {
-						JOptionPane.showMessageDialog(okButton, "Please assign the Week(s) of the Month");
-						return;
-					}
-
-					// Create TaskEvent and set response
-					AssignTaskEvent ev = new AssignTaskEvent(this, programName, task, daysOfWeekSelected,
-							weeksOfMonthSelected);
-					dialogResponse = ev;
-					setVisible(false);
-					dispose();
-
-				} catch (IllegalArgumentException ev) {
-					JOptionPane.showMessageDialog(okButton, "TBD Exception");
 				}
+				if (numSelected == 0) {
+					JOptionPane.showMessageDialog(okButton, "Please assign the Day(s) of the Week");
+					return;
+				}
+
+				// Create weeks of month array
+				numSelected = 0;
+				int numWeeksInMonth = weekOfMonthButtons.length;
+				boolean[] weeksOfMonthSelected = new boolean[numWeeksInMonth];
+				for (int i = 0; i < numWeeksInMonth; i++) {
+					if (weekOfMonthButtons[i].isSelected()) {
+						numSelected++;
+						weeksOfMonthSelected[i] = true;
+					}
+				}
+				if (numSelected == 0) {
+					JOptionPane.showMessageDialog(okButton, "Please assign the Week(s) of the Month");
+					return;
+				}
+
+				// Create TaskEvent and set response
+				AssignTaskEvent ev = new AssignTaskEvent(this, programName, task, daysOfWeekSelected,
+						weeksOfMonthSelected);
+				dialogResponse = ev;
+				setVisible(false);
+				dispose();
 			}
 		});
 		cancelButton.addActionListener(new ActionListener() {

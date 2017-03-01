@@ -12,8 +12,10 @@ import java.sql.Statement;
 import java.util.Calendar;
 import java.util.LinkedList;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JList;
 
 import model.AssignedTasksModel;
 import model.DateRangeModel;
@@ -39,14 +41,7 @@ public class TestDatabase {
 		if (initialized)
 			return;
 
-		try {
-			connectDatabase();
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("Unable to connect to database: " + e.getMessage());
-		}
-
+		connectDatabase();
 		updateConnectionStatus();
 
 		connectButton.addActionListener(new ActionListener() {
@@ -54,12 +49,7 @@ public class TestDatabase {
 				if (connectButton.getText().equals("Disconnect")) {
 					disconnectDatabase();
 				} else {
-					try {
-						connectDatabase();
-
-					} catch (Exception e2) {
-						System.out.println("Unable to connect to database: " + e2.getMessage());
-					}
+					connectDatabase();
 				}
 				updateConnectionStatus();
 			}
@@ -90,14 +80,14 @@ public class TestDatabase {
 	/*
 	 * ------- Database Connections -------
 	 */
-	public static Boolean connectDatabase() throws Exception {
+	public static Boolean connectDatabase() {
 		if (isDatabaseConnected())
 			return true;
 
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			System.out.println("Unable to connect to database: " + e.getMessage());
 			return false;
 		}
@@ -151,7 +141,7 @@ public class TestDatabase {
 	 */
 	public static void showRosterDatabase() {
 		try {
-			PreparedStatement checkStmt = dbConnection.prepareStatement("SELECT * FROM Persons;");
+			PreparedStatement checkStmt = dbConnection.prepareStatement("SELECT * FROM Persons ORDER BY PersonName;");
 			ResultSet result = checkStmt.executeQuery();
 			int row;
 
@@ -175,7 +165,8 @@ public class TestDatabase {
 	public static void showTasksDatabase() {
 		try {
 			PreparedStatement checkStmt = dbConnection
-					.prepareStatement("SELECT * FROM Tasks, Programs " + "WHERE Tasks.ProgramID = Programs.ProgramID;");
+					.prepareStatement("SELECT * FROM Tasks, Programs " + "WHERE Tasks.ProgramID = Programs.ProgramID " 
+			+ "ORDER BY Hour, Minute;");
 			ResultSet result = checkStmt.executeQuery();
 			int row;
 
@@ -186,13 +177,14 @@ public class TestDatabase {
 				if (row == 0)
 					break;
 
+				TimeModel time = new TimeModel(result.getInt("Hour"), result.getInt("Minute"));
 				String location = result.getString("Location");
 				if (location == null || location.equals(""))
 					System.out.println("Row " + row + ": " + result.getString("ProgramName") + " - "
-							+ result.getString("TaskName"));
+							+ result.getString("TaskName") + " at " + time.toString());
 				else
 					System.out.println("Row " + row + ": " + result.getString("ProgramName") + " - "
-							+ result.getString("TaskName") + " at " + result.getString("Location"));
+							+ result.getString("TaskName") + " at " + time.toString() + " in " + result.getString("Location"));
 			}
 			result.close();
 			checkStmt.close();
@@ -205,7 +197,7 @@ public class TestDatabase {
 	/*
 	 * ------- Importing Files to SQL Database -------
 	 */
-	public static void importPersonDatabase(LinkedList<PersonModel> persons) throws Exception {
+	public static void importPersonDatabase(LinkedList<PersonModel> persons) {
 		personList = persons;
 		int personID = 0;
 		try {
@@ -222,7 +214,7 @@ public class TestDatabase {
 				PersonModel person = personList.get(i);
 				if (result.getInt("count") == 0) {
 					// Add new person
-					personID = addPerson(person.getName(), person.getPhone(), person.getEmail(), person.isLeader());
+					personID = addPerson(person.getName(), person.getPhone(), person.getEmail(), person.isLeader(), person.getNotes());
 					System.out.println("ImportPersonDatabase (count = 0): personID = " + personID + ", name = "
 							+ person.getName());
 				} else {
@@ -245,7 +237,7 @@ public class TestDatabase {
 		}
 	}
 
-	public static void importAssignedTasks(LinkedList<AssignedTasksModel> assignedTasks, int personID) throws Exception {
+	public static void importAssignedTasks(LinkedList<AssignedTasksModel> assignedTasks, int personID) {
 		try {
 			PreparedStatement checkTaskStmt = dbConnection
 					.prepareStatement("SELECT COUNT(*) AS count, TaskID AS taskID FROM Tasks WHERE TaskName=?;");
@@ -275,7 +267,7 @@ public class TestDatabase {
 		}
 	}
 
-	public static void importUnavailDates(LinkedList<DateRangeModel> unavailDates, int personID) throws Exception {
+	public static void importUnavailDates(LinkedList<DateRangeModel> unavailDates, int personID) {
 		try {
 			PreparedStatement checkDateRangeStmt = dbConnection.prepareStatement(
 					"SELECT COUNT(*) AS count FROM UnavailDates, Persons WHERE " + "UnavailDates.PersonID=? AND "
@@ -305,7 +297,7 @@ public class TestDatabase {
 		}
 	}
 
-	public static void importSingleInstanceTasks(LinkedList<SingleInstanceTaskModel> singleInstanceTask, int personID) throws Exception {
+	public static void importSingleInstanceTasks(LinkedList<SingleInstanceTaskModel> singleInstanceTask, int personID) {
 		try {
 			PreparedStatement checkTaskStmt = dbConnection.prepareStatement(
 					"SELECT COUNT(*) AS count, Tasks.TaskID as taskID, Persons.PersonID as personID, Persons.PersonName as personName "
@@ -341,7 +333,7 @@ public class TestDatabase {
 		}
 	}
 
-	public static void importProgramDatabase(LinkedList<ProgramModel> programs) throws Exception {
+	public static void importProgramDatabase(LinkedList<ProgramModel> programs) {
 		programList = programs;
 		int progID = 0;
 		try {
@@ -374,7 +366,7 @@ public class TestDatabase {
 		}
 	}
 
-	private static void importTasksByProgram(ProgramModel program, int progID) throws Exception {
+	private static void importTasksByProgram(ProgramModel program, int progID) {
 		try {
 			PreparedStatement checkTaskStmt = dbConnection
 					.prepareStatement("SELECT COUNT(*) AS count FROM Tasks WHERE TaskName=?;");
@@ -408,7 +400,7 @@ public class TestDatabase {
 	/*
 	 * ------- Load SQL Database into Application -------
 	 */
-	public static LinkedList<ProgramModel> loadPrograms() throws Exception {
+	public static LinkedList<ProgramModel> loadPrograms() {
 		LinkedList<ProgramModel> progList = new LinkedList<ProgramModel>();
 		if (!connectDatabase())
 			return progList;
@@ -458,7 +450,7 @@ public class TestDatabase {
 		return taskList;
 	}
 
-	public static LinkedList<PersonModel> loadRoster() throws Exception {
+	public static LinkedList<PersonModel> loadRoster() {
 		LinkedList<PersonModel> personList = new LinkedList<PersonModel>();
 		if (!connectDatabase())
 			return personList;
@@ -486,7 +478,7 @@ public class TestDatabase {
 		return personList;
 	}
 
-	private static LinkedList<AssignedTasksModel> loadAssignedTasks(int personID) throws Exception {
+	private static LinkedList<AssignedTasksModel> loadAssignedTasks(int personID) {
 		LinkedList<AssignedTasksModel> assignedTasksList = new LinkedList<AssignedTasksModel>();
 		if (!connectDatabase())
 			return assignedTasksList;
@@ -519,7 +511,7 @@ public class TestDatabase {
 		return assignedTasksList;
 	}
 
-	private static LinkedList<DateRangeModel> loadUnavailDates(int personID) throws Exception {
+	private static LinkedList<DateRangeModel> loadUnavailDates(int personID) {
 		LinkedList<DateRangeModel> unavailDatesList = new LinkedList<DateRangeModel>();
 		if (!connectDatabase())
 			return unavailDatesList;
@@ -546,7 +538,7 @@ public class TestDatabase {
 		return unavailDatesList;
 	}
 
-	private static LinkedList<SingleInstanceTaskModel> loadSingleInstanceTasks(int personID) throws Exception {
+	private static LinkedList<SingleInstanceTaskModel> loadSingleInstanceTasks(int personID) {
 		LinkedList<SingleInstanceTaskModel> singleTasksList = new LinkedList<SingleInstanceTaskModel>();
 		if (!connectDatabase())
 			return singleTasksList;
@@ -584,6 +576,30 @@ public class TestDatabase {
 		return singleTasksList;
 	}
 
+	public static JList<String> getProgramList () {
+		DefaultListModel<String> dbModel = new DefaultListModel<String>();
+		JList<String> programList = new JList<String>(dbModel);
+		
+		if (!connectDatabase())
+			return programList;
+
+		try {
+			Statement selectStmt = dbConnection.createStatement();
+			ResultSet results = selectStmt.executeQuery(
+					"SELECT ProgramName FROM Programs ORDER BY ProgramName;");
+
+			while (results.next()) {
+				dbModel.addElement(new String(results.getString("ProgramName")));
+			}
+			results.close();
+			selectStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println("Failure retrieving Program List: " + e.getMessage());
+		}
+		return programList;
+	}
+	
 	private static boolean[] createDaysOfWeekArray(int dow) {
 		boolean[] dowBool = { false, false, false, false, false, false, false };
 		for (int i = 6; i >= 0; i--) {
@@ -607,9 +623,10 @@ public class TestDatabase {
 	private static String getTaskName(int taskId) {
 		try {
 			PreparedStatement selectStmt = dbConnection
-					.prepareStatement("SELECT TaskName AS TaskName FROM Tasks WHERE TaskID=?;");
+					.prepareStatement("SELECT TaskName FROM Tasks WHERE TaskID=?;");
 			selectStmt.setInt(1, taskId);
 			ResultSet result = selectStmt.executeQuery();
+			result.next();
 
 			String taskName = result.getString("TaskName");
 			selectStmt.close();
@@ -625,7 +642,7 @@ public class TestDatabase {
 	/*
 	 * ------- Programs Database addition/updates -------
 	 */
-	public static int addProgram(String programName, String startDate, String endDate) throws Exception {
+	public static int addProgram(String programName, String startDate, String endDate) {
 		int progID = 0;
 		if (!connectDatabase())
 			return -1;
@@ -659,7 +676,7 @@ public class TestDatabase {
 	 * ------- Task Database additions/updates -------
 	 */
 	public static int addTask(int progID, String taskName, String location, int numLeadersReqd, int totalPersonsReqd,
-			boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) throws Exception {
+			boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
 		int taskID = 0;
 		if (!connectDatabase())
 			return -1;
@@ -705,14 +722,14 @@ public class TestDatabase {
 	/*
 	 * ------- Person Database additions/updates -------
 	 */
-	public static int addPerson(String personName, String phone, String email, boolean leader) throws Exception {
+	public static int addPerson(String personName, String phone, String email, boolean leader, String notes) {
 		int personID = 0;
 		if (!connectDatabase())
 			return -1;
 		
 		try {
 			PreparedStatement addPersonStmt = dbConnection.prepareStatement(
-					"INSERT INTO Persons (PersonName, PhoneNumber, EMail, isLeader) " + " VALUES (?, ?, ?, ?)",
+					"INSERT INTO Persons (PersonName, PhoneNumber, EMail, isLeader, Notes) " + " VALUES (?, ?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 
 			// Add new person
@@ -720,7 +737,8 @@ public class TestDatabase {
 			addPersonStmt.setString(col++, personName);
 			addPersonStmt.setString(col++, phone);
 			addPersonStmt.setString(col++, email);
-			addPersonStmt.setBoolean(col, leader);
+			addPersonStmt.setBoolean(col++, leader);
+			addPersonStmt.setString(col, notes);
 
 			addPersonStmt.executeUpdate();
 			ResultSet result = addPersonStmt.getGeneratedKeys();
@@ -736,7 +754,7 @@ public class TestDatabase {
 		return personID;
 	}
 
-	public static int addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) throws Exception {
+	public static int addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
 		int assignedTaskID = 0;
 		int dow = 0, wom = 0;
 		if (!connectDatabase())
@@ -773,7 +791,7 @@ public class TestDatabase {
 		return assignedTaskID;
 	}
 
-	public static int addUnavailDates(int personID, String startDate, String endDate) throws Exception {
+	public static int addUnavailDates(int personID, String startDate, String endDate) {
 		int unavailDatesID = 0;
 		if (!connectDatabase())
 			return -1;
@@ -802,7 +820,7 @@ public class TestDatabase {
 		return unavailDatesID;
 	}
 
-	public static int addSingleInstanceTask(int personID, int taskID, Calendar taskTime) throws Exception {
+	public static int addSingleInstanceTask(int personID, int taskID, Calendar taskTime) {
 		int singleInstanceID = 0;
 		if (!connectDatabase())
 			return -1;
@@ -812,11 +830,11 @@ public class TestDatabase {
 		try {
 			if (taskID == 0) {
 				addSingleTaskStmt = dbConnection.prepareStatement(
-						"INSERT INTO SingleInstanceTasks (PersonID, DateTime) VALUES (?, ?)",
+						"INSERT INTO SingleInstanceTasks (PersonID, Date, Time) VALUES (?, ?, ?)",
 						Statement.RETURN_GENERATED_KEYS);
 			} else {
 				addSingleTaskStmt = dbConnection.prepareStatement(
-						"INSERT INTO SingleInstanceTasks (PersonID, TaskId, DateTime) VALUES (?, ?, ?)",
+						"INSERT INTO SingleInstanceTasks (PersonID, TaskId, Date, Time) VALUES (?, ?, ?, ?)",
 						Statement.RETURN_GENERATED_KEYS);
 			}
 
@@ -825,9 +843,8 @@ public class TestDatabase {
 			if (taskID != 0)
 				addSingleTaskStmt.setInt(col++, taskID);
 			// addSingleTaskStmt.setTimestamp(3, java.sql.Timestamp.valueOf(taskTime.toString()));
-			String date = Utilities.getSqlTimestamp(taskTime);
-			System.out.println("Display date: " + date);
-			addSingleTaskStmt.setTimestamp(col++, java.sql.Timestamp.valueOf(Utilities.getSqlTimestamp(taskTime)));
+			addSingleTaskStmt.setDate(col++, java.sql.Date.valueOf(Utilities.getSqlDate(taskTime)));
+			addSingleTaskStmt.setTime(col++, java.sql.Time.valueOf(Utilities.getSqlTime(taskTime)));
 
 			addSingleTaskStmt.executeUpdate();
 			ResultSet result = addSingleTaskStmt.getGeneratedKeys();

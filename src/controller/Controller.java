@@ -27,7 +27,7 @@ public class Controller {
 	/*
 	 * ------- Programs -------
 	 */
-	public void addProgram(ProgramEvent ev) throws Exception {
+	public void addProgram(ProgramEvent ev) {
 		db.addProgram(ev.getProgramName(), ev.getStartDate(), ev.getEndDate());
 	}
 
@@ -58,7 +58,7 @@ public class Controller {
 	/*
 	 * ------- Task data -------
 	 */
-	public void addTask(TaskEvent ev) throws Exception {
+	public void addTask(TaskEvent ev) {
 		db.addTask(ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
 				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 	}
@@ -143,16 +143,16 @@ public class Controller {
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraDates,
-			LinkedList<DateRangeModel> datesUnavailable) throws Exception {
+			LinkedList<DateRangeModel> datesUnavailable) {
 		db.addPerson(name, phone, email, leader, notes, assignedTasks, extraDates, datesUnavailable);
 	}
 
-	public void updatePerson(PersonEvent ev) throws Exception {
+	public void updatePerson(PersonEvent ev) {
 		db.updatePerson(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
 				ev.getAssignedTaskChanges(), ev.getExtraDates(), ev.getDatesUnavailable());
 	}
 
-	public void addSingleInstanceTask(JList<String> personList, Calendar day, TaskModel task, int color) throws Exception {
+	public void addSingleInstanceTask(JList<String> personList, Calendar day, TaskModel task, int color) {
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
 			db.addSingleInstanceTask(personList.getModel().getElementAt(i), day, task, color);
 		}
@@ -162,7 +162,7 @@ public class Controller {
 		db.renamePerson(oldName, newName);
 	}
 
-	public void markPersonUnavail(String personName, Calendar today) throws Exception {
+	public void markPersonUnavail(String personName, Calendar today) {
 		db.markPersonUnavail(personName, today);
 	}
 
@@ -221,11 +221,11 @@ public class Controller {
 		db.loadProgramFromFile(file);
 	}
 
-	public void loadProgramFromDatabase() throws Exception {
+	public void loadProgramFromDatabase() {
 		db.loadProgramFromDatabase();
 	}
 
-	public void loadRosterFromDatabase() throws Exception {
+	public void loadRosterFromDatabase() {
 		db.loadRosterFromDatabase();
 	}
 

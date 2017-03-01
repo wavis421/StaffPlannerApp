@@ -82,39 +82,33 @@ public class DateRangeDialog extends JDialog {
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					// Set up start/end dates
-					String startDate = startDatePicker.getJFormattedTextField().getText();
-					String endDate = endDatePicker.getJFormattedTextField().getText();
+				// Set up start/end dates
+				String startDate = startDatePicker.getJFormattedTextField().getText();
+				String endDate = endDatePicker.getJFormattedTextField().getText();
 
-					if (!startDate.equals("") && !endDate.equals("")) {
-						if (taskCombo == null) {
-							// No task in dialog
-							dialogResponse = new DateRangeEvent(DateRangeDialog.this, null,
-									(Calendar) startDatePicker.getModel().getValue(),
-									(Calendar) endDatePicker.getModel().getValue());
-							setVisible(false);
-							dispose();
+				if (!startDate.equals("") && !endDate.equals("")) {
+					if (taskCombo == null) {
+						// No task in dialog
+						dialogResponse = new DateRangeEvent(DateRangeDialog.this, null,
+								(Calendar) startDatePicker.getModel().getValue(),
+								(Calendar) endDatePicker.getModel().getValue());
+						setVisible(false);
+						dispose();
 
-						} else if (taskCombo.getSelectedItem() == null) {
-							// Expecting a task, none selected
-							JOptionPane.showMessageDialog(DateRangeDialog.this,
-									"Please select which task to assign a substitute");
+					} else if (taskCombo.getSelectedItem() == null) {
+						// Expecting a task, none selected
+						JOptionPane.showMessageDialog(DateRangeDialog.this,
+								"Please select which task to assign a substitute");
 
-						} else {
-							// Task selected
-							int idx = taskCombo.getSelectedIndex();
-							dialogResponse = new DateRangeEvent(DateRangeDialog.this,
-									(TaskModel) allTasks.getModel().getElementAt(idx),
-									(Calendar) startDatePicker.getModel().getValue(), null);
-							setVisible(false);
-							dispose();
-						}
+					} else {
+						// Task selected
+						int idx = taskCombo.getSelectedIndex();
+						dialogResponse = new DateRangeEvent(DateRangeDialog.this,
+								(TaskModel) allTasks.getModel().getElementAt(idx),
+								(Calendar) startDatePicker.getModel().getValue(), null);
+						setVisible(false);
+						dispose();
 					}
-
-				} catch (IllegalArgumentException ev) {
-					JOptionPane.showMessageDialog(okButton, "Invalid date field: " + ev.getMessage(),
-							"Date Parsing Exception", JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		});

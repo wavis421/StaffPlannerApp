@@ -65,7 +65,6 @@ public class PersonDialog extends JDialog {
 	private JComboBox<String> dateUnavailCombo;
 	private JTextArea notesArea = new JTextArea(3, TEXT_FIELD_SIZE);
 	private LinkedList<AssignedTasksModel> assignedTaskChanges;
-	private LinkedList<DateRangeModel> datesUnavailable;
 	private JComboBox<String> singleInstanceTaskCombo;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
@@ -73,6 +72,7 @@ public class PersonDialog extends JDialog {
 
 	private static boolean okToSave;
 	private static LinkedList<SingleInstanceTaskModel> newSingleInstanceTasks;
+	private static LinkedList<DateRangeModel> newDatesUnavailable;
 
 	// Labels
 	private JLabel nameLabel = new JLabel("Person's name: ");
@@ -103,8 +103,12 @@ public class PersonDialog extends JDialog {
 		if (newSingleInstanceTasks != null)
 			newSingleInstanceTasks.clear();
 		newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+		
+		if (newDatesUnavailable != null)
+			newDatesUnavailable.clear();
+		newDatesUnavailable = new LinkedList<DateRangeModel>();
 
-		this.datesUnavailable = new LinkedList<DateRangeModel>();
+		createUnavailDateCombo(newDatesUnavailable);
 
 		okToSave = false;
 		createSingleInstanceTaskCombo(null);
@@ -133,19 +137,26 @@ public class PersonDialog extends JDialog {
 		this.assignedTaskChanges = assignedTaskChanges;
 
 		if (okToSave) {
-			// This list was processed and can be cleared
+			// These lists were processed and can be cleared
 			newSingleInstanceTasks.clear();
 			newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+			newDatesUnavailable.clear();
+			newDatesUnavailable = new LinkedList<DateRangeModel>();
+			
 			okToSave = false;
-		} else if (newSingleInstanceTasks == null) {
-			// Create list first time after startup
-			newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+			
+		} else {
+			// Create lists first time after startup
+			if (newSingleInstanceTasks == null)
+				newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+			if (newDatesUnavailable == null)
+				newDatesUnavailable = new LinkedList<DateRangeModel>();
 		}
 
-		this.datesUnavailable = (LinkedList<DateRangeModel>) person.getDatesUnavailable().clone();
-		this.allTasks = allTasks;
-
+		createUnavailDateCombo(person.getDatesUnavailable());
 		createSingleInstanceTaskCombo(person.getSingleInstanceTasks());
+
+		this.allTasks = allTasks;
 
 		setupPersonDialog();
 		setVisible(true);
@@ -161,7 +172,6 @@ public class PersonDialog extends JDialog {
 
 	private void setupPersonDialog() {
 		createStaffSelector();
-		createUnavailDateCombo();
 
 		// Force the text area not to expand when user types more than 3 lines!!
 		notesArea.setBorder(BorderFactory.createEtchedBorder());
@@ -178,7 +188,7 @@ public class PersonDialog extends JDialog {
 				DateRangeEvent dialogResponse = ev.getDialogResponse();
 				if (dialogResponse != null) {
 					// Date range valid. Add to Linked List and Combo Box.
-					datesUnavailable.add(dialogResponse.getDateRange());
+					newDatesUnavailable.add(dialogResponse.getDateRange());
 					DefaultComboBoxModel<String> dateModel = (DefaultComboBoxModel<String>) dateUnavailCombo.getModel();
 					if (dialogResponse.getDateRange().getStartDate().equals(dialogResponse.getDateRange().getEndDate()))
 						// Add single date to list
@@ -215,7 +225,7 @@ public class PersonDialog extends JDialog {
 				} else {
 					PersonEvent ev = new PersonEvent(this, personName.getText().trim(), phone.getText().trim(),
 							email.getText().trim(), leaderButton.isSelected() ? true : false, processNotesArea(),
-							assignedTaskChanges, null, newSingleInstanceTasks, datesUnavailable);
+							assignedTaskChanges, null, newSingleInstanceTasks, newDatesUnavailable);
 					okToSave = true;
 					dialogResponse = ev;
 					setVisible(false);
@@ -341,14 +351,15 @@ public class PersonDialog extends JDialog {
 		singleInstanceTaskCombo.setPreferredSize(new Dimension(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT));
 	}
 
-	private void createUnavailDateCombo() {
+	private void createUnavailDateCombo(LinkedList<DateRangeModel> datesUnavailable) {
 		DefaultComboBoxModel<String> dateModel = new DefaultComboBoxModel<String>();
 
 		for (int i = 0; i < datesUnavailable.size(); i++) {
 			DateRangeModel dateUnavail = datesUnavailable.get(i);
 			if (Utilities.isDateInThePast(dateUnavail.getEndDate(), "Error parsing Unavailable Date(s)"))
-				// Date range has passed; remove from list
-				datesUnavailable.remove(dateUnavail);
+				// TODO: Date range has passed; remove from list
+				//datesUnavailable.remove(dateUnavail);
+				;
 			else if (dateUnavail.getStartDate().equals(dateUnavail.getEndDate()))
 				// Add single date to list
 				dateModel.addElement(dateUnavail.getStartDate());
@@ -411,7 +422,7 @@ public class PersonDialog extends JDialog {
 
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, newSingleInstanceTasks, datesUnavailable);
+								lastAssignedTask, newSingleInstanceTasks, newDatesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -457,7 +468,7 @@ public class PersonDialog extends JDialog {
 
 						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
 								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, newSingleInstanceTasks, datesUnavailable);
+								lastAssignedTask, newSingleInstanceTasks, newDatesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();

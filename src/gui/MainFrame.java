@@ -80,7 +80,7 @@ public class MainFrame extends JFrame {
 	private JMenuItem filterByProgramMenuItem;
 	private JMenuItem filterByPersonMenuItem;
 
-	public MainFrame() throws Exception {
+	public MainFrame() {
 		super("Staff Planner");
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
@@ -112,42 +112,35 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 
-		// Optionally load sample database
-		loadSampleDatabase();
+		// Load selected databases
+		loadSelectedDatabases();
 	}
 
-	private void loadSampleDatabase() throws Exception {
-		DefaultListModel<String> sampleDatabase = new DefaultListModel<String>();
-		sampleDatabase.addElement(new String("Kindergarten"));
-		JList<String> sampleList = new JList<String>(sampleDatabase);
-		FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select sample database to load", sampleList);
+	private void loadSelectedDatabases() {
+		// TODO: Go through database to get program list
+		JList<String> databaseList = TestDatabase.getProgramList();
+		if (databaseList.getModel().getSize() == 0) {
+			System.out.println("No databases exist!");
+			return;
+		}
+		
+		FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select database(s) to load", databaseList);
 		JList<String> dialogResponse = ev.getDialogResponse();
 		if (dialogResponse != null) {
 			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			
+			// If only 1 database was selected, set this as active program
+			if (dialogResponse.getModel().getSize() == 1) {
+				setProgramName (dialogResponse.getModel().getElementAt(0));
+				taskMenu.setEnabled(true);
+			}
+			
+			// For now, always load 'Kindergarten' database
 			controller.loadProgramFromDatabase();
 			processImportProgram();
-			/*
-			try {
-				controller.loadProgramFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_prog.tsk"));
-				processImportProgram();
-			
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "Failed to load database file " +
-					dialogResponse.getModel().getElementAt(0) + "_prog.tsk");
-			}
-			*/
 
 			controller.loadRosterFromDatabase();
 			processImportRoster();
-			/*
-				try {
-					controller.loadRosterFromFile(new File(dialogResponse.getModel().getElementAt(0) + "_staff.tsk"));
-					processImportRoster();
-			
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "Failed to load database file " +
-					dialogResponse.getModel().getElementAt(0) + "_staff.tsk"); }
-			*/
 
 			updateMonth((Calendar) calPanel.getCurrentCalendar());
 			this.setCursor(Cursor.getDefaultCursor());
@@ -375,14 +368,8 @@ public class MainFrame extends JFrame {
 								"Program " + dialogResponse.getProgramName() + " already exists.");
 
 					} else {
-						try {
-							// Add program to database
-							controller.addProgram(dialogResponse);
-
-						} catch (Exception e1) {
-							JOptionPane.showMessageDialog(MainFrame.this, "Failed to add Program '"
-									+ dialogResponse.getProgramName() + "' to database: " + e1.getMessage());
-						}
+						// Add program to database
+						controller.addProgram(dialogResponse);
 
 						if (controller.getNumPrograms() > 1)
 							filterByProgramMenuItem.setEnabled(true);
@@ -464,11 +451,7 @@ public class MainFrame extends JFrame {
 		// Set up listeners for TASK menu
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					createTask();
-				} catch (Exception e1) {
-					System.out.println("Failure creating task: " + e1.getMessage());
-				}
+				createTask();
 			}
 		});
 		taskEditMenu.addChangeListener(new ChangeListener() {
@@ -487,11 +470,7 @@ public class MainFrame extends JFrame {
 					taskItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							String origName = taskItem.getText();
-							try {
-								editTask(selectedProgramName, origName);
-							} catch (Exception e1) {
-								System.out.println("Failure editing task '" + origName + "': " + e1.getMessage());
-							}
+							editTask(selectedProgramName, origName);
 
 							taskList.removeAll();
 							taskEditMenu.removeAll();
@@ -515,12 +494,7 @@ public class MainFrame extends JFrame {
 
 					taskItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
-							try {
-								cloneTask(task);
-							} catch (Exception e1) {
-								System.out.println(
-										"Failure cloning task '" + task.getTaskName() + "': " + e1.getMessage());
-							}
+							cloneTask(task);
 							taskList.removeAll();
 							taskCloneMenu.removeAll();
 						}
@@ -549,14 +523,9 @@ public class MainFrame extends JFrame {
 									"Complete Roster for " + task.getTaskName(), PersonTableModel.getExpansionByTask(),
 									task.getTaskName(), personsByTask, "Add person", null, personsAvail, null);
 
-							try {
-								do {
-									ev = processViewCompleteRosterByTaskDialog(ev.getDialogResponse(), task);
-								} while (ev != null);
-							} catch (Exception e1) {
-								System.out.println("Failure viewing roster for task '" + task.getTaskName() + "': "
-										+ e1.getMessage());
-							}
+							do {
+								ev = processViewCompleteRosterByTaskDialog(ev.getDialogResponse(), task);
+							} while (ev != null);
 
 							taskList.removeAll();
 							taskRosterMenu.removeAll();
@@ -568,21 +537,16 @@ public class MainFrame extends JFrame {
 		taskViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JList<TaskModel> allTasks = controller.getAllTasksByProgram(selectedProgramName);
-				TaskTableDialog taskEvent = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
-						allTasks);
+				TaskTableDialog taskEvent = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName, allTasks);
 
-				try {
-					do {
-						taskEvent = processViewAllTasksDialog(taskEvent.getDialogResponse());
-					} while (taskEvent != null);
-				} catch (Exception e1) {
-					System.out.println("Failure viewing tasks: " + e1.getMessage());
-				}
+				do {
+					taskEvent = processViewAllTasksDialog(taskEvent.getDialogResponse());
+				} while (taskEvent != null);
 			}
 		});
 	}
 
-	private TaskTableDialog processViewAllTasksDialog(TaskTableEvent event) throws Exception {
+	private TaskTableDialog processViewAllTasksDialog(TaskTableEvent event) {
 		if (event != null && event.getButtonId() != TaskTableDialog.getCloseButton()) {
 			if (event.getButtonId() == TaskTableDialog.getAddTaskButton()) {
 				createTask();
@@ -610,13 +574,9 @@ public class MainFrame extends JFrame {
 				PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
 
-				try {
-					do {
-						personEvent = processAddPersonDialog(personEvent);
-					} while (personEvent != null);
-				} catch (Exception e1) {
-					System.out.println("Failure adding Person: " + e1.getMessage());
-				}
+				do {
+					personEvent = processAddPersonDialog(personEvent);
+				} while (personEvent != null);
 			}
 		});
 		editPersonMenu.addChangeListener(new ChangeListener() {
@@ -631,14 +591,12 @@ public class MainFrame extends JFrame {
 					personItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent ev) {
 							String origName = personItem.getText();
-							try {
-								editPerson(origName);
-							} catch (Exception e1) {
-								System.out.println("Failure editing Person '" + origName + "': " + e1.getMessage());
-							}
+
+							editPerson(origName);
 
 							personList.removeAll();
 							editPersonMenu.removeAll();
+							updateMonth((Calendar) calPanel.getCurrentCalendar());
 						}
 					});
 				}
@@ -651,19 +609,15 @@ public class MainFrame extends JFrame {
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
 							PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null);
 
-					try {
-						do {
-							ev = processViewAllPersonsDialog(ev.getDialogResponse());
-						} while (ev != null);
-					} catch (Exception e1) {
-						System.out.println("Failure viewing Roster: " + e1.getMessage());
-					}
+					do {
+						ev = processViewAllPersonsDialog(ev.getDialogResponse());
+					} while (ev != null);
 				}
 			}
 		});
 	}
 
-	private PersonTableDialog processViewAllPersonsDialog(PersonTableEvent event) throws Exception {
+	private PersonTableDialog processViewAllPersonsDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				// Add new person
@@ -752,12 +706,12 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createTask() throws Exception {
+	private void createTask() {
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, selectedProgramName);
 		processCreateTaskDialog(taskEvent, null);
 	}
 
-	private void editTask(String programName, String origTaskName) throws Exception {
+	private void editTask(String programName, String origTaskName) {
 		if (programName == null)
 			programName = controller.findProgramByTaskName(origTaskName);
 
@@ -766,7 +720,7 @@ public class MainFrame extends JFrame {
 		processCreateTaskDialog(taskEvent, origTaskName);
 	}
 
-	private void cloneTask(TaskModel task) throws Exception {
+	private void cloneTask(TaskModel task) {
 		TaskEvent ev = new TaskEvent(MainFrame.this, selectedProgramName, null, task.getLocation(),
 				task.getNumLeadersReqd(), task.getTotalPersonsReqd(), task.getDayOfWeek(), task.getWeekOfMonth(),
 				task.getTime(), task.getColor());
@@ -775,7 +729,7 @@ public class MainFrame extends JFrame {
 		processCreateTaskDialog(taskEvent, null);
 	}
 
-	private void processCreateTaskDialog(TaskDialog taskEvent, String origTaskName) throws Exception {
+	private void processCreateTaskDialog(TaskDialog taskEvent, String origTaskName) {
 		// Loop until user enters valid and unique task name OR cancels
 		while (taskEvent.getDialogResponse() != null) {
 			TaskEvent dialogResponse = taskEvent.getDialogResponse();
@@ -818,7 +772,7 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	private PersonDialog processAddPersonDialog(PersonDialog personEvent) throws Exception {
+	private PersonDialog processAddPersonDialog(PersonDialog personEvent) {
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
@@ -855,7 +809,7 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private PersonDialog processEditPersonDialog(PersonDialog personEvent, String origName) throws Exception {
+	private PersonDialog processEditPersonDialog(PersonDialog personEvent, String origName) {
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
@@ -886,7 +840,7 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private void editPerson(String origName) throws Exception {
+	private void editPerson(String origName) {
 		PersonModel person = controller.getPersonByName(origName);
 		if (person == null)
 			JOptionPane.showMessageDialog(MainFrame.this, "Person does not exist");
@@ -943,14 +897,9 @@ public class MainFrame extends JFrame {
 							PersonTableModel.getExpansionByDay(), selectedTask.getTaskName(), personsToday, "Add sub",
 							calendar, personsAvail, null);
 
-					try {
-						do {
-							ev = processViewRosterByTaskDialog(ev.getDialogResponse());
-						} while (ev != null);
-					} catch (Exception e1) {
-						System.out.println("Failure viewing roster for task '" + selectedTask.getTaskName() + "': "
-								+ e1.getMessage());
-					}
+					do {
+						ev = processViewRosterByTaskDialog(ev.getDialogResponse());
+					} while (ev != null);
 				}
 			}
 		});
@@ -973,13 +922,9 @@ public class MainFrame extends JFrame {
 						PersonTableModel.getExpansionByDay(), null, personsByTime, "Add floater", calendar,
 						personsAvail, timeList);
 
-				try {
-					do {
-						ev = processViewRosterByTimeDialog(ev.getDialogResponse());
-					} while (ev != null);
-				} catch (Exception e1) {
-					System.out.println("Failure viewing roster: " + e1.getMessage());
-				}
+				do {
+					ev = processViewRosterByTimeDialog(ev.getDialogResponse());
+				} while (ev != null);
 			}
 		});
 		viewRosterByLocationItem.addActionListener(new ActionListener() {
@@ -997,13 +942,9 @@ public class MainFrame extends JFrame {
 									+ Utilities.getDisplayDate(selectedCalendar),
 							PersonTableModel.getExpansionByDay(), null, personsByLoc, "", calendar, personsAvail, null);
 
-					try {
-						do {
-							ev = processViewRosterByLocationDialog(ev.getDialogResponse());
-						} while (ev != null);
-					} catch (Exception e1) {
-						System.out.println("Failure viewing roster: " + e1.getMessage());
-					}
+					do {
+						ev = processViewRosterByLocationDialog(ev.getDialogResponse());
+					} while (ev != null);
 				}
 			}
 		});
@@ -1020,18 +961,14 @@ public class MainFrame extends JFrame {
 						PersonTableModel.getExpansionByDay(), null, personsByTask, "Add floater", calendar,
 						personsAvail, timesToday);
 
-				try {
-					do {
-						ev = processViewCompleteRosterDialog(ev.getDialogResponse());
-					} while (ev != null);
-				} catch (Exception e1) {
-					System.out.println("Failure viewing roster: " + e1.getMessage());
-				}
+				do {
+					ev = processViewCompleteRosterDialog(ev.getDialogResponse());
+				} while (ev != null);
 			}
 		});
 	}
 
-	private PersonTableDialog processViewRosterByTaskDialog(PersonTableEvent event) throws Exception {
+	private PersonTableDialog processViewRosterByTaskDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				controller.addSingleInstanceTask(event.getPersonList(), selectedCalendar, selectedTask,
@@ -1064,8 +1001,7 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private PersonTableDialog processViewCompleteRosterByTaskDialog(PersonTableEvent event, TaskModel task)
-			throws Exception {
+	private PersonTableDialog processViewCompleteRosterByTaskDialog(PersonTableEvent event, TaskModel task) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				for (int i = 0; i < event.getPersonList().getModel().getSize(); i++)
@@ -1090,7 +1026,7 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private PersonTableDialog processViewRosterByTimeDialog(PersonTableEvent event) throws Exception {
+	private PersonTableDialog processViewRosterByTimeDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				// Adding floater
@@ -1129,7 +1065,7 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private PersonTableDialog processViewRosterByLocationDialog(PersonTableEvent event) throws Exception {
+	private PersonTableDialog processViewRosterByLocationDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				editPerson(event.getPersonName());
@@ -1155,7 +1091,7 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private PersonTableDialog processViewCompleteRosterDialog(PersonTableEvent event) throws Exception {
+	private PersonTableDialog processViewCompleteRosterDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				controller.addSingleInstanceTask(event.getPersonList(), event.getCalendar(), null, event.getColor());

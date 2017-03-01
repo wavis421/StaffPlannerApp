@@ -65,6 +65,14 @@ public class Utilities {
 				+ String.format("%02d", calendar.get(Calendar.MINUTE)) + ":00");
 	}
 
+	public static String getSqlTime(Calendar calendar) {
+		int hour = calendar.get(Calendar.HOUR);
+		if (calendar.get(Calendar.AM_PM) == Calendar.PM)
+			hour += 12;
+
+		return (String.format("%02d", hour) + ":" + String.format("%02d", calendar.get(Calendar.MINUTE)) + ":00");
+	}
+
 	public static String getSqlDate(Calendar calendar) {
 		return (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
 				+ calendar.get(Calendar.DAY_OF_MONTH));
