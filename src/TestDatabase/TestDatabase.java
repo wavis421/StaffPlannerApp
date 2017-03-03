@@ -518,7 +518,7 @@ public class TestDatabase {
 
 		try {
 			PreparedStatement selectStmt = dbConnection.prepareStatement(
-					"SELECT UnavailDatesID, UnavailDates.PersonID, StartDate, EndDate FROM UnavailDates, Persons "
+					"SELECT UnavailDatesID, UnavailDates.PersonID, StartDate, EndDate FROM UnavailDates "
 							+ "WHERE UnavailDates.PersonID=?;");
 			selectStmt.setInt(1, personID);
 			ResultSet results = selectStmt.executeQuery();
@@ -547,7 +547,8 @@ public class TestDatabase {
 			PreparedStatement selectStmt = dbConnection.prepareStatement(
 					"SELECT SingleInstanceID, SingleInstanceTasks.PersonID, SingleInstanceTasks.TaskID, "
 							+ "SingleInstanceTasks.Date, SingleInstanceTasks.Time, SingleInstanceTasks.Color "
-							+ "FROM SingleInstanceTasks " + "WHERE SingleInstanceTasks.PersonID=?;");
+							+ "FROM SingleInstanceTasks " + "WHERE SingleInstanceTasks.PersonID=? " 
+							+ "ORDER BY SingleInstanceTasks.Date;");
 			selectStmt.setInt(1, personID);
 			ResultSet results = selectStmt.executeQuery();
 
@@ -620,6 +621,20 @@ public class TestDatabase {
 		return womBool;
 	}
 
+	private static int getDowAsInt (boolean[] dowArray) {
+		int dow = 0;
+		for (int k = 0; k < 7; k++)
+			dow = (dow << 1) | (dowArray[k] ? 1 : 0);
+		return dow;
+	}
+	
+	private static int getWomAsInt (boolean[] womArray) {
+		int wom = 0;
+		for (int k = 0; k < 5; k++)
+			wom = (wom << 1) | (womArray[k] ? 1 : 0);
+		return wom;
+	}
+	
 	private static String getTaskName(int taskId) {
 		try {
 			PreparedStatement selectStmt = dbConnection
@@ -671,6 +686,45 @@ public class TestDatabase {
 		}
 		return progID;
 	}
+	
+	public static void updateProgramName(int programID, String progName) {
+		if (!connectDatabase())
+			return;
+
+		try {
+			// Update program name
+			PreparedStatement updateProgramStmt = dbConnection.prepareStatement(
+					"UPDATE Programs SET ProgramName=? WHERE ProgramID=?;");
+			updateProgramStmt.setString(1, progName);
+			updateProgramStmt.setInt(2, programID);
+			
+			updateProgramStmt.executeUpdate();
+			updateProgramStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println("Failure updating Program Name in database: " + e.getMessage());
+		}
+	}
+	
+	public static void updateProgramDates(int programID, String startDate, String endDate) {
+		if (!connectDatabase())
+			return;
+
+		try {
+			// Update program name
+			PreparedStatement updateProgramStmt = dbConnection.prepareStatement(
+					"UPDATE Programs SET StartDate=?, EndDate=? WHERE ProgramID=?;");
+			updateProgramStmt.setString(1, startDate);
+			updateProgramStmt.setString(2,  endDate);
+			updateProgramStmt.setInt(3, programID);
+			
+			updateProgramStmt.executeUpdate();
+			updateProgramStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println("Failure updating Program Dates in database: " + e.getMessage());
+		}
+	}
 
 	/*
 	 * ------- Task Database additions/updates -------
@@ -686,12 +740,6 @@ public class TestDatabase {
 					"INSERT INTO Tasks (ProgramID, TaskName, Hour, Minute, Location, NumLeadersReqd, TotalPersonsReqd, "
 							+ "DaysOfWeek, DowInMonth, Color) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 							Statement.RETURN_GENERATED_KEYS);
-			int dow = 0, wom = 0;
-
-			for (int k = 0; k < 7; k++)
-				dow = (dow << 1) | (dayOfWeek[k] ? 1 : 0);
-			for (int k = 0; k < 5; k++)
-				wom = (wom << 1) | (weekOfMonth[k] ? 1 : 0);
 
 			int col = 1;
 			addTaskStmt.setInt(col++, progID);
@@ -701,8 +749,8 @@ public class TestDatabase {
 			addTaskStmt.setString(col++, location);
 			addTaskStmt.setInt(col++, numLeadersReqd);
 			addTaskStmt.setInt(col++, totalPersonsReqd);
-			addTaskStmt.setInt(col++, dow);
-			addTaskStmt.setInt(col++, wom);
+			addTaskStmt.setInt(col++, getDowAsInt(dayOfWeek));
+			addTaskStmt.setInt(col++, getWomAsInt(weekOfMonth));
 			addTaskStmt.setInt(col++, color);
 
 			addTaskStmt.executeUpdate();
@@ -718,6 +766,56 @@ public class TestDatabase {
 		}
 		return taskID;
 	}
+	
+	public static void updateTaskName(int taskID, String taskName) {
+		if (!connectDatabase())
+			return;
+		
+		try {
+			PreparedStatement updateTaskStmt = dbConnection.prepareStatement(
+					"UPDATE Tasks SET TaskName=? WHERE TaskID=?;");
+
+			int col = 1;
+			updateTaskStmt.setString(col++, taskName);
+			updateTaskStmt.setInt(col++, taskID);
+
+			updateTaskStmt.executeUpdate();
+			updateTaskStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println("Failure updating task name in database: " + e.getMessage());
+		}
+	}
+	
+	public static void updateTaskFields(int taskID, String taskName, String location, int numLeadersReqd, int totalPersonsReqd,
+			boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
+		if (!connectDatabase())
+			return;
+		
+		try {
+			PreparedStatement updateTaskStmt = dbConnection.prepareStatement(
+					"UPDATE Tasks SET TaskName=?, Location=?, NumLeadersReqd=?, TotalPersonsReqd=?, DaysOfWeek=?, DowInMonth=?, " 
+							+ "Hour=?, Minute=?, Color=? WHERE TaskID=?;");
+
+			int col = 1;
+			updateTaskStmt.setString(col++, taskName);
+			updateTaskStmt.setString(col++, location);
+			updateTaskStmt.setInt(col++, numLeadersReqd);
+			updateTaskStmt.setInt(col++, totalPersonsReqd);
+			updateTaskStmt.setInt(col++, getDowAsInt(dayOfWeek));
+			updateTaskStmt.setInt(col++, getWomAsInt(weekOfMonth));
+			updateTaskStmt.setInt(col++, time.get24Hour());
+			updateTaskStmt.setInt(col++, time.getMinute());
+			updateTaskStmt.setInt(col++, color);
+			updateTaskStmt.setInt(col++, taskID);
+
+			updateTaskStmt.executeUpdate();
+			updateTaskStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println("Failure updating task to database: " + e.getMessage());
+		}
+	}
 
 	/*
 	 * ------- Person Database additions/updates -------
@@ -729,7 +827,7 @@ public class TestDatabase {
 		
 		try {
 			PreparedStatement addPersonStmt = dbConnection.prepareStatement(
-					"INSERT INTO Persons (PersonName, PhoneNumber, EMail, isLeader, Notes) " + " VALUES (?, ?, ?, ?, ?)",
+					"INSERT INTO Persons (PersonName, PhoneNumber, EMail, isLeader, Notes) " + " VALUES (?, ?, ?, ?, ?);",
 					Statement.RETURN_GENERATED_KEYS);
 
 			// Add new person
@@ -752,6 +850,32 @@ public class TestDatabase {
 			System.out.println("Failure adding Person to database: " + e.getMessage());
 		}
 		return personID;
+	}
+
+	public static void updatePerson(int personID, String personName, String phone, String email, boolean leader, String notes) {
+		if (!connectDatabase())
+			return;
+		
+		try {
+			PreparedStatement updatePersonStmt = dbConnection.prepareStatement(
+					"UPDATE Persons SET PersonName=?, PhoneNumber=?, EMail=?, isLeader=?, Notes=? " 
+					+ "WHERE PersonID=?;");
+
+			// Add new person
+			int col = 1;
+			updatePersonStmt.setString(col++, personName);
+			updatePersonStmt.setString(col++, phone);
+			updatePersonStmt.setString(col++, email);
+			updatePersonStmt.setBoolean(col++, leader);
+			updatePersonStmt.setString(col++, notes);
+			updatePersonStmt.setInt(col, personID);
+
+			updatePersonStmt.executeUpdate();
+			updatePersonStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println("Failure updating Person in database: " + e.getMessage());
+		}
 	}
 
 	public static int addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {

@@ -51,8 +51,45 @@ public class Utilities {
 
 	public static String getDisplayDate(Calendar calendar) {
 		String month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
-
 		return (month + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR));
+	}
+
+	public static Date getDateFromCalendar(Calendar calendar) {
+		try {
+			return (dateFormatter.parse((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH)
+					+ "/" + calendar.get(Calendar.YEAR)));
+
+		} catch (ParseException e1) {
+			return null;
+		}
+	}
+
+	public static boolean checkForDateAndTimeMatch(Date todayDate, int todayDOW, int todayWOM, Calendar calendar) {
+		Date calDay = Utilities.getDateFromCalendar(calendar);
+		int calWeekIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int calDayIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+		if ((calDay.compareTo(todayDate) == 0) && (calWeekIdx == todayWOM) && (calDayIdx == todayDOW)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static boolean isDateWithinDateRange(Date today, String startDateStr, String endDateStr, String errorString) {
+		try {
+			Date startDate = dateFormatter.parse(startDateStr);
+			Date endDate = dateFormatter.parse(endDateStr);
+			
+			if (today.compareTo(startDate) >= 0 && today.compareTo(endDate) <= 0) {
+				// today is between startDate and endDate
+				return true;
+			}
+
+		} catch (ParseException e) {
+			JOptionPane.showMessageDialog(null, errorString, "Error parsing dates", JOptionPane.ERROR_MESSAGE);
+		}
+		return false;
 	}
 
 	public static String getSqlTimestamp(Calendar calendar) {
@@ -84,7 +121,7 @@ public class Utilities {
 			Date date = sqlDateFormatter.parse(sqlDate.toString() + " " + sqlTime.toString());
 			cal.setTime(date);
 			return cal;
-			
+
 		} catch (ParseException e) {
 			JOptionPane.showMessageDialog(null,
 					"Unable to parse date '" + sqlDate.toString() + " " + sqlTime.toString() + "': " + e.getMessage(),

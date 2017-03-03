@@ -123,18 +123,18 @@ public class MainFrame extends JFrame {
 			System.out.println("No databases exist!");
 			return;
 		}
-		
+
 		FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select database(s) to load", databaseList);
 		JList<String> dialogResponse = ev.getDialogResponse();
 		if (dialogResponse != null) {
 			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			
+
 			// If only 1 database was selected, set this as active program
 			if (dialogResponse.getModel().getSize() == 1) {
-				setProgramName (dialogResponse.getModel().getElementAt(0));
+				setProgramName(dialogResponse.getModel().getElementAt(0));
 				taskMenu.setEnabled(true);
 			}
-			
+
 			// For now, always load 'Kindergarten' database
 			controller.loadProgramFromDatabase();
 			processImportProgram();
@@ -537,7 +537,8 @@ public class MainFrame extends JFrame {
 		taskViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JList<TaskModel> allTasks = controller.getAllTasksByProgram(selectedProgramName);
-				TaskTableDialog taskEvent = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName, allTasks);
+				TaskTableDialog taskEvent = new TaskTableDialog(MainFrame.this, "All Tasks for " + selectedProgramName,
+						allTasks);
 
 				do {
 					taskEvent = processViewAllTasksDialog(taskEvent.getDialogResponse());
@@ -591,7 +592,6 @@ public class MainFrame extends JFrame {
 					personItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent ev) {
 							String origName = personItem.getText();
-
 							editPerson(origName);
 
 							personList.removeAll();
@@ -790,7 +790,7 @@ public class MainFrame extends JFrame {
 				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						new PersonModel(0, dialogResponse.getName(), dialogResponse.getPhone(),
 								dialogResponse.getEmail(), dialogResponse.isLeader(), dialogResponse.getNotes(),
-								assignedTaskList, dialogResponse.getDatesUnavailable(), null),
+								assignedTaskList, null, null),
 						assignedTaskList,
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
@@ -820,10 +820,11 @@ public class MainFrame extends JFrame {
 				LinkedList<AssignedTasksModel> assignedListMerged = mergeAssignedTaskList(assignedTasks,
 						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedListMerged);
+
 				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						new PersonModel(thisPerson.getPersonID(), dialogResponse.getName(), dialogResponse.getPhone(),
 								dialogResponse.getEmail(), dialogResponse.isLeader(), dialogResponse.getNotes(),
-								dialogResponse.getAssignedTaskChanges(), dialogResponse.getDatesUnavailable(),
+								dialogResponse.getAssignedTaskChanges(), thisPerson.getDatesUnavailable(),
 								thisPerson.getSingleInstanceTasks()),
 						dialogResponse.getAssignedTaskChanges(),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedListMerged),

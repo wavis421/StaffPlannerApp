@@ -15,6 +15,9 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 		this.personID = personID;
 		this.taskID = taskID;
 		this.taskName = taskName;
+		
+		taskDate.set(Calendar.SECOND, 0);
+		taskDate.set(Calendar.MILLISECOND, 0);
 		this.taskDate = taskDate;
 
 		// Note: Color parameter only valid when taskName is blank

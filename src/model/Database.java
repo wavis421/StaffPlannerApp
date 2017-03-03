@@ -24,6 +24,13 @@ import TestDatabase.TestDatabase;
 import utilities.Utilities;
 
 public class Database {
+	// Locally used constants
+	private static final int PERSON_NOT_AVAIL = -2;
+	private static final int NO_MATCH_FOUND = -1;
+	private static final int ASSIGNED_TASK_MATCH = 0;
+	private static final int SINGLE_INSTANCE_TASK_MATCH = 1;
+	private static final int FLOATER_MATCH = 2;
+
 	private LinkedList<ProgramModel> programList;
 	private LinkedList<PersonModel> personList;
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
@@ -50,7 +57,8 @@ public class Database {
 	public void updateProgram(String programName, String startDate, String endDate) {
 		ProgramModel program = getProgramByName(programName);
 		if (!program.getStartDate().equals(startDate) || !program.getEndDate().equals(endDate)) {
-			// TODO: Update database
+			// Update database
+			TestDatabase.updateProgramDates(program.getProgramID(), startDate, endDate);
 
 			program.setStartDate(startDate);
 			program.setEndDate(endDate);
@@ -60,8 +68,9 @@ public class Database {
 	public void renameProgram(String oldName, String newName) {
 		ProgramModel program = getProgramByName(oldName);
 		if (program != null) {
-			// TODO: Update database
-			
+			// Update database
+			TestDatabase.updateProgramName(program.getProgramID(), newName);
+
 			program.setProgramName(newName);
 			Collections.sort(programList);
 
@@ -146,14 +155,16 @@ public class Database {
 
 		if (taskIdx != -1) {
 			TaskModel task = program.getTaskList().get(taskIdx);
-			// TODO: Update database
-			
+			// Update database
+			TestDatabase.updateTaskFields(task.getTaskID(), taskName, location, numLeadersReqd, totalPersonsReqd,
+					dayOfWeek, weekOfMonth, time, color);
+
 			TaskModel newTask = new TaskModel(task.getTaskID(), task.getProgramID(), taskName, location, numLeadersReqd,
 					totalPersonsReqd, dayOfWeek, weekOfMonth, time, color);
-			
+
 			program.getTaskList().set(taskIdx, newTask);
 			Collections.sort(program.getTaskList());
-			
+
 		} else
 			JOptionPane.showMessageDialog(null, "Task '" + taskName + "' not found!", "Error updating task",
 					JOptionPane.ERROR_MESSAGE);
@@ -166,8 +177,9 @@ public class Database {
 		taskIdx = getTaskIndexByName(program, oldName);
 		if (taskIdx != -1) {
 			TaskModel task = program.getTaskList().get(taskIdx);
-			// TODO: Update database
-			
+			// Update database
+			TestDatabase.updateTaskName(task.getTaskID(), newName);
+
 			task.setTaskName(newName);
 			program.getTaskList().set(taskIdx, task);
 
@@ -222,7 +234,7 @@ public class Database {
 	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> persons) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = getDay(calendar);
+		Date thisDay = Utilities.getDateFromCalendar(calendar);
 		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 		boolean match;
 
@@ -292,7 +304,7 @@ public class Database {
 	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = getDay(calendar);
+		Date thisDay = Utilities.getDateFromCalendar(calendar);
 
 		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
 		for (int i = 0; i < programList.size(); i++) {
@@ -315,7 +327,7 @@ public class Database {
 	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = getDay(calendar);
+		Date thisDay = Utilities.getDateFromCalendar(calendar);
 
 		// Get all tasks for today
 		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
@@ -370,11 +382,9 @@ public class Database {
 		return thisDaysTasks;
 	}
 
-	/*
-	public List<TaskModel> getAllTasks() {
-		return Collections.unmodifiableList(taskList);
-	}
-	*/
+	//public List<TaskModel> getAllTasks() {
+	//	return Collections.unmodifiableList(taskList);
+	//}
 
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
@@ -491,15 +501,18 @@ public class Database {
 		for (int i = 0; i < assignedTaskList.size(); i++) {
 			AssignedTasksModel assignedTask = assignedTaskList.get(i);
 			if (assignedTask.getTaskName().equals(taskName)) {
-				return 0;
+				return ASSIGNED_TASK_MATCH;
 			}
 		}
-		return -1;
+		return NO_MATCH_FOUND;
 	}
 
 	private int checkPersonMatchForTaskByDay(PersonModel person, String taskName, Date today, int dayOfWeekIdx,
 			int dowInMonthIdx) {
-		if (isPersonAvailable(person, today)) {
+		if (!isPersonAvailable(person, today))
+			return PERSON_NOT_AVAIL;
+
+		else {
 			LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
 
 			// Check if task is in person's assigned task list for today
@@ -507,7 +520,7 @@ public class Database {
 				AssignedTasksModel assignedTask = assignedTaskList.get(i);
 				if (assignedTask.getTaskName().equals(taskName) && assignedTask.getDaysOfWeek()[dayOfWeekIdx]
 						&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
-					return 0;
+					return ASSIGNED_TASK_MATCH;
 				}
 			}
 
@@ -516,12 +529,12 @@ public class Database {
 				// Check if this person is a sub for today
 				Calendar subCalendar = singleInstanceTask.getTaskDate();
 				if (singleInstanceTask.getTaskName().equals(taskName)
-						&& checkForDateAndTimeMatch(today, dayOfWeekIdx, dowInMonthIdx, subCalendar)) {
-					return 1;
+						&& Utilities.checkForDateAndTimeMatch(today, dayOfWeekIdx, dowInMonthIdx, subCalendar)) {
+					return SINGLE_INSTANCE_TASK_MATCH;
 				}
 			}
 		}
-		return -1;
+		return NO_MATCH_FOUND;
 	}
 
 	private int checkSingleInstanceTaskMatch(SingleInstanceTaskModel singleInstanceTask, String taskName, Date today,
@@ -530,22 +543,10 @@ public class Database {
 		Calendar subCalendar = singleInstanceTask.getTaskDate();
 
 		if (singleInstanceTask.getTaskName().equals(taskName)
-				&& checkForDateAndTimeMatch(today, dayOfWeekIdx, dowInMonthIdx, subCalendar))
-			return 1;
+				&& Utilities.checkForDateAndTimeMatch(today, dayOfWeekIdx, dowInMonthIdx, subCalendar))
+			return SINGLE_INSTANCE_TASK_MATCH;
 		else
-			return -1;
-	}
-
-	private boolean checkForDateAndTimeMatch(Date todayDate, int todayDOW, int todayWOM, Calendar calendar) {
-		Date calDay = getDay(calendar);
-		int calWeekIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int calDayIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-		if ((calDay.compareTo(todayDate) == 0) && (calWeekIdx == todayWOM) && (calDayIdx == todayDOW)) {
-			return true;
-		} else {
-			return false;
-		}
+			return NO_MATCH_FOUND;
 	}
 
 	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
@@ -563,16 +564,6 @@ public class Database {
 			}
 		}
 		return (personCount | (leaderCount << 16));
-	}
-
-	private Date getDay(Calendar calendar) {
-		try {
-			return (dateFormatter.parse((calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.DAY_OF_MONTH)
-					+ "/" + calendar.get(Calendar.YEAR)));
-
-		} catch (ParseException e1) {
-			return null;
-		}
 	}
 
 	private boolean isProgramExpired(Date today, ProgramModel prog) {
@@ -612,25 +603,11 @@ public class Database {
 	}
 
 	private boolean isPersonAvailable(PersonModel person, Date today) {
-		if (today == null)
-			return true; // impossible?
-
 		for (int i = 0; i < person.getDatesUnavailable().size(); i++) {
 			DateRangeModel datesUnavail = person.getDatesUnavailable().get(i);
-			try {
-				Date startDate = dateFormatter.parse(datesUnavail.getStartDate());
-				Date endDate = dateFormatter.parse(datesUnavail.getEndDate());
-				if (today.compareTo(startDate) >= 0 && today.compareTo(endDate) <= 0) {
-					// Person unavailable, today is between start and end
-					return false;
-				}
-
-			} catch (ParseException e) {
-				JOptionPane.showMessageDialog(null,
-						"Unable to parse " + person.getName() + "'s unavailable start/end dates.",
-						"Error parsing dates", JOptionPane.ERROR_MESSAGE);
-				return true;
-			}
+			if (Utilities.isDateWithinDateRange(today, datesUnavail.getStartDate(), datesUnavail.getEndDate(),
+					"Unable to parse " + person.getName() + "'s Unavailable start/end Dates."))
+				return false;
 		}
 		return true;
 	}
@@ -642,22 +619,22 @@ public class Database {
 			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraTasks,
 			LinkedList<DateRangeModel> datesUnavailable) {
 		int personID = TestDatabase.addPerson(name, phone, email, leader, notes);
-		
+
 		for (int i = 0; i < assignedTasks.size(); i++) {
 			AssignedTasksModel task = assignedTasks.get(i);
-			int assignedTaskID = TestDatabase.addAssignedTask(personID, task.getTaskID(), 
-					task.getDaysOfWeek(), task.getWeeksOfMonth());
+			int assignedTaskID = TestDatabase.addAssignedTask(personID, task.getTaskID(), task.getDaysOfWeek(),
+					task.getWeeksOfMonth());
 			task.setPersonID(personID);
 			task.setAssignedTaskID(assignedTaskID);
 		}
-		
+
 		for (int i = 0; i < extraTasks.size(); i++) {
 			SingleInstanceTaskModel task = extraTasks.get(i);
 			int singleTaskID = TestDatabase.addSingleInstanceTask(personID, task.getTaskID(), task.getTaskDate());
 			task.setPersonID(personID);
 			task.setSingleTaskID(singleTaskID);
 		}
-		
+
 		for (int i = 0; i < datesUnavailable.size(); i++) {
 			DateRangeModel dates = datesUnavailable.get(i);
 			int datesID = TestDatabase.addUnavailDates(personID, dates.getStartDate(), dates.getEndDate());
@@ -696,15 +673,13 @@ public class Database {
 
 			// Add extraTasks (list only contains additions!!)
 			for (int i = 0; i < extraTasks.size(); i++) {
-				// TODO: check whether person already assigned to this task/day
 				SingleInstanceTaskModel singleTask = extraTasks.get(i);
-				int taskID = singleTask.getTaskID();
-				int singleInstanceID = TestDatabase.addSingleInstanceTask(personID, taskID,
-						singleTask.getTaskDate());
 
-				thisPerson.getSingleInstanceTasks().add(new SingleInstanceTaskModel(singleInstanceID,
-						personID, taskID, singleTask.getTaskName(),
-						singleTask.getTaskDate(), singleTask.getColor()));
+				// Add single instance task to database
+				int taskID = singleTask.getTaskID();
+				int singleInstanceID = TestDatabase.addSingleInstanceTask(personID, taskID, singleTask.getTaskDate());
+				thisPerson.getSingleInstanceTasks().add(new SingleInstanceTaskModel(singleInstanceID, personID, taskID,
+						singleTask.getTaskName(), singleTask.getTaskDate(), singleTask.getColor()));
 			}
 			Collections.sort(thisPerson.getSingleInstanceTasks());
 
@@ -715,13 +690,14 @@ public class Database {
 				int datesID = TestDatabase.addUnavailDates(personID, date.getStartDate(), date.getEndDate());
 				date.setPersonID(personID);
 				date.setUnavailDatesID(datesID);
-				
+
 				thisPerson.getDatesUnavailable().add(date);
 			}
 			Collections.sort(thisPerson.getDatesUnavailable());
 
 			// Now update remaining fields
-			// TODO: Update database
+			TestDatabase.updatePerson(thisPerson.getPersonID(), personName, personPhone, personEmail, personIsLeader,
+					personNotes);
 			thisPerson.setName(personName);
 			thisPerson.setPhone(personPhone);
 			thisPerson.setEmail(personEmail);
@@ -737,27 +713,26 @@ public class Database {
 		PersonModel person = getPersonByName(personName);
 		int taskID, singleTaskID;
 		String taskName;
-		
+
 		if (task == null) {
 			taskID = 0;
 			taskName = "";
-		}
-		else {
+		} else {
 			taskID = task.getTaskID();
 			taskName = task.getTaskName();
 		}
 		singleTaskID = TestDatabase.addSingleInstanceTask(person.getPersonID(), taskID, calendar);
 
 		// Add task to single instance task list
-		person.getSingleInstanceTasks().add(new SingleInstanceTaskModel(singleTaskID, person.getPersonID(), taskID, 
-				taskName, calendar, color));
+		person.getSingleInstanceTasks().add(
+				new SingleInstanceTaskModel(singleTaskID, person.getPersonID(), taskID, taskName, calendar, color));
 		Collections.sort(person.getSingleInstanceTasks());
 	}
 
 	public void renamePerson(String oldName, String newName) {
 		int personIdx = getPersonIndexByName(oldName);
 		if (personIdx != -1) {
-			// TODO: Update database
+			// Update person name
 			PersonModel person = personList.get(personIdx);
 			person.setName(newName);
 			Collections.sort(personList);
@@ -771,10 +746,10 @@ public class Database {
 
 		if (person != null) {
 			// Mark person unavailable for today
-			// TODO: Update database
 			String displayDate = Utilities.getDisplayDate(today);
 			int unavailDatesID = TestDatabase.addUnavailDates(person.getPersonID(), displayDate, displayDate);
-			DateRangeModel dateModel = new DateRangeModel(unavailDatesID, person.getPersonID(), displayDate, displayDate);
+			DateRangeModel dateModel = new DateRangeModel(unavailDatesID, person.getPersonID(), displayDate,
+					displayDate);
 			person.getDatesUnavailable().add(dateModel);
 		}
 	}
@@ -800,7 +775,7 @@ public class Database {
 	}
 
 	public JList<String> getAvailPersonsAsString(Calendar today) {
-		Date thisDay = getDay(today);
+		Date thisDay = Utilities.getDateFromCalendar(today);
 
 		// Get all persons who are available today
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
@@ -854,7 +829,7 @@ public class Database {
 	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = getDay(calendar);
+		Date thisDay = Utilities.getDateFromCalendar(calendar);
 		Calendar localCalendar = (Calendar) calendar.clone();
 
 		JList<PersonModel> persons = getAllPersons();
@@ -900,7 +875,7 @@ public class Database {
 	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = getDay(calendar);
+		Date thisDay = Utilities.getDateFromCalendar(calendar);
 
 		JList<PersonModel> persons = getAllPersons();
 		LinkedList<PersonByTaskModel> thisDaysPersons = new LinkedList<PersonByTaskModel>();
