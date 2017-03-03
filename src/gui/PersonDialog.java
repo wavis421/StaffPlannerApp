@@ -558,7 +558,7 @@ public class PersonDialog extends JDialog {
 				DateRangeModel datesUnavail = datesUnavailableList.get(i);
 				if (Utilities.isDateWithinDateRange(today, datesUnavail.getStartDate(), datesUnavail.getEndDate(),
 						"Unable to parse " + person + "'s Unavailable start/end Dates.")) {
-					JOptionPane.showMessageDialog(null,
+					JOptionPane.showMessageDialog(PersonDialog.this,
 							person + " is not available on " + Utilities.getDisplayDate(thisDay),
 							"Updating Person Info", JOptionPane.INFORMATION_MESSAGE);
 					return false;
@@ -570,7 +570,7 @@ public class PersonDialog extends JDialog {
 			DateRangeModel datesUnavail = newDatesUnavailable.get(i);
 			if (Utilities.isDateWithinDateRange(today, datesUnavail.getStartDate(), datesUnavail.getEndDate(),
 					"Unable to parse " + person + "'s Unavailable start/end Dates.")) {
-				JOptionPane.showMessageDialog(null,
+				JOptionPane.showMessageDialog(PersonDialog.this,
 						person + " is not available on " + Utilities.getDisplayDate(thisDay), "Updating Person Info",
 						JOptionPane.INFORMATION_MESSAGE);
 				return false;
@@ -588,7 +588,7 @@ public class PersonDialog extends JDialog {
 			AssignedTasksModel assignedTask = taskList.get(i);
 			if (assignedTask.getTaskName().equals(taskName) && assignedTask.getDaysOfWeek()[calDayIdx]
 					&& assignedTask.getWeeksOfMonth()[calWeekIdx]) {
-				JOptionPane.showMessageDialog(null,
+				JOptionPane.showMessageDialog(PersonDialog.this,
 						person + " is already assigned to " + assignedTask.getTaskName() + " on "
 								+ Utilities.getDisplayDate(thisDay),
 						"Updating Person Info", JOptionPane.INFORMATION_MESSAGE);
@@ -607,14 +607,14 @@ public class PersonDialog extends JDialog {
 					singleInstanceTask.getTaskDate())) {
 				if (singleInstanceTask.getTaskName().equals(""))
 					// Date/time conflict with floater
-					JOptionPane.showMessageDialog(null,
+					JOptionPane.showMessageDialog(PersonDialog.this,
 							person + " is already assigned as a Floater on "
 									+ Utilities.getDisplayDate(singleInstanceTask.getTaskDate()) + " at "
 									+ Utilities.formatTime(singleInstanceTask.getTaskDate()),
 							"Updating Person Info", JOptionPane.INFORMATION_MESSAGE);
 				else
 					// Date/time conflict with substitute
-					JOptionPane.showMessageDialog(null,
+					JOptionPane.showMessageDialog(PersonDialog.this,
 							person + " is already assigned to " + singleInstanceTask.getTaskName() + " on "
 									+ Utilities.getDisplayDate(singleInstanceTask.getTaskDate()) + " at "
 									+ Utilities.formatTime(singleInstanceTask.getTaskDate()),
