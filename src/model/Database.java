@@ -665,13 +665,18 @@ public class Database {
 				taskIdx = findAssignedTaskIdx(assignedTask.getTaskName(), dbAssignedTaskList);
 				if (taskIdx != -1) {
 					// Assigned task already in database, so update
-					TestDatabase.updateAssignedTask(assignedTask.getAssignedTaskID(), assignedTask.getDaysOfWeek(),
+					int assignedTaskID = dbAssignedTaskList.get(taskIdx).getAssignedTaskID();
+					TestDatabase.updateAssignedTask(assignedTaskID, assignedTask.getDaysOfWeek(),
 							assignedTask.getWeeksOfMonth());
+					assignedTask.setPersonID(personID);
+					assignedTask.setAssignedTaskID(assignedTaskID);
 					thisPerson.getAssignedTasks().set(taskIdx, assignedTask);
 				} else {
 					// New task was assigned, add to database
-					TestDatabase.addAssignedTask(personID, assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
-							assignedTask.getWeeksOfMonth());
+					int assignedTaskID = TestDatabase.addAssignedTask(personID, assignedTask.getTaskID(),
+							assignedTask.getDaysOfWeek(), assignedTask.getWeeksOfMonth());
+					assignedTask.setPersonID(personID);
+					assignedTask.setAssignedTaskID(assignedTaskID);
 					thisPerson.getAssignedTasks().add(assignedTask);
 				}
 			}
@@ -690,13 +695,16 @@ public class Database {
 
 			// Add dates unavailable (list only contains additions!!)
 			for (int i = 0; i < personDatesUnavailable.size(); i++) {
-				// TODO: check for duplication
 				DateRangeModel date = personDatesUnavailable.get(i);
-				int datesID = TestDatabase.addUnavailDates(personID, date.getStartDate(), date.getEndDate());
-				date.setPersonID(personID);
-				date.setUnavailDatesID(datesID);
+				
+				// Add unavailable dates if not a duplicate
+				if (!findDateMatchInDateRangeModel(thisPerson.getDatesUnavailable(), date)) {
+					int datesID = TestDatabase.addUnavailDates(personID, date.getStartDate(), date.getEndDate());
+					date.setPersonID(personID);
+					date.setUnavailDatesID(datesID);
 
-				thisPerson.getDatesUnavailable().add(date);
+					thisPerson.getDatesUnavailable().add(date);
+				}
 			}
 			Collections.sort(thisPerson.getDatesUnavailable());
 
@@ -961,6 +969,15 @@ public class Database {
 			taskIdx++;
 		}
 		return -1;
+	}
+	
+	private boolean findDateMatchInDateRangeModel (LinkedList<DateRangeModel> dateList, DateRangeModel compareDate) {
+		for (int i = 0; i < dateList.size(); i++) {
+			DateRangeModel date = dateList.get(i);
+			if (date.compareTo(compareDate) == 0)
+				return true;
+		}
+		return false;
 	}
 
 	/*

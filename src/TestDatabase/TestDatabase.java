@@ -485,10 +485,10 @@ public class TestDatabase {
 
 		try {
 			PreparedStatement selectStmt = dbConnection.prepareStatement(
-					"SELECT AssignedTaskID, AssignedTasks.PersonID, AssignedTasks.TaskID, AssignedTasks.DaysOfWeek, "
+					"SELECT AssignedTasks.AssignedTaskID, AssignedTasks.PersonID, AssignedTasks.TaskID, AssignedTasks.DaysOfWeek, "
 							+ "AssignedTasks.DowInMonth, TaskName, ProgramName, Hour, Minute "
-							+ "FROM AssignedTasks, Tasks, Programs " + "WHERE AssignedTasks.PersonID=? "
-							+ "AND AssignedTasks.TaskID = Tasks.TaskID " + "AND Tasks.ProgramID = Programs.ProgramID "
+							+ "FROM AssignedTasks, Tasks, Programs WHERE AssignedTasks.PersonID=? "
+							+ "AND AssignedTasks.TaskID = Tasks.TaskID AND Tasks.ProgramID = Programs.ProgramID "
 							+ "ORDER BY Tasks.Hour, Tasks.Minute;");
 			selectStmt.setInt(1, personID);
 			ResultSet results = selectStmt.executeQuery();
@@ -738,7 +738,7 @@ public class TestDatabase {
 		try {
 			PreparedStatement addTaskStmt = dbConnection.prepareStatement(
 					"INSERT INTO Tasks (ProgramID, TaskName, Hour, Minute, Location, NumLeadersReqd, TotalPersonsReqd, "
-							+ "DaysOfWeek, DowInMonth, Color) VALUES " + "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+							+ "DaysOfWeek, DowInMonth, Color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 							Statement.RETURN_GENERATED_KEYS);
 
 			int col = 1;
@@ -915,7 +915,7 @@ public class TestDatabase {
 
 		try {
 			PreparedStatement updateAssignedTaskStmt = dbConnection.prepareStatement(
-					"UPDATE AssignedTasks SET DaysOfWeek=? DowInMonth=? WHERE AssignedTasksID=?;");
+					"UPDATE AssignedTasks SET DaysOfWeek=?, DowInMonth=? WHERE AssignedTaskID=?;");
 
 			// Add new assigned task
 			int col = 1;
