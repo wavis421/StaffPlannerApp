@@ -382,9 +382,9 @@ public class Database {
 		return thisDaysTasks;
 	}
 
-	//public List<TaskModel> getAllTasks() {
-	//	return Collections.unmodifiableList(taskList);
-	//}
+	// public List<TaskModel> getAllTasks() {
+	// return Collections.unmodifiableList(taskList);
+	// }
 
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
@@ -660,15 +660,20 @@ public class Database {
 			LinkedList<AssignedTasksModel> dbAssignedTaskList = thisPerson.getAssignedTasks();
 
 			for (int i = 0; i < personAssignedTasks.size(); i++) {
-				// TODO: Update database
+				// Update database
 				AssignedTasksModel assignedTask = personAssignedTasks.get(i);
 				taskIdx = findAssignedTaskIdx(assignedTask.getTaskName(), dbAssignedTaskList);
-				if (taskIdx != -1)
+				if (taskIdx != -1) {
 					// Assigned task already in database, so update
+					TestDatabase.updateAssignedTask(assignedTask.getAssignedTaskID(), assignedTask.getDaysOfWeek(),
+							assignedTask.getWeeksOfMonth());
 					thisPerson.getAssignedTasks().set(taskIdx, assignedTask);
-				else
+				} else {
 					// New task was assigned, add to database
+					TestDatabase.addAssignedTask(personID, assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
+							assignedTask.getWeeksOfMonth());
 					thisPerson.getAssignedTasks().add(assignedTask);
+				}
 			}
 
 			// Add extraTasks (list only contains additions!!)

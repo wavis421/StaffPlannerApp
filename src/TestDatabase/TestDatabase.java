@@ -880,7 +880,6 @@ public class TestDatabase {
 
 	public static int addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
 		int assignedTaskID = 0;
-		int dow = 0, wom = 0;
 		if (!connectDatabase())
 			return -1;
 
@@ -889,17 +888,12 @@ public class TestDatabase {
 					"INSERT INTO AssignedTasks (PersonID, taskID, DaysOfWeek, DowInMonth) VALUES (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 
-			for (int k = 0; k < 7; k++)
-				dow = (dow << 1) | (daysOfWeek[k] ? 1 : 0);
-			for (int k = 0; k < 5; k++)
-				wom = (wom << 1) | (weeksOfMonth[k] ? 1 : 0);
-
 			// Add new assigned task
 			int col = 1;
 			addAssignedTaskStmt.setInt(col++, personID);
 			addAssignedTaskStmt.setInt(col++, taskID);
-			addAssignedTaskStmt.setInt(col++, dow);
-			addAssignedTaskStmt.setInt(col++, wom);
+			addAssignedTaskStmt.setInt(col++, getDowAsInt(daysOfWeek));
+			addAssignedTaskStmt.setInt(col++, getWomAsInt(weeksOfMonth));
 
 			addAssignedTaskStmt.executeUpdate();
 			ResultSet result = addAssignedTaskStmt.getGeneratedKeys();
@@ -915,6 +909,28 @@ public class TestDatabase {
 		return assignedTaskID;
 	}
 
+	public static void updateAssignedTask(int assignedTaskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+		if (!connectDatabase())
+			return;
+
+		try {
+			PreparedStatement updateAssignedTaskStmt = dbConnection.prepareStatement(
+					"UPDATE AssignedTasks SET DaysOfWeek=? DowInMonth=? WHERE AssignedTasksID=?;");
+
+			// Add new assigned task
+			int col = 1;
+			updateAssignedTaskStmt.setInt(col++, getDowAsInt(daysOfWeek));
+			updateAssignedTaskStmt.setInt(col++, getWomAsInt(weeksOfMonth));
+			updateAssignedTaskStmt.setInt(col, assignedTaskID);
+
+			updateAssignedTaskStmt.executeUpdate();
+			updateAssignedTaskStmt.close();
+
+		} catch (SQLException e) {
+			System.out.println("Failure updating task assignment: " + e.getMessage());
+		}
+	}
+	
 	public static int addUnavailDates(int personID, String startDate, String endDate) {
 		int unavailDatesID = 0;
 		if (!connectDatabase())
