@@ -49,9 +49,11 @@ public class Database {
 	public void addProgram(String programName, String startDate, String endDate) {
 		int programID = TestDatabase.addProgram(programName, startDate, endDate);
 
-		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
-		programList.add(new ProgramModel(programID, programName, startDate, endDate, taskList));
-		Collections.sort(programList);
+		if (programID > 0) {
+			LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
+			programList.add(new ProgramModel(programID, programName, startDate, endDate, taskList));
+			Collections.sort(programList);
+		}
 	}
 
 	public void updateProgram(String programName, String startDate, String endDate) {
@@ -143,18 +145,20 @@ public class Database {
 		int taskID = TestDatabase.addTask(program.getProgramID(), taskName, location, numLeadersReqd, totalPersonsReqd,
 				dayOfWeek, weekOfMonth, time, color);
 
-		program.getTaskList().add(new TaskModel(taskID, program.getProgramID(), taskName, location, numLeadersReqd,
-				totalPersonsReqd, dayOfWeek, weekOfMonth, time, color));
-		Collections.sort(program.getTaskList());
+		if (taskID > 0) {
+			program.getTaskList().add(new TaskModel(taskID, program.getProgramID(), taskName, location, numLeadersReqd,
+					totalPersonsReqd, dayOfWeek, weekOfMonth, time, color));
+			Collections.sort(program.getTaskList());
+		}
 	}
 
 	public void updateTask(String programName, String taskName, String location, int numLeadersReqd,
 			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
 		ProgramModel program = getProgramByName(programName);
-		int taskIdx = getTaskIndexByName(program, taskName);
+		int taskListIdx = getTaskIndexByName(program, taskName);
 
-		if (taskIdx != -1) {
-			TaskModel task = program.getTaskList().get(taskIdx);
+		if (taskListIdx != -1) {
+			TaskModel task = program.getTaskList().get(taskListIdx);
 			// Update database
 			TestDatabase.updateTaskFields(task.getTaskID(), taskName, location, numLeadersReqd, totalPersonsReqd,
 					dayOfWeek, weekOfMonth, time, color);
@@ -162,7 +166,7 @@ public class Database {
 			TaskModel newTask = new TaskModel(task.getTaskID(), task.getProgramID(), taskName, location, numLeadersReqd,
 					totalPersonsReqd, dayOfWeek, weekOfMonth, time, color);
 
-			program.getTaskList().set(taskIdx, newTask);
+			program.getTaskList().set(taskListIdx, newTask);
 			Collections.sort(program.getTaskList());
 
 		} else
@@ -171,17 +175,17 @@ public class Database {
 	}
 
 	public void renameTask(String programName, String oldName, String newName) {
-		int taskIdx;
+		int taskListIdx;
 
 		ProgramModel program = getProgramByName(programName);
-		taskIdx = getTaskIndexByName(program, oldName);
-		if (taskIdx != -1) {
-			TaskModel task = program.getTaskList().get(taskIdx);
+		taskListIdx = getTaskIndexByName(program, oldName);
+		if (taskListIdx != -1) {
+			TaskModel task = program.getTaskList().get(taskListIdx);
 			// Update database
 			TestDatabase.updateTaskName(task.getTaskID(), newName);
 
 			task.setTaskName(newName);
-			program.getTaskList().set(taskIdx, task);
+			program.getTaskList().set(taskListIdx, task);
 
 			// Update persons' assigned tasks lists
 			updateTaskNameByPerson(oldName, newName);
@@ -619,28 +623,48 @@ public class Database {
 			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraTasks,
 			LinkedList<DateRangeModel> datesUnavailable) {
 		int personID = TestDatabase.addPerson(name, phone, email, leader, notes);
+		if (personID <= 0)
+			return;
 
 		for (int i = 0; i < assignedTasks.size(); i++) {
 			AssignedTasksModel task = assignedTasks.get(i);
 			int assignedTaskID = TestDatabase.addAssignedTask(personID, task.getTaskID(), task.getDaysOfWeek(),
 					task.getWeeksOfMonth());
-			task.setPersonID(personID);
-			task.setAssignedTaskID(assignedTaskID);
+			if (assignedTaskID > 0) {
+				task.setPersonID(personID);
+				task.setAssignedTaskID(assignedTaskID);
+			} else {
+				assignedTasks.remove(i);
+				i--;
+			}
 		}
+		Collections.sort(assignedTasks);
 
 		for (int i = 0; i < extraTasks.size(); i++) {
 			SingleInstanceTaskModel task = extraTasks.get(i);
 			int singleTaskID = TestDatabase.addSingleInstanceTask(personID, task.getTaskID(), task.getTaskDate());
-			task.setPersonID(personID);
-			task.setSingleTaskID(singleTaskID);
+			if (singleTaskID > 0) {
+				task.setPersonID(personID);
+				task.setSingleTaskID(singleTaskID);
+			} else {
+				extraTasks.remove(i);
+				i--;
+			}
 		}
+		Collections.sort(extraTasks);
 
 		for (int i = 0; i < datesUnavailable.size(); i++) {
 			DateRangeModel dates = datesUnavailable.get(i);
 			int datesID = TestDatabase.addUnavailDates(personID, dates.getStartDate(), dates.getEndDate());
-			dates.setPersonID(personID);
-			dates.setUnavailDatesID(datesID);
+			if (datesID > 0) {
+				dates.setPersonID(personID);
+				dates.setUnavailDatesID(datesID);
+			} else {
+				datesUnavailable.remove(i);
+				i--;
+			}
 		}
+		Collections.sort(datesUnavailable);
 
 		personList.add(new PersonModel(personID, name, phone, email, leader, notes, assignedTasks, datesUnavailable,
 				extraTasks));
@@ -675,9 +699,11 @@ public class Database {
 					// New task was assigned, add to database
 					int assignedTaskID = TestDatabase.addAssignedTask(personID, assignedTask.getTaskID(),
 							assignedTask.getDaysOfWeek(), assignedTask.getWeeksOfMonth());
-					assignedTask.setPersonID(personID);
-					assignedTask.setAssignedTaskID(assignedTaskID);
-					thisPerson.getAssignedTasks().add(assignedTask);
+					if (assignedTaskID > 0) {
+						assignedTask.setPersonID(personID);
+						assignedTask.setAssignedTaskID(assignedTaskID);
+						thisPerson.getAssignedTasks().add(assignedTask);
+					}
 				}
 			}
 
@@ -688,22 +714,25 @@ public class Database {
 				// Add single instance task to database
 				int taskID = singleTask.getTaskID();
 				int singleInstanceID = TestDatabase.addSingleInstanceTask(personID, taskID, singleTask.getTaskDate());
-				thisPerson.getSingleInstanceTasks().add(new SingleInstanceTaskModel(singleInstanceID, personID, taskID,
-						singleTask.getTaskName(), singleTask.getTaskDate(), singleTask.getColor()));
+				if (singleInstanceID > 0) {
+					thisPerson.getSingleInstanceTasks().add(new SingleInstanceTaskModel(singleInstanceID, personID,
+							taskID, singleTask.getTaskName(), singleTask.getTaskDate(), singleTask.getColor()));
+				}
 			}
 			Collections.sort(thisPerson.getSingleInstanceTasks());
 
 			// Add dates unavailable (list only contains additions!!)
 			for (int i = 0; i < personDatesUnavailable.size(); i++) {
 				DateRangeModel date = personDatesUnavailable.get(i);
-				
+
 				// Add unavailable dates if not a duplicate
 				if (!findDateMatchInDateRangeModel(thisPerson.getDatesUnavailable(), date)) {
 					int datesID = TestDatabase.addUnavailDates(personID, date.getStartDate(), date.getEndDate());
-					date.setPersonID(personID);
-					date.setUnavailDatesID(datesID);
-
-					thisPerson.getDatesUnavailable().add(date);
+					if (datesID > 0) {
+						date.setPersonID(personID);
+						date.setUnavailDatesID(datesID);
+						thisPerson.getDatesUnavailable().add(date);
+					}
 				}
 			}
 			Collections.sort(thisPerson.getDatesUnavailable());
@@ -736,10 +765,12 @@ public class Database {
 		}
 		singleTaskID = TestDatabase.addSingleInstanceTask(person.getPersonID(), taskID, calendar);
 
-		// Add task to single instance task list
-		person.getSingleInstanceTasks().add(
-				new SingleInstanceTaskModel(singleTaskID, person.getPersonID(), taskID, taskName, calendar, color));
-		Collections.sort(person.getSingleInstanceTasks());
+		if (singleTaskID > 0) {
+			// Add task to single instance task list
+			person.getSingleInstanceTasks().add(
+					new SingleInstanceTaskModel(singleTaskID, person.getPersonID(), taskID, taskName, calendar, color));
+			Collections.sort(person.getSingleInstanceTasks());
+		}
 	}
 
 	public void renamePerson(String oldName, String newName) {
@@ -761,9 +792,12 @@ public class Database {
 			// Mark person unavailable for today
 			String displayDate = Utilities.getDisplayDate(today);
 			int unavailDatesID = TestDatabase.addUnavailDates(person.getPersonID(), displayDate, displayDate);
-			DateRangeModel dateModel = new DateRangeModel(unavailDatesID, person.getPersonID(), displayDate,
-					displayDate);
-			person.getDatesUnavailable().add(dateModel);
+
+			if (unavailDatesID > 0) {
+				DateRangeModel dateModel = new DateRangeModel(unavailDatesID, person.getPersonID(), displayDate,
+						displayDate);
+				person.getDatesUnavailable().add(dateModel);
+			}
 		}
 	}
 
@@ -970,8 +1004,8 @@ public class Database {
 		}
 		return -1;
 	}
-	
-	private boolean findDateMatchInDateRangeModel (LinkedList<DateRangeModel> dateList, DateRangeModel compareDate) {
+
+	private boolean findDateMatchInDateRangeModel(LinkedList<DateRangeModel> dateList, DateRangeModel compareDate) {
 		for (int i = 0; i < dateList.size(); i++) {
 			DateRangeModel date = dateList.get(i);
 			if (date.compareTo(compareDate) == 0)
