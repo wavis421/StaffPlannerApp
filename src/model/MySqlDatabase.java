@@ -302,11 +302,6 @@ public class MySqlDatabase {
 		return count;
 	}
 
-	private int getProgramIndexByName(String programName) {
-		// TODO: Shouldn't need this anymore
-		return -1;
-	}
-
 	/*
 	 * ------- Task data -------
 	 */
