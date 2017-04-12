@@ -28,15 +28,15 @@ public class AssignedTasksModel implements Serializable, Comparable<AssignedTask
 	public int getAssignedTaskID() {
 		return assignedTaskID;
 	}
-	
+
 	public void setAssignedTaskID(int id) {
 		assignedTaskID = id;
 	}
-	
+
 	public void setPersonID(int id) {
 		personID = id;
 	}
-	
+
 	public String toString() {
 		return taskName;
 	}

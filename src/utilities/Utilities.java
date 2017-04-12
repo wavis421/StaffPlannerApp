@@ -1,7 +1,5 @@
 package utilities;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -19,7 +17,8 @@ public class Utilities {
 	// Time format for hour 1 - 12 and AM/PM field
 	private static final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-	private static final SimpleDateFormat sqlDateFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	private static final SimpleDateFormat sqlDateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	private static final SimpleDateFormat sqlDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	/* <<<<<<<<<< Calendar & Time Utilities >>>>>>>>>> */
 	public static String formatTime(Calendar cal) {
@@ -114,17 +113,45 @@ public class Utilities {
 		return (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
 				+ calendar.get(Calendar.DAY_OF_MONTH));
 	}
+	
+	public static String getSqlDate(String displayDate) {
+		try {
+			Calendar cal = Calendar.getInstance();
+			Date date = dateFormatter.parse(displayDate);
+			cal.setTime(date);
+			return getSqlDate(cal);
+
+		} catch (ParseException e1) {
+			return null;
+		}
+	}
 
 	public static Calendar convertSqlDateTime(java.sql.Date sqlDate, java.sql.Time sqlTime) {
 		try {
 			Calendar cal = Calendar.getInstance();
-			Date date = sqlDateFormatter.parse(sqlDate.toString() + " " + sqlTime.toString());
+			Date date = sqlDateTimeFormatter.parse(sqlDate.toString() + " " + sqlTime.toString());
 			cal.setTime(date);
 			return cal;
 
 		} catch (ParseException e) {
 			JOptionPane.showMessageDialog(null,
 					"Unable to parse date '" + sqlDate.toString() + " " + sqlTime.toString() + "': " + e.getMessage(),
+					"Parsing Error", JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+	}
+	
+	public static String convertSqlDateToString(java.sql.Date sqlDate) {
+		try {
+			// TODO: There must be a better way to do this!
+			Calendar cal = Calendar.getInstance();
+			Date date = sqlDateFormatter.parse(sqlDate.toString());
+			cal.setTime(date);
+			return getDisplayDate(cal);
+
+		} catch (ParseException e) {
+			JOptionPane.showMessageDialog(null,
+					"Unable to parse date '" + sqlDate.toString() + "': " + e.getMessage(),
 					"Parsing Error", JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
@@ -265,7 +292,7 @@ public class Utilities {
 		}
 		return newJList;
 	}
-
+	
 	/* <<<<<<<<<< Color Utilities >>>>>>>>>> */
 	public static int[] getColorSelection() {
 		int[] colorSelections = { 0x000000, // Black

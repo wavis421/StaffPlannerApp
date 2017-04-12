@@ -88,7 +88,7 @@ public class DateRangeDialog extends JDialog {
 
 				if (!startDate.equals("") && !endDate.equals("")) {
 					if (taskCombo == null) {
-						// No task in dialog
+						// No task in dialog, so setting Unavailable Date range
 						dialogResponse = new DateRangeEvent(DateRangeDialog.this, null,
 								(Calendar) startDatePicker.getModel().getValue(),
 								(Calendar) endDatePicker.getModel().getValue());
@@ -96,12 +96,12 @@ public class DateRangeDialog extends JDialog {
 						dispose();
 
 					} else if (taskCombo.getSelectedItem() == null) {
-						// Expecting a task, none selected
+						// Substitute needs a task, none selected
 						JOptionPane.showMessageDialog(DateRangeDialog.this,
 								"Please select which task to assign a substitute");
 
 					} else {
-						// Task selected
+						// Assigning substitute, task selected
 						int idx = taskCombo.getSelectedIndex();
 						dialogResponse = new DateRangeEvent(DateRangeDialog.this,
 								(TaskModel) allTasks.getModel().getElementAt(idx),

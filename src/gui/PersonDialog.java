@@ -347,7 +347,7 @@ public class PersonDialog extends JDialog {
 				SingleInstanceTaskModel task = singleInstanceTaskList.get(i);
 				Calendar date = task.getTaskDate();
 				String taskName = task.getTaskName();
-				if (taskName.equals("")) {
+				if (taskName == null || taskName.equals("")) {
 					taskName = "Floater";
 					taskModel.addElement(
 							taskName + " on " + Utilities.getDisplayDate(date) + " at " + Utilities.formatTime(date));
