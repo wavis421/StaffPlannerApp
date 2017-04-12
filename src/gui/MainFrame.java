@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -81,9 +82,12 @@ public class MainFrame extends JFrame {
 	private JMenuItem filterByPersonMenuItem;
 
 	public MainFrame() {
-		super("Staff Planner");
+		super("Program Planner");
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
+		
+		ImageIcon img = new ImageIcon("PPicon24.png");
+		setIconImage(img.getImage());
 
 		// Create components
 		controller = new Controller();
@@ -1203,8 +1207,7 @@ public class MainFrame extends JFrame {
 		for (int i = 0; i < taskList.size(); i++) {
 			AssignedTasksModel item = taskList.get(i);
 
-			// Check to see if this task is currently valid; if not, leave
-			// disabled
+			// Check to see if this task is currently valid; if not, leave disabled
 			TaskModel thisTask = controller.getTaskByName(item.getProgramName(), item.getTaskName());
 			if (thisTask == null) {
 				System.out.println("Dropping program " + item.getProgramName() + ", task " + item.getTaskName());
@@ -1242,6 +1245,7 @@ public class MainFrame extends JFrame {
 		String programName = null;
 		if (lastTaskAdded != null)
 			programName = lastTaskAdded.getProgramName();
+
 		collapseTree(assignedTree, programName);
 		collapseTree(taskTree, programName);
 
