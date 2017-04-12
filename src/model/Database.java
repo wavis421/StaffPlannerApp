@@ -29,7 +29,6 @@ public class Database {
 	private static final int NO_MATCH_FOUND = -1;
 	private static final int ASSIGNED_TASK_MATCH = 0;
 	private static final int SINGLE_INSTANCE_TASK_MATCH = 1;
-	private static final int FLOATER_MATCH = 2;
 
 	private LinkedList<ProgramModel> programList;
 	private LinkedList<PersonModel> personList;
