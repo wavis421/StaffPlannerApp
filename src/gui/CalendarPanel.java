@@ -17,8 +17,9 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
@@ -59,7 +60,7 @@ public class CalendarPanel extends JPanel {
 
 	// Private instance variables
 	private JLabel leftLabel, rightLabel;
-	private LinkedList<CalendarDayModel>[] dayBoxTaskList = new LinkedList[31];
+	private ArrayList<CalendarDayModel>[] dayBoxTaskList = new ArrayList[31];
 	private JLabel programLabel = new JLabel("   ");
 	private JLabel filterLabel = new JLabel("");
 	private TableLayout calLayout = new TableLayout();
@@ -105,7 +106,7 @@ public class CalendarPanel extends JPanel {
 		// Set up filter label
 		filterLabel.setHorizontalAlignment(JLabel.RIGHT);
 		filterLabel.setFont(JTFTools.decodeFont(FILTER_FONT));
-		
+
 		// Initialize calendar parameters
 		currentCalendar = Calendar.getInstance(locale);
 		currentCalendar.setFirstDayOfWeek(Calendar.SUNDAY);
@@ -148,10 +149,19 @@ public class CalendarPanel extends JPanel {
 	}
 
 	// Update the tasks for the indicated calendar day
-	public void updateTasksByDay(int dayIdx, LinkedList<CalendarDayModel> tasks) {
+	public void updateTasksByDay(int dayIdx, ArrayList<CalendarDayModel> tasks) {
 		if (dayBoxTaskList[dayIdx] != null)
 			dayBoxTaskList[dayIdx].clear();
 		dayBoxTaskList[dayIdx] = tasks;
+	}
+
+	// Update the tasks for the current month
+	public void updateTasksByMonth(ArrayList<ArrayList<CalendarDayModel>> taskList) {
+		for (int i = 0; i < 31; i++) {
+			if (dayBoxTaskList[i] != null)
+				dayBoxTaskList[i].clear();
+			dayBoxTaskList[i] = taskList.get(i);
+		}
 	}
 
 	// Refresh calendar

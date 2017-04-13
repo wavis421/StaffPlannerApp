@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -85,7 +85,7 @@ public class MainFrame extends JFrame {
 		super("Program Planner");
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
-		
+
 		ImageIcon img = new ImageIcon("PPicon24.png");
 		setIconImage(img.getImage());
 
@@ -521,7 +521,7 @@ public class MainFrame extends JFrame {
 
 					taskItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
-							LinkedList<PersonByTaskModel> personsByTask = controller.getPersonsByTask(task);
+							ArrayList<PersonByTaskModel> personsByTask = controller.getPersonsByTask(task);
 							JList<String> personsAvail = controller.getAllPersonsAsString();
 							PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 									"Complete Roster for " + task.getTaskName(), PersonTableModel.getExpansionByTask(),
@@ -574,7 +574,7 @@ public class MainFrame extends JFrame {
 		// Set up listeners for PERSONS menu
 		addPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				LinkedList<AssignedTasksModel> assignedList = new LinkedList<AssignedTasksModel>();
+				ArrayList<AssignedTasksModel> assignedList = new ArrayList<AssignedTasksModel>();
 				JTree taskTree = createTaskTree(assignedList);
 				PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
@@ -609,7 +609,7 @@ public class MainFrame extends JFrame {
 		viewAllPersonsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
-					LinkedList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
+					ArrayList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
 							PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null);
 
@@ -625,7 +625,7 @@ public class MainFrame extends JFrame {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				// Add new person
-				LinkedList<AssignedTasksModel> assignedList = new LinkedList<AssignedTasksModel>();
+				ArrayList<AssignedTasksModel> assignedList = new ArrayList<AssignedTasksModel>();
 				JTree taskTree = createTaskTree(assignedList);
 				PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
@@ -639,7 +639,7 @@ public class MainFrame extends JFrame {
 			}
 
 			// Refresh data and re-open Person Table dialog
-			LinkedList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
+			ArrayList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
 					PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null);
 			return ev;
@@ -789,7 +789,7 @@ public class MainFrame extends JFrame {
 							"Person " + dialogResponse.getName() + " already exists. Please use a different name.");
 
 				// Do not save; go back and edit person
-				LinkedList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTaskChanges();
+				ArrayList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTaskChanges();
 				JTree taskTree = createTaskTree(assignedTaskList);
 				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						new PersonModel(0, dialogResponse.getName(), dialogResponse.getPhone(),
@@ -819,9 +819,9 @@ public class MainFrame extends JFrame {
 		if (dialogResponse != null) {
 			if (!personEvent.getOkToSaveStatus()) { // is OK to save?
 				PersonModel thisPerson = controller.getPersonByName(origName);
-				LinkedList<AssignedTasksModel> assignedTasks = (LinkedList<AssignedTasksModel>) thisPerson
+				ArrayList<AssignedTasksModel> assignedTasks = (ArrayList<AssignedTasksModel>) thisPerson
 						.getAssignedTasks().clone();
-				LinkedList<AssignedTasksModel> assignedListMerged = mergeAssignedTaskList(assignedTasks,
+				ArrayList<AssignedTasksModel> assignedListMerged = mergeAssignedTaskList(assignedTasks,
 						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedListMerged);
 
@@ -850,10 +850,10 @@ public class MainFrame extends JFrame {
 		if (person == null)
 			JOptionPane.showMessageDialog(MainFrame.this, "Person does not exist");
 		else {
-			LinkedList<AssignedTasksModel> assignedList = person.getAssignedTasks();
+			ArrayList<AssignedTasksModel> assignedList = person.getAssignedTasks();
 			JTree taskTree = createTaskTree(assignedList);
 			PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(), person,
-					new LinkedList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
+					new ArrayList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
 					taskTree);
 			do {
 				personEvent = processEditPersonDialog(personEvent, origName);
@@ -893,7 +893,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (selectedTask != null) {
 					// View assigned persons
-					LinkedList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
+					ArrayList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
 					JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 					Calendar calendar = (Calendar) selectedCalendar.clone();
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
@@ -917,7 +917,7 @@ public class MainFrame extends JFrame {
 				JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
 
 				// View assigned persons by time
-				LinkedList<PersonByTaskModel> personsByTime = controller.getPersonsByDayByTime(selectedCalendar);
+				ArrayList<PersonByTaskModel> personsByTime = controller.getPersonsByDayByTime(selectedCalendar);
 				JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 				Calendar calendar = (Calendar) selectedCalendar.clone();
 
@@ -937,7 +937,7 @@ public class MainFrame extends JFrame {
 				if (selectedTask != null && selectedTask.getLocation() != null
 						&& !selectedTask.getLocation().equals("")) {
 					// View assigned persons by location
-					LinkedList<PersonByTaskModel> personsByLoc = controller.getPersonsByDayByLocation(selectedCalendar,
+					ArrayList<PersonByTaskModel> personsByLoc = controller.getPersonsByDayByLocation(selectedCalendar,
 							selectedTask.getLocation());
 					Calendar calendar = (Calendar) selectedCalendar.clone();
 
@@ -956,7 +956,7 @@ public class MainFrame extends JFrame {
 		viewCompleteRosterForToday.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// View all persons
-				LinkedList<PersonByTaskModel> personsByTask = controller.getPersonsByDay(selectedCalendar);
+				ArrayList<PersonByTaskModel> personsByTask = controller.getPersonsByDay(selectedCalendar);
 				JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 				JList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
 				Calendar calendar = (Calendar) selectedCalendar.clone();
@@ -992,7 +992,7 @@ public class MainFrame extends JFrame {
 			}
 
 			// Refresh data and re-open Person Table Dialog
-			LinkedList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
+			ArrayList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
 			JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 			Calendar calendar = (Calendar) selectedCalendar.clone();
 
@@ -1020,7 +1020,7 @@ public class MainFrame extends JFrame {
 			}
 
 			// Refresh data and re-open Person Table Dialog
-			LinkedList<PersonByTaskModel> personsByTask = controller.getPersonsByTask(task);
+			ArrayList<PersonByTaskModel> personsByTask = controller.getPersonsByTask(task);
 			JList<String> personsAvail = controller.getAllPersonsAsString();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Monthly Roster for " + task.getTaskName(),
 					PersonTableModel.getExpansionByTask(), task.getTaskName(), personsByTask, "Add person", null,
@@ -1055,7 +1055,7 @@ public class MainFrame extends JFrame {
 			JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
 
 			// Refresh data and re-open Person Table dialog
-			LinkedList<PersonByTaskModel> personsByTime = controller.getPersonsByDayByTime(event.getCalendar());
+			ArrayList<PersonByTaskModel> personsByTime = controller.getPersonsByDayByTime(event.getCalendar());
 			JList<String> personsAvail = controller.getAvailPersonsAsString(event.getCalendar());
 			Calendar calendar = (Calendar) selectedCalendar.clone();
 
@@ -1083,7 +1083,7 @@ public class MainFrame extends JFrame {
 			}
 
 			// Remaining events not implemented. Re-open Person Table dialog.
-			LinkedList<PersonByTaskModel> personsByLoc = controller.getPersonsByDayByLocation(selectedCalendar,
+			ArrayList<PersonByTaskModel> personsByLoc = controller.getPersonsByDayByLocation(selectedCalendar,
 					selectedTask.getLocation());
 			Calendar calendar = (Calendar) selectedCalendar.clone();
 
@@ -1113,7 +1113,7 @@ public class MainFrame extends JFrame {
 			}
 
 			// Refresh data and re-open Person Table Dialog
-			LinkedList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
+			ArrayList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
 			JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 			JList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
 			Calendar calendar = (Calendar) selectedCalendar.clone();
@@ -1127,25 +1127,34 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
+	boolean daily = false;
 	private void updateMonth(Calendar calendar) {
 		Calendar localCalendar = (Calendar) calendar.clone();
-		LinkedList<CalendarDayModel> tasks;
-		for (int i = 0; i < 31; i++) {
-			localCalendar.set(Calendar.DAY_OF_MONTH, i + 1);
-			if (selectedFilterId == PROGRAM_FILTER)
-				tasks = controller.getTasksByDayByProgram(localCalendar, filteredList);
-			else if (selectedFilterId == PERSON_FILTER)
-				tasks = controller.getTasksByDayByPerson(localCalendar, filteredList);
-			else if (selectedFilterId == ROSTER_FILTER)
-				tasks = controller.getTasksByDayByIncompleteRoster(localCalendar);
-			else if (selectedFilterId == LOCATION_FILTER)
-				tasks = controller.getTasksByDayByLocation(localCalendar, filteredList);
-			else if (selectedFilterId == TIME_FILTER)
-				tasks = controller.getTasksByDayByTime(localCalendar, filteredList);
-			else
-				tasks = controller.getAllTasksAndFloatersByDay(localCalendar);
 
-			calPanel.updateTasksByDay(i, tasks);
+		if (daily) {
+			ArrayList<CalendarDayModel> tasks;
+
+			for (int i = 0; i < 31; i++) {
+				localCalendar.set(Calendar.DAY_OF_MONTH, i + 1);
+				if (selectedFilterId == PROGRAM_FILTER)
+					tasks = controller.getTasksByDayByProgram(localCalendar, filteredList);
+				else if (selectedFilterId == PERSON_FILTER)
+					tasks = controller.getTasksByDayByPerson(localCalendar, filteredList);
+				else if (selectedFilterId == ROSTER_FILTER)
+					tasks = controller.getTasksByDayByIncompleteRoster(localCalendar);
+				else if (selectedFilterId == LOCATION_FILTER)
+					tasks = controller.getTasksByDayByLocation(localCalendar, filteredList);
+				else if (selectedFilterId == TIME_FILTER)
+					tasks = controller.getTasksByDayByTime(localCalendar, filteredList);
+				else
+					tasks = controller.getAllTasksAndFloatersByDay(localCalendar);
+
+				calPanel.updateTasksByDay(i, tasks);
+			}
+		} else {
+			localCalendar.set(Calendar.DAY_OF_MONTH, 1);
+			calPanel.updateTasksByMonth(controller.getAllTasksAndFloatersByMonth(localCalendar));
+			// TestDatabase.updateMonth(Utilities.getSqlDate(localCalendar));
 		}
 		calPanel.refresh();
 	}
@@ -1171,10 +1180,10 @@ public class MainFrame extends JFrame {
 	}
 
 	// TODO: Make the tree handling methods (below) a separate class
-	private JTree createTaskTree(LinkedList<AssignedTasksModel> assignedTaskList) {
+	private JTree createTaskTree(ArrayList<AssignedTasksModel> assignedTaskList) {
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Select task to assign  >>>");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
-		LinkedList<ProgramModel> programList = controller.getAllPrograms();
+		ArrayList<ProgramModel> programList = controller.getAllPrograms();
 
 		for (int i = 0; i < programList.size(); i++) {
 			ProgramModel p = programList.get(i);
@@ -1198,7 +1207,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private JTree createAssignedTasksTree(AssignedTasksModel lastTaskAdded, JTree taskTree,
-			LinkedList<AssignedTasksModel> taskList) {
+			ArrayList<AssignedTasksModel> taskList) {
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Assigned tasks");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
 		JTree assignedTree = new JTree(treeModel);
@@ -1207,7 +1216,8 @@ public class MainFrame extends JFrame {
 		for (int i = 0; i < taskList.size(); i++) {
 			AssignedTasksModel item = taskList.get(i);
 
-			// Check to see if this task is currently valid; if not, leave disabled
+			// Check to see if this task is currently valid; if not, leave
+			// disabled
 			TaskModel thisTask = controller.getTaskByName(item.getProgramName(), item.getTaskName());
 			if (thisTask == null) {
 				System.out.println("Dropping program " + item.getProgramName() + ", task " + item.getTaskName());
@@ -1281,7 +1291,7 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private int findNodeInAssignedTaskList(LinkedList<AssignedTasksModel> list, String taskName) {
+	private int findNodeInAssignedTaskList(ArrayList<AssignedTasksModel> list, String taskName) {
 		for (int idx = 0; idx < list.size(); idx++) {
 			AssignedTasksModel t = list.get(idx);
 			if (t.getTaskName().equals(taskName)) {
@@ -1291,8 +1301,8 @@ public class MainFrame extends JFrame {
 		return -1;
 	}
 
-	private LinkedList<AssignedTasksModel> mergeAssignedTaskList(LinkedList<AssignedTasksModel> mergeTaskList,
-			LinkedList<AssignedTasksModel> assignedTaskChangeList) {
+	private ArrayList<AssignedTasksModel> mergeAssignedTaskList(ArrayList<AssignedTasksModel> mergeTaskList,
+			ArrayList<AssignedTasksModel> assignedTaskChangeList) {
 		// Merge tasks changed list into merge list
 		for (int i = 0; i < assignedTaskChangeList.size(); i++) {
 			AssignedTasksModel task = assignedTaskChangeList.get(i);

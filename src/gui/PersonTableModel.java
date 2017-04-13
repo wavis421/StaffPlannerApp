@@ -8,7 +8,7 @@
 
 package gui;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -44,14 +44,14 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final int EMAIL_COLUMN_EXPAND_BY_TASK = 5;
 
 	private static final long serialVersionUID = 12340002L;
-	private LinkedList<PersonByTaskModel> personList;
+	private ArrayList<PersonByTaskModel> personList;
 	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail" };
 	private String colNamesExpandByDay[] = { "Name", "Ldr", "Sub", "Task", "Time", "Location", "Phone #", "E-Mail" };
 	private String colNamesExpandByTask[] = { "Name", "Ldr", "DOW", "WOM", "Phone #", "E-Mail" };
 	private String colNames[];
 	private int expansionLevel;
 
-	public PersonTableModel(int columnExpansionLevel, LinkedList<PersonByTaskModel> personList) {
+	public PersonTableModel(int columnExpansionLevel, ArrayList<PersonByTaskModel> personList) {
 		this.personList = personList;
 		this.expansionLevel = columnExpansionLevel;
 		if (columnExpansionLevel == PERSON_TABLE_EXPAND_BY_DAY) {
@@ -63,7 +63,7 @@ public class PersonTableModel extends AbstractTableModel {
 		}
 	}
 
-	public void setData(LinkedList<PersonByTaskModel> db) {
+	public void setData(ArrayList<PersonByTaskModel> db) {
 		personList = db;
 	}
 
@@ -236,7 +236,7 @@ public class PersonTableModel extends AbstractTableModel {
 		return PERSON_TABLE_EXPAND_BY_TASK;
 	}
 
-	private AssignedTasksModel getTaskMatchInAssignedTaskList(String taskName, LinkedList<AssignedTasksModel> list) {
+	private AssignedTasksModel getTaskMatchInAssignedTaskList(String taskName, ArrayList<AssignedTasksModel> list) {
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).getTaskName().equals(taskName))
 				return list.get(i);

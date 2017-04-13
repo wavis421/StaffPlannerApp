@@ -1,7 +1,7 @@
 package gui;
 
+import java.util.ArrayList;
 import java.util.EventObject;
-import java.util.LinkedList;
 
 import model.AssignedTasksModel;
 import model.DateRangeModel;
@@ -13,18 +13,18 @@ public class PersonEvent extends EventObject {
 	private String email;
 	private boolean leader;
 	private String notes;
-	private LinkedList<AssignedTasksModel> assignedTaskChanges;
+	private ArrayList<AssignedTasksModel> assignedTaskChanges;
 	private AssignedTasksModel lastTaskAdded;
-	private LinkedList<SingleInstanceTaskModel> extraDates;
-	private LinkedList<DateRangeModel> datesUnavailable;
+	private ArrayList<SingleInstanceTaskModel> extraDates;
+	private ArrayList<DateRangeModel> datesUnavailable;
 
 	public PersonEvent(Object source) {
 		super(source);
 	}
 
 	public PersonEvent(Object source, String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTaskChanges, AssignedTasksModel lastTaskAdded,
-			LinkedList<SingleInstanceTaskModel> extraDates, LinkedList<DateRangeModel> datesUnavailable) {
+			ArrayList<AssignedTasksModel> assignedTaskChanges, AssignedTasksModel lastTaskAdded,
+			ArrayList<SingleInstanceTaskModel> extraDates, ArrayList<DateRangeModel> datesUnavailable) {
 		super(source);
 
 		this.name = name;
@@ -58,7 +58,7 @@ public class PersonEvent extends EventObject {
 		return notes;
 	}
 
-	public LinkedList<AssignedTasksModel> getAssignedTaskChanges() {
+	public ArrayList<AssignedTasksModel> getAssignedTaskChanges() {
 		return assignedTaskChanges;
 	}
 
@@ -66,11 +66,11 @@ public class PersonEvent extends EventObject {
 		return lastTaskAdded;
 	}
 
-	public LinkedList<SingleInstanceTaskModel> getExtraDates() {
+	public ArrayList<SingleInstanceTaskModel> getExtraDates() {
 		return extraDates;
 	}
 	
-	public LinkedList<DateRangeModel> getDatesUnavailable() {
+	public ArrayList<DateRangeModel> getDatesUnavailable() {
 		return datesUnavailable;
 	}
 }

@@ -13,7 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -69,16 +69,16 @@ public class PersonDialog extends JDialog {
 	private JScrollPane taskTreeScrollPane;
 
 	// Lists
-	private LinkedList<AssignedTasksModel> assignedTasksList;
-	private LinkedList<AssignedTasksModel> assignedTaskChanges;
-	private LinkedList<SingleInstanceTaskModel> singleInstanceTaskList;
-	private LinkedList<DateRangeModel> datesUnavailableList;
+	private ArrayList<AssignedTasksModel> assignedTasksList;
+	private ArrayList<AssignedTasksModel> assignedTaskChanges;
+	private ArrayList<SingleInstanceTaskModel> singleInstanceTaskList;
+	private ArrayList<DateRangeModel> datesUnavailableList;
 	private JList<TaskModel> allTasks;
 
 	// Static variables
 	private static boolean okToSave;
-	private static LinkedList<SingleInstanceTaskModel> newSingleInstanceTasks;
-	private static LinkedList<DateRangeModel> newDatesUnavailable;
+	private static ArrayList<SingleInstanceTaskModel> newSingleInstanceTasks;
+	private static ArrayList<DateRangeModel> newDatesUnavailable;
 
 	// Labels
 	private JLabel nameLabel = new JLabel("Person's name: ");
@@ -105,16 +105,16 @@ public class PersonDialog extends JDialog {
 
 		this.allTasks = allTasks;
 		this.leaderButton.setSelected(true);
-		this.assignedTasksList = new LinkedList<AssignedTasksModel>();
-		this.assignedTaskChanges = new LinkedList<AssignedTasksModel>();
+		this.assignedTasksList = new ArrayList<AssignedTasksModel>();
+		this.assignedTaskChanges = new ArrayList<AssignedTasksModel>();
 
 		if (newSingleInstanceTasks != null)
 			newSingleInstanceTasks.clear();
-		newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+		newSingleInstanceTasks = new ArrayList<SingleInstanceTaskModel>();
 
 		if (newDatesUnavailable != null)
 			newDatesUnavailable.clear();
-		newDatesUnavailable = new LinkedList<DateRangeModel>();
+		newDatesUnavailable = new ArrayList<DateRangeModel>();
 
 		createUnavailDateCombo();
 
@@ -127,7 +127,7 @@ public class PersonDialog extends JDialog {
 
 	// Constructor for updating existing person, PersonModel contains values
 	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, PersonModel person,
-			LinkedList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
+			ArrayList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
 		setLocation(new Point(100, 100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
@@ -150,18 +150,18 @@ public class PersonDialog extends JDialog {
 		if (okToSave) {
 			// These lists were processed and can be cleared
 			newSingleInstanceTasks.clear();
-			newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+			newSingleInstanceTasks = new ArrayList<SingleInstanceTaskModel>();
 			newDatesUnavailable.clear();
-			newDatesUnavailable = new LinkedList<DateRangeModel>();
+			newDatesUnavailable = new ArrayList<DateRangeModel>();
 
 			okToSave = false;
 
 		} else {
 			// Create lists first time after startup
 			if (newSingleInstanceTasks == null)
-				newSingleInstanceTasks = new LinkedList<SingleInstanceTaskModel>();
+				newSingleInstanceTasks = new ArrayList<SingleInstanceTaskModel>();
 			if (newDatesUnavailable == null)
-				newDatesUnavailable = new LinkedList<DateRangeModel>();
+				newDatesUnavailable = new ArrayList<DateRangeModel>();
 		}
 
 		createUnavailDateCombo();
@@ -580,7 +580,7 @@ public class PersonDialog extends JDialog {
 		return true;
 	}
 
-	private boolean checkAssignedTaskConflicts(LinkedList<AssignedTasksModel> taskList, String person, String taskName,
+	private boolean checkAssignedTaskConflicts(ArrayList<AssignedTasksModel> taskList, String person, String taskName,
 			Calendar thisDay, Date calDay, int calDayIdx, int calWeekIdx) {
 
 		// Check if task is in person's assigned task list for today
@@ -598,7 +598,7 @@ public class PersonDialog extends JDialog {
 		return false;
 	}
 
-	private boolean checkSingleInstanceTaskConflicts(String person, LinkedList<SingleInstanceTaskModel> taskList,
+	private boolean checkSingleInstanceTaskConflicts(String person, ArrayList<SingleInstanceTaskModel> taskList,
 			Date thisDay, int dayOfWeekIdx, int dayOfWeekInMonthIdx) {
 
 		for (int i = 0; i < taskList.size(); i++) {

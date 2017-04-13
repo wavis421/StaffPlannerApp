@@ -11,7 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Calendar;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -50,8 +50,8 @@ public class PersonTableDialog extends JDialog {
 	private JPopupMenu popup;
 	private JMenuItem removeItem;
 	private JMenuItem editItem;
-	private LinkedList<PersonByTaskModel> personList;
-	private LinkedList<PersonByTaskModel> fullList = null;
+	private ArrayList<PersonByTaskModel> personList;
+	private ArrayList<PersonByTaskModel> fullList = null;
 	private String taskName;
 
 	private String addButtonText;
@@ -65,7 +65,7 @@ public class PersonTableDialog extends JDialog {
 	private JDialog child;
 
 	public PersonTableDialog(JFrame parent, String title, int columnExpansionLevel, String taskName,
-			LinkedList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
+			ArrayList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
 			JList<TimeModel> allTimes) {
 		super(parent, true);
 		setLocation(new Point(100, 100));
@@ -316,7 +316,7 @@ public class PersonTableDialog extends JDialog {
 		return panel;
 	}
 
-	public void setData(LinkedList<PersonByTaskModel> db) {
+	public void setData(ArrayList<PersonByTaskModel> db) {
 		// Floaters have null task; if task defined, create a sub-list with
 		// matching task
 		if (taskName == null)
@@ -456,9 +456,9 @@ public class PersonTableDialog extends JDialog {
 			return true;
 	}
 
-	private LinkedList<PersonByTaskModel> createPersonListByTask(String taskName,
-			LinkedList<PersonByTaskModel> fullPersonList) {
-		LinkedList<PersonByTaskModel> newPersonList = new LinkedList<PersonByTaskModel>();
+	private ArrayList<PersonByTaskModel> createPersonListByTask(String taskName,
+			ArrayList<PersonByTaskModel> fullPersonList) {
+		ArrayList<PersonByTaskModel> newPersonList = new ArrayList<PersonByTaskModel>();
 		for (int i = 0; i < fullPersonList.size(); i++) {
 			PersonByTaskModel person = fullPersonList.get(i);
 			if (person.getTask() != null && person.getTask().getTaskName().equals(taskName))

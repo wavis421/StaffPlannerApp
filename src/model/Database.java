@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -30,16 +29,16 @@ public class Database {
 	private static final int ASSIGNED_TASK_MATCH = 0;
 	private static final int SINGLE_INSTANCE_TASK_MATCH = 1;
 
-	private LinkedList<ProgramModel> programList;
-	private LinkedList<PersonModel> personList;
+	private ArrayList<ProgramModel> programList;
+	private ArrayList<PersonModel> personList;
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 	public Database() {
 		// Connect to database
 		TestDatabase.initializeDatabase();
 
-		programList = new LinkedList<ProgramModel>();
-		personList = new LinkedList<PersonModel>();
+		programList = new ArrayList<ProgramModel>();
+		personList = new ArrayList<PersonModel>();
 	}
 
 	/*
@@ -49,7 +48,7 @@ public class Database {
 		int programID = TestDatabase.addProgram(programName, startDate, endDate);
 
 		if (programID > 0) {
-			LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
+			ArrayList<TaskModel> taskList = new ArrayList<TaskModel>();
 			programList.add(new ProgramModel(programID, programName, startDate, endDate, taskList));
 			Collections.sort(programList);
 		}
@@ -102,7 +101,7 @@ public class Database {
 		return (new JList<String>(nameModel));
 	}
 
-	public LinkedList<ProgramModel> getAllPrograms() {
+	public ArrayList<ProgramModel> getAllPrograms() {
 		// return (List<ProgramModel>)
 		// Collections.unmodifiableList(programList);
 		return programList;
@@ -209,7 +208,7 @@ public class Database {
 	}
 
 	public String findProgramByTaskName(String taskName) {
-		LinkedList<ProgramModel> allPrograms = getAllPrograms();
+		ArrayList<ProgramModel> allPrograms = getAllPrograms();
 		for (int i = 0; i < allPrograms.size(); i++) {
 			ProgramModel p = allPrograms.get(i);
 			for (int j = 0; j < p.getTaskList().size(); j++) {
@@ -221,8 +220,8 @@ public class Database {
 		return null;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programFilterList) {
-		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+	public ArrayList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programFilterList) {
+		ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
 		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
 			String programName = findProgramByTaskName(thisDaysTasks.get(taskIdx).getTask().getTaskName());
@@ -234,11 +233,11 @@ public class Database {
 		return thisDaysTasks;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> persons) {
+	public ArrayList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> persons) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = Utilities.getDateFromCalendar(calendar);
-		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+		ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 		boolean match;
 
 		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
@@ -262,8 +261,8 @@ public class Database {
 		return thisDaysTasks;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
-		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+	public ArrayList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
+		ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
 		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
 			if ((thisDaysTasks.get(taskIdx).getPersonCount() >= thisDaysTasks.get(taskIdx).getTask()
@@ -277,8 +276,8 @@ public class Database {
 		return thisDaysTasks;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
-		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
+	public ArrayList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
+		ArrayList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
 			String taskLoc = matchingTasks.get(taskIdx).getTask().getLocation();
@@ -290,8 +289,8 @@ public class Database {
 		return matchingTasks;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> timeList) {
-		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
+	public ArrayList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> timeList) {
+		ArrayList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
 		Collections.sort(matchingTasks);
 
 		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
@@ -304,12 +303,12 @@ public class Database {
 		return matchingTasks;
 	}
 
-	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
+	public ArrayList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = Utilities.getDateFromCalendar(calendar);
 
-		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
+		ArrayList<CalendarDayModel> thisDaysTasks = new ArrayList<CalendarDayModel>();
 		for (int i = 0; i < programList.size(); i++) {
 			ProgramModel prog = programList.get(i);
 			if (isProgramExpired(thisDay, prog))
@@ -324,16 +323,16 @@ public class Database {
 				}
 			}
 		}
-		return (LinkedList<CalendarDayModel>) thisDaysTasks;
+		return (ArrayList<CalendarDayModel>) thisDaysTasks;
 	}
 
-	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
+	public ArrayList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = Utilities.getDateFromCalendar(calendar);
 
 		// Get all tasks for today
-		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+		ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
 		// Now add floaters to the list
 		for (int i = 0; i < personList.size(); i++) {
@@ -458,7 +457,7 @@ public class Database {
 		DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
 		ArrayList<TimeModel> timeArray = new ArrayList<TimeModel>();
 
-		LinkedList<CalendarDayModel> taskList = getAllTasksByDay(calendar);
+		ArrayList<CalendarDayModel> taskList = getAllTasksByDay(calendar);
 		for (int taskIdx = 0; taskIdx < taskList.size(); taskIdx++) {
 			// Check whether already in list before adding
 			TimeModel taskTime = taskList.get(taskIdx).getTask().getTime();
@@ -498,7 +497,7 @@ public class Database {
 	}
 
 	private int checkPersonMatchForTask(PersonModel person, String taskName) {
-		LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+		ArrayList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
 
 		// Check if task is in person's assigned task list
 		for (int i = 0; i < assignedTaskList.size(); i++) {
@@ -516,7 +515,7 @@ public class Database {
 			return PERSON_NOT_AVAIL;
 
 		else {
-			LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+			ArrayList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
 
 			// Check if task is in person's assigned task list for today
 			for (int i = 0; i < assignedTaskList.size(); i++) {
@@ -619,8 +618,8 @@ public class Database {
 	 * ------- Person data -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraTasks,
-			LinkedList<DateRangeModel> datesUnavailable) {
+			ArrayList<AssignedTasksModel> assignedTasks, ArrayList<SingleInstanceTaskModel> extraTasks,
+			ArrayList<DateRangeModel> datesUnavailable) {
 		int personID = TestDatabase.addPerson(name, phone, email, leader, notes);
 		if (personID <= 0)
 			return;
@@ -671,8 +670,8 @@ public class Database {
 	}
 
 	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
-			String personNotes, LinkedList<AssignedTasksModel> personAssignedTasks,
-			LinkedList<SingleInstanceTaskModel> extraTasks, LinkedList<DateRangeModel> personDatesUnavailable) {
+			String personNotes, ArrayList<AssignedTasksModel> personAssignedTasks,
+			ArrayList<SingleInstanceTaskModel> extraTasks, ArrayList<DateRangeModel> personDatesUnavailable) {
 
 		int personIdx = getPersonIndexByName(personName);
 		if (personIdx != -1) {
@@ -680,7 +679,7 @@ public class Database {
 			int taskIdx;
 			PersonModel thisPerson = personList.get(personIdx);
 			int personID = thisPerson.getPersonID();
-			LinkedList<AssignedTasksModel> dbAssignedTaskList = thisPerson.getAssignedTasks();
+			ArrayList<AssignedTasksModel> dbAssignedTaskList = thisPerson.getAssignedTasks();
 
 			for (int i = 0; i < personAssignedTasks.size(); i++) {
 				// Update database
@@ -844,19 +843,19 @@ public class Database {
 		return list;
 	}
 
-	public LinkedList<PersonByTaskModel> getAllPersonsList() {
-		LinkedList<PersonByTaskModel> personsByTask = new LinkedList<PersonByTaskModel>();
+	public ArrayList<PersonByTaskModel> getAllPersonsList() {
+		ArrayList<PersonByTaskModel> personsByTask = new ArrayList<PersonByTaskModel>();
 		for (int i = 0; i < personList.size(); i++) {
 			PersonModel p = personList.get(i);
 			PersonByTaskModel person = new PersonByTaskModel(p, null, false, 0, null);
 			personsByTask.add(person);
 		}
-		return (LinkedList<PersonByTaskModel>) personsByTask;
+		return (ArrayList<PersonByTaskModel>) personsByTask;
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
+	public ArrayList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
 		JList<PersonModel> persons = getAllPersons();
-		LinkedList<PersonByTaskModel> thisTasksPersons = new LinkedList<PersonByTaskModel>();
+		ArrayList<PersonByTaskModel> thisTasksPersons = new ArrayList<PersonByTaskModel>();
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = persons.getModel().getElementAt(i);
@@ -872,15 +871,15 @@ public class Database {
 
 	// Return list of all persons assigned to this day, including single
 	// instance assignments (subs) and floaters
-	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
+	public ArrayList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = Utilities.getDateFromCalendar(calendar);
 		Calendar localCalendar = (Calendar) calendar.clone();
 
 		JList<PersonModel> persons = getAllPersons();
-		LinkedList<CalendarDayModel> tasksForToday = getAllTasksByDay(localCalendar);
-		LinkedList<PersonByTaskModel> thisDaysPersons = new LinkedList<PersonByTaskModel>();
+		ArrayList<CalendarDayModel> tasksForToday = getAllTasksByDay(localCalendar);
+		ArrayList<PersonByTaskModel> thisDaysPersons = new ArrayList<PersonByTaskModel>();
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
@@ -913,18 +912,18 @@ public class Database {
 				}
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) thisDaysPersons;
+		return (ArrayList<PersonByTaskModel>) thisDaysPersons;
 	}
 
 	// TODO: Currently not used!
 	// If it is used later, add check for 'isPersonAvailable'.
-	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
+	public ArrayList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = Utilities.getDateFromCalendar(calendar);
 
 		JList<PersonModel> persons = getAllPersons();
-		LinkedList<PersonByTaskModel> thisDaysPersons = new LinkedList<PersonByTaskModel>();
+		ArrayList<PersonByTaskModel> thisDaysPersons = new ArrayList<PersonByTaskModel>();
 
 		for (int i = 0; i < persons.getModel().getSize(); i++) {
 			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
@@ -937,11 +936,11 @@ public class Database {
 				thisDaysPersons.add(personByTask);
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) thisDaysPersons;
+		return (ArrayList<PersonByTaskModel>) thisDaysPersons;
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
-		LinkedList<PersonByTaskModel> persons = getPersonsByDay(calendar);
+	public ArrayList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
+		ArrayList<PersonByTaskModel> persons = getPersonsByDay(calendar);
 
 		for (int i = 0; i < persons.size(); i++) {
 			PersonByTaskModel person = persons.get(i);
@@ -951,11 +950,11 @@ public class Database {
 				i--;
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) persons;
+		return (ArrayList<PersonByTaskModel>) persons;
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
-		LinkedList<PersonByTaskModel> personList = getPersonsByDay(calendar);
+	public ArrayList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
+		ArrayList<PersonByTaskModel> personList = getPersonsByDay(calendar);
 
 		for (int i = 0; i < personList.size(); i++) {
 			PersonByTaskModel person = personList.get(i);
@@ -965,7 +964,7 @@ public class Database {
 				i--;
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) personList;
+		return (ArrayList<PersonByTaskModel>) personList;
 	}
 
 	public int getNumPersons() {
@@ -992,7 +991,7 @@ public class Database {
 		return false;
 	}
 
-	private int findAssignedTaskIdx(String taskName, LinkedList<AssignedTasksModel> assignedTaskList) {
+	private int findAssignedTaskIdx(String taskName, ArrayList<AssignedTasksModel> assignedTaskList) {
 		int taskIdx = 0;
 
 		for (int i = 0; i < assignedTaskList.size(); i++) {
@@ -1004,7 +1003,7 @@ public class Database {
 		return -1;
 	}
 
-	private boolean findDateMatchInDateRangeModel(LinkedList<DateRangeModel> dateList, DateRangeModel compareDate) {
+	private boolean findDateMatchInDateRangeModel(ArrayList<DateRangeModel> dateList, DateRangeModel compareDate) {
 		for (int i = 0; i < dateList.size(); i++) {
 			DateRangeModel date = dateList.get(i);
 			if (date.compareTo(compareDate) == 0)
@@ -1021,7 +1020,7 @@ public class Database {
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
 
 		// Create linked list of selected programs
-		LinkedList<ProgramModel> pList = new LinkedList<ProgramModel>();
+		ArrayList<ProgramModel> pList = new ArrayList<ProgramModel>();
 		for (int i = 0; i < programNameList.getModel().getSize(); i++) {
 			pList.add(getProgramByName(programNameList.getModel().getElementAt(i)));
 		}

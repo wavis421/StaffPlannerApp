@@ -1,7 +1,7 @@
 package model;
 
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 public class PersonModel implements Serializable, Comparable<PersonModel> {
 	private static final long serialVersionUID = 12340004L;
@@ -11,13 +11,13 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 	private String email;
 	private boolean leader; // Leader or assistant
 	private String notes;
-	private LinkedList<AssignedTasksModel> assignedTasks;
-	private LinkedList<DateRangeModel> datesUnavailable;
-	private LinkedList<SingleInstanceTaskModel> singleInstanceTasks;
+	private ArrayList<AssignedTasksModel> assignedTasks;
+	private ArrayList<DateRangeModel> datesUnavailable;
+	private ArrayList<SingleInstanceTaskModel> singleInstanceTasks;
 
 	public PersonModel(int personID, String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<DateRangeModel> datesUnavailable,
-			LinkedList<SingleInstanceTaskModel> singleInstanceTaskAssignment) {
+			ArrayList<AssignedTasksModel> assignedTasks, ArrayList<DateRangeModel> datesUnavailable,
+			ArrayList<SingleInstanceTaskModel> singleInstanceTaskAssignment) {
 		this.personID = personID;
 		this.name = name;
 		this.phone = phone;
@@ -77,20 +77,20 @@ public class PersonModel implements Serializable, Comparable<PersonModel> {
 		this.notes = notes;
 	}
 
-	public LinkedList<AssignedTasksModel> getAssignedTasks() {
+	public ArrayList<AssignedTasksModel> getAssignedTasks() {
 		return assignedTasks;
 	}
 
-	public LinkedList<DateRangeModel> getDatesUnavailable() {
+	public ArrayList<DateRangeModel> getDatesUnavailable() {
 		return datesUnavailable;
 	}
 
-	public void setDatesUnavailable(LinkedList<DateRangeModel> datesUnavail) {
+	public void setDatesUnavailable(ArrayList<DateRangeModel> datesUnavail) {
 		this.datesUnavailable.clear();
 		this.datesUnavailable = datesUnavail;
 	}
 
-	public LinkedList<SingleInstanceTaskModel> getSingleInstanceTasks() {
+	public ArrayList<SingleInstanceTaskModel> getSingleInstanceTasks() {
 		return singleInstanceTasks;
 	}
 

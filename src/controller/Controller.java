@@ -3,7 +3,7 @@ package controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import javax.swing.JList;
 
@@ -14,6 +14,7 @@ import model.AssignedTasksModel;
 import model.CalendarDayModel;
 import model.Database;
 import model.DateRangeModel;
+import model.MySqlDatabase;
 import model.PersonByTaskModel;
 import model.PersonModel;
 import model.ProgramModel;
@@ -23,6 +24,7 @@ import model.TimeModel;
 
 public class Controller {
 	Database db = new Database();
+	MySqlDatabase sqlDb = new MySqlDatabase();
 
 	/*
 	 * ------- Programs -------
@@ -47,7 +49,7 @@ public class Controller {
 		return db.getAllProgramsAsString();
 	}
 
-	public LinkedList<ProgramModel> getAllPrograms() {
+	public ArrayList<ProgramModel> getAllPrograms() {
 		return db.getAllPrograms();
 	}
 
@@ -80,32 +82,36 @@ public class Controller {
 		return db.findProgramByTaskName(taskName);
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
+	public ArrayList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
 		return db.getTasksByDayByProgram(calendar, programs);
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
+	public ArrayList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
 		return db.getTasksByDayByPerson(calendar, personList);
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
+	public ArrayList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
 		return db.getTasksByDayByIncompleteRoster(calendar);
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
+	public ArrayList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
 		return db.getTasksByDayByLocation(calendar, locations);
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> times) {
+	public ArrayList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> times) {
 		return db.getTasksByDayByTime(calendar, times);
 	}
 
-	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
+	public ArrayList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
 		return db.getAllTasksByDay(calendar);
 	}
 
-	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
+	public ArrayList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
 		return db.getAllTasksAndFloatersByDay(calendar);
+	}
+	
+	public ArrayList<ArrayList<CalendarDayModel>> getAllTasksAndFloatersByMonth(Calendar calendar) {
+		return sqlDb.getAllTasksAndFloatersByMonth(calendar);
 	}
 
 	/*
@@ -142,8 +148,8 @@ public class Controller {
 	 * ------- Persons -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraDates,
-			LinkedList<DateRangeModel> datesUnavailable) {
+			ArrayList<AssignedTasksModel> assignedTasks, ArrayList<SingleInstanceTaskModel> extraDates,
+			ArrayList<DateRangeModel> datesUnavailable) {
 		db.addPerson(name, phone, email, leader, notes, assignedTasks, extraDates, datesUnavailable);
 	}
 
@@ -182,27 +188,27 @@ public class Controller {
 		return db.getAllPersons();
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
+	public ArrayList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
 		return db.getPersonsByTask(task);
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
+	public ArrayList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
 		return db.getPersonsByDayByTask(calendar, task);
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
+	public ArrayList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
 		return db.getPersonsByDayByTime(calendar);
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
+	public ArrayList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
 		return db.getPersonsByDayByLocation(calendar, location);
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
+	public ArrayList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		return db.getPersonsByDay(calendar);
 	}
 
-	public LinkedList<PersonByTaskModel> getAllPersonsList() {
+	public ArrayList<PersonByTaskModel> getAllPersonsList() {
 		return db.getAllPersonsList();
 	}
 

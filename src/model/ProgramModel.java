@@ -1,17 +1,17 @@
 package model;
 
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 public class ProgramModel implements Serializable, Comparable<ProgramModel> {
 	private static final long serialVersionUID = 12340002L;
 	private int programID;
 	private String programName;
 	private String startDate, endDate;
-	private LinkedList<TaskModel> taskList;
+	private ArrayList<TaskModel> taskList;
 	
 	// Create new program with null task list
-	public ProgramModel(int programID, String programName, String startDate, String endDate, LinkedList<TaskModel> taskList) {
+	public ProgramModel(int programID, String programName, String startDate, String endDate, ArrayList<TaskModel> taskList) {
 		this.programID = programID;
 		this.programName = programName;
 		this.startDate = startDate;
@@ -51,7 +51,7 @@ public class ProgramModel implements Serializable, Comparable<ProgramModel> {
 		this.endDate = endDate;
 	}
 
-	public LinkedList<TaskModel> getTaskList() {
+	public ArrayList<TaskModel> getTaskList() {
 		return taskList;
 	}
 

@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -38,8 +38,8 @@ public class TestDatabase {
 	private static JButton connectButton = new JButton();
 	private static JButton showRosterButton = new JButton("Show Roster");
 	private static JButton showTasksButton = new JButton("Show Tasks");
-	private static LinkedList<PersonModel> personList;
-	private static LinkedList<ProgramModel> programList;
+	private static ArrayList<PersonModel> personList;
+	private static ArrayList<ProgramModel> programList;
 
 	public static void initializeDatabase() {
 		if (initialized)
@@ -244,7 +244,7 @@ public class TestDatabase {
 	/*
 	 * ------- Importing Files to SQL Database -------
 	 */
-	public static void importPersonDatabase(LinkedList<PersonModel> persons) {
+	public static void importPersonDatabase(ArrayList<PersonModel> persons) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -303,7 +303,7 @@ public class TestDatabase {
 	}
 
 	// TODO: Figure out how to import assigned tasks
-	public static void importAssignedTasks(LinkedList<AssignedTasksModel> assignedTasks, int personID) {
+	public static void importAssignedTasks(ArrayList<AssignedTasksModel> assignedTasks, int personID) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -348,7 +348,7 @@ public class TestDatabase {
 		}
 	}
 
-	public static void importUnavailDates(LinkedList<DateRangeModel> unavailDates, int personID) {
+	public static void importUnavailDates(ArrayList<DateRangeModel> unavailDates, int personID) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -395,7 +395,7 @@ public class TestDatabase {
 	}
 
 	// TODO: Figure out how to import SingleInstanceTasks
-	public static void importSingleInstanceTasks(LinkedList<SingleInstanceTaskModel> singleInstanceTask, int personID) {
+	public static void importSingleInstanceTasks(ArrayList<SingleInstanceTaskModel> singleInstanceTask, int personID) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -448,7 +448,7 @@ public class TestDatabase {
 		}
 	}
 
-	public static void importProgramDatabase(LinkedList<ProgramModel> programs) {
+	public static void importProgramDatabase(ArrayList<ProgramModel> programs) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -507,7 +507,7 @@ public class TestDatabase {
 				PreparedStatement checkTaskStmt = dbConnection
 						.prepareStatement("SELECT COUNT(*) AS count FROM Tasks WHERE TaskName=?;");
 				ResultSet result = null;
-				LinkedList<TaskModel> tasks = program.getTaskList();
+				ArrayList<TaskModel> tasks = program.getTaskList();
 
 				// Add task for this program
 				for (int j = 0; j < tasks.size(); j++) {
@@ -548,8 +548,8 @@ public class TestDatabase {
 	/*
 	 * ------- Load SQL Database into Application -------
 	 */
-	public static LinkedList<ProgramModel> loadPrograms() {
-		LinkedList<ProgramModel> progList = new LinkedList<ProgramModel>();
+	public static ArrayList<ProgramModel> loadPrograms() {
+		ArrayList<ProgramModel> progList = new ArrayList<ProgramModel>();
 		if (!checkDatabaseConnection())
 			return progList;
 
@@ -586,8 +586,8 @@ public class TestDatabase {
 		return progList;
 	}
 
-	private static LinkedList<TaskModel> loadTasksByProgram(int progID) {
-		LinkedList<TaskModel> taskList = new LinkedList<TaskModel>();
+	private static ArrayList<TaskModel> loadTasksByProgram(int progID) {
+		ArrayList<TaskModel> taskList = new ArrayList<TaskModel>();
 		if (!checkDatabaseConnection())
 			return taskList;
 
@@ -629,9 +629,9 @@ public class TestDatabase {
 		return taskList;
 	}
 
-	public static LinkedList<PersonModel> loadRoster() {
+	public static ArrayList<PersonModel> loadRoster() {
 		System.out.println("Enter LOAD ROSTER at " + Calendar.getInstance().getTime());
-		LinkedList<PersonModel> personList = new LinkedList<PersonModel>();
+		ArrayList<PersonModel> personList = new ArrayList<PersonModel>();
 		if (!checkDatabaseConnection())
 			return personList;
 		System.out.println("CONNECTED at " + Calendar.getInstance().getTime());
@@ -674,8 +674,8 @@ public class TestDatabase {
 		return personList;
 	}
 
-	private static LinkedList<AssignedTasksModel> loadAssignedTasks(int personID) {
-		LinkedList<AssignedTasksModel> assignedTasksList = new LinkedList<AssignedTasksModel>();
+	private static ArrayList<AssignedTasksModel> loadAssignedTasks(int personID) {
+		ArrayList<AssignedTasksModel> assignedTasksList = new ArrayList<AssignedTasksModel>();
 		if (!checkDatabaseConnection())
 			return assignedTasksList;
 
@@ -720,8 +720,8 @@ public class TestDatabase {
 		return assignedTasksList;
 	}
 
-	private static LinkedList<AssignedTasksModel> loadAssignedTasks() {
-		LinkedList<AssignedTasksModel> assignedTasksList = new LinkedList<AssignedTasksModel>();
+	private static ArrayList<AssignedTasksModel> loadAssignedTasks() {
+		ArrayList<AssignedTasksModel> assignedTasksList = new ArrayList<AssignedTasksModel>();
 		if (!checkDatabaseConnection())
 			return assignedTasksList;
 
@@ -765,8 +765,8 @@ public class TestDatabase {
 		return assignedTasksList;
 	}
 
-	private static LinkedList<DateRangeModel> loadUnavailDates(int personID) {
-		LinkedList<DateRangeModel> unavailDatesList = new LinkedList<DateRangeModel>();
+	private static ArrayList<DateRangeModel> loadUnavailDates(int personID) {
+		ArrayList<DateRangeModel> unavailDatesList = new ArrayList<DateRangeModel>();
 		if (!checkDatabaseConnection())
 			return unavailDatesList;
 
@@ -804,8 +804,8 @@ public class TestDatabase {
 		return unavailDatesList;
 	}
 
-	private static LinkedList<SingleInstanceTaskModel> loadSingleInstanceTasks(int personID) {
-		LinkedList<SingleInstanceTaskModel> singleTasksList = new LinkedList<SingleInstanceTaskModel>();
+	private static ArrayList<SingleInstanceTaskModel> loadSingleInstanceTasks(int personID) {
+		ArrayList<SingleInstanceTaskModel> singleTasksList = new ArrayList<SingleInstanceTaskModel>();
 		if (!checkDatabaseConnection())
 			return singleTasksList;
 
@@ -1433,8 +1433,8 @@ public class TestDatabase {
 		return singleInstanceID;
 	}
 
-	public static LinkedList<CalendarDayModel> updateMonth(String date) {
-		LinkedList<CalendarDayModel> calendarList = new LinkedList<CalendarDayModel>();
+	public static ArrayList<CalendarDayModel> updateMonth(String date) {
+		ArrayList<CalendarDayModel> calendarList = new ArrayList<CalendarDayModel>();
 		if (!checkDatabaseConnection())
 			return calendarList;
 
