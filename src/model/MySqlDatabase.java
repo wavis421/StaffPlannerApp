@@ -1,30 +1,18 @@
 package model;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
@@ -38,8 +26,6 @@ public class MySqlDatabase {
 	private static final int NO_MATCH_FOUND = -1;
 	private static final int ASSIGNED_TASK_MATCH = 0;
 	private static final int SINGLE_INSTANCE_TASK_MATCH = 1;
-
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
 
 	public MySqlDatabase() {
 		// Make initial connection to database
@@ -264,7 +250,7 @@ public class MySqlDatabase {
 		return (new JList<String>(nameModel));
 	}
 
-	public LinkedList<ProgramModel> getAllPrograms() {
+	public ArrayList<ProgramModel> getAllPrograms() {
 		// TODO: Used to create JTree
 		return null;
 	}
@@ -306,7 +292,7 @@ public class MySqlDatabase {
 	 * ------- Task data -------
 	 */
 	public void addTask(String programName, String taskName, String location, int numLeadersReqd, int totalPersonsReqd,
-				boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
+			boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -543,183 +529,202 @@ public class MySqlDatabase {
 		return progName;
 	}
 
-	public LinkedList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programFilterList) {
-		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+	//
+	// TODO:
+	// public ArrayList<CalendarDayModel> getTasksByDayByProgram(Calendar
+	// calendar, JList<String> programFilterList)
+	// {
+	// ArrayList<CalendarDayModel>thisDaysTasks = getAllTasksByDay(calendar);
+	//
+	// TODO: Possibly create a new procedure?
+	// for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
+	// String programName =
+	// findProgramByTaskName(thisDaysTasks.get(taskIdx).getTask().getTaskName());
+	// if (!Utilities.findStringMatchInJList(programName, programFilterList)) {
+	// thisDaysTasks.remove(taskIdx); taskIdx--;
+	// }
+	// }
+	// return thisDaysTasks;
+	// }
+	//
+	// public ArrayList<CalendarDayModel> getTasksByDayByPerson(Calendar
+	// calendar, JList<String> persons) {
+	// int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) -
+	// 1;
+	// int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+	// Date thisDay = Utilities.getDateFromCalendar(calendar);
+	// ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+	// boolean match;
+	//
+	// TODO: Possibly create a new procedure?
+	// for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
+	// match = false;
+	// int thisDaysTaskID = thisDaysTasks.get(taskIdx).getTask().getTaskID();
+	// for (int i = 0; i < persons.getModel().getSize(); i++) {
+	// PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
+	// // -1 = no match, 0 = assigned task, 1 = single instance task
+	// if (checkPersonMatchForTaskByDay(pModel, thisDaysTaskID, thisDay,
+	// dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
+	// match = true; break;
+	// }
+	// }
+	// if (!match) {
+	// thisDaysTasks.remove(taskIdx);
+	// taskIdx--;
+	// }
+	// } return thisDaysTasks;
+	// }
 
-		// TODO: Possibly create a new procedure?
-		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-			String programName = findProgramByTaskName(thisDaysTasks.get(taskIdx).getTask().getTaskName());
-			if (!Utilities.findStringMatchInJList(programName, programFilterList)) {
-				thisDaysTasks.remove(taskIdx);
-				taskIdx--;
-			}
-		}
-		return thisDaysTasks;
-	}
+	// public ArrayList<CalendarDayModel>
+	// getTasksByDayByIncompleteRoster(Calendar calendar) {
+	// ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+	//
+	// TODO: Possibly create a new procedure?
+	// for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
+	// if ((thisDaysTasks.get(taskIdx).getPersonCount() >=
+	// thisDaysTasks.get(taskIdx).getTask().getTotalPersonsReqd()) &&
+	// (thisDaysTasks.get(taskIdx).getLeaderCount() >=
+	// thisDaysTasks.get(taskIdx).getTask().getNumLeadersReqd())) {
+	// thisDaysTasks.remove(taskIdx); taskIdx--;
+	// }
+	// }
+	// return thisDaysTasks;
+	// }
 
-	public LinkedList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> persons) {
-		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = Utilities.getDateFromCalendar(calendar);
-		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
-		boolean match;
+	// public ArrayList<CalendarDayModel> getTasksByDayByLocation(Calendar
+	// calendar, JList<String> locations) {
+	// ArrayList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
+	// // TODO: Possibly create a new procedure?
+	// for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
+	// String taskLoc = matchingTasks.get(taskIdx).getTask().getLocation();
+	// if (!Utilities.findStringMatchInJList(taskLoc, locations)) {
+	// matchingTasks.remove(taskIdx); taskIdx--;
+	// }
+	// } return matchingTasks;
+	// }
+	//
+	// public ArrayList<CalendarDayModel> getTasksByDayByTime(Calendar calendar,
+	// JList<String> timeList) {
+	// ArrayList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
+	// Collections.sort(matchingTasks);
+	//
+	// // TODO: Possibly create a new procedure?
+	// for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
+	// String taskTime =
+	// matchingTasks.get(taskIdx).getTask().getTime().toString();
+	// if (!Utilities.findStringMatchInJList(taskTime, timeList)) {
+	// matchingTasks.remove(taskIdx); taskIdx--;
+	// }
+	// }
+	// return matchingTasks;
+	// }
+	//
+	// public ArrayList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
+	// int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) -
+	// 1;
+	// int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+	// Date thisDay = Utilities.getDateFromCalendar(calendar);
+	//
+	// // TODO: Possibly create a new procedure?
+	// ArrayList<CalendarDayModel> thisDaysTasks = new
+	// ArrayList<CalendarDayModel>();
+	// for (int i = 0; i < programList.size(); i++) {
+	// ProgramModel prog = programList.get(i);
+	// if (isProgramExpired(thisDay, prog))
+	// continue;
+	//
+	// for (int j = 0; j < prog.getTaskList().size(); j++) {
+	// TaskModel task = prog.getTaskList().get(j);
+	// if ((task.getDayOfWeek()[dayOfWeekIdx]) &&
+	// (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
+	// int count = getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx,
+	// dayOfWeekInMonthIdx);
+	// thisDaysTasks.add(new CalendarDayModel(task, count & 0xFFFF,
+	// (count >> 16) & 0xFFFF, task.getColor(), null, null));
+	// }
+	// }
+	// }
+	// return (ArrayList<CalendarDayModel>) thisDaysTasks;
+	// }
+	//
+	// public ArrayList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar
+	// calendar) {
+	// int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) -
+	// 1;
+	// int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+	// Date thisDay = Utilities.getDateFromCalendar(calendar);
+	//
+	// TODO: Replaced with getAllTasksAndFloatersByMonth (?)
+	//
+	// Get all tasks for today
+	// ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
 
-		// TODO: Possibly create a new procedure?
-		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-			match = false;
-			int thisDaysTaskID = thisDaysTasks.get(taskIdx).getTask().getTaskID();
+	// Now add floaters to the list
+	// for (int i = 0; i < personList.size(); i++) {
+	// PersonModel person = personList.get(i);
+	//
+	// Check if person is a floater (not associated with task).
+	// for (int j = 0; j < person.getSingleInstanceTasks().size(); j++) {
+	// SingleInstanceTaskModel task = person.getSingleInstanceTasks().get(j);
+	// if (checkFloaterMatch(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)
+	// >= 0) {
+	// thisDaysTasks.add(new CalendarDayModel(null, 0, 0, task.getColor(),
+	// task.getTaskDate(), "Floater"));
+	// }
+	// }
+	// }
+	//
+	// Merge duplicate floaters
+	// for (int i = 0; i < thisDaysTasks.size(); i++) {
+	// CalendarDayModel calDay = thisDaysTasks.get(i);
+	// if (calDay.getTask() == null) {
+	// Found floater
+	// Calendar taskTime = calDay.getFloaterTime();
+	// int floaterCount = 0;
+	// int firstFloaterIndex = 0;
+	//
+	// Find floaters with matching time
+	// for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
+	// if (thisDaysTasks.get(taskIdx).getFloaterTime() == null) { // Not a
+	// floater
+	// continue;
+	// }
+	//
+	// if (Utilities.checkForTimeMatch(taskTime,
+	// thisDaysTasks.get(taskIdx).getFloaterTime())) {
+	// if (floaterCount == 0) {
+	// First match, keep in list
+	// firstFloaterIndex = taskIdx;
+	// } else {
+	// // Multiple matches, remove from list
+	// thisDaysTasks.remove(taskIdx);
+	// taskIdx--;
+	// }
+	// floaterCount++;
+	// }
+	// }
+	//
+	// Update floater name if more than 1 match
+	// if (floaterCount > 1)
+	// thisDaysTasks.get(firstFloaterIndex).setFloaterTaskName(floaterCount + "
+	// Floaters");
+	// }
+	// } Collections.sort(thisDaysTasks); return thisDaysTasks;
+	// }
 
-			for (int i = 0; i < persons.getModel().getSize(); i++) {
-				PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
-				// -1 = no match, 0 = assigned task, 1 = single instance task
-				if (checkPersonMatchForTaskByDay(pModel, thisDaysTaskID, thisDay, dayOfWeekIdx,
-						dayOfWeekInMonthIdx) >= 0) {
-					match = true;
-					break;
-				}
-			}
-			if (!match) {
-				thisDaysTasks.remove(taskIdx);
-				taskIdx--;
-			}
-		}
-		return thisDaysTasks;
-	}
+	public ArrayList<ArrayList<CalendarDayModel>> getAllTasksAndFloatersByMonth(Calendar calendar) {
+		// Create a calendar list for each day of the month
+		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
 
-	public LinkedList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
-		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
+		// Create an empty array list for each day of month
+		for (int i = 0; i < 31; i++)
+			calendarList.add(new ArrayList<CalendarDayModel>());
 
-		// TODO: Possibly create a new procedure?
-		for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-			if ((thisDaysTasks.get(taskIdx).getPersonCount() >= thisDaysTasks.get(taskIdx).getTask()
-					.getTotalPersonsReqd())
-					&& (thisDaysTasks.get(taskIdx).getLeaderCount() >= thisDaysTasks.get(taskIdx).getTask()
-							.getNumLeadersReqd())) {
-				thisDaysTasks.remove(taskIdx);
-				taskIdx--;
-			}
-		}
-		return thisDaysTasks;
-	}
-
-	public LinkedList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
-		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
-
-		// TODO: Possibly create a new procedure?
-		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
-			String taskLoc = matchingTasks.get(taskIdx).getTask().getLocation();
-			if (!Utilities.findStringMatchInJList(taskLoc, locations)) {
-				matchingTasks.remove(taskIdx);
-				taskIdx--;
-			}
-		}
-		return matchingTasks;
-	}
-
-	public LinkedList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> timeList) {
-		LinkedList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
-		Collections.sort(matchingTasks);
-
-		// TODO: Possibly create a new procedure?
-		for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
-			String taskTime = matchingTasks.get(taskIdx).getTask().getTime().toString();
-			if (!Utilities.findStringMatchInJList(taskTime, timeList)) {
-				matchingTasks.remove(taskIdx);
-				taskIdx--;
-			}
-		}
-		return matchingTasks;
-	}
-
-	public LinkedList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
-		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = Utilities.getDateFromCalendar(calendar);
-
-		// TODO: Possibly create a new procedure?
-		LinkedList<CalendarDayModel> thisDaysTasks = new LinkedList<CalendarDayModel>();
-		for (int i = 0; i < programList.size(); i++) {
-			ProgramModel prog = programList.get(i);
-			if (isProgramExpired(thisDay, prog))
-				continue;
-
-			for (int j = 0; j < prog.getTaskList().size(); j++) {
-				TaskModel task = prog.getTaskList().get(j);
-				if ((task.getDayOfWeek()[dayOfWeekIdx]) && (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
-					int count = getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx);
-					thisDaysTasks.add(new CalendarDayModel(task, count & 0xFFFF, (count >> 16) & 0xFFFF,
-							task.getColor(), null, null));
-				}
-			}
-		}
-		return (LinkedList<CalendarDayModel>) thisDaysTasks;
-	}
-
-	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
-		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
-		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = Utilities.getDateFromCalendar(calendar);
-
-		// TODO: Replaced with getAllTasksAndFloatersByMonth (?)
-
-		// Get all tasks for today
-		LinkedList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
-
-		// Now add floaters to the list
-		for (int i = 0; i < personList.size(); i++) {
-			PersonModel person = personList.get(i);
-
-			// Check if person is a floater (not associated with task).
-			for (int j = 0; j < person.getSingleInstanceTasks().size(); j++) {
-				SingleInstanceTaskModel task = person.getSingleInstanceTasks().get(j);
-				if (checkFloaterMatch(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-					thisDaysTasks.add(new CalendarDayModel(null, 0, 0, task.getColor(), task.getTaskDate(), "Floater"));
-				}
-			}
-		}
-
-		// Merge duplicate floaters
-		for (int i = 0; i < thisDaysTasks.size(); i++) {
-			CalendarDayModel calDay = thisDaysTasks.get(i);
-			if (calDay.getTask() == null) { // Found floater
-				Calendar taskTime = calDay.getFloaterTime();
-				int floaterCount = 0;
-				int firstFloaterIndex = 0;
-
-				// Find floaters with matching time
-				for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-					if (thisDaysTasks.get(taskIdx).getFloaterTime() == null) {
-						// Not a floater
-						continue;
-					}
-
-					if (Utilities.checkForTimeMatch(taskTime, thisDaysTasks.get(taskIdx).getFloaterTime())) {
-						if (floaterCount == 0) {
-							// First match, keep in list
-							firstFloaterIndex = taskIdx;
-						} else {
-							// Multiple matches, remove from list
-							thisDaysTasks.remove(taskIdx);
-							taskIdx--;
-						}
-						floaterCount++;
-					}
-				}
-
-				// Update floater name if more than 1 match
-				if (floaterCount > 1)
-					thisDaysTasks.get(firstFloaterIndex).setFloaterTaskName(floaterCount + " Floaters");
-			}
-		}
-		Collections.sort(thisDaysTasks);
-		return thisDaysTasks;
-	}
-
-	public LinkedList<CalendarDayModel> getAllTasksAndFloatersByMonth(Calendar calendar) {
-		LinkedList<CalendarDayModel> calendarList = new LinkedList<CalendarDayModel>();
+		// Return empty list if unable to connect to database
 		if (!checkDatabaseConnection())
 			return calendarList;
 
+		int day, personCount;
 		String taskName;
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
 		String date = Utilities.getSqlDate(calendar);
@@ -729,17 +734,36 @@ public class MySqlDatabase {
 						.prepareStatement("CALL MonthlyCalendar('" + date + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
+				boolean[] dayOfWeek = { false, true, true, true, true, true, false };
+				boolean[] weekOfMonth = { true, true, true, true, true, true };
 				while (results.next()) {
-					// TODO: Return linked list of calendar days
-					taskName = results.getString(2);
-					if (taskName == null)
-						System.out.println("Day " + results.getInt(1) + ": " + results.getInt(6) + " Floater(s) at "
-								+ results.getInt(4) + ":" + results.getInt(5));
-					else
-						System.out.println("Day " + results.getInt(1) + ": " + taskName + " (" + results.getInt(3)
-								+ ") at " + results.getInt(4) + ":" + results.getInt(5) + ", Persons "
-								+ results.getInt(6) + "/" + results.getInt(8) + ", Leaders " + results.getInt(7) + "/"
-								+ results.getInt(9));
+					day = results.getInt("Today");
+					taskName = results.getString("TaskName");
+					personCount = results.getInt("PersonCount");
+					Calendar cal = Calendar.getInstance();
+					Utilities.addTimeToCalendar(calendar,
+							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
+
+					// TODO: Add color field, figure out TaskModel, don't
+					// hard-code columns
+					if (taskName == null) {
+						// Floater
+						if (personCount == 1)
+							calendarList.get(day - 1).add(new CalendarDayModel(null, personCount,
+									results.getInt("LeaderCount"), results.getInt("TaskColor"), cal, "Floater"));
+						else
+							calendarList.get(day - 1)
+									.add(new CalendarDayModel(null, personCount, results.getInt("LeaderCount"),
+											results.getInt("TaskColor"), cal, personCount + " Floaters"));
+					} else {
+						TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"),
+								taskName, "" /* location */, results.getInt("NumLdrsReqd"),
+								results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
+								new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
+								results.getInt("TaskColor"));
+						calendarList.get(day - 1).add(new CalendarDayModel(newTask, personCount,
+								results.getInt("LeaderCount"), results.getInt("TaskColor"), null, ""));
+					}
 				}
 				results.close();
 				updateMonthStmt.close();
@@ -915,28 +939,29 @@ public class MySqlDatabase {
 		return new JList<String>(timeModel);
 	}
 
-	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
-		DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
-		ArrayList<TimeModel> timeArray = new ArrayList<TimeModel>();
+	// TODO:
+	// public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
+	// DefaultListModel<TimeModel> timeModel = new
+	// DefaultListModel<TimeModel>();
+	// ArrayList<TimeModel> timeArray = new ArrayList<TimeModel>();
 
-		// TODO:
-		LinkedList<CalendarDayModel> taskList = getAllTasksByDay(calendar);
-		for (int taskIdx = 0; taskIdx < taskList.size(); taskIdx++) {
-			// Check whether already in list before adding
-			TimeModel taskTime = taskList.get(taskIdx).getTask().getTime();
-			if (!findTimeMatchInArray(taskTime, timeArray))
-				timeArray.add(taskTime);
-		}
+	// TODO:
+	// ArrayList<CalendarDayModel> taskList = getAllTasksByDay(calendar);
+	// for (int taskIdx = 0; taskIdx < taskList.size(); taskIdx++) {
+	// Check whether already in list before adding
+	// TimeModel taskTime = taskList.get(taskIdx).getTask().getTime();
+	// if (!findTimeMatchInArray(taskTime, timeArray)) timeArray.add(taskTime);
+	// }
 
-		Collections.sort((ArrayList<TimeModel>) timeArray);
-		for (int i = 0; i < timeArray.size(); i++)
-			timeModel.addElement(timeArray.get(i));
-		JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
-		return timeList;
-	}
+	// Collections.sort((ArrayList<TimeModel>) timeArray);
+	// for (int i = 0; i < timeArray.size(); i++)
+	// timeModel.addElement(timeArray.get(i));
+	// JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
+	// return timeList;
+	// }
 
 	private int checkPersonMatchForTask(PersonModel person, int taskID) {
-		LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+		ArrayList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
 
 		// TODO: Probably not needed after conversion completed
 		// Check if task is in person's assigned task list
@@ -956,7 +981,7 @@ public class MySqlDatabase {
 			return PERSON_NOT_AVAIL;
 
 		else {
-			LinkedList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+			ArrayList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
 
 			// Check if task is in person's assigned task list for today
 			for (int i = 0; i < assignedTaskList.size(); i++) {
@@ -980,74 +1005,6 @@ public class MySqlDatabase {
 		return NO_MATCH_FOUND;
 	}
 
-	private int checkFloaterMatch(SingleInstanceTaskModel singleInstanceTask, Date today, int dayOfWeekIdx,
-			int dowInMonthIdx) {
-		// TODO: Probably not needed after conversion
-		// Check if this person is a sub for today
-		Calendar subCalendar = singleInstanceTask.getTaskDate();
-
-		if ((singleInstanceTask.getTaskID() == 0)
-				&& Utilities.checkForDateAndTimeMatch(today, dayOfWeekIdx, dowInMonthIdx, subCalendar))
-			return SINGLE_INSTANCE_TASK_MATCH;
-		else
-			return NO_MATCH_FOUND;
-	}
-
-	private int getPersonCountForTaskByDay(TaskModel task, Date today, int dayOfWeekIdx, int dowInMonthIdx) {
-		JList<PersonModel> persons = getAllPersons();
-		short personCount = 0;
-		short leaderCount = 0;
-
-		// TODO: Probably not needed after conversion
-		for (int idx = 0; idx < persons.getModel().getSize(); idx++) {
-			PersonModel person = persons.getModel().getElementAt(idx);
-			// -1 = no match, 0 = assigned task, 1 = single instance task
-			if (checkPersonMatchForTaskByDay(person, task.getTaskID(), today, dayOfWeekIdx, dowInMonthIdx) >= 0) {
-				personCount++;
-				if (person.isLeader())
-					leaderCount++;
-			}
-		}
-		return (personCount | (leaderCount << 16));
-	}
-
-	private boolean isProgramExpired(Date today, ProgramModel prog) {
-		if (today == null)
-			return false; // impossible?
-
-		// TODO: Probably not needed after conversion
-		if ((prog.getStartDate() != null) && !prog.getStartDate().equals("")) {
-			try {
-				Date progDate = dateFormatter.parse(prog.getStartDate());
-				if (today.compareTo(progDate) < 0)
-					// Program expired
-					return true;
-
-			} catch (ParseException e) {
-				JOptionPane.showMessageDialog(null,
-						"Unable to parse start-date for program '" + prog.getProgramName() + "'",
-						"Error retrieving program", JOptionPane.ERROR_MESSAGE);
-				prog.setStartDate(null);
-			}
-		}
-
-		if ((prog.getEndDate() != null) && !prog.getEndDate().equals("")) {
-			try {
-				Date progDate = dateFormatter.parse(prog.getEndDate());
-				if (today.compareTo(progDate) > 0)
-					// Program expired
-					return true;
-
-			} catch (ParseException e) {
-				JOptionPane.showMessageDialog(null,
-						"Unable to parse end-date for program '" + prog.getProgramName() + "'",
-						"Error retrieving program", JOptionPane.ERROR_MESSAGE);
-				prog.setEndDate(null);
-			}
-		}
-		return false;
-	}
-
 	private boolean isPersonAvailable(PersonModel person, Date today) {
 		// TODO: Probably not needed after conversion
 		for (int i = 0; i < person.getDatesUnavailable().size(); i++) {
@@ -1063,8 +1020,8 @@ public class MySqlDatabase {
 	 * ------- Person data -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
-			LinkedList<AssignedTasksModel> assignedTasks, LinkedList<SingleInstanceTaskModel> extraTasks,
-			LinkedList<DateRangeModel> datesUnavailable) {
+			ArrayList<AssignedTasksModel> assignedTasks, ArrayList<SingleInstanceTaskModel> extraTasks,
+			ArrayList<DateRangeModel> datesUnavailable) {
 
 		int personID = addPersonInfo(name, phone, email, leader, notes);
 		if (personID <= 0)
@@ -1148,8 +1105,8 @@ public class MySqlDatabase {
 				updatePersonStmt.setString(col++, phone);
 				updatePersonStmt.setString(col++, email);
 				updatePersonStmt.setBoolean(col++, leader);
-				updatePersonStmt.setString(col, notes);
-				updatePersonStmt.setString(col++, personName);
+				updatePersonStmt.setString(col++, notes);
+				updatePersonStmt.setString(col, personName);
 
 				updatePersonStmt.executeUpdate();
 				ResultSet result = updatePersonStmt.getGeneratedKeys();
@@ -1177,7 +1134,7 @@ public class MySqlDatabase {
 		return personID;
 	}
 
-	public void addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+	private void addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -1213,7 +1170,7 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateAssignedTask(int assignedTaskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+	private void updateAssignedTask(int assignedTaskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -1339,7 +1296,7 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void addSingleInstanceTask_orig(String personName, Calendar taskTime, TaskModel task, int color) {
+	private void addSingleInstanceTask_orig(String personName, Calendar taskTime, TaskModel task, int color) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -1465,8 +1422,8 @@ public class MySqlDatabase {
 	}
 
 	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
-			String personNotes, LinkedList<AssignedTasksModel> personAssignedTasks,
-			LinkedList<SingleInstanceTaskModel> extraTasks, LinkedList<DateRangeModel> personDatesUnavailable) {
+			String personNotes, ArrayList<AssignedTasksModel> personAssignedTasks,
+			ArrayList<SingleInstanceTaskModel> extraTasks, ArrayList<DateRangeModel> personDatesUnavailable) {
 
 		// TODO: Check if we have to check for person NAME changes???
 
@@ -1610,114 +1567,188 @@ public class MySqlDatabase {
 		return (new JList<String>(nameModel));
 	}
 
-	public JList<String> getAvailPersonsAsString(Calendar today) {
-		Date thisDay = Utilities.getDateFromCalendar(today);
+	// TODO:
+	// public JList<String> getAvailPersonsAsString(Calendar today)
+	// {
+	// Date thisDay = Utilities.getDateFromCalendar(today);
+	//
+	// // TODO:
+	// // Get all persons who are available today
+	// DefaultListModel<String> nameModel = new DefaultListModel<String>();
+	//
+	// for (int i = 0; i < personList.size(); i++) {
+	// PersonModel p = personList.get(i);
+	// if (isPersonAvailable(p, thisDay))
+	// nameModel.addElement(new String(p.getName()));
+	// }
+	// return (new JList<String>(nameModel));
+	// }
 
-		// TODO:
-		// Get all persons who are available today
-		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+	public ArrayList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
+		ArrayList<PersonByTaskModel> thisTasksPersons = new ArrayList<PersonByTaskModel>();
 
-		for (int i = 0; i < personList.size(); i++) {
-			PersonModel p = personList.get(i);
-			if (isPersonAvailable(p, thisDay))
-				nameModel.addElement(new String(p.getName()));
-		}
-		return (new JList<String>(nameModel));
-	}
+		// TODO: Check if task is in person's assigned task list
+		// This method is used to get complete roster for a task
 
-	public LinkedList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
-		JList<PersonModel> persons = getAllPersons();
-		LinkedList<PersonByTaskModel> thisTasksPersons = new LinkedList<PersonByTaskModel>();
-
-		// TODO:
-		for (int i = 0; i < persons.getModel().getSize(); i++) {
-			PersonModel pModel = persons.getModel().getElementAt(i);
-
-			// -1 = no match, 0 = assigned task
-			if (checkPersonMatchForTask(pModel, task.getTaskID()) == 0) {
-				// Match found, add to list
-				thisTasksPersons.add(new PersonByTaskModel(pModel, task, false, task.getColor(), null));
-			}
-		}
 		return thisTasksPersons;
 	}
 
 	// Return list of all persons assigned to this day, including single
 	// instance assignments (subs) and floaters
-	public LinkedList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
+	public ArrayList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Date thisDay = Utilities.getDateFromCalendar(calendar);
 		Calendar localCalendar = (Calendar) calendar.clone();
+		String sqlDate = Utilities.getSqlDate(localCalendar);
 
-		// TODO:
-		JList<PersonModel> persons = getAllPersons();
-		LinkedList<CalendarDayModel> tasksForToday = getAllTasksByDay(localCalendar);
-		LinkedList<PersonByTaskModel> thisDaysPersons = new LinkedList<PersonByTaskModel>();
+		ArrayList<PersonByTaskModel> thisDaysPersons = new ArrayList<PersonByTaskModel>();
+		if (!checkDatabaseConnection())
+			return (ArrayList<PersonByTaskModel>) thisDaysPersons;
 
-		for (int i = 0; i < persons.getModel().getSize(); i++) {
-			PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i).toString());
-			if (!isPersonAvailable(pModel, thisDay))
-				continue;
+		// TODO: Check if person available, add color, check for single instance
+		// task TIME
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						// Assigned tasks with matching DOW and WOM
+						"SELECT PersonName, isLeader AS Leader, false AS SingleInstance, Tasks.TaskID AS TaskID, "
+								+ "  TaskName, Hour AS Hour, Minute AS Minute, Location, PhoneNumber, EMail, "
+								+ "Tasks.Color AS TaskColor, 0 AS SingleInstanceColor "
+								+ "FROM Tasks, Persons, Programs, AssignedTasks "
+								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
+								// Check if program expired
+								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
+								+ "  AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
+								// Check if task is active today
+								+ "  AND (Tasks.DaysOfWeek & (1 << ?)) != 0 "
+								+ "  AND (Tasks.DowInMonth & (1 << ?)) != 0 "
+								// Check if assigned task is active today
+								+ "  AND Tasks.TaskID = AssignedTasks.TaskID "
+								+ "  AND (AssignedTasks.DaysOfWeek & (1 << ?)) != 0 "
+								+ "  AND (AssignedTasks.DowInMonth & (1 << ?)) != 0 "
+								// Find associated person
+								+ "  AND Persons.PersonID = AssignedTasks.PersonID " + "UNION " +
+								// Floaters and subs from Single Instance Tasks
+								// with matching date
+								"SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
+								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
+								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor "
+								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks "
+								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
+								// Check if program expired
+								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
+								+ "	 AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
+								// Check if task assigned to today
+								+ "	 AND (SingleInstanceTasks.TaskID = Tasks.TaskID OR SingleInstanceTasks.TaskID IS NULL) "
+								+ "	 AND SingleDate=? "
+								// Find associated person
+								+ "	 AND SingleInstanceTasks.PersonID = Persons.PersonID "
+								+ "GROUP BY PersonName, TaskID " + "ORDER BY PersonName, TaskName;");
 
-			// Search through today's tasks for a person match
-			for (int taskIdx = 0; taskIdx < tasksForToday.size(); taskIdx++) {
-				TaskModel task = tasksForToday.get(taskIdx).getTask();
+				int row = 1;
+				Utilities.getSqlDate(localCalendar);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setInt(row++, dayOfWeekIdx);
+				selectStmt.setInt(row++, dayOfWeekInMonthIdx);
+				selectStmt.setInt(row++, dayOfWeekIdx);
+				selectStmt.setInt(row++, dayOfWeekInMonthIdx);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row, sqlDate);
 
-				// -1 = no match, 0 = assigned task, 1 = single instance task
-				int match = checkPersonMatchForTaskByDay(pModel, task.getTaskID(), thisDay, dayOfWeekIdx,
-						dayOfWeekInMonthIdx);
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					Utilities.addTimeToCalendar(localCalendar,
+							new TimeModel(result.getInt("Hour"), result.getInt("Minute")));
 
-				if (match >= 0) {
-					Utilities.addTimeToCalendar(localCalendar, task.getTime());
-					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, task, match == 0 ? false : true,
-							task.getColor(), localCalendar);
-					thisDaysPersons.add(personByTask);
+					if (result.getInt("TaskID") == 0) {
+						// Floater
+						System.out.println(result.getString("PersonName") + " " + result.getString("PhoneNumber") + " "
+								+ result.getString("EMail") + " leader=" + (result.getInt("Leader") == 1 ? true : false)
+								+ " task=FLOATER at " + result.getInt("Hour") + ":" + result.getInt("Minute")
+								+ ", color=" + result.getInt("SingleInstanceColor"));
+					} else {
+						System.out.println(result.getString("PersonName") + " " + result.getString("PhoneNumber") + " "
+								+ result.getString("EMail") + " leader=" + (result.getInt("Leader") == 1 ? true : false)
+								+ (result.getBoolean("SingleInstance") == true ? " SUB" : "") + " task="
+								+ result.getString("TaskName") + " at " + result.getInt("Hour") + ":"
+								+ result.getInt("Minute") + ", color=" + result.getInt("TaskColor"));
+					}
+
+					// assigned tasks
+					// PersonModel pModel = new
+					// PersonModel(result.getInt("PersonID"),
+					// result.getString("PersonName"),
+					// result.getString("PhoneNumber"),
+					// result.getString("EMail"),
+					// result.getInt("Leader") == 1 ? true : false,
+					// "", null, null, null);
+					// PersonByTaskModel personByTask = new
+					// PersonByTaskModel(pModel, task, isSub,
+					// task.getColor(), localCalendar);
+					// thisDaysPersons.add(personByTask);
+
+					// floaters
+					// PersonByTaskModel personByTask = new
+					// PersonByTaskModel(pModel, null, false, task.getColor(),
+					// task.getTaskDate());
+					// thisDaysPersons.add(personByTask);
 				}
-			}
+				result.close();
+				selectStmt.close();
+				break;
 
-			// Check if person is a floater (not associated with task)
-			for (int j = 0; j < pModel.getSingleInstanceTasks().size(); j++) {
-				SingleInstanceTaskModel task = pModel.getSingleInstanceTasks().get(j);
-				if (checkFloaterMatch(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-					PersonByTaskModel personByTask = new PersonByTaskModel(pModel, null, false, task.getColor(),
-							task.getTaskDate());
-					thisDaysPersons.add(personByTask);
-				}
-			}
-		}
-		return (LinkedList<PersonByTaskModel>) thisDaysPersons;
-	}
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
 
-	public LinkedList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
-		LinkedList<PersonByTaskModel> persons = getPersonsByDay(calendar);
-
-		// TODO:
-		for (int i = 0; i < persons.size(); i++) {
-			PersonByTaskModel person = persons.get(i);
-
-			if (!Utilities.checkForTimeMatch(person.getTaskDate(), calendar)) {
-				persons.remove(i);
-				i--;
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				break;
 			}
 		}
-		return (LinkedList<PersonByTaskModel>) persons;
+		return (ArrayList<PersonByTaskModel>) thisDaysPersons;
 	}
 
-	public LinkedList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
-		LinkedList<PersonByTaskModel> personList = getPersonsByDay(calendar);
+	// public ArrayList<PersonByTaskModel> getPersonsByDayByTime(Calendar
+	// calendar) {
+	// ArrayList<PersonByTaskModel> persons = getPersonsByDay(calendar);
 
-		// TODO:
-		for (int i = 0; i < personList.size(); i++) {
-			PersonByTaskModel person = personList.get(i);
+	// TODO:
+	// for (int i = 0; i < persons.size(); i++) {
+	// PersonByTaskModel person = persons.get(i);
 
-			if (person.getTask() == null || !person.getTask().getLocation().equals(location)) {
-				personList.remove(i);
-				i--;
-			}
-		}
-		return (LinkedList<PersonByTaskModel>) personList;
-	}
+	// if (!Utilities.checkForTimeMatch(person.getTaskDate(), calendar)) {
+	// persons.remove(i);
+	// i--;
+	// }
+	// }
+	// return (ArrayList<PersonByTaskModel>) persons;
+	// }
+
+	// public ArrayList<PersonByTaskModel> getPersonsByDayByLocation(Calendar
+	// calendar, String location) {
+	// ArrayList<PersonByTaskModel> personList = getPersonsByDay(calendar);
+
+	// TODO:
+	// for (int i = 0; i < personList.size(); i++) {
+	// PersonByTaskModel person = personList.get(i);
+
+	// if (person.getTask() == null ||
+	// !person.getTask().getLocation().equals(location)) {
+	// personList.remove(i);
+	// i--;
+	// }
+	// }
+	// return (ArrayList<PersonByTaskModel>) personList;
+	// }
 
 	public int getNumPersons() {
 		if (!checkDatabaseConnection())
@@ -1740,8 +1771,7 @@ public class MySqlDatabase {
 					// First attempt to connect
 					System.out.println("Attempting to re-connect to database...");
 					connectDatabase();
-				} else
-					// Second try
+				} else // Second try
 					System.out.println("Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {

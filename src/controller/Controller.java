@@ -30,23 +30,23 @@ public class Controller {
 	 * ------- Programs -------
 	 */
 	public void addProgram(ProgramEvent ev) {
-		db.addProgram(ev.getProgramName(), ev.getStartDate(), ev.getEndDate());
+		sqlDb.addProgram(ev.getProgramName(), ev.getStartDate(), ev.getEndDate());
 	}
 
 	public void updateProgram(String programName, String startDate, String endDate) {
-		db.updateProgram(programName, startDate, endDate);
+		sqlDb.updateProgram(programName, startDate, endDate);
 	}
 
 	public void renameProgram(String oldName, String newName) {
-		db.renameProgram(oldName, newName);
+		sqlDb.renameProgram(oldName, newName);
 	}
 
 	public ProgramModel getProgramByName(String programName) {
-		return db.getProgramByName(programName);
+		return sqlDb.getProgramByName(programName);
 	}
 
 	public JList<String> getAllProgramsAsString() {
-		return db.getAllProgramsAsString();
+		return sqlDb.getAllProgramsAsString();
 	}
 
 	public ArrayList<ProgramModel> getAllPrograms() {
@@ -54,32 +54,32 @@ public class Controller {
 	}
 
 	public int getNumPrograms() {
-		return db.getNumPrograms();
+		return sqlDb.getNumPrograms();
 	}
 
 	/*
 	 * ------- Task data -------
 	 */
 	public void addTask(TaskEvent ev) {
-		db.addTask(ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
+		sqlDb.addTask(ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
 				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 	}
 
 	public void updateTask(TaskEvent ev) {
-		db.updateTask(ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
+		sqlDb.updateTask(ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
 				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 	}
 
 	public void renameTask(String programName, String oldName, String newName) {
-		db.renameTask(programName, oldName, newName);
+		sqlDb.renameTask(programName, oldName, newName);
 	}
 
 	public TaskModel getTaskByName(String programName, String taskName) {
-		return db.getTaskByName(programName, taskName);
+		return sqlDb.getTaskByName(programName, taskName);
 	}
 
 	public String findProgramByTaskName(String taskName) {
-		return db.findProgramByTaskName(taskName);
+		return sqlDb.findProgramByTaskName(taskName);
 	}
 
 	public ArrayList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
@@ -119,19 +119,19 @@ public class Controller {
 	 */
 
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
-		return db.getAllTasksByProgram(programName);
+		return sqlDb.getAllTasksByProgram(programName);
 	}
 
 	public JList<TaskModel> getAllTasks() {
-		return db.getAllTasks();
+		return sqlDb.getAllTasks();
 	}
 
 	public JList<String> getAllLocationsAsString() {
-		return db.getAllLocationsAsString();
+		return sqlDb.getAllLocationsAsString();
 	}
 
 	public JList<String> getAllTimesAsString() {
-		return db.getAllTimesAsString();
+		return sqlDb.getAllTimesAsString();
 	}
 
 	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
@@ -150,11 +150,11 @@ public class Controller {
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
 			ArrayList<AssignedTasksModel> assignedTasks, ArrayList<SingleInstanceTaskModel> extraDates,
 			ArrayList<DateRangeModel> datesUnavailable) {
-		db.addPerson(name, phone, email, leader, notes, assignedTasks, extraDates, datesUnavailable);
+		sqlDb.addPerson(name, phone, email, leader, notes, assignedTasks, extraDates, datesUnavailable);
 	}
 
 	public void updatePerson(PersonEvent ev) {
-		db.updatePerson(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
+		sqlDb.updatePerson(ev.getName(), ev.getPhone(), ev.getEmail(), ev.isLeader(), ev.getNotes(),
 				ev.getAssignedTaskChanges(), ev.getExtraDates(), ev.getDatesUnavailable());
 	}
 
@@ -165,11 +165,11 @@ public class Controller {
 	}
 
 	public void renamePerson(String oldName, String newName) {
-		db.renamePerson(oldName, newName);
+		sqlDb.renamePerson(oldName, newName);
 	}
 
 	public void markPersonUnavail(String personName, Calendar today) {
-		db.markPersonUnavail(personName, today);
+		sqlDb.markPersonUnavail(personName, today);
 	}
 
 	public PersonModel getPersonByName(String name) {
@@ -177,7 +177,7 @@ public class Controller {
 	}
 
 	public JList<String> getAllPersonsAsString() {
-		return db.getAllPersonsAsString();
+		return sqlDb.getAllPersonsAsString();
 	}
 
 	public JList<String> getAvailPersonsAsString(Calendar today) {
@@ -205,6 +205,7 @@ public class Controller {
 	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
+		sqlDb.getPersonsByDay(calendar);
 		return db.getPersonsByDay(calendar);
 	}
 
@@ -213,7 +214,7 @@ public class Controller {
 	}
 
 	public int getNumPersons() {
-		return db.getNumPersons();
+		return sqlDb.getNumPersons();
 	}
 
 	/*
