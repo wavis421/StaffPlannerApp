@@ -1602,6 +1602,7 @@ public class MySqlDatabase {
 		Calendar localCalendar = (Calendar) calendar.clone();
 		String sqlDate = Utilities.getSqlDate(localCalendar);
 
+		PersonByTaskModel personByTask;
 		ArrayList<PersonByTaskModel> thisDaysPersons = new ArrayList<PersonByTaskModel>();
 		if (!checkDatabaseConnection())
 			return (ArrayList<PersonByTaskModel>) thisDaysPersons;
@@ -1628,9 +1629,11 @@ public class MySqlDatabase {
 								+ "  AND (AssignedTasks.DaysOfWeek & (1 << ?)) != 0 "
 								+ "  AND (AssignedTasks.DowInMonth & (1 << ?)) != 0 "
 								// Find associated person
-								+ "  AND Persons.PersonID = AssignedTasks.PersonID " + "UNION " +
-								// Floaters and subs from Single Instance Tasks
-								// with matching date
+								+ "  AND Persons.PersonID = AssignedTasks.PersonID "
+
+								+ "UNION " +
+
+								// Floaters + Subs from Single Instance Tasks
 								"SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
 								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor "
@@ -1644,10 +1647,10 @@ public class MySqlDatabase {
 								+ "	 AND SingleDate=? "
 								// Find associated person
 								+ "	 AND SingleInstanceTasks.PersonID = Persons.PersonID "
+
 								+ "GROUP BY PersonName, TaskID " + "ORDER BY PersonName, TaskName;");
 
 				int row = 1;
-				Utilities.getSqlDate(localCalendar);
 				selectStmt.setString(row++, sqlDate);
 				selectStmt.setString(row++, sqlDate);
 				selectStmt.setInt(row++, dayOfWeekIdx);
@@ -1663,38 +1666,35 @@ public class MySqlDatabase {
 					Utilities.addTimeToCalendar(localCalendar,
 							new TimeModel(result.getInt("Hour"), result.getInt("Minute")));
 
+					PersonModel pModel = new PersonModel(0, result.getString("PersonName"),
+							result.getString("PhoneNumber"), result.getString("EMail"),
+							result.getInt("Leader") == 1 ? true : false, "", null, null, null);
+
 					if (result.getInt("TaskID") == 0) {
 						// Floater
 						System.out.println(result.getString("PersonName") + " " + result.getString("PhoneNumber") + " "
 								+ result.getString("EMail") + " leader=" + (result.getInt("Leader") == 1 ? true : false)
 								+ " task=FLOATER at " + result.getInt("Hour") + ":" + result.getInt("Minute")
 								+ ", color=" + result.getInt("SingleInstanceColor"));
+
+						personByTask = new PersonByTaskModel(pModel, null, false, result.getInt("SingleInstanceColor"),
+								localCalendar);
+
 					} else {
 						System.out.println(result.getString("PersonName") + " " + result.getString("PhoneNumber") + " "
 								+ result.getString("EMail") + " leader=" + (result.getInt("Leader") == 1 ? true : false)
 								+ (result.getBoolean("SingleInstance") == true ? " SUB" : "") + " task="
 								+ result.getString("TaskName") + " at " + result.getInt("Hour") + ":"
 								+ result.getInt("Minute") + ", color=" + result.getInt("TaskColor"));
+
+						personByTask = new PersonByTaskModel(pModel,
+								new TaskModel(result.getInt("TaskID"), 0, result.getString("TaskName"),
+										result.getString("Location"), 0, 0, null, null,
+										new TimeModel(result.getInt("Hour"), result.getInt("Minute")),
+										result.getInt("TaskColor")),
+								result.getBoolean("SingleInstance"), result.getInt("TaskColor"), localCalendar);
 					}
-
-					// assigned tasks
-					// PersonModel pModel = new
-					// PersonModel(result.getInt("PersonID"),
-					// result.getString("PersonName"),
-					// result.getString("PhoneNumber"),
-					// result.getString("EMail"),
-					// result.getInt("Leader") == 1 ? true : false,
-					// "", null, null, null);
-					// PersonByTaskModel personByTask = new
-					// PersonByTaskModel(pModel, task, isSub,
-					// task.getColor(), localCalendar);
-					// thisDaysPersons.add(personByTask);
-
-					// floaters
-					// PersonByTaskModel personByTask = new
-					// PersonByTaskModel(pModel, null, false, task.getColor(),
-					// task.getTaskDate());
-					// thisDaysPersons.add(personByTask);
+					thisDaysPersons.add(personByTask);
 				}
 				result.close();
 				selectStmt.close();

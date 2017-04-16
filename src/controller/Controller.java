@@ -205,8 +205,7 @@ public class Controller {
 	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
-		sqlDb.getPersonsByDay(calendar);
-		return db.getPersonsByDay(calendar);
+		return sqlDb.getPersonsByDay(calendar);
 	}
 
 	public ArrayList<PersonByTaskModel> getAllPersonsList() {
