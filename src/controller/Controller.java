@@ -50,7 +50,7 @@ public class Controller {
 	}
 
 	public ArrayList<ProgramModel> getAllPrograms() {
-		return db.getAllPrograms();
+		return sqlDb.getAllPrograms();
 	}
 
 	public int getNumPrograms() {
@@ -135,7 +135,7 @@ public class Controller {
 	}
 
 	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
-		return db.getAllTimesByDay(calendar);
+		return sqlDb.getAllTimesByDay(calendar);
 	}
 
 	/*

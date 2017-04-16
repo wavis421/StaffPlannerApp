@@ -251,8 +251,41 @@ public class MySqlDatabase {
 	}
 
 	public ArrayList<ProgramModel> getAllPrograms() {
-		// TODO: Used to create JTree
-		return null;
+		ArrayList<ProgramModel> programList = new ArrayList<>();
+
+		if (!checkDatabaseConnection())
+			return programList;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Programs ORDER BY ProgramName;");
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					programList.add(new ProgramModel(result.getInt("ProgramID"), result.getString("ProgramName"),
+							Utilities.convertSqlDateToString(result.getDate("StartDate")),
+							Utilities.convertSqlDateToString(result.getDate("EndDate")), null));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving program list from database: " + e.getMessage());
+				break;
+			}
+		}
+		return programList;
 	}
 
 	public int getNumPrograms() {
@@ -940,80 +973,64 @@ public class MySqlDatabase {
 	}
 
 	// TODO:
-	// public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
-	// DefaultListModel<TimeModel> timeModel = new
-	// DefaultListModel<TimeModel>();
-	// ArrayList<TimeModel> timeArray = new ArrayList<TimeModel>();
+	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Calendar localCalendar = (Calendar) calendar.clone();
+		String sqlDate = Utilities.getSqlDate(localCalendar);
 
-	// TODO:
-	// ArrayList<CalendarDayModel> taskList = getAllTasksByDay(calendar);
-	// for (int taskIdx = 0; taskIdx < taskList.size(); taskIdx++) {
-	// Check whether already in list before adding
-	// TimeModel taskTime = taskList.get(taskIdx).getTask().getTime();
-	// if (!findTimeMatchInArray(taskTime, timeArray)) timeArray.add(taskTime);
-	// }
+		DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
+		
+		if (!checkDatabaseConnection())
+			return new JList<TimeModel>(timeModel);
 
-	// Collections.sort((ArrayList<TimeModel>) timeArray);
-	// for (int i = 0; i < timeArray.size(); i++)
-	// timeModel.addElement(timeArray.get(i));
-	// JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
-	// return timeList;
-	// }
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						// Select tasks with matching DOW and WOM
+						"SELECT Hour, Minute " + "FROM Tasks, Programs "
+								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
+								// Check if program expired
+								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
+								+ "  AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
 
-	private int checkPersonMatchForTask(PersonModel person, int taskID) {
-		ArrayList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+								// Check if task is active today
+								+ "  AND (Tasks.DaysOfWeek & (1 << ?)) != 0 "
+								+ "  AND (Tasks.DowInMonth & (1 << ?)) != 0 "
 
-		// TODO: Probably not needed after conversion completed
-		// Check if task is in person's assigned task list
-		for (int i = 0; i < assignedTaskList.size(); i++) {
-			AssignedTasksModel assignedTask = assignedTaskList.get(i);
-			if (assignedTask.getTaskID() == taskID) {
-				return ASSIGNED_TASK_MATCH;
-			}
-		}
-		return NO_MATCH_FOUND;
-	}
+								+ "GROUP BY Hour, Minute "
 
-	private int checkPersonMatchForTaskByDay(PersonModel person, int taskID, Date today, int dayOfWeekIdx,
-			int dowInMonthIdx) {
-		// TODO: Probably not needed after conversion
-		if (!isPersonAvailable(person, today))
-			return PERSON_NOT_AVAIL;
+								+ "ORDER BY Hour, Minute;");
 
-		else {
-			ArrayList<AssignedTasksModel> assignedTaskList = person.getAssignedTasks();
+				int row = 1;
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setInt(row++, dayOfWeekIdx);
+				selectStmt.setInt(row, dayOfWeekInMonthIdx);
 
-			// Check if task is in person's assigned task list for today
-			for (int i = 0; i < assignedTaskList.size(); i++) {
-				AssignedTasksModel assignedTask = assignedTaskList.get(i);
-				if ((assignedTask.getTaskID() == taskID) && assignedTask.getDaysOfWeek()[dayOfWeekIdx]
-						&& assignedTask.getWeeksOfMonth()[dowInMonthIdx]) {
-					return ASSIGNED_TASK_MATCH;
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					timeModel.addElement(new TimeModel(result.getInt("Hour"), result.getInt("Minute")));
 				}
-			}
+				result.close();
+				selectStmt.close();
+				break;
 
-			for (int i = 0; i < person.getSingleInstanceTasks().size(); i++) {
-				SingleInstanceTaskModel singleInstanceTask = person.getSingleInstanceTasks().get(i);
-				// Check if this person is a sub for today
-				Calendar subCalendar = singleInstanceTask.getTaskDate();
-				if ((singleInstanceTask.getTaskID() == taskID)
-						&& Utilities.checkForDateAndTimeMatch(today, dayOfWeekIdx, dowInMonthIdx, subCalendar)) {
-					return SINGLE_INSTANCE_TASK_MATCH;
-				}
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving time list from database: " + e.getMessage());
+				break;
 			}
 		}
-		return NO_MATCH_FOUND;
-	}
-
-	private boolean isPersonAvailable(PersonModel person, Date today) {
-		// TODO: Probably not needed after conversion
-		for (int i = 0; i < person.getDatesUnavailable().size(); i++) {
-			DateRangeModel datesUnavail = person.getDatesUnavailable().get(i);
-			if (Utilities.isDateWithinDateRange(today, datesUnavail.getStartDate(), datesUnavail.getEndDate(),
-					"Unable to parse " + person.getName() + "'s Unavailable start/end Dates."))
-				return false;
-		}
-		return true;
+		return new JList<TimeModel>(timeModel);
 	}
 
 	/*
