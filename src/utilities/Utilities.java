@@ -32,6 +32,11 @@ public class Utilities {
 		return timeFormat.format(localCal.getTime());
 	}
 
+	public static String getCurrTime() {
+		Calendar localCal = Calendar.getInstance();
+		return timeFormat.format(localCal.getTime());
+	}
+	
 	public static boolean checkForTimeMatch(Calendar time1, Calendar time2) {
 		if (time1.get(Calendar.HOUR) == time2.get(Calendar.HOUR)
 				&& time1.get(Calendar.MINUTE) == time2.get(Calendar.MINUTE)

@@ -92,7 +92,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -125,7 +125,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -157,7 +157,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -194,7 +194,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -229,7 +229,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -267,7 +267,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -300,7 +300,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -348,7 +348,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -392,7 +392,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -425,7 +425,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -464,7 +464,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -504,7 +504,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -540,7 +540,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -771,7 +771,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -812,7 +812,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -852,7 +852,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -888,7 +888,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -924,7 +924,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -985,7 +985,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1058,7 +1058,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1096,7 +1096,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1133,7 +1133,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1168,7 +1168,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1211,7 +1211,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1255,7 +1255,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1298,7 +1298,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1345,7 +1345,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1391,7 +1391,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1438,7 +1438,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1476,7 +1476,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1511,7 +1511,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1551,7 +1551,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1615,7 +1615,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1658,7 +1658,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1693,7 +1693,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1732,7 +1732,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1775,7 +1775,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1814,7 +1814,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -1831,9 +1831,52 @@ public class MySqlDatabase {
 	public ArrayList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
 		ArrayList<PersonByTaskModel> thisTasksPersons = new ArrayList<PersonByTaskModel>();
 
-		// TODO: Check if task is in person's assigned task list
-		// This method is used to get complete roster for a task
+		if (!checkDatabaseConnection())
+			return thisTasksPersons;
 
+		// Check if task is in person's assigned task list
+		for (int i = 0; i < 2; i++) {
+			try {
+				// TODO: Optimize by not selecting * from each table
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Persons, AssignedTasks, Tasks " + "WHERE Tasks.TaskID=?"
+								+ "  AND AssignedTasks.TaskID = Tasks.TaskID "
+								+ "  AND AssignedTasks.PersonID = Persons.PersonID " + "ORDER BY PersonName;");
+				selectStmt.setInt(1, task.getTaskID());
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					// Getting person by task, so only need to put matching task in assigned task list
+					ArrayList<AssignedTasksModel> assignedTaskList = new ArrayList<AssignedTasksModel>();
+					assignedTaskList.add(new AssignedTasksModel(result.getInt("AssignedTaskID"),
+							result.getInt("AssignedTasks.PersonID"), result.getInt("AssignedTasks.TaskID"), "",
+							result.getString("TaskName"),
+							createDaysOfWeekArray(result.getInt("AssignedTasks.DaysOfWeek")),
+							createDaysOfWeekArray(result.getInt("AssignedTasks.DowInMonth"))));
+					
+					PersonModel p = new PersonModel(result.getInt("Persons.PersonID"), result.getString("PersonName"),
+							result.getString("PhoneNumber"), result.getString("EMail"), result.getBoolean("isLeader"),
+							result.getString("Notes"), assignedTaskList, null, null);
+					thisTasksPersons.add(new PersonByTaskModel(p, task, false, task.getColor(), null));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				break;
+			}
+		}
 		return thisTasksPersons;
 	}
 
@@ -1842,7 +1885,6 @@ public class MySqlDatabase {
 	public ArrayList<PersonByTaskModel> getPersonsByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-		Date thisDay = Utilities.getDateFromCalendar(calendar);
 		Calendar localCalendar = (Calendar) calendar.clone();
 		String sqlDate = Utilities.getSqlDate(localCalendar);
 
@@ -1942,7 +1984,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
@@ -2008,7 +2050,7 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println("Attempting to re-connect to database...");
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else // Second try
 					System.out.println("Unable to connect to database: " + e.getMessage());

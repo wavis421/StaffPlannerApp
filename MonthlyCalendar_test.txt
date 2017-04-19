@@ -1,0 +1,144 @@
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS MonthlyCalendar$$
+CREATE PROCEDURE MonthlyCalendar(IN startDate DATE)
+BEGIN
+	DECLARE firstDow INT Default (DAYOFWEEK(startDate) - 1);
+	DECLARE numDaysInMonth INT Default (DAYOFMONTH(LAST_DAY(startDate)));
+	DECLARE thisDoM, numRows, currRow, currDoW, currWoM, womLoopIdx, dowLoopIdx, progID, progNotExpired INT DEFAULT 0;
+	DECLARE thisDate DATE;
+	DECLARE tableTaskID INT DEFAULT 0;
+	DECLARE tableTaskName VARCHAR(30);
+
+	# Create temporary table containing task information
+	CREATE TEMPORARY TABLE TaskTable (
+		TaskName VARCHAR(30),
+		TaskID int(11),
+		ProgramID int(11),
+		DoW INT(11),
+		WoM INT(11),
+		Hour INT(11),
+		Minute INT(11),
+		NumPersonsReqd INT(11),
+		NumLdrsReqd INT(11),
+		FloaterDate DATE
+	) AS
+	(SELECT TaskName AS TaskName, TaskID AS TaskID, ProgramID as ProgramID, 
+			DaysOfWeek AS DoW, DowInMonth AS WoM, Hour AS Hour, Minute AS Minute, 
+			TotalPersonsReqd AS NumPersonsReqd, NumLeadersReqd AS NumLdrsReqd, NULL AS FloaterDate
+		FROM Tasks
+	) UNION
+
+	# Floater tasks determined by unassigned TaskID (NULL) and matching date
+	(SELECT NULL, TaskID, ProgramID, 0, 0, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, 
+			COUNT(*) AS NumPersonsReqd, 0, SingleDate AS FloaterDate
+		FROM SingleInstanceTasks
+		WHERE TaskID IS NULL 
+		GROUP BY FloaterDate, Hour, Minute
+	); 
+
+	# Create MonthTable to contain filtered TaskTable data
+	CREATE TEMPORARY TABLE MonthTable (
+		Today INT(11),
+		TaskName VARCHAR(30),
+		TaskID INT(11),
+		Hour INT(11),
+		Minute INT(11),
+		NumPersonsReqd INT(11),
+		NumLdrsReqd INT(11),
+		PersonsCount INT(11),
+		LeaderCount INT(11)
+	);
+
+	# Loop through the task table to compute additional fields for MonthTable
+	SET numRows = (SELECT COUNT(*) FROM TaskTable);
+	WHILE currRow < numRows DO
+		SET tableTaskName = (SELECT TaskName FROM TaskTable LIMIT currRow, 1);
+		IF (tableTaskName IS NULL) THEN
+			# TaskName is NULL, so this is a Floater Task.
+			# Check if the floater date is in current month AND if program for this floater has expired.
+			SET thisDate = (SELECT FloaterDate FROM TaskTable LIMIT currRow, 1);
+			SET progID = (SELECT ProgramID FROM TaskTable LIMIT currRow, 1);
+			IF ((SELECT COUNT(*) FROM Programs
+				WHERE (Programs.ProgramID = progID
+					AND ((Programs.StartDate IS NULL) OR (thisDate >= Programs.StartDate)) 
+					AND ((Programs.EndDate IS NULL) OR (thisDate <= Programs.EndDate)))
+					AND (thisDate BETWEEN startDate AND LAST_DAY(startDate))) > 0) THEN
+
+			    # Floater task has no associated task info except date/time
+			    # Insert info into month table
+			    INSERT INTO MonthTable 
+				    (Today, TaskName, TaskID, Hour, Minute, NumPersonsReqd, NumLdrsReqd, PersonsCount, LeaderCount)
+				    SELECT DAYOFMONTH(thisDate), NULL, 0, Hour, Minute, 0, 0, NumPersonsReqd, 0
+				    FROM TaskTable
+				    LIMIT currRow, 1;
+			END IF;
+		ELSE
+			# Task not NULL, so process by DOW, WOM
+			SET currDoW = (SELECT DoW FROM TaskTable LIMIT currRow, 1);
+			SET currWoM = (SELECT WoM FROM TaskTable LIMIT currRow, 1);
+			SET dowLoopIdx = 0;
+			dowLoop: LOOP	
+				IF ((currDoW >> dowLoopIdx) & 1) = 1 THEN
+					# DOW enabled, so add DOW table entry for each selected week
+					SET womLoopIdx = 0;
+					womLoop: LOOP
+						IF ((currWoM >> womLoopIdx) & 1) = 1 THEN
+							# Calculate day of month and check out-of-bounds
+							IF (dowLoopIdx < firstDow) THEN
+								SET thisDoM = (7 - firstDow) + (womLoopIdx * 7) + dowLoopIdx + 1;
+							ELSEIF (womLoopIdx = 0) THEN
+								SET thisDoM = (dowLoopIdx + 1) - firstDow;
+							ELSE
+								SET thisDoM = (7 - firstDow) + ((womLoopIdx - 1) * 7) + dowLoopIdx + 1; 
+							END IF;
+							IF (thisDoM > numDaysInMonth) THEN
+								LEAVE womLoop;
+							END IF;
+
+							# Check if this task's program has expired
+							SET thisDate = DATE_ADD(startDate, INTERVAL (thisDoM - 1) DAY);
+							SET progID = (SELECT ProgramID FROM TaskTable LIMIT currRow, 1);
+							IF ((SELECT COUNT(*) FROM Programs
+								WHERE (Programs.ProgramID = progID
+									AND ((Programs.StartDate IS NULL) OR (thisDate >= Programs.StartDate)) 
+									AND ((Programs.EndDate IS NULL) OR (thisDate <= Programs.EndDate)))) > 0) THEN
+
+								# Get each field from TaskTable, add thisDoM AND person count 
+								SET tableTaskID = (SELECT TaskID FROM TaskTable LIMIT currRow, 1);
+								INSERT INTO MonthTable (Today, TaskName, TaskID, Hour, Minute, NumPersonsReqd, NumLdrsReqd, 
+										PersonsCount, LeaderCount)
+									SELECT thisDoM, tableTaskName, TaskID, Hour, Minute, 
+										NumPersonsReqd, NumLdrsReqd, 
+										(SELECT COUNT(*) FROM AssignedTasks
+											WHERE AssignedTasks.TaskID = tableTaskID 
+											AND (AssignedTasks.DaysOfWeek & (1 << dowLoopIdx)) != 0
+											AND (AssignedTasks.DowInMonth & (1 << womLoopIdx)) != 0), 
+										0
+									FROM TaskTable
+									LIMIT currRow, 1;
+							END IF;
+						END IF;
+						SET womLoopIdx = womLoopIdx + 1;
+						IF womLoopIdx > 5 THEN
+							LEAVE womLoop;
+						END IF;
+					END LOOP;
+				END IF;
+				SET dowLoopIdx = dowLoopIdx + 1;
+				IF dowLoopIdx > 6 THEN
+					LEAVE dowLoop;
+				END IF;
+			END LOOP;
+		END IF;
+		SET currRow = currRow + 1;
+	END WHILE;
+
+	# Select ALL from this month's table
+	SELECT * FROM MonthTable ORDER BY Today, Hour, Minute, TaskName;
+	
+	DROP TABLE TaskTable;
+	DROP TABLE MonthTable;
+
+END$$
+DELIMITER ;

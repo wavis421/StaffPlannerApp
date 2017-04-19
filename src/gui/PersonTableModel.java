@@ -22,7 +22,7 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final int PERSON_TABLE_MINIMUM_EXPANSION = 0;
 	private static final int PERSON_TABLE_EXPAND_BY_DAY = 1;
 	private static final int PERSON_TABLE_EXPAND_BY_TASK = 2;
-	
+
 	// Columns for PERSON_TABLE_MINIMUM_EXPANSION
 	private static final int PERSON_NAME_COLUMN = 0;
 	private static final int LEADER_COLUMN = 1;
@@ -237,6 +237,8 @@ public class PersonTableModel extends AbstractTableModel {
 	}
 
 	private AssignedTasksModel getTaskMatchInAssignedTaskList(String taskName, ArrayList<AssignedTasksModel> list) {
+		// TODO: should always return item 0 in list, since list has only 1
+		// entry(???)
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).getTaskName().equals(taskName))
 				return list.get(i);

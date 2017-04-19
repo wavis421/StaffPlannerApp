@@ -818,8 +818,8 @@ public class MainFrame extends JFrame {
 		if (dialogResponse != null) {
 			if (!personEvent.getOkToSaveStatus()) { // is OK to save?
 				PersonModel thisPerson = controller.getPersonByName(origName);
-				ArrayList<AssignedTasksModel> assignedTasks = (ArrayList<AssignedTasksModel>) thisPerson
-						.getAssignedTasks().clone();
+				// TODO: do we really need to re-fetch the assigned task list for this person??
+				ArrayList<AssignedTasksModel> assignedTasks = controller.getAssignedTasks(origName);
 				ArrayList<AssignedTasksModel> assignedListMerged = mergeAssignedTaskList(assignedTasks,
 						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedListMerged);
