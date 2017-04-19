@@ -207,9 +207,9 @@ public class Controller {
 		return sqlDb.getPersonsByDay(calendar);
 	}
 
-	public ArrayList<PersonByTaskModel> getAllPersonsList() {
+	public ArrayList<PersonByTaskModel> getAllPersons() {
 		System.out.println("getAllPersonsList needs update");
-		return db.getAllPersonsList();
+		return sqlDb.getAllPersons();
 	}
 
 	public int getNumPersons() {

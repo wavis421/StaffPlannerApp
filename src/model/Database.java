@@ -35,7 +35,7 @@ public class Database {
 
 	public Database() {
 		// Connect to database
-		TestDatabase.initializeDatabase();
+		//TestDatabase.initializeDatabase();
 
 		programList = new ArrayList<ProgramModel>();
 		personList = new ArrayList<PersonModel>();

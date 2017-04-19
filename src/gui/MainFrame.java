@@ -142,7 +142,7 @@ public class MainFrame extends JFrame {
 			controller.loadProgramFromDatabase();
 			processImportProgram();
 
-			controller.loadRosterFromDatabase();
+			//controller.loadRosterFromDatabase();
 			processImportRoster();
 
 			updateMonth((Calendar) calPanel.getCurrentCalendar());
@@ -608,7 +608,7 @@ public class MainFrame extends JFrame {
 		viewAllPersonsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (controller.getNumPersons() > 0) {
-					ArrayList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
+					ArrayList<PersonByTaskModel> allPersons = controller.getAllPersons();
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
 							PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null);
 
@@ -638,7 +638,7 @@ public class MainFrame extends JFrame {
 			}
 
 			// Refresh data and re-open Person Table dialog
-			ArrayList<PersonByTaskModel> allPersons = controller.getAllPersonsList();
+			ArrayList<PersonByTaskModel> allPersons = controller.getAllPersons();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
 					PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null);
 			return ev;
