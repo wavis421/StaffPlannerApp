@@ -28,7 +28,7 @@ public class MySqlDatabase {
 	/*
 	 * ------- Database Connections -------
 	 */
-	public static void connectDatabase() {
+	private void connectDatabase() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 
@@ -48,7 +48,7 @@ public class MySqlDatabase {
 		}
 	}
 
-	public static void disconnectDatabase() {
+	public void disconnectDatabase() {
 		if (dbConnection != null) {
 			try {
 				dbConnection.close();
@@ -59,7 +59,7 @@ public class MySqlDatabase {
 		}
 	}
 
-	private static boolean checkDatabaseConnection() {
+	private boolean checkDatabaseConnection() {
 		// If database connection has been lost, try re-connecting
 		if (dbConnection == null)
 			connectDatabase();

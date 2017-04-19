@@ -27,6 +27,13 @@ public class Controller {
 	MySqlDatabase sqlDb = new MySqlDatabase();
 
 	/*
+	 * ------- Database Connections -------
+	 */
+	public void disconnectDatabase() {
+		sqlDb.disconnectDatabase();
+	}
+	
+	/*
 	 * ------- Programs -------
 	 */
 	public void addProgram(ProgramEvent ev) {
@@ -174,11 +181,6 @@ public class Controller {
 
 	public JList<String> getAvailPersonsAsString(Calendar today) {
 		return sqlDb.getAvailPersonsAsString(today);
-	}
-
-	public JList<PersonModel> getAllPersons() {
-		System.out.println("getAllPersons needs update");
-		return db.getAllPersons();
 	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByTask(TaskModel task) {

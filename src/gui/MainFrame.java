@@ -37,7 +37,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import TestDatabase.TestDatabase;
 import controller.Controller;
 import model.AssignedTasksModel;
 import model.CalendarDayModel;
@@ -122,7 +121,7 @@ public class MainFrame extends JFrame {
 
 	private void loadSelectedDatabases() {
 		// TODO: Go through database to get program list
-		JList<String> databaseList = TestDatabase.getProgramList();
+		JList<String> databaseList = controller.getAllProgramsAsString();
 		if (databaseList.getModel().getSize() == 0) {
 			System.out.println("No databases exist!");
 			return;
@@ -322,7 +321,7 @@ public class MainFrame extends JFrame {
 		});
 		exitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				TestDatabase.disconnectDatabase();
+				controller.disconnectDatabase();
 				dispose();
 				System.gc();
 			}
@@ -587,10 +586,10 @@ public class MainFrame extends JFrame {
 		editPersonMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				editPersonMenu.removeAll();
-				JList<PersonModel> personList = controller.getAllPersons();
+				JList<String> personList = controller.getAllPersonsAsString();
 
 				for (int i = 0; i < personList.getModel().getSize(); i++) {
-					JMenuItem personItem = new JMenuItem(personList.getModel().getElementAt(i).toString());
+					JMenuItem personItem = new JMenuItem(personList.getModel().getElementAt(i));
 					editPersonMenu.add(personItem);
 
 					personItem.addActionListener(new ActionListener() {

@@ -11,6 +11,7 @@ BEGIN
 	DECLARE currDowInMonth INT Default 0;
 
 	# Create MonthTable 
+	# TODO: Name table based on user to make unique
 	CREATE TABLE IF NOT EXISTS MonthTable (
 		Today INT(11),
 		TaskName VARCHAR(30),
@@ -24,6 +25,7 @@ BEGIN
 		NumLdrsReqd INT(11),
 		TaskColor INT(11)
 	);
+	TRUNCATE MonthTable;
 
 	# Insert tasks and floaters into table for each day of month
 	WHILE (thisDay <= numDaysInMonth) DO
@@ -83,6 +85,5 @@ BEGIN
 					
 	# Select ALL from this month's table
 	SELECT * FROM MonthTable ORDER BY Today, TaskHour, TaskMinute, TaskName;
-	DROP TABLE MonthTable;
 END$$
 DELIMITER ;
