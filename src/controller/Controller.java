@@ -83,40 +83,38 @@ public class Controller {
 	}
 
 	public ArrayList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
+		System.out.println("getTasksByDayByProgram needs update");
 		return db.getTasksByDayByProgram(calendar, programs);
 	}
 
 	public ArrayList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
+		System.out.println("getTasksByDayByPerson needs update");
 		return db.getTasksByDayByPerson(calendar, personList);
 	}
 
 	public ArrayList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
+		System.out.println("getTasksByDayByIncompleteRoster needs update");
 		return db.getTasksByDayByIncompleteRoster(calendar);
 	}
 
 	public ArrayList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
+		System.out.println("getTasksByDayByLocation needs update");
 		return db.getTasksByDayByLocation(calendar, locations);
 	}
 
 	public ArrayList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> times) {
+		System.out.println("getTasksByDayByTime needs update");
 		return db.getTasksByDayByTime(calendar, times);
 	}
 
-	public ArrayList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
-		return db.getAllTasksByDay(calendar);
-	}
-
 	public ArrayList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
+		System.out.println("getAllTasksAndFloatersByDay needs update");
 		return db.getAllTasksAndFloatersByDay(calendar);
 	}
-	
+
 	public ArrayList<ArrayList<CalendarDayModel>> getAllTasksAndFloatersByMonth(Calendar calendar) {
 		return sqlDb.getAllTasksAndFloatersByMonth(calendar);
 	}
-
-	/*
-	 * public List<TaskModel> getAllTasks() { return db.getAllTasks(); }
-	 */
 
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		return sqlDb.getAllTasksByProgram(programName);
@@ -139,12 +137,6 @@ public class Controller {
 	}
 
 	/*
-	public JList<String> getAllTasksAsString(String programName) {
-		return db.getAllTasksAsString(programName);
-	}
-	*/
-
-	/*
 	 * ------- Persons -------
 	 */
 	public void addPerson(String name, String phone, String email, boolean leader, String notes,
@@ -160,7 +152,7 @@ public class Controller {
 
 	public void addSingleInstanceTask(JList<String> personList, Calendar day, TaskModel task, int color) {
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			db.addSingleInstanceTask(personList.getModel().getElementAt(i), day, task, color);
+			sqlDb.addSingleInstanceTask(personList.getModel().getElementAt(i), day, task, color);
 		}
 	}
 
@@ -173,7 +165,7 @@ public class Controller {
 	}
 
 	public PersonModel getPersonByName(String name) {
-		return db.getPersonByName(name);
+		return sqlDb.getPersonByName(name);
 	}
 
 	public JList<String> getAllPersonsAsString() {
@@ -181,26 +173,31 @@ public class Controller {
 	}
 
 	public JList<String> getAvailPersonsAsString(Calendar today) {
-		return db.getAvailPersonsAsString(today);
+		return sqlDb.getAvailPersonsAsString(today);
 	}
 
 	public JList<PersonModel> getAllPersons() {
+		System.out.println("getAllPersons needs update");
 		return db.getAllPersons();
 	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
+		System.out.println("getPersonsByTask needs update");
 		return db.getPersonsByTask(task);
 	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
+		System.out.println("getPersonsByDayByTask needs update");
 		return db.getPersonsByDayByTask(calendar, task);
 	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
+		System.out.println("getPersonsByDayByTime needs update");
 		return db.getPersonsByDayByTime(calendar);
 	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
+		System.out.println("getPersonsByDayByLocation needs update");
 		return db.getPersonsByDayByLocation(calendar, location);
 	}
 
@@ -209,11 +206,20 @@ public class Controller {
 	}
 
 	public ArrayList<PersonByTaskModel> getAllPersonsList() {
+		System.out.println("getAllPersonsList needs update");
 		return db.getAllPersonsList();
 	}
 
 	public int getNumPersons() {
 		return sqlDb.getNumPersons();
+	}
+	
+	public ArrayList<AssignedTasksModel> getAssignedTasks(String personName) {
+		return sqlDb.getAssignedTasks(personName);
+	}
+	
+	public ArrayList<DateRangeModel> getUnavailDates(String personName) {
+		return sqlDb.getUnavailDates(personName);
 	}
 
 	/*

@@ -11,7 +11,6 @@ public class DateRangeEvent extends EventObject {
 	private TaskModel task;
 	private Calendar startDate;
 	private Calendar endDate;
-	private DateRangeModel dateRange;
 
 	public DateRangeEvent(Object source, TaskModel task, Calendar startDate, Calendar endDate) {
 		super(source);
@@ -27,7 +26,7 @@ public class DateRangeEvent extends EventObject {
 		else
 			return "";
 	}
-
+	
 	public TaskModel getTask() {
 		return task;
 	}
@@ -39,5 +38,8 @@ public class DateRangeEvent extends EventObject {
 	public DateRangeModel getDateRange() {
 		return new DateRangeModel(0, 0, Utilities.getDisplayDate(startDate), Utilities.getDisplayDate(endDate));
 	}
-}
 
+	public DateRangeModel getSqlDateRange() {
+		return new DateRangeModel(0, 0, Utilities.getSqlDate(startDate), Utilities.getSqlDate(endDate));
+	}
+}

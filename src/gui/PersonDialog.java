@@ -199,7 +199,7 @@ public class PersonDialog extends JDialog {
 				DateRangeEvent dateResponse = ev.getDialogResponse();
 				if (dateResponse != null) {
 					// Date range valid. Add to Linked List and Combo Box.
-					newDatesUnavailable.add(dateResponse.getDateRange());
+					newDatesUnavailable.add(dateResponse.getSqlDateRange());
 					DefaultComboBoxModel<String> dateModel = (DefaultComboBoxModel<String>) dateUnavailCombo.getModel();
 					if (dateResponse.getDateRange().getStartDate().equals(dateResponse.getDateRange().getEndDate()))
 						// Add single date to list
@@ -391,16 +391,18 @@ public class PersonDialog extends JDialog {
 
 	private void addDateUnavail(DateRangeModel dateUnavail, DefaultComboBoxModel<String> dateModel) {
 
-		if (Utilities.isDateInThePast(dateUnavail.getEndDate(), "Error parsing Unavailable Date(s)"))
-			// TODO: Date range has passed; remove from list
-			// datesUnavailable.remove(dateUnavail);
-			;
-		else if (dateUnavail.getStartDate().equals(dateUnavail.getEndDate()))
+		// if (Utilities.isDateInThePast(dateUnavail.getEndDate(), "Error
+		// parsing Unavailable Date(s)"))
+		// TODO: Date range has passed; remove from list
+		// datesUnavailable.remove(dateUnavail);
+
+		if (dateUnavail.getStartDate().equals(dateUnavail.getEndDate()))
 			// Add single date to list
-			dateModel.addElement(dateUnavail.getStartDate());
+			dateModel.addElement(Utilities.convertSqlDateToString(dateUnavail.getStartDate()));
 		else
 			// Add date range to list
-			dateModel.addElement(dateUnavail.getStartDate() + "  to  " + dateUnavail.getEndDate());
+			dateModel.addElement(Utilities.convertSqlDateToString(dateUnavail.getStartDate()) + "  to  "
+					+ Utilities.convertSqlDateToString(dateUnavail.getEndDate()));
 	}
 
 	private String processNotesArea() {
@@ -568,6 +570,7 @@ public class PersonDialog extends JDialog {
 
 		for (int i = 0; i < newDatesUnavailable.size(); i++) {
 			DateRangeModel datesUnavail = newDatesUnavailable.get(i);
+			
 			if (Utilities.isDateWithinDateRange(today, datesUnavail.getStartDate(), datesUnavail.getEndDate(),
 					"Unable to parse " + person + "'s Unavailable start/end Dates.")) {
 				JOptionPane.showMessageDialog(PersonDialog.this,

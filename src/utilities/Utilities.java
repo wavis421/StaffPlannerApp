@@ -157,12 +157,28 @@ public class Utilities {
 		}
 	}
 
+	public static String convertSqlDateToString(String sqlDateString) {
+		try {
+			// TODO: There must be a better way to do this!
+			Calendar cal = Calendar.getInstance();
+			Date date = sqlDateFormatter.parse(sqlDateString);
+			cal.setTime(date);
+			return getDisplayDate(cal);
+
+		} catch (ParseException e) {
+			JOptionPane.showMessageDialog(null,
+					"Unable to parse date '" + sqlDateString + "': " + e.getMessage(),
+					"Parsing Error", JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+	}
+	
 	public static boolean isDateInThePast(String dateString, String errorString) {
 		Calendar today = Calendar.getInstance();
 		Calendar date = Calendar.getInstance();
 
 		try {
-			date.setTime(dateFormatter.parse(dateString));
+			date.setTime(sqlDateFormatter.parse(dateString));
 
 		} catch (ParseException e) {
 			JOptionPane.showMessageDialog(null, "Unable to parse date '" + dateString + "': " + e.getMessage(),

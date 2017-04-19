@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,12 +19,6 @@ import utilities.Utilities;
 
 public class MySqlDatabase {
 	private static Connection dbConnection;
-
-	// Locally used constants
-	private static final int PERSON_NOT_AVAIL = -2;
-	private static final int NO_MATCH_FOUND = -1;
-	private static final int ASSIGNED_TASK_MATCH = 0;
-	private static final int SINGLE_INSTANCE_TASK_MATCH = 1;
 
 	public MySqlDatabase() {
 		// Make initial connection to database
@@ -449,13 +442,12 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return null;
 
+		// TODO: Remove programName parameter, fill in missing fields
 		TaskModel task = null;
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Tasks, Programs WHERE ProgramName=? AND TaskName=?;");
-				selectStmt.setString(1, programName);
-				selectStmt.setString(2, taskName);
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM Tasks WHERE TaskName=?;");
+				selectStmt.setString(1, taskName);
 
 				ResultSet result = selectStmt.executeQuery();
 				if (result.next()) {
@@ -652,33 +644,7 @@ public class MySqlDatabase {
 	// return matchingTasks;
 	// }
 	//
-	// public ArrayList<CalendarDayModel> getAllTasksByDay(Calendar calendar) {
-	// int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) -
-	// 1;
-	// int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-	// Date thisDay = Utilities.getDateFromCalendar(calendar);
-	//
-	// // TODO: Possibly create a new procedure?
-	// ArrayList<CalendarDayModel> thisDaysTasks = new
-	// ArrayList<CalendarDayModel>();
-	// for (int i = 0; i < programList.size(); i++) {
-	// ProgramModel prog = programList.get(i);
-	// if (isProgramExpired(thisDay, prog))
-	// continue;
-	//
-	// for (int j = 0; j < prog.getTaskList().size(); j++) {
-	// TaskModel task = prog.getTaskList().get(j);
-	// if ((task.getDayOfWeek()[dayOfWeekIdx]) &&
-	// (task.getWeekOfMonth()[dayOfWeekInMonthIdx])) {
-	// int count = getPersonCountForTaskByDay(task, thisDay, dayOfWeekIdx,
-	// dayOfWeekInMonthIdx);
-	// thisDaysTasks.add(new CalendarDayModel(task, count & 0xFFFF,
-	// (count >> 16) & 0xFFFF, task.getColor(), null, null));
-	// }
-	// }
-	// }
-	// return (ArrayList<CalendarDayModel>) thisDaysTasks;
-	// }
+
 	//
 	// public ArrayList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar
 	// calendar) {
@@ -980,7 +946,7 @@ public class MySqlDatabase {
 		String sqlDate = Utilities.getSqlDate(localCalendar);
 
 		DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
-		
+
 		if (!checkDatabaseConnection())
 			return new JList<TimeModel>(timeModel);
 
@@ -1052,7 +1018,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < extraTasks.size(); i++) {
 			// TODO: Also add floater color
 			SingleInstanceTaskModel task = extraTasks.get(i);
-			addSingleInstanceTask(personID, task.getTaskID(), task.getTaskDate());
+			addSingleInstanceTask(name, task.getTaskID(), task.getTaskDate());
 		}
 
 		for (int i = 0; i < datesUnavailable.size(); i++) {
@@ -1106,16 +1072,14 @@ public class MySqlDatabase {
 		return personID;
 	}
 
-	private int updatePersonInfo(String personName, String phone, String email, boolean leader, String notes) {
-		int personID = 0;
+	private void updatePersonInfo(String personName, String phone, String email, boolean leader, String notes) {
 		if (!checkDatabaseConnection())
-			return -1;
+			return;
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement updatePersonStmt = dbConnection.prepareStatement(
-						"UPDATE Persons SET PhoneNumber=?, EMail=?, isLeader=?, Notes=? " + "WHERE PersonName=?;",
-						Statement.RETURN_GENERATED_KEYS);
+						"UPDATE Persons SET PhoneNumber=?, EMail=?, isLeader=?, Notes=? WHERE PersonName=?;");
 
 				// Update person
 				int col = 1;
@@ -1126,11 +1090,6 @@ public class MySqlDatabase {
 				updatePersonStmt.setString(col, personName);
 
 				updatePersonStmt.executeUpdate();
-				ResultSet result = updatePersonStmt.getGeneratedKeys();
-				if (result.next())
-					personID = result.getInt(1);
-
-				result.close();
 				updatePersonStmt.close();
 				break;
 
@@ -1148,7 +1107,7 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return personID;
+		return;
 	}
 
 	private void addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
@@ -1222,30 +1181,28 @@ public class MySqlDatabase {
 		}
 	}
 
-	private void mergeAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+	private void mergeAssignedTask(String personName, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
 		if (!checkDatabaseConnection())
 			return;
 
-		String personName = null;
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement prepStmt = dbConnection
-						.prepareStatement("SELECT COUNT(*), AssignedTaskID, Persons.PersonID AS PersonID, PersonName "
+						.prepareStatement("SELECT COUNT(*) AS Count, AssignedTaskID, Persons.PersonID AS PersonID "
 								+ "FROM AssignedTasks, Persons "
-								+ "WHERE TaskID=? AND Persons.PersonID=? AND AssignedTasks.PersonID = Persons.PersonID;");
+								+ "WHERE TaskID=? AND Persons.PersonName=? AND AssignedTasks.PersonID = Persons.PersonID;");
 				prepStmt.setInt(1, taskID);
-				prepStmt.setInt(2, personID);
+				prepStmt.setString(2, personName);
 				ResultSet result = prepStmt.executeQuery();
 
 				// TODO: Optimize this later by avoiding duplicating overhead
-				if (result.getInt(1) > 0) {
+				if (result.getInt("Count") > 0) {
 					// Assigned task exists, so update fields
 					updateAssignedTask(result.getInt("AssignedTaskID"), daysOfWeek, weeksOfMonth);
 				} else {
 					// Assigned task not already in list, so insert
 					addAssignedTask(result.getInt("PersonID"), taskID, daysOfWeek, weeksOfMonth);
 				}
-				personName = result.getString("PersonName");
 
 				result.close();
 				prepStmt.close();
@@ -1261,16 +1218,102 @@ public class MySqlDatabase {
 					System.out.println("Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				if (personName == null)
-					System.out.println("Failure adding tasks: " + e.getMessage());
-				else
-					System.out.println("Failure adding tasks for " + personName + ": " + e.getMessage());
+
+				System.out.println("Failure adding tasks for " + personName + ": " + e.getMessage());
 				break;
 			}
 		}
 	}
 
-	public void addSingleInstanceTask(int personID, int taskID, Calendar taskTime) {
+	public ArrayList<AssignedTasksModel> getAssignedTasks(String personName) {
+		ArrayList<AssignedTasksModel> taskList = new ArrayList<>();
+
+		if (!checkDatabaseConnection())
+			return taskList;
+
+		// TODO: Add missing fields
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT ProgramName, TaskName, "
+						+ "  AssignedTasks.DaysOfWeek AS DaysOfWeek, AssignedTasks.DowInMonth AS DowInMonth "
+						+ "FROM AssignedTasks, Persons, Tasks, Programs WHERE Persons.PersonName = ? "
+						+ "  AND Persons.PersonID = AssignedTasks.PersonID "
+						+ "  AND Tasks.TaskID = AssignedTasks.TaskID " + "  AND Tasks.ProgramID = Programs.ProgramID "
+						+ "ORDER BY ProgramName, TaskName;");
+				selectStmt.setString(1, personName);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					taskList.add(new AssignedTasksModel(0, 0, 0, result.getString("ProgramName"),
+							result.getString("TaskName"), createDaysOfWeekArray(result.getInt("DaysOfWeek")),
+							createDowInMonthArray(result.getInt("DowInMonth"))));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println(
+						"Failure retreiving task list for " + personName + " from database: " + e.getMessage());
+				break;
+			}
+		}
+		return taskList;
+	}
+
+	public ArrayList<DateRangeModel> getUnavailDates(String personName) {
+		ArrayList<DateRangeModel> dateList = new ArrayList<>();
+
+		if (!checkDatabaseConnection())
+			return dateList;
+
+		// TODO: Add missing fields
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT UnavailDates.UnavailDatesID AS UnavailID, Persons.PersonID AS PersonID, StartDate, EndDate "
+								+ "FROM UnavailDates, Persons "
+								+ "WHERE Persons.PersonName = ? AND Persons.PersonID = UnavailDates.PersonID "
+								+ "ORDER BY StartDate, EndDate;");
+				selectStmt.setString(1, personName);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					dateList.add(new DateRangeModel(result.getInt("UnavailID"), result.getInt("PersonID"),
+							result.getDate("StartDate").toString(), result.getDate("EndDate").toString()));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving Unavail Dates list for " + personName + " from database: "
+						+ e.getMessage());
+				break;
+			}
+		}
+		return dateList;
+	}
+
+	public void addSingleInstanceTask(String personName, int taskID, Calendar taskTime) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -1279,19 +1322,67 @@ public class MySqlDatabase {
 			PreparedStatement addSingleTaskStmt = null;
 			try {
 				if (taskID == 0) {
-					addSingleTaskStmt = dbConnection.prepareStatement(
-							"INSERT INTO SingleInstanceTasks (PersonID, SingleDate, SingleTime) VALUES (?, ?, ?);");
+					addSingleTaskStmt = dbConnection
+							.prepareStatement("INSERT INTO SingleInstanceTasks (PersonID, SingleDate, SingleTime) "
+									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?);");
 				} else {
 					addSingleTaskStmt = dbConnection.prepareStatement(
-							"INSERT INTO SingleInstanceTasks (PersonID, TaskId, SingleDate, SingleTime) VALUES (?, ?, ?, ?);");
+							"INSERT INTO SingleInstanceTasks (PersonID, TaskId, SingleDate, SingleTime) "
+									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?);");
 				}
 
 				// Add new Single Instance Task
-				addSingleTaskStmt.setInt(col++, personID);
+				addSingleTaskStmt.setString(col++, personName);
 				if (taskID != 0)
 					addSingleTaskStmt.setInt(col++, taskID);
 				addSingleTaskStmt.setDate(col++, java.sql.Date.valueOf(Utilities.getSqlDate(taskTime)));
 				addSingleTaskStmt.setTime(col++, java.sql.Time.valueOf(Utilities.getSqlTime(taskTime)));
+
+				addSingleTaskStmt.executeUpdate();
+				addSingleTaskStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure adding single instance task: " + e.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void addSingleInstanceTask(String personName, Calendar singleDate, TaskModel task, int color) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			int col = 1;
+			PreparedStatement addSingleTaskStmt = null;
+			try {
+				if (task.getTaskID() == 0) {
+					addSingleTaskStmt = dbConnection.prepareStatement(
+							"INSERT INTO SingleInstanceTasks (PersonID, SingleDate, SingleTime, Color) VALUES "
+									+ "((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?);");
+				} else {
+					addSingleTaskStmt = dbConnection.prepareStatement(
+							"INSERT INTO SingleInstanceTasks (PersonID, TaskId, SingleDate, SingleTime Color) VALUES "
+									+ "((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?, ?);");
+				}
+
+				// Add new Single Instance Task
+				addSingleTaskStmt.setString(col++, personName);
+				if (task.getTaskID() != 0)
+					addSingleTaskStmt.setInt(col++, task.getTaskID());
+				addSingleTaskStmt.setDate(col++, java.sql.Date.valueOf(Utilities.getSqlDate(singleDate)));
+				addSingleTaskStmt.setTime(col++, java.sql.Time.valueOf(Utilities.getSqlTime(singleDate)));
+				addSingleTaskStmt.setInt(col, color);
 
 				addSingleTaskStmt.executeUpdate();
 				addSingleTaskStmt.close();
@@ -1375,8 +1466,8 @@ public class MySqlDatabase {
 
 				// Add new Unavailable Dates
 				addUnavailDatesStmt.setInt(1, personID);
-				addUnavailDatesStmt.setString(2, startDate);
-				addUnavailDatesStmt.setString(3, endDate);
+				addUnavailDatesStmt.setDate(2, java.sql.Date.valueOf(startDate));
+				addUnavailDatesStmt.setDate(3, java.sql.Date.valueOf(endDate));
 
 				addUnavailDatesStmt.executeUpdate();
 				addUnavailDatesStmt.close();
@@ -1398,25 +1489,60 @@ public class MySqlDatabase {
 		}
 	}
 
-	private void updateUnavailDates(int personID, String startDate, String endDate) {
+	private void addUnavailDates(String personName, String startDate, String endDate) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement addUnavailDatesStmt = dbConnection
+						.prepareStatement("INSERT INTO UnavailDates (PersonID, StartDate, EndDate) VALUES "
+								+ "((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?);");
+
+				// Add new Unavailable Dates
+				addUnavailDatesStmt.setString(1, personName);
+				addUnavailDatesStmt.setDate(2, java.sql.Date.valueOf(startDate));
+				addUnavailDatesStmt.setDate(3, java.sql.Date.valueOf(endDate));
+
+				addUnavailDatesStmt.executeUpdate();
+				addUnavailDatesStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure adding unavailable dates: " + e.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void updateUnavailDates(String personName, String startDate, String endDate) {
 		if (!checkDatabaseConnection())
 			return;
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement prepStmt = dbConnection.prepareStatement("SELECT COUNT(*) FROM UnavailDates, Persons "
-						+ "WHERE StartDate=? AND EndDate=? AND Persons.PersonID=? "
-						+ "AND UnavailDates.PersonID = Persons.PersonID;");
-				prepStmt.setString(1, startDate);
-				prepStmt.setString(2, endDate);
-				prepStmt.setInt(3, personID);
+						+ "WHERE StartDate=? AND EndDate=? AND PersonName=? "
+						+ "   AND UnavailDates.PersonID = Persons.PersonID;");
+				prepStmt.setDate(1, java.sql.Date.valueOf(startDate));
+				prepStmt.setDate(2, java.sql.Date.valueOf(endDate));
+				prepStmt.setString(3, personName);
 				ResultSet result = prepStmt.executeQuery();
 				result.next();
 
 				// TODO: Check whether this is a superset of another date range
 				if (result.getInt(1) == 0) {
 					// No match for start/end dates, so add date range
-					addUnavailDates(personID, startDate, endDate);
+					addUnavailDates(personName, startDate, endDate);
 				}
 				result.close();
 				prepStmt.close();
@@ -1445,15 +1571,13 @@ public class MySqlDatabase {
 		// TODO: Check if we have to check for person NAME changes???
 
 		// Update person info
-		int personID = updatePersonInfo(personName, personPhone, personEmail, personIsLeader, personNotes);
-		if (personID <= 0)
-			return;
+		updatePersonInfo(personName, personPhone, personEmail, personIsLeader, personNotes);
 
 		// Merge in the assigned tasks (list ONLY contains changes!!)
 		for (int i = 0; i < personAssignedTasks.size(); i++) {
 			// Update Assigned Tasks database for this person
 			AssignedTasksModel assignedTask = personAssignedTasks.get(i);
-			mergeAssignedTask(personID, assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
+			mergeAssignedTask(personName, assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
 					assignedTask.getWeeksOfMonth());
 		}
 
@@ -1461,14 +1585,14 @@ public class MySqlDatabase {
 		for (int i = 0; i < extraTasks.size(); i++) {
 			// Add single instance task to database
 			SingleInstanceTaskModel singleTask = extraTasks.get(i);
-			addSingleInstanceTask(personID, singleTask.getTaskID(), singleTask.getTaskDate());
+			addSingleInstanceTask(personName, singleTask.getTaskID(), singleTask.getTaskDate());
 		}
 
 		// Add dates unavailable (check for duplicates)
 		for (int i = 0; i < personDatesUnavailable.size(); i++) {
 			// Add unavailable dates if not a duplicate
 			DateRangeModel date = personDatesUnavailable.get(i);
-			updateUnavailDates(personID, date.getStartDate(), date.getEndDate());
+			updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
 		}
 	}
 
@@ -1508,15 +1632,14 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return;
 
+		String displayDate = Utilities.getDisplayDate(today);
 		for (int i = 0; i < 2; i++) {
 			try {
-				String displayDate = Utilities.getDisplayDate(today);
-				PreparedStatement prepStmt = dbConnection
-						.prepareStatement("SELECT COUNT(*), Persons.PersonID AS PersonID FROM UnavailDates, Persons "
-								+ "WHERE StartDate=? AND EndDate=? AND PersonName=? "
-								+ "AND UnavailDates.PersonID = Persons.PersonID;");
-				prepStmt.setString(1, displayDate);
-				prepStmt.setString(2, displayDate);
+				PreparedStatement prepStmt = dbConnection.prepareStatement("SELECT COUNT(*) FROM UnavailDates, Persons "
+						+ "WHERE StartDate=? AND EndDate=? AND PersonName=? "
+						+ "AND UnavailDates.PersonID = Persons.PersonID;");
+				prepStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(today)));
+				prepStmt.setDate(2, java.sql.Date.valueOf(Utilities.getSqlDate(today)));
 				prepStmt.setString(3, personName);
 				ResultSet result = prepStmt.executeQuery();
 				result.next();
@@ -1524,7 +1647,7 @@ public class MySqlDatabase {
 				// TODO: Check whether this is a superset of another date range
 				if (result.getInt(1) == 0) {
 					// No match for start/end dates, so add date range
-					addUnavailDates(result.getInt(2), displayDate, displayDate);
+					addUnavailDates(personName, displayDate, displayDate);
 				} else
 					System.out.println("Date range for " + personName + " already exists.");
 
@@ -1584,22 +1707,87 @@ public class MySqlDatabase {
 		return (new JList<String>(nameModel));
 	}
 
-	// TODO:
-	// public JList<String> getAvailPersonsAsString(Calendar today)
-	// {
-	// Date thisDay = Utilities.getDateFromCalendar(today);
-	//
-	// // TODO:
-	// // Get all persons who are available today
-	// DefaultListModel<String> nameModel = new DefaultListModel<String>();
-	//
-	// for (int i = 0; i < personList.size(); i++) {
-	// PersonModel p = personList.get(i);
-	// if (isPersonAvailable(p, thisDay))
-	// nameModel.addElement(new String(p.getName()));
-	// }
-	// return (new JList<String>(nameModel));
-	// }
+	public JList<String> getAvailPersonsAsString(Calendar today) {
+		Date thisDay = Utilities.getDateFromCalendar(today);
+
+		// Get all persons who are available today
+		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+
+		if (!checkDatabaseConnection())
+			return new JList<String>(nameModel);
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT PersonName FROM Persons, UnavailDates "
+								+ "WHERE Persons.PersonID = UnavailDates.PersonID "
+								+ "AND ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate "
+								+ "ORDER BY PersonName;");
+				selectStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(today)));
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					nameModel.addElement(new String(result.getString("PersonName")));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				break;
+			}
+		}
+		return (new JList<String>(nameModel));
+	}
+
+	public PersonModel getPersonByName(String personName) {
+		if (!checkDatabaseConnection())
+			return null;
+
+		PersonModel person = null;
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Persons WHERE PersonName=?;");
+				selectStmt.setString(1, personName);
+
+				ResultSet result = selectStmt.executeQuery();
+				if (result.next()) {
+					ArrayList<DateRangeModel> dateList = getUnavailDates(personName);
+					person = new PersonModel(result.getInt("PersonID"), result.getString("PersonName"),
+							result.getString("PhoneNumber"), result.getString("EMail"), result.getBoolean("isLeader"),
+							result.getString("Notes"), null, dateList, null);
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println("Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving " + personName + " from database: " + e.getMessage());
+				break;
+			}
+		}
+		return person;
+	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByTask(TaskModel task) {
 		ArrayList<PersonByTaskModel> thisTasksPersons = new ArrayList<PersonByTaskModel>();
@@ -1624,8 +1812,7 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return (ArrayList<PersonByTaskModel>) thisDaysPersons;
 
-		// TODO: Check if person available, add color, check for single instance
-		// task TIME
+		// TODO: add color, check for single instance task TIME
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
@@ -1633,7 +1820,7 @@ public class MySqlDatabase {
 						"SELECT PersonName, isLeader AS Leader, false AS SingleInstance, Tasks.TaskID AS TaskID, "
 								+ "  TaskName, Hour AS Hour, Minute AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, 0 AS SingleInstanceColor "
-								+ "FROM Tasks, Persons, Programs, AssignedTasks "
+								+ "FROM Tasks, Persons, Programs, AssignedTasks, UnavailDates "
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
@@ -1647,6 +1834,9 @@ public class MySqlDatabase {
 								+ "  AND (AssignedTasks.DowInMonth & (1 << ?)) != 0 "
 								// Find associated person
 								+ "  AND Persons.PersonID = AssignedTasks.PersonID "
+								// Check if person available today
+								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
+								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
 
 								+ "UNION " +
 
@@ -1654,7 +1844,7 @@ public class MySqlDatabase {
 								"SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
 								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor "
-								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks "
+								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks, UnavailDates "
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
@@ -1664,6 +1854,9 @@ public class MySqlDatabase {
 								+ "	 AND SingleDate=? "
 								// Find associated person
 								+ "	 AND SingleInstanceTasks.PersonID = Persons.PersonID "
+								// Check if person available today
+								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
+								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
 
 								+ "GROUP BY PersonName, TaskID " + "ORDER BY PersonName, TaskName;");
 
@@ -1674,6 +1867,8 @@ public class MySqlDatabase {
 				selectStmt.setInt(row++, dayOfWeekInMonthIdx);
 				selectStmt.setInt(row++, dayOfWeekIdx);
 				selectStmt.setInt(row++, dayOfWeekInMonthIdx);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
 				selectStmt.setString(row++, sqlDate);
 				selectStmt.setString(row++, sqlDate);
 				selectStmt.setString(row, sqlDate);
@@ -1689,21 +1884,9 @@ public class MySqlDatabase {
 
 					if (result.getInt("TaskID") == 0) {
 						// Floater
-						System.out.println(result.getString("PersonName") + " " + result.getString("PhoneNumber") + " "
-								+ result.getString("EMail") + " leader=" + (result.getInt("Leader") == 1 ? true : false)
-								+ " task=FLOATER at " + result.getInt("Hour") + ":" + result.getInt("Minute")
-								+ ", color=" + result.getInt("SingleInstanceColor"));
-
 						personByTask = new PersonByTaskModel(pModel, null, false, result.getInt("SingleInstanceColor"),
 								localCalendar);
-
 					} else {
-						System.out.println(result.getString("PersonName") + " " + result.getString("PhoneNumber") + " "
-								+ result.getString("EMail") + " leader=" + (result.getInt("Leader") == 1 ? true : false)
-								+ (result.getBoolean("SingleInstance") == true ? " SUB" : "") + " task="
-								+ result.getString("TaskName") + " at " + result.getInt("Hour") + ":"
-								+ result.getInt("Minute") + ", color=" + result.getInt("TaskColor"));
-
 						personByTask = new PersonByTaskModel(pModel,
 								new TaskModel(result.getInt("TaskID"), 0, result.getString("TaskName"),
 										result.getString("Location"), 0, 0, null, null,

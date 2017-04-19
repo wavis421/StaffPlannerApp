@@ -14,10 +14,10 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -824,11 +824,11 @@ public class MainFrame extends JFrame {
 				ArrayList<AssignedTasksModel> assignedListMerged = mergeAssignedTaskList(assignedTasks,
 						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedListMerged);
-
+					
 				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						new PersonModel(thisPerson.getPersonID(), dialogResponse.getName(), dialogResponse.getPhone(),
 								dialogResponse.getEmail(), dialogResponse.isLeader(), dialogResponse.getNotes(),
-								dialogResponse.getAssignedTaskChanges(), thisPerson.getDatesUnavailable(),
+								dialogResponse.getAssignedTaskChanges(), controller.getUnavailDates(origName),
 								thisPerson.getSingleInstanceTasks()),
 						dialogResponse.getAssignedTaskChanges(),
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedListMerged),
@@ -850,7 +850,7 @@ public class MainFrame extends JFrame {
 		if (person == null)
 			JOptionPane.showMessageDialog(MainFrame.this, "Person does not exist");
 		else {
-			ArrayList<AssignedTasksModel> assignedList = person.getAssignedTasks();
+			ArrayList<AssignedTasksModel> assignedList = controller.getAssignedTasks(origName);
 			JTree taskTree = createTaskTree(assignedList);
 			PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(), person,
 					new ArrayList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
@@ -1127,11 +1127,10 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	boolean daily = false;
 	private void updateMonth(Calendar calendar) {
 		Calendar localCalendar = (Calendar) calendar.clone();
 
-		if (daily) {
+		if (false) {
 			ArrayList<CalendarDayModel> tasks;
 
 			for (int i = 0; i < 31; i++) {
