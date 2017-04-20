@@ -187,14 +187,8 @@ public class Controller {
 		return sqlDb.getPersonsByTask(task);
 	}
 
-	public ArrayList<PersonByTaskModel> getPersonsByDayByTask(Calendar calendar, TaskModel task) {
-		System.out.println("getPersonsByDayByTask needs update");
-		return db.getPersonsByDayByTask(calendar, task);
-	}
-
 	public ArrayList<PersonByTaskModel> getPersonsByDayByTime(Calendar calendar) {
-		System.out.println("getPersonsByDayByTime needs update");
-		return db.getPersonsByDayByTime(calendar);
+		return sqlDb.getPersonsByDayByTime(calendar);
 	}
 
 	public ArrayList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
