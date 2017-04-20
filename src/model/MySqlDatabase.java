@@ -2002,7 +2002,7 @@ public class MySqlDatabase {
 								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor "
 								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks, UnavailDates "
-								
+
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
@@ -2082,22 +2082,124 @@ public class MySqlDatabase {
 		return (ArrayList<PersonByTaskModel>) persons;
 	}
 
-	// public ArrayList<PersonByTaskModel> getPersonsByDayByLocation(Calendar
-	// calendar, String location) {
-	// ArrayList<PersonByTaskModel> personList = getPersonsByDay(calendar);
+	public ArrayList<PersonByTaskModel> getPersonsByDayByLocation(Calendar calendar, String location) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Calendar localCalendar = (Calendar) calendar.clone();
+		String sqlDate = Utilities.getSqlDate(localCalendar);
+		int hour = localCalendar.get(Calendar.HOUR);
+		int minute = localCalendar.get(Calendar.MINUTE);
 
-	// TODO:
-	// for (int i = 0; i < personList.size(); i++) {
-	// PersonByTaskModel person = personList.get(i);
+		PersonByTaskModel personByLocation;
+		ArrayList<PersonByTaskModel> persons = new ArrayList<PersonByTaskModel>();
+		if (!checkDatabaseConnection())
+			return (ArrayList<PersonByTaskModel>) persons;
 
-	// if (person.getTask() == null ||
-	// !person.getTask().getLocation().equals(location)) {
-	// personList.remove(i);
-	// i--;
-	// }
-	// }
-	// return (ArrayList<PersonByTaskModel>) personList;
-	// }
+		// TODO: add color, check for single instance task TIME
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						// Assigned tasks with matching DOW and WOM
+						"SELECT PersonName, isLeader AS Leader, false AS SingleInstance, Tasks.TaskID AS TaskID, "
+								+ "  TaskName, Hour AS Hour, Minute AS Minute, Location, PhoneNumber, EMail, "
+								+ "Tasks.Color AS TaskColor, 0 AS SingleInstanceColor "
+								+ "FROM Tasks, Persons, Programs, AssignedTasks, UnavailDates "
+
+								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
+								// Check if program expired
+								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
+								+ "  AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
+								// Check if task is active today
+								+ "  AND (Tasks.DaysOfWeek & (1 << ?)) != 0 "
+								+ "  AND (Tasks.DowInMonth & (1 << ?)) != 0 "
+								// Check if assigned task is active today
+								+ "  AND Tasks.TaskID = AssignedTasks.TaskID "
+								+ "  AND (AssignedTasks.DaysOfWeek & (1 << ?)) != 0 "
+								+ "  AND (AssignedTasks.DowInMonth & (1 << ?)) != 0 "
+								// Find associated person
+								+ "  AND Persons.PersonID = AssignedTasks.PersonID "
+								// Check if person available today
+								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
+								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
+								// Check for location match
+								+ "  AND Tasks.Location = ? "
+
+								+ "UNION " +
+
+								// Floaters + Subs from Single Instance Tasks
+								"SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
+								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
+								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor "
+								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks, UnavailDates "
+
+								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
+								// Check if program expired
+								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
+								+ "	 AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
+								// Check if task assigned to today
+								+ "	 AND (SingleInstanceTasks.TaskID = Tasks.TaskID OR SingleInstanceTasks.TaskID IS NULL) "
+								+ "	 AND SingleDate=? "
+								// Find associated person
+								+ "	 AND SingleInstanceTasks.PersonID = Persons.PersonID "
+								// Check if person available today
+								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
+								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
+								// Check for time match
+								+ "  AND Tasks.Location = ? "
+
+								+ "GROUP BY Location ORDER BY PersonName, TaskName;");
+
+				int row = 1;
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setInt(row++, dayOfWeekIdx);
+				selectStmt.setInt(row++, dayOfWeekInMonthIdx);
+				selectStmt.setInt(row++, dayOfWeekIdx);
+				selectStmt.setInt(row++, dayOfWeekInMonthIdx);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, location);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, location);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					Utilities.addTimeToCalendar(localCalendar,
+							new TimeModel(result.getInt("Hour"), result.getInt("Minute")));
+
+					PersonModel pModel = new PersonModel(0, result.getString("PersonName"),
+							result.getString("PhoneNumber"), result.getString("EMail"),
+							result.getInt("Leader") == 1 ? true : false, "", null, null, null);
+
+					// Task or substitute; floaters don't have location
+					personByLocation = new PersonByTaskModel(pModel, new TaskModel(result.getInt("TaskID"), 0,
+							result.getString("TaskName"), result.getString("Location"), 0, 0, null, null,
+							new TimeModel(result.getInt("Hour"), result.getInt("Minute")), result.getInt("TaskColor")),
+							result.getBoolean("SingleInstance"), result.getInt("TaskColor"), localCalendar);
+					persons.add(personByLocation);
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				break;
+			}
+		}
+		return (ArrayList<PersonByTaskModel>) persons;
+	}
 
 	public int getNumPersons() {
 		if (!checkDatabaseConnection())
