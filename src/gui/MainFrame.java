@@ -115,39 +115,11 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 
-		// Load selected databases
-		loadSelectedDatabases();
-	}
+		// Initialize program and roster
+		initializeProgram();
+		initializeRoster();
 
-	private void loadSelectedDatabases() {
-		// TODO: Go through database to get program list
-		JList<String> databaseList = controller.getAllProgramsAsString();
-		if (databaseList.getModel().getSize() == 0) {
-			System.out.println("No databases exist!");
-			return;
-		}
-
-		FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select database(s) to load", databaseList);
-		JList<String> dialogResponse = ev.getDialogResponse();
-		if (dialogResponse != null) {
-			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-			// If only 1 database was selected, set this as active program
-			if (dialogResponse.getModel().getSize() == 1) {
-				setProgramName(dialogResponse.getModel().getElementAt(0));
-				taskMenu.setEnabled(true);
-			}
-
-			// For now, always load 'Kindergarten' database
-			controller.loadProgramFromDatabase();
-			processImportProgram();
-
-			//controller.loadRosterFromDatabase();
-			processImportRoster();
-
-			updateMonth((Calendar) calPanel.getCurrentCalendar());
-			this.setCursor(Cursor.getDefaultCursor());
-		}
+		updateMonth((Calendar) calPanel.getCurrentCalendar());
 	}
 
 	private JMenuBar createMenuBar() {
@@ -276,7 +248,7 @@ public class MainFrame extends JFrame {
 						updateMonth((Calendar) calPanel.getCurrentCalendar());
 
 						// Select active program and enable program filter menu
-						processImportProgram();
+						initializeProgram();
 
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -310,7 +282,7 @@ public class MainFrame extends JFrame {
 						updateMonth((Calendar) calPanel.getCurrentCalendar());
 
 						// Process import roster
-						processImportRoster();
+						initializeRoster();
 
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -328,7 +300,7 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void processImportProgram() {
+	private void initializeProgram() {
 		// Select active program and enable program filter menu
 		int numPrograms = controller.getNumPrograms();
 		if (numPrograms > 1)
@@ -349,7 +321,7 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	private void processImportRoster() {
+	private void initializeRoster() {
 		// Enable person filter menu
 		if (controller.getNumPersons() > 1)
 			filterByPersonMenuItem.setEnabled(true);
@@ -1132,6 +1104,7 @@ public class MainFrame extends JFrame {
 		if (false) {
 			ArrayList<CalendarDayModel> tasks;
 
+			// TODO: Remove this code when mySql database ready
 			for (int i = 0; i < 31; i++) {
 				localCalendar.set(Calendar.DAY_OF_MONTH, i + 1);
 				if (selectedFilterId == PROGRAM_FILTER)

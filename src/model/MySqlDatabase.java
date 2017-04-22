@@ -1971,9 +1971,9 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						// Assigned tasks with matching DOW and WOM
-						"SELECT PersonName, isLeader AS Leader, false AS SingleInstance, Tasks.TaskID AS TaskID, "
+						"(SELECT PersonName, isLeader AS Leader, false AS SingleInstance, Tasks.TaskID AS TaskID, "
 								+ "  TaskName, Hour AS Hour, Minute AS Minute, Location, PhoneNumber, EMail, "
-								+ "Tasks.Color AS TaskColor, 0 AS SingleInstanceColor "
+								+ "Tasks.Color AS TaskColor, 0 AS SingleInstanceColor, 0 AS SingleInstanceID "
 								+ "FROM Tasks, Persons, Programs, AssignedTasks, UnavailDates "
 
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
@@ -1993,17 +1993,18 @@ public class MySqlDatabase {
 								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
 								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
 								// Check for time match
-								+ "  AND Tasks.Hour = ? AND Tasks.Minute = ? "
+								+ "  AND Tasks.Hour = ? AND Tasks.Minute = ?) "
 
 								+ "UNION " +
 
 								// Floaters + Subs from Single Instance Tasks
-								"SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
+								"(SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
 								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
-								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor "
+								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor, SingleInstanceID "
+								
 								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks, UnavailDates "
 
-								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
+								+ "WHERE (SingleInstanceTasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
 								+ "	 AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
@@ -2017,8 +2018,9 @@ public class MySqlDatabase {
 								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
 								// Check for time match
 								+ "  AND HOUR(SingleTime)=? AND MINUTE(SingleTime)=? "
-
-								+ "GROUP BY Hour, Minute ORDER BY PersonName, TaskName;");
+								+ "GROUP BY SingleInstanceID) "
+								
+								+ "ORDER BY PersonName, TaskName;");
 
 				int row = 1;
 				selectStmt.setString(row++, sqlDate);

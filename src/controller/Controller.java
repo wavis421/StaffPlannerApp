@@ -32,7 +32,7 @@ public class Controller {
 	public void disconnectDatabase() {
 		sqlDb.disconnectDatabase();
 	}
-	
+
 	/*
 	 * ------- Programs -------
 	 */
@@ -207,11 +207,11 @@ public class Controller {
 	public int getNumPersons() {
 		return sqlDb.getNumPersons();
 	}
-	
+
 	public ArrayList<AssignedTasksModel> getAssignedTasks(String personName) {
 		return sqlDb.getAssignedTasks(personName);
 	}
-	
+
 	public ArrayList<DateRangeModel> getUnavailDates(String personName) {
 		return sqlDb.getUnavailDates(personName);
 	}
@@ -219,6 +219,7 @@ public class Controller {
 	/*
 	 * ------- File save/restore items -------
 	 */
+	// TODO: Implement any required save/restore features
 	public void saveProgramToFile(JList<String> programNameList, File file) throws IOException {
 		db.saveProgramToFile(programNameList, file);
 	}
