@@ -748,19 +748,22 @@ public class MySqlDatabase {
 					if (taskName == null) {
 						// Floater
 						if (personCount == 1)
-							calendarList.get(day - 1).add(new CalendarDayModel(null, personCount,
-									results.getInt("LeaderCount"), results.getInt("TaskColor"), cal, "Floater"));
+							calendarList.get(day - 1)
+									.add(new CalendarDayModel(null, personCount,
+											results.getInt("LeaderCount"), results.getInt("TaskColor"), cal,
+											"Floater"));
 						else
 							calendarList.get(day - 1)
-									.add(new CalendarDayModel(null, personCount, results.getInt("LeaderCount"),
-											results.getInt("TaskColor"), cal, personCount + " Floaters"));
+									.add(new CalendarDayModel(null, personCount,
+											results.getInt("LeaderCount"), results.getInt("TaskColor"), cal,
+											personCount + " Floaters"));
 					} else {
 						TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"),
 								taskName, "" /* location */, results.getInt("NumLdrsReqd"),
 								results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
 								new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 								results.getInt("TaskColor"));
-						calendarList.get(day - 1).add(new CalendarDayModel(newTask, personCount,
+						calendarList.get(day - 1).add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
 								results.getInt("LeaderCount"), results.getInt("TaskColor"), null, ""));
 					}
 				}
@@ -2001,7 +2004,7 @@ public class MySqlDatabase {
 								"(SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
 								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor, SingleInstanceID "
-								
+
 								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks, UnavailDates "
 
 								+ "WHERE (SingleInstanceTasks.ProgramID = Programs.ProgramID "
@@ -2019,7 +2022,7 @@ public class MySqlDatabase {
 								// Check for time match
 								+ "  AND HOUR(SingleTime)=? AND MINUTE(SingleTime)=? "
 								+ "GROUP BY SingleInstanceID) "
-								
+
 								+ "ORDER BY PersonName, TaskName;");
 
 				int row = 1;
