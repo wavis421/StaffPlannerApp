@@ -1718,7 +1718,7 @@ public class MySqlDatabase {
 						.prepareStatement("SELECT PersonName FROM Persons, UnavailDates "
 								+ "WHERE ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
 								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)  "
-								+ "ORDER BY PersonName;");
+								+ "GROUP BY PersonName ORDER BY PersonName;");
 				selectStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(today)));
 
 				ResultSet result = selectStmt.executeQuery();
