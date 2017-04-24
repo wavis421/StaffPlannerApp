@@ -740,7 +740,7 @@ public class MySqlDatabase {
 					taskName = results.getString("TaskName");
 					personCount = results.getInt("PersonCount");
 					Calendar cal = Calendar.getInstance();
-					Utilities.addTimeToCalendar(calendar,
+					Utilities.addTimeToCalendar(cal,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
 					// TODO: Add color field, figure out TaskModel, don't
