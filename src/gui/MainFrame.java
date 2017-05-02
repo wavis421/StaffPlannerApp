@@ -752,8 +752,8 @@ public class MainFrame extends JFrame {
 
 		if (dialogResponse != null) {
 			boolean okToSave = personEvent.getOkToSaveStatus();
-			PersonModel person = controller.getPersonByName(dialogResponse.getName());
-			if (!okToSave || person != null) {
+			boolean personExists = controller.checkPersonExists(dialogResponse.getName());
+			if (!okToSave || personExists == true) {
 				if (okToSave)
 					// Person already exists
 					JOptionPane.showMessageDialog(MainFrame.this,

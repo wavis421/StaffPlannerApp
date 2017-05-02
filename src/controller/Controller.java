@@ -171,6 +171,10 @@ public class Controller {
 		sqlDb.markPersonUnavail(personName, today);
 	}
 
+	public boolean checkPersonExists(String personName) {
+		return sqlDb.checkPersonExists(personName);
+	}
+	
 	public PersonModel getPersonByName(String name) {
 		return sqlDb.getPersonByName(name);
 	}

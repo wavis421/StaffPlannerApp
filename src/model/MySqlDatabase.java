@@ -554,163 +554,6 @@ public class MySqlDatabase {
 		return progName;
 	}
 
-	//
-	// TODO:
-	// public ArrayList<CalendarDayModel> getTasksByDayByProgram(Calendar
-	// calendar, JList<String> programFilterList)
-	// {
-	// ArrayList<CalendarDayModel>thisDaysTasks = getAllTasksByDay(calendar);
-	//
-	// TODO: Possibly create a new procedure?
-	// for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-	// String programName =
-	// findProgramByTaskName(thisDaysTasks.get(taskIdx).getTask().getTaskName());
-	// if (!Utilities.findStringMatchInJList(programName, programFilterList)) {
-	// thisDaysTasks.remove(taskIdx); taskIdx--;
-	// }
-	// }
-	// return thisDaysTasks;
-	// }
-	//
-	// public ArrayList<CalendarDayModel> getTasksByDayByPerson(Calendar
-	// calendar, JList<String> persons) {
-	// int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) -
-	// 1;
-	// int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-	// Date thisDay = Utilities.getDateFromCalendar(calendar);
-	// ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
-	// boolean match;
-	//
-	// TODO: Possibly create a new procedure?
-	// for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-	// match = false;
-	// int thisDaysTaskID = thisDaysTasks.get(taskIdx).getTask().getTaskID();
-	// for (int i = 0; i < persons.getModel().getSize(); i++) {
-	// PersonModel pModel = getPersonByName(persons.getModel().getElementAt(i));
-	// // -1 = no match, 0 = assigned task, 1 = single instance task
-	// if (checkPersonMatchForTaskByDay(pModel, thisDaysTaskID, thisDay,
-	// dayOfWeekIdx, dayOfWeekInMonthIdx) >= 0) {
-	// match = true; break;
-	// }
-	// }
-	// if (!match) {
-	// thisDaysTasks.remove(taskIdx);
-	// taskIdx--;
-	// }
-	// } return thisDaysTasks;
-	// }
-
-	// public ArrayList<CalendarDayModel>
-	// getTasksByDayByIncompleteRoster(Calendar calendar) {
-	// ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
-	//
-	// TODO: Possibly create a new procedure?
-	// for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-	// if ((thisDaysTasks.get(taskIdx).getPersonCount() >=
-	// thisDaysTasks.get(taskIdx).getTask().getTotalPersonsReqd()) &&
-	// (thisDaysTasks.get(taskIdx).getLeaderCount() >=
-	// thisDaysTasks.get(taskIdx).getTask().getNumLeadersReqd())) {
-	// thisDaysTasks.remove(taskIdx); taskIdx--;
-	// }
-	// }
-	// return thisDaysTasks;
-	// }
-
-	// public ArrayList<CalendarDayModel> getTasksByDayByLocation(Calendar
-	// calendar, JList<String> locations) {
-	// ArrayList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
-	// // TODO: Possibly create a new procedure?
-	// for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
-	// String taskLoc = matchingTasks.get(taskIdx).getTask().getLocation();
-	// if (!Utilities.findStringMatchInJList(taskLoc, locations)) {
-	// matchingTasks.remove(taskIdx); taskIdx--;
-	// }
-	// } return matchingTasks;
-	// }
-	//
-	// public ArrayList<CalendarDayModel> getTasksByDayByTime(Calendar calendar,
-	// JList<String> timeList) {
-	// ArrayList<CalendarDayModel> matchingTasks = getAllTasksByDay(calendar);
-	// Collections.sort(matchingTasks);
-	//
-	// // TODO: Possibly create a new procedure?
-	// for (int taskIdx = 0; taskIdx < matchingTasks.size(); taskIdx++) {
-	// String taskTime =
-	// matchingTasks.get(taskIdx).getTask().getTime().toString();
-	// if (!Utilities.findStringMatchInJList(taskTime, timeList)) {
-	// matchingTasks.remove(taskIdx); taskIdx--;
-	// }
-	// }
-	// return matchingTasks;
-	// }
-	//
-
-	//
-	// public ArrayList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar
-	// calendar) {
-	// int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) -
-	// 1;
-	// int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-	// Date thisDay = Utilities.getDateFromCalendar(calendar);
-	//
-	// TODO: Replaced with getAllTasksAndFloatersByMonth (?)
-	//
-	// Get all tasks for today
-	// ArrayList<CalendarDayModel> thisDaysTasks = getAllTasksByDay(calendar);
-
-	// Now add floaters to the list
-	// for (int i = 0; i < personList.size(); i++) {
-	// PersonModel person = personList.get(i);
-	//
-	// Check if person is a floater (not associated with task).
-	// for (int j = 0; j < person.getSingleInstanceTasks().size(); j++) {
-	// SingleInstanceTaskModel task = person.getSingleInstanceTasks().get(j);
-	// if (checkFloaterMatch(task, thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx)
-	// >= 0) {
-	// thisDaysTasks.add(new CalendarDayModel(null, 0, 0, task.getColor(),
-	// task.getTaskDate(), "Floater"));
-	// }
-	// }
-	// }
-	//
-	// Merge duplicate floaters
-	// for (int i = 0; i < thisDaysTasks.size(); i++) {
-	// CalendarDayModel calDay = thisDaysTasks.get(i);
-	// if (calDay.getTask() == null) {
-	// Found floater
-	// Calendar taskTime = calDay.getFloaterTime();
-	// int floaterCount = 0;
-	// int firstFloaterIndex = 0;
-	//
-	// Find floaters with matching time
-	// for (int taskIdx = 0; taskIdx < thisDaysTasks.size(); taskIdx++) {
-	// if (thisDaysTasks.get(taskIdx).getFloaterTime() == null) { // Not a
-	// floater
-	// continue;
-	// }
-	//
-	// if (Utilities.checkForTimeMatch(taskTime,
-	// thisDaysTasks.get(taskIdx).getFloaterTime())) {
-	// if (floaterCount == 0) {
-	// First match, keep in list
-	// firstFloaterIndex = taskIdx;
-	// } else {
-	// // Multiple matches, remove from list
-	// thisDaysTasks.remove(taskIdx);
-	// taskIdx--;
-	// }
-	// floaterCount++;
-	// }
-	// }
-	//
-	// Update floater name if more than 1 match
-	// if (floaterCount > 1)
-	// thisDaysTasks.get(firstFloaterIndex).setFloaterTaskName(floaterCount + "
-	// Floaters");
-	// }
-	// } Collections.sort(thisDaysTasks); return thisDaysTasks;
-	// }
-
 	public ArrayList<ArrayList<CalendarDayModel>> getAllTasksAndFloatersByMonth(Calendar calendar) {
 		// Create a calendar list for each day of the month
 		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
@@ -1412,6 +1255,57 @@ public class MySqlDatabase {
 		}
 	}
 
+	public ArrayList<SingleInstanceTaskModel> getSingleInstanceTasks(String personName) {
+		ArrayList<SingleInstanceTaskModel> singleTaskList = new ArrayList<>();
+
+		if (!checkDatabaseConnection())
+			return singleTaskList;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT SingleInstanceID, TaskName, SingleInstanceTasks.TaskID, "
+						+ "SingleInstanceTasks.PersonID, SingleDate, SingleTime, SingleInstanceTasks.Color  "
+						+ "FROM SingleInstanceTasks, Tasks, Persons "
+						+ "WHERE Persons.PersonName=? AND Persons.PersonID = SingleInstanceTasks.PersonID "
+						+ "AND (SingleInstanceTasks.TaskID IS NULL OR SingleInstanceTasks.TaskID = Tasks.TaskID) "
+						+ "GROUP BY SingleInstanceID "
+						+ "ORDER BY SingleDate, SingleTime;");
+				selectStmt.setString(1, personName);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					String taskName = "";
+					int taskID = result.getInt("SingleInstanceTasks.TaskID");
+					if (taskID > 0)
+						taskName = result.getString("TaskName");
+
+					singleTaskList.add(new SingleInstanceTaskModel(result.getInt("SingleInstanceID"), 
+							result.getInt("SingleInstanceTasks.PersonID"), taskID, taskName, 
+							Utilities.convertSqlDateTime(result.getDate("SingleDate"), result.getTime("SingleTime")), 
+							result.getInt("SingleInstanceTasks.Color")));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println(
+						"Failure retreiving sub/floater list for " + personName + " from database: " + e.getMessage());
+				break;
+			}
+		}
+		return singleTaskList;
+	}
+	
 	private void addUnavailDates(int personID, String startDate, String endDate) {
 		if (!checkDatabaseConnection())
 			return;
@@ -1746,6 +1640,43 @@ public class MySqlDatabase {
 		return (new JList<String>(nameModel));
 	}
 
+	public boolean checkPersonExists(String personName) {
+		if (!checkDatabaseConnection())
+			return false;
+
+		boolean personExists = false;
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("COUNT(*) FROM Persons WHERE PersonName=?;");
+				selectStmt.setString(1, personName);
+
+				ResultSet result = selectStmt.executeQuery();
+				result.next();
+				if (result.getInt(1) > 0)
+					personExists = true;
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving " + personName + " info from database: " + e.getMessage());
+				break;
+			}
+		}
+		return personExists;
+	}
+	
 	public PersonModel getPersonByName(String personName) {
 		if (!checkDatabaseConnection())
 			return null;
@@ -1759,10 +1690,12 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				if (result.next()) {
+					ArrayList<SingleInstanceTaskModel> singleTaskList = getSingleInstanceTasks(personName);
+					ArrayList<AssignedTasksModel> assignedTaskList = getAssignedTasks(personName);
 					ArrayList<DateRangeModel> dateList = getUnavailDates(personName);
 					person = new PersonModel(result.getInt("PersonID"), result.getString("PersonName"),
 							result.getString("PhoneNumber"), result.getString("EMail"), result.getBoolean("isLeader"),
-							result.getString("Notes"), null, dateList, null);
+							result.getString("Notes"), assignedTaskList, dateList, singleTaskList);
 				}
 				result.close();
 				selectStmt.close();

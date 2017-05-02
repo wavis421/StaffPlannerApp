@@ -145,7 +145,7 @@ public class Utilities {
 			return null;
 		}
 	}
-	
+
 	public static String convertSqlDateToString(java.sql.Date sqlDate) {
 		try {
 			// TODO: There must be a better way to do this!
