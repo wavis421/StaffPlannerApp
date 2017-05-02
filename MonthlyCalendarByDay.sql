@@ -1,7 +1,7 @@
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS MonthlyCalendarByLocation$$
-CREATE PROCEDURE MonthlyCalendarByLocation(IN startDate DATE, IN locFilter VARCHAR(150))
+DROP PROCEDURE IF EXISTS MonthlyCalendar$$
+CREATE PROCEDURE MonthlyCalendar(IN startDate DATE)
 BEGIN
 	DECLARE firstDow INT Default (DAYOFWEEK(startDate) - 1);
 	DECLARE numDaysInMonth INT Default (DAYOFMONTH(LAST_DAY(startDate)));
@@ -33,7 +33,7 @@ BEGIN
 	WHILE (thisDay <= numDaysInMonth) DO
 		INSERT INTO MonthTable
 		   (Today, TaskName, TaskID, ProgramID, TaskHour, TaskMinute, PersonCount, LeaderCount, SubCount,
-				NumPersonsReqd, NumLdrsReqd, TaskColor, Location)
+				NumPersonsReqd, NumLdrsReqd, TaskColor)
 
 		   # Select Tasks by DOW and WOM
 		   # TODO: Optimize, counting assigned tasks does not need to be done for each assigned task
@@ -50,17 +50,27 @@ BEGIN
 				(SELECT COUNT(*) FROM SingleInstanceTasks WHERE SingleInstanceTasks.TaskID IS NOT NULL
 					AND SingleInstanceTasks.TaskID = Tasks.TaskID
 					AND SingleDate = currDate) AS SubCount, 
-				Tasks.TotalPersonsReqd AS NumPersonsReqd, Tasks.NumLeadersReqd AS NumLdrsReqd, Tasks.Color AS TaskColor,
-				Tasks.Location AS Location
+				Tasks.TotalPersonsReqd AS NumPersonsReqd, Tasks.NumLeadersReqd AS NumLdrsReqd, Tasks.Color AS TaskColor
 			FROM Tasks, Programs, Persons
 			WHERE ((Tasks.DaysOfWeek & (1 << currDow)) != 0)
 				AND ((Tasks.DowInMonth & (1 << currDowInMonth)) != 0)
-				AND FIND_IN_SET(Location, locFilter)
 				AND (Tasks.ProgramID = Programs.ProgramID   # Check if program expired
 					AND ((Programs.StartDate IS NULL) OR (currDate >= Programs.StartDate)) 
 					AND ((Programs.EndDate IS NULL) OR (currDate <= Programs.EndDate)))
-			GROUP BY Tasks.TaskID
-		   );
+
+		   ) UNION
+
+		   # Floater tasks determined by unassigned TaskID (NULL) and matching date
+		   (SELECT thisDay, NULL AS TaskName, SingleInstanceTasks.TaskID AS TaskID, Programs.ProgramID AS ProgramID,
+				HOUR(SingleTime), MINUTE(SingleTime), COUNT(*) AS PersonCount, 0, 0, 0, 0, Color
+			FROM SingleInstanceTasks, Programs
+			WHERE TaskID IS NULL 
+				AND SingleDate = currDate
+				AND (SingleInstanceTasks.ProgramID = Programs.ProgramID 
+					AND ((Programs.StartDate IS NULL) OR (currDate >= Programs.StartDate)) 
+					AND ((Programs.EndDate IS NULL) OR (currDate <= Programs.EndDate)))
+			GROUP BY SingleTime
+   		   );
 		
 		# Increment by day
 		SET currDate = DATE_ADD(currDate, INTERVAL 1 DAY); 
