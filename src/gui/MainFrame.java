@@ -1124,7 +1124,10 @@ public class MainFrame extends JFrame {
 			}
 		} else {
 			localCalendar.set(Calendar.DAY_OF_MONTH, 1);
-			calPanel.updateTasksByMonth(controller.getAllTasksAndFloatersByMonth(localCalendar));
+			if (selectedFilterId == LOCATION_FILTER)
+				calPanel.updateTasksByMonth(controller.getTasksByLocationByMonth(localCalendar, filteredList));
+			else
+				calPanel.updateTasksByMonth(controller.getAllTasksAndFloatersByMonth(localCalendar));
 			// TestDatabase.updateMonth(Utilities.getSqlDate(localCalendar));
 		}
 		calPanel.refresh();

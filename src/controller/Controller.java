@@ -123,6 +123,10 @@ public class Controller {
 		return sqlDb.getAllTasksAndFloatersByMonth(calendar);
 	}
 
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar, JList<String> locations) {
+		return sqlDb.getTasksByLocationByMonth(calendar, locations);
+	}
+	
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		return sqlDb.getAllTasksByProgram(programName);
 	}
