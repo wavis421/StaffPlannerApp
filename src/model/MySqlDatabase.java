@@ -1115,50 +1115,7 @@ public class MySqlDatabase {
 		}
 		return taskList;
 	}
-
-	public ArrayList<DateRangeModel> getUnavailDates(String personName) {
-		ArrayList<DateRangeModel> dateList = new ArrayList<>();
-
-		if (!checkDatabaseConnection())
-			return dateList;
-
-		// TODO: Add missing fields
-		for (int i = 0; i < 2; i++) {
-			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT UnavailDates.UnavailDatesID AS UnavailID, Persons.PersonID AS PersonID, StartDate, EndDate "
-								+ "FROM UnavailDates, Persons "
-								+ "WHERE Persons.PersonName = ? AND Persons.PersonID = UnavailDates.PersonID "
-								+ "ORDER BY StartDate, EndDate;");
-				selectStmt.setString(1, personName);
-
-				ResultSet result = selectStmt.executeQuery();
-				while (result.next()) {
-					dateList.add(new DateRangeModel(result.getInt("UnavailID"), result.getInt("PersonID"),
-							result.getDate("StartDate").toString(), result.getDate("EndDate").toString()));
-				}
-				result.close();
-				selectStmt.close();
-				break;
-
-			} catch (CommunicationsException e) {
-				if (i == 0) {
-					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
-					connectDatabase();
-				} else
-					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
-
-			} catch (SQLException e) {
-				System.out.println("Failure retreiving Unavail Dates list for " + personName + " from database: "
-						+ e.getMessage());
-				break;
-			}
-		}
-		return dateList;
-	}
-
+	
 	public void addSingleInstanceTask(String personName, int taskID, Calendar taskTime, int color) {
 		if (!checkDatabaseConnection())
 			return;
@@ -1413,6 +1370,49 @@ public class MySqlDatabase {
 				break;
 			}
 		}
+	}
+
+	public ArrayList<DateRangeModel> getUnavailDates(String personName) {
+		ArrayList<DateRangeModel> dateList = new ArrayList<>();
+
+		if (!checkDatabaseConnection())
+			return dateList;
+
+		// TODO: Add missing fields
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT UnavailDates.UnavailDatesID AS UnavailID, Persons.PersonID AS PersonID, StartDate, EndDate "
+								+ "FROM UnavailDates, Persons "
+								+ "WHERE Persons.PersonName = ? AND Persons.PersonID = UnavailDates.PersonID "
+								+ "ORDER BY StartDate, EndDate;");
+				selectStmt.setString(1, personName);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					dateList.add(new DateRangeModel(result.getInt("UnavailID"), result.getInt("PersonID"),
+							result.getDate("StartDate").toString(), result.getDate("EndDate").toString()));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving Unavail Dates list for " + personName + " from database: "
+						+ e.getMessage());
+				break;
+			}
+		}
+		return dateList;
 	}
 
 	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
