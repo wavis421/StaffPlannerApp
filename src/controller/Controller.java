@@ -142,6 +142,10 @@ public class Controller {
 		return sqlDb.getTasksByProgramByMonth(calendar, programList);
 	}
 	
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByIncompleteRosterByMonth(Calendar calendar) {
+		return sqlDb.getTasksByIncompleteRosterByMonth(calendar);
+	}
+	
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		return sqlDb.getAllTasksByProgram(programName);
 	}

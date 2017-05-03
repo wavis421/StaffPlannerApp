@@ -790,12 +790,13 @@ public class MainFrame extends JFrame {
 		if (dialogResponse != null) {
 			if (!personEvent.getOkToSaveStatus()) { // is OK to save?
 				PersonModel thisPerson = controller.getPersonByName(origName);
-				// TODO: do we really need to re-fetch the assigned task list for this person??
+				// TODO: do we really need to re-fetch the assigned task list
+				// for this person??
 				ArrayList<AssignedTasksModel> assignedTasks = controller.getAssignedTasks(origName);
 				ArrayList<AssignedTasksModel> assignedListMerged = mergeAssignedTaskList(assignedTasks,
 						dialogResponse.getAssignedTaskChanges());
 				JTree taskTree = createTaskTree(assignedListMerged);
-					
+
 				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
 						new PersonModel(thisPerson.getPersonID(), dialogResponse.getName(), dialogResponse.getPhone(),
 								dialogResponse.getEmail(), dialogResponse.isLeader(), dialogResponse.getNotes(),
@@ -1101,40 +1102,20 @@ public class MainFrame extends JFrame {
 	private void updateMonth(Calendar calendar) {
 		Calendar localCalendar = (Calendar) calendar.clone();
 
-		if (false) {
-			ArrayList<CalendarDayModel> tasks;
+		localCalendar.set(Calendar.DAY_OF_MONTH, 1);
+		if (selectedFilterId == LOCATION_FILTER)
+			calPanel.updateTasksByMonth(controller.getTasksByLocationByMonth(localCalendar, filteredList));
+		else if (selectedFilterId == TIME_FILTER)
+			calPanel.updateTasksByMonth(controller.getTasksByTimeByMonth(localCalendar, filteredList));
+		else if (selectedFilterId == PERSON_FILTER)
+			calPanel.updateTasksByMonth(controller.getTasksByPersonsByMonth(localCalendar, filteredList));
+		else if (selectedFilterId == PROGRAM_FILTER)
+			calPanel.updateTasksByMonth(controller.getTasksByProgramByMonth(localCalendar, filteredList));
+		else if (selectedFilterId == ROSTER_FILTER)
+			calPanel.updateTasksByMonth(controller.getTasksByIncompleteRosterByMonth(localCalendar));
+		else
+			calPanel.updateTasksByMonth(controller.getAllTasksAndFloatersByMonth(localCalendar));
 
-			// TODO: Remove this code when mySql database ready
-			for (int i = 0; i < 31; i++) {
-				localCalendar.set(Calendar.DAY_OF_MONTH, i + 1);
-				if (selectedFilterId == PROGRAM_FILTER)
-					tasks = controller.getTasksByDayByProgram(localCalendar, filteredList);
-				else if (selectedFilterId == PERSON_FILTER)
-					tasks = controller.getTasksByDayByPerson(localCalendar, filteredList);
-				else if (selectedFilterId == ROSTER_FILTER)
-					tasks = controller.getTasksByDayByIncompleteRoster(localCalendar);
-				else if (selectedFilterId == LOCATION_FILTER)
-					tasks = controller.getTasksByDayByLocation(localCalendar, filteredList);
-				else if (selectedFilterId == TIME_FILTER)
-					tasks = controller.getTasksByDayByTime(localCalendar, filteredList);
-				else
-					tasks = controller.getAllTasksAndFloatersByDay(localCalendar);
-
-				calPanel.updateTasksByDay(i, tasks);
-			}
-		} else {
-			localCalendar.set(Calendar.DAY_OF_MONTH, 1);
-			if (selectedFilterId == LOCATION_FILTER)
-				calPanel.updateTasksByMonth(controller.getTasksByLocationByMonth(localCalendar, filteredList));
-			else if (selectedFilterId == TIME_FILTER)
-				calPanel.updateTasksByMonth(controller.getTasksByTimeByMonth(localCalendar, filteredList));
-			else if (selectedFilterId == PERSON_FILTER)
-				calPanel.updateTasksByMonth(controller.getTasksByPersonsByMonth(localCalendar, filteredList));
-			else if (selectedFilterId == PROGRAM_FILTER)
-				calPanel.updateTasksByMonth(controller.getTasksByProgramByMonth(localCalendar, filteredList));
-			else
-				calPanel.updateTasksByMonth(controller.getAllTasksAndFloatersByMonth(localCalendar));
-		}
 		calPanel.refresh();
 	}
 
