@@ -55,11 +55,11 @@ BEGIN
 			FROM Tasks, Programs, Persons
 			WHERE ((Tasks.DaysOfWeek & (1 << currDow)) != 0)
 				AND ((Tasks.DowInMonth & (1 << currDowInMonth)) != 0)
-				AND (LeaderCount < NumLeadersReqd OR PersonCount < NumPersonsReqd)
 				AND (Tasks.ProgramID = Programs.ProgramID   # Check if program expired
 					AND ((Programs.StartDate IS NULL) OR (currDate >= Programs.StartDate)) 
 					AND ((Programs.EndDate IS NULL) OR (currDate <= Programs.EndDate)))
 			GROUP BY Tasks.TaskID
+			HAVING (PersonCount < NumPersonsReqd OR LeaderCount < NumLeadersReqd)
 		   );
 		
 		# Increment by day

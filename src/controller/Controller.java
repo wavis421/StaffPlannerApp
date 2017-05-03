@@ -89,36 +89,6 @@ public class Controller {
 		return sqlDb.findProgramByTaskName(taskName);
 	}
 
-	public ArrayList<CalendarDayModel> getTasksByDayByProgram(Calendar calendar, JList<String> programs) {
-		System.out.println("getTasksByDayByProgram needs update");
-		return db.getTasksByDayByProgram(calendar, programs);
-	}
-
-	public ArrayList<CalendarDayModel> getTasksByDayByPerson(Calendar calendar, JList<String> personList) {
-		System.out.println("getTasksByDayByPerson needs update");
-		return db.getTasksByDayByPerson(calendar, personList);
-	}
-
-	public ArrayList<CalendarDayModel> getTasksByDayByIncompleteRoster(Calendar calendar) {
-		System.out.println("getTasksByDayByIncompleteRoster needs update");
-		return db.getTasksByDayByIncompleteRoster(calendar);
-	}
-
-	public ArrayList<CalendarDayModel> getTasksByDayByLocation(Calendar calendar, JList<String> locations) {
-		System.out.println("getTasksByDayByLocation needs update");
-		return db.getTasksByDayByLocation(calendar, locations);
-	}
-
-	public ArrayList<CalendarDayModel> getTasksByDayByTime(Calendar calendar, JList<String> times) {
-		System.out.println("getTasksByDayByTime needs update");
-		return db.getTasksByDayByTime(calendar, times);
-	}
-
-	public ArrayList<CalendarDayModel> getAllTasksAndFloatersByDay(Calendar calendar) {
-		System.out.println("getAllTasksAndFloatersByDay needs update");
-		return db.getAllTasksAndFloatersByDay(calendar);
-	}
-
 	public ArrayList<ArrayList<CalendarDayModel>> getAllTasksAndFloatersByMonth(Calendar calendar) {
 		return sqlDb.getAllTasksAndFloatersByMonth(calendar);
 	}
