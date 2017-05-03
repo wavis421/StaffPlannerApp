@@ -1128,9 +1128,10 @@ public class MainFrame extends JFrame {
 				calPanel.updateTasksByMonth(controller.getTasksByLocationByMonth(localCalendar, filteredList));
 			else if (selectedFilterId == TIME_FILTER)
 				calPanel.updateTasksByMonth(controller.getTasksByTimeByMonth(localCalendar, filteredList));
+			else if (selectedFilterId == PERSON_FILTER)
+				calPanel.updateTasksByMonth(controller.getTasksByPersonsByMonth(localCalendar, filteredList));
 			else
 				calPanel.updateTasksByMonth(controller.getAllTasksAndFloatersByMonth(localCalendar));
-			// TestDatabase.updateMonth(Utilities.getSqlDate(localCalendar));
 		}
 		calPanel.refresh();
 	}

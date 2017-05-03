@@ -132,6 +132,11 @@ public class Controller {
 		return sqlDb.getTasksByTimeByMonth(calendar, times);
 	}
 	
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
+			JList<String> personList) {
+		return sqlDb.getTasksByPersonsByMonth(calendar, personList);
+	}
+	
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		return sqlDb.getAllTasksByProgram(programName);
 	}
