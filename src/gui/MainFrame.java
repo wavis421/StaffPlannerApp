@@ -1130,6 +1130,8 @@ public class MainFrame extends JFrame {
 				calPanel.updateTasksByMonth(controller.getTasksByTimeByMonth(localCalendar, filteredList));
 			else if (selectedFilterId == PERSON_FILTER)
 				calPanel.updateTasksByMonth(controller.getTasksByPersonsByMonth(localCalendar, filteredList));
+			else if (selectedFilterId == PROGRAM_FILTER)
+				calPanel.updateTasksByMonth(controller.getTasksByProgramByMonth(localCalendar, filteredList));
 			else
 				calPanel.updateTasksByMonth(controller.getAllTasksAndFloatersByMonth(localCalendar));
 		}
