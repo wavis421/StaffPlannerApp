@@ -1126,6 +1126,8 @@ public class MainFrame extends JFrame {
 			localCalendar.set(Calendar.DAY_OF_MONTH, 1);
 			if (selectedFilterId == LOCATION_FILTER)
 				calPanel.updateTasksByMonth(controller.getTasksByLocationByMonth(localCalendar, filteredList));
+			else if (selectedFilterId == TIME_FILTER)
+				calPanel.updateTasksByMonth(controller.getTasksByTimeByMonth(localCalendar, filteredList));
 			else
 				calPanel.updateTasksByMonth(controller.getAllTasksAndFloatersByMonth(localCalendar));
 			// TestDatabase.updateMonth(Utilities.getSqlDate(localCalendar));

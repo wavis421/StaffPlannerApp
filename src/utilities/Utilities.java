@@ -53,6 +53,19 @@ public class Utilities {
 		calendar.set(Calendar.AM_PM, time.getAmPm());
 	}
 
+	public static Calendar getCalendarTime(String time) {
+		Calendar cal = Calendar.getInstance();
+		try {
+			cal.setTime(timeFormat.parse(time));
+			return cal;
+			
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Unable to parse time " + time + ": " + e.getMessage());
+			return null;
+		}
+	}
+	
 	public static String getDisplayDate(Calendar calendar) {
 		String month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
 		return (month + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR));
@@ -113,7 +126,7 @@ public class Utilities {
 
 		return (String.format("%02d", hour) + ":" + String.format("%02d", calendar.get(Calendar.MINUTE)) + ":00");
 	}
-
+	
 	public static String getSqlDate(Calendar calendar) {
 		return (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
 				+ calendar.get(Calendar.DAY_OF_MONTH));
