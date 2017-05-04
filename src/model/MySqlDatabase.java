@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -327,8 +326,8 @@ public class MySqlDatabase {
 				PreparedStatement addTaskStmt = dbConnection.prepareStatement(
 						"INSERT INTO Tasks (ProgramID, TaskName, Hour, Minute, Location, NumLeadersReqd, TotalPersonsReqd, "
 								+ "DaysOfWeek, DowInMonth, Color) "
-								+ "VALUES ((SELECT ProgramID FROM Programs WHERE Programs.ProgramName = programName), "
-								+ "?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+								+ "VALUES ((SELECT Programs.ProgramID FROM Programs WHERE Programs.ProgramName = '"
+								+ programName + "'), ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addTaskStmt.setString(col++, taskName);
@@ -673,8 +672,8 @@ public class MySqlDatabase {
 
 					// TODO: Figure out TaskModel, don't hard-code columns
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
-							results.getString("Location"), results.getInt("NumLdrsReqd"), results.getInt("NumPersonsReqd"),
-							dayOfWeek, weekOfMonth,
+							results.getString("Location"), results.getInt("NumLdrsReqd"),
+							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -702,8 +701,7 @@ public class MySqlDatabase {
 		return calendarList;
 	}
 
-	public ArrayList<ArrayList<CalendarDayModel>> getTasksByTimeByMonth(Calendar calendar,
-			JList<String> times) {
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByTimeByMonth(Calendar calendar, JList<String> times) {
 		// Create a calendar list for each day of the month
 		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
 
@@ -746,8 +744,8 @@ public class MySqlDatabase {
 
 					// TODO: Figure out TaskModel, don't hard-code columns
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
-							results.getString("Location"), results.getInt("NumLdrsReqd"), results.getInt("NumPersonsReqd"),
-							dayOfWeek, weekOfMonth,
+							results.getString("Location"), results.getInt("NumLdrsReqd"),
+							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -820,8 +818,8 @@ public class MySqlDatabase {
 
 					// TODO: Figure out TaskModel, don't hard-code columns
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
-							results.getString("Location"), results.getInt("NumLdrsReqd"), results.getInt("NumPersonsReqd"),
-							dayOfWeek, weekOfMonth,
+							results.getString("Location"), results.getInt("NumLdrsReqd"),
+							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -893,8 +891,8 @@ public class MySqlDatabase {
 
 					// TODO: Figure out TaskModel, don't hard-code columns
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
-							results.getString("Location"), results.getInt("NumLdrsReqd"), results.getInt("NumPersonsReqd"),
-							dayOfWeek, weekOfMonth,
+							results.getString("Location"), results.getInt("NumLdrsReqd"),
+							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -957,8 +955,8 @@ public class MySqlDatabase {
 
 					// TODO: Figure out TaskModel, don't hard-code columns
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
-							results.getString("Location"), results.getInt("NumLdrsReqd"), results.getInt("NumPersonsReqd"),
-							dayOfWeek, weekOfMonth,
+							results.getString("Location"), results.getInt("NumLdrsReqd"),
+							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -985,7 +983,7 @@ public class MySqlDatabase {
 		}
 		return calendarList;
 	}
-	
+
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
 
@@ -1389,14 +1387,17 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement prepStmt = dbConnection
-						.prepareStatement("SELECT COUNT(*) AS Count, AssignedTaskID, Persons.PersonID AS PersonID "
+						.prepareStatement("SELECT COUNT(*) AS Count, AssignedTaskID, "
+								+ "(SELECT PersonID FROM Persons WHERE PersonName=?) AS PersonID "
 								+ "FROM AssignedTasks, Persons "
 								+ "WHERE TaskID=? AND Persons.PersonName=? AND AssignedTasks.PersonID = Persons.PersonID;");
-				prepStmt.setInt(1, taskID);
-				prepStmt.setString(2, personName);
+				prepStmt.setString(1, personName);
+				prepStmt.setInt(2, taskID);
+				prepStmt.setString(3, personName);
 				ResultSet result = prepStmt.executeQuery();
 
 				// TODO: Optimize this later by avoiding duplicating overhead
+				result.next();
 				if (result.getInt("Count") > 0) {
 					// Assigned task exists, so update fields
 					updateAssignedTask(result.getInt("AssignedTaskID"), daysOfWeek, weeksOfMonth);
@@ -1953,8 +1954,6 @@ public class MySqlDatabase {
 	}
 
 	public JList<String> getAvailPersonsAsString(Calendar today) {
-		Date thisDay = Utilities.getDateFromCalendar(today);
-
 		// Get all persons who are available today
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
 
@@ -2381,8 +2380,6 @@ public class MySqlDatabase {
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Calendar localCalendar = (Calendar) calendar.clone();
 		String sqlDate = Utilities.getSqlDate(localCalendar);
-		int hour = localCalendar.get(Calendar.HOUR);
-		int minute = localCalendar.get(Calendar.MINUTE);
 
 		PersonByTaskModel personByLocation;
 		ArrayList<PersonByTaskModel> persons = new ArrayList<PersonByTaskModel>();

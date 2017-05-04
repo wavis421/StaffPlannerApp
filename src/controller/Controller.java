@@ -197,7 +197,6 @@ public class Controller {
 	}
 
 	public ArrayList<PersonByTaskModel> getAllPersons() {
-		System.out.println("getAllPersonsList needs update");
 		return sqlDb.getAllPersons();
 	}
 
