@@ -1380,53 +1380,6 @@ public class MySqlDatabase {
 		}
 	}
 
-	private void mergeAssignedTask(String personName, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
-		if (!checkDatabaseConnection())
-			return;
-
-		for (int i = 0; i < 2; i++) {
-			try {
-				PreparedStatement prepStmt = dbConnection
-						.prepareStatement("SELECT COUNT(*) AS Count, AssignedTaskID, "
-								+ "(SELECT PersonID FROM Persons WHERE PersonName=?) AS PersonID "
-								+ "FROM AssignedTasks, Persons "
-								+ "WHERE TaskID=? AND Persons.PersonName=? AND AssignedTasks.PersonID = Persons.PersonID;");
-				prepStmt.setString(1, personName);
-				prepStmt.setInt(2, taskID);
-				prepStmt.setString(3, personName);
-				ResultSet result = prepStmt.executeQuery();
-
-				// TODO: Optimize this later by avoiding duplicating overhead
-				result.next();
-				if (result.getInt("Count") > 0) {
-					// Assigned task exists, so update fields
-					updateAssignedTask(result.getInt("AssignedTaskID"), daysOfWeek, weeksOfMonth);
-				} else {
-					// Assigned task not already in list, so insert
-					addAssignedTask(result.getInt("PersonID"), taskID, daysOfWeek, weeksOfMonth);
-				}
-
-				result.close();
-				prepStmt.close();
-				break;
-
-			} catch (CommunicationsException e) {
-				if (i == 0) {
-					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
-					connectDatabase();
-				} else
-					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
-
-			} catch (SQLException e) {
-
-				System.out.println("Failure adding tasks for " + personName + ": " + e.getMessage());
-				break;
-			}
-		}
-	}
-
 	public ArrayList<AssignedTasksModel> getAssignedTasks(String personName) {
 		ArrayList<AssignedTasksModel> taskList = new ArrayList<>();
 
@@ -1436,7 +1389,8 @@ public class MySqlDatabase {
 		// TODO: Add missing fields
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT ProgramName, TaskName, "
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT ProgramName, "
+						+ "  TaskName, Persons.PersonID AS PersonID, AssignedTasks.AssignedTaskID AS AssignedTaskID, "
 						+ "  AssignedTasks.DaysOfWeek AS DaysOfWeek, AssignedTasks.DowInMonth AS DowInMonth "
 						+ "FROM AssignedTasks, Persons, Tasks, Programs WHERE Persons.PersonName = ? "
 						+ "  AND Persons.PersonID = AssignedTasks.PersonID "
@@ -1446,8 +1400,9 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					taskList.add(new AssignedTasksModel(0, 0, 0, result.getString("ProgramName"),
-							result.getString("TaskName"), createDaysOfWeekArray(result.getInt("DaysOfWeek")),
+					taskList.add(new AssignedTasksModel(result.getInt("AssignedTaskID"), result.getInt("PersonID"), 0,
+							result.getString("ProgramName"), result.getString("TaskName"),
+							createDaysOfWeekArray(result.getInt("DaysOfWeek")),
 							createDowInMonthArray(result.getInt("DowInMonth"))));
 				}
 				result.close();
@@ -1780,12 +1735,18 @@ public class MySqlDatabase {
 		// Update person info
 		updatePersonInfo(personName, personPhone, personEmail, personIsLeader, personNotes);
 
-		// Merge in the assigned tasks (list ONLY contains changes!!)
+		// Merge in the assigned tasks
 		for (int i = 0; i < personAssignedTasks.size(); i++) {
 			// Update Assigned Tasks database for this person
 			AssignedTasksModel assignedTask = personAssignedTasks.get(i);
-			mergeAssignedTask(personName, assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
-					assignedTask.getWeeksOfMonth());
+			if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+				// Assigned task not already in list, so insert
+				addAssignedTask(assignedTask.getPersonID(), assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
+						assignedTask.getWeeksOfMonth());
+			else if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_UPDATE)
+				// Assigned task exists, so update fields
+				updateAssignedTask(assignedTask.getAssignedTaskID(), assignedTask.getDaysOfWeek(),
+						assignedTask.getWeeksOfMonth());
 		}
 
 		// Add extraTasks (list only contains additions!!)

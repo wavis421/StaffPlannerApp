@@ -43,14 +43,15 @@ public class AssignTaskDialog extends JDialog {
 	// Track current program and task
 	private String programName;
 	private TaskModel task;
+	private int assignedTaskID;
 
 	public AssignTaskDialog(JDialog parent, AssignTaskEvent taskEvent) {
 		super(parent, "Assign task...", true);
 		// setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 		// setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 
-		initAssignTaskDialog(taskEvent.getProgramName(), taskEvent.getTask(), taskEvent.getDaysOfWeek(),
-				taskEvent.getWeeksOfMonth());
+		initAssignTaskDialog(taskEvent.getProgramName(), taskEvent.getTask(), taskEvent.getAssignedTaskID(),
+				taskEvent.getDaysOfWeek(), taskEvent.getWeeksOfMonth());
 	}
 
 	public AssignTaskDialog(JDialog parent, String programName, TaskModel task) {
@@ -61,17 +62,18 @@ public class AssignTaskDialog extends JDialog {
 		boolean[] daysOfWeek = { false, false, false, false, false, false, false };
 		boolean[] weeksOfMonth = { false, false, false, false, false };
 
-		initAssignTaskDialog(programName, task, daysOfWeek, weeksOfMonth);
+		initAssignTaskDialog(programName, task, 0, daysOfWeek, weeksOfMonth);
 	}
 
 	public AssignTaskEvent getDialogResponse() {
 		return dialogResponse;
 	}
 
-	private void initAssignTaskDialog(String programName, TaskModel task, boolean[] daysOfWeek,
+	private void initAssignTaskDialog(String programName, TaskModel task, int assignedTaskID, boolean[] daysOfWeek,
 			boolean[] weeksOfMonth) {
 		this.programName = programName;
 		this.task = task;
+		this.assignedTaskID = assignedTaskID;
 
 		createDayOfWeekButtons(daysOfWeek);
 		createWeekOfMonthButtons(weeksOfMonth);
@@ -109,7 +111,7 @@ public class AssignTaskDialog extends JDialog {
 				}
 
 				// Create TaskEvent and set response
-				AssignTaskEvent ev = new AssignTaskEvent(this, programName, task, daysOfWeekSelected,
+				AssignTaskEvent ev = new AssignTaskEvent(this, programName, task, assignedTaskID, daysOfWeekSelected,
 						weeksOfMonthSelected);
 				dialogResponse = ev;
 				setVisible(false);

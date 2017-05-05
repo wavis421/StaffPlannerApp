@@ -754,8 +754,7 @@ public class MainFrame extends JFrame {
 			boolean okToSave = personEvent.getOkToSaveStatus();
 			boolean personExists = controller.checkPersonExists(dialogResponse.getName());
 			if (!okToSave || personExists == true) {
-				if (okToSave)
-					// Person already exists
+				if (personExists)
 					JOptionPane.showMessageDialog(MainFrame.this,
 							"Person " + dialogResponse.getName() + " already exists. Please use a different name.");
 
@@ -763,9 +762,9 @@ public class MainFrame extends JFrame {
 				ArrayList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTaskChanges();
 				JTree taskTree = createTaskTree(assignedTaskList);
 				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
-						new PersonModel(0, dialogResponse.getName(), dialogResponse.getPhone(),
-								dialogResponse.getEmail(), dialogResponse.isLeader(), dialogResponse.getNotes(),
-								assignedTaskList, null, null),
+						new PersonModel(dialogResponse.getPersonID(), dialogResponse.getName(),
+								dialogResponse.getPhone(), dialogResponse.getEmail(), dialogResponse.isLeader(),
+								dialogResponse.getNotes(), assignedTaskList, null, null),
 						assignedTaskList,
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
@@ -792,19 +791,16 @@ public class MainFrame extends JFrame {
 				PersonModel thisPerson = controller.getPersonByName(origName);
 				// TODO: do we really need to re-fetch the assigned task list
 				// for this person??
-				ArrayList<AssignedTasksModel> assignedTasks = controller.getAssignedTasks(origName);
-				ArrayList<AssignedTasksModel> assignedListMerged = mergeAssignedTaskList(assignedTasks,
-						dialogResponse.getAssignedTaskChanges());
-				JTree taskTree = createTaskTree(assignedListMerged);
+				ArrayList<AssignedTasksModel> assignedTasks = dialogResponse.getAssignedTaskChanges();
+				JTree taskTree = createTaskTree(assignedTasks);
 
 				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
-						new PersonModel(thisPerson.getPersonID(), dialogResponse.getName(), dialogResponse.getPhone(),
-								dialogResponse.getEmail(), dialogResponse.isLeader(), dialogResponse.getNotes(),
-								dialogResponse.getAssignedTaskChanges(), controller.getUnavailDates(origName),
+						new PersonModel(thisPerson.getPersonID(), dialogResponse.getName(),
+								dialogResponse.getPhone(), dialogResponse.getEmail(), dialogResponse.isLeader(),
+								dialogResponse.getNotes(), assignedTasks, controller.getUnavailDates(origName),
 								thisPerson.getSingleInstanceTasks()),
-						dialogResponse.getAssignedTaskChanges(),
-						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedListMerged),
-						taskTree);
+						assignedTasks,
+						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTasks), taskTree);
 				return personEvent;
 			} else {
 				// Update task list and refresh calendar
@@ -1186,7 +1182,7 @@ public class MainFrame extends JFrame {
 
 			// Create the event to be added to the tree
 			AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(), thisTask,
-					item.getDaysOfWeek(), item.getWeeksOfMonth());
+					item.getAssignedTaskID(), item.getDaysOfWeek(), item.getWeeksOfMonth());
 
 			// Find if the associated Program is already in tree
 			path = findNodeInTree((DefaultMutableTreeNode) assignedTree.getModel().getRoot(), item.getProgramName());
@@ -1259,22 +1255,5 @@ public class MainFrame extends JFrame {
 			}
 		}
 		return -1;
-	}
-
-	private ArrayList<AssignedTasksModel> mergeAssignedTaskList(ArrayList<AssignedTasksModel> mergeTaskList,
-			ArrayList<AssignedTasksModel> assignedTaskChangeList) {
-		// Merge tasks changed list into merge list
-		for (int i = 0; i < assignedTaskChangeList.size(); i++) {
-			AssignedTasksModel task = assignedTaskChangeList.get(i);
-
-			int foundIdx = findNodeInAssignedTaskList(mergeTaskList, task.getTaskName());
-			if (foundIdx == -1) { // Not in list
-				mergeTaskList.add(task);
-			} else {
-				mergeTaskList.set(foundIdx, task);
-			}
-		}
-		Collections.sort(mergeTaskList);
-		return mergeTaskList;
 	}
 }

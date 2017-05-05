@@ -7,16 +7,18 @@ import model.TaskModel;
 public class AssignTaskEvent extends EventObject {
 	private String programName;
 	private TaskModel task;
+	private int assignedTaskID;
 	private boolean[] daysOfWeek;
 	private boolean[] weeksOfMonth;
 	
-	public AssignTaskEvent(Object source, String programName, TaskModel task, boolean[] daysOfWeek,
+	public AssignTaskEvent(Object source, String programName, TaskModel task, int assignedTaskID, boolean[] daysOfWeek,
 			boolean[] weeksOfMonth) {
 		
 		super(source);
 
 		this.programName = programName;
 		this.task = task;
+		this.assignedTaskID = assignedTaskID;
 		this.daysOfWeek = daysOfWeek;
 		this.weeksOfMonth = weeksOfMonth;
 	}
@@ -34,6 +36,10 @@ public class AssignTaskEvent extends EventObject {
 
 	public TaskModel getTask() {
 		return task;
+	}
+
+	public int getAssignedTaskID() {
+		return assignedTaskID;
 	}
 
 	public boolean[] getDaysOfWeek() {

@@ -39,6 +39,7 @@ import javax.swing.tree.TreePath;
 
 import model.AssignedTasksModel;
 import model.DateRangeModel;
+import model.ListStatus;
 import model.PersonModel;
 import model.SingleInstanceTaskModel;
 import model.TaskModel;
@@ -56,6 +57,7 @@ public class PersonDialog extends JDialog {
 	private JButton extraDatesButton = new JButton("Extra Dates");
 
 	// Private instance variables
+	private int personID;
 	private JTextField personName = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField phone = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField email = new JTextField(TEXT_FIELD_SIZE);
@@ -70,7 +72,6 @@ public class PersonDialog extends JDialog {
 
 	// Lists
 	private ArrayList<AssignedTasksModel> assignedTasksList;
-	private ArrayList<AssignedTasksModel> assignedTaskChanges;
 	private ArrayList<SingleInstanceTaskModel> singleInstanceTaskList;
 	private ArrayList<DateRangeModel> datesUnavailableList;
 	private JList<TaskModel> allTasks;
@@ -106,7 +107,6 @@ public class PersonDialog extends JDialog {
 		this.allTasks = allTasks;
 		this.leaderButton.setSelected(true);
 		this.assignedTasksList = new ArrayList<AssignedTasksModel>();
-		this.assignedTaskChanges = new ArrayList<AssignedTasksModel>();
 
 		if (newSingleInstanceTasks != null)
 			newSingleInstanceTasks.clear();
@@ -133,12 +133,12 @@ public class PersonDialog extends JDialog {
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		createTrees(assignedTasksTree, taskTree);
 
+		this.personID = person.getPersonID();
 		this.personName.setText(person.getName());
 		this.phone.setText(person.getPhone());
 		this.email.setText(person.getEmail());
 		this.notesArea.setText(person.getNotes());
 		this.assignedTasksList = person.getAssignedTasks();
-		this.assignedTaskChanges = assignedTaskChanges;
 		this.singleInstanceTaskList = person.getSingleInstanceTasks();
 		this.datesUnavailableList = person.getDatesUnavailable();
 
@@ -241,9 +241,9 @@ public class PersonDialog extends JDialog {
 				if (personName.getText().trim().equals("")) {
 					JOptionPane.showMessageDialog(okButton, "Person's name field is required");
 				} else {
-					PersonEvent ev = new PersonEvent(this, personName.getText().trim(), phone.getText().trim(),
-							email.getText().trim(), leaderButton.isSelected() ? true : false, processNotesArea(),
-							assignedTaskChanges, null, newSingleInstanceTasks, newDatesUnavailable);
+					PersonEvent ev = new PersonEvent(this, personID, personName.getText().trim(),
+							phone.getText().trim(), email.getText().trim(), leaderButton.isSelected() ? true : false,
+							processNotesArea(), assignedTasksList, null, newSingleInstanceTasks, newDatesUnavailable);
 					okToSave = true;
 					dialogResponse = ev;
 					setVisible(false);
@@ -444,16 +444,19 @@ public class PersonDialog extends JDialog {
 					AssignTaskEvent eventResponse = event.getDialogResponse();
 					if (eventResponse != null) {
 						// Update assigned task with new node info
-						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(0, 0,
-								eventResponse.getTask().getTaskID(), eventResponse.getProgramName(),
+						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getAssignedTaskID(),
+								personID, eventResponse.getTask().getTaskID(), eventResponse.getProgramName(),
 								eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
 								eventResponse.getWeeksOfMonth());
-						removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
-						assignedTaskChanges.add(lastAssignedTask);
+						ListStatus status = removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
+						if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
+							status = ListStatus.LIST_ELEMENT_UPDATE;
+						lastAssignedTask.setElementStatus(status);
+						assignedTasksList.add(lastAssignedTask);
 
-						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, newSingleInstanceTasks, newDatesUnavailable);
+						PersonEvent ev = new PersonEvent(this, personID, personName.getText(), phone.getText(),
+								email.getText(), leaderButton.isSelected() ? true : false, processNotesArea(),
+								assignedTasksList, lastAssignedTask, newSingleInstanceTasks, newDatesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -492,14 +495,15 @@ public class PersonDialog extends JDialog {
 
 					AssignTaskEvent eventResponse = event.getDialogResponse();
 					if (eventResponse != null) {
-						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(0, 0,
-								eventResponse.getTask().getTaskID(), node.getParent().toString(), childNode.toString(),
-								eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
-						assignedTaskChanges.add(lastAssignedTask);
+						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getAssignedTaskID(),
+								personID, eventResponse.getTask().getTaskID(), node.getParent().toString(),
+								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
+						lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
+						assignedTasksList.add(lastAssignedTask);
 
-						PersonEvent ev = new PersonEvent(this, personName.getText(), phone.getText(), email.getText(),
-								leaderButton.isSelected() ? true : false, processNotesArea(), assignedTaskChanges,
-								lastAssignedTask, newSingleInstanceTasks, newDatesUnavailable);
+						PersonEvent ev = new PersonEvent(this, personID, personName.getText(), phone.getText(),
+								email.getText(), leaderButton.isSelected() ? true : false, processNotesArea(),
+								assignedTasksList, lastAssignedTask, newSingleInstanceTasks, newDatesUnavailable);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -510,15 +514,16 @@ public class PersonDialog extends JDialog {
 		});
 	}
 
-	private void removeNodeFromAssignedTaskList(String taskName) {
-		for (int i = 0; i < assignedTaskChanges.size(); i++) {
-			AssignedTasksModel t = assignedTaskChanges.get(i);
+	private ListStatus removeNodeFromAssignedTaskList(String taskName) {
+		for (int i = 0; i < assignedTasksList.size(); i++) {
+			AssignedTasksModel t = assignedTasksList.get(i);
 			if (t.getTaskName().equals(taskName)) {
-				int idx = assignedTaskChanges.indexOf(t);
-				assignedTaskChanges.remove(idx);
-				return;
+				int idx = assignedTasksList.indexOf(t);
+				assignedTasksList.remove(idx);
+				return t.getElementStatus();
 			}
 		}
+		return ListStatus.LIST_ELEMENT_NEW;
 	}
 
 	private boolean checkConflictsForSingleInstanceTask(SingleInstanceTaskModel newSingleTask) {
@@ -536,10 +541,6 @@ public class PersonDialog extends JDialog {
 			return true;
 
 		if (checkAssignedTaskConflicts(assignedTasksList, person, newSingleTask.getTaskName(), thisDay, calDay,
-				calDayIdx, calWeekIdx))
-			return true;
-
-		if (checkAssignedTaskConflicts(assignedTaskChanges, person, newSingleTask.getTaskName(), thisDay, calDay,
 				calDayIdx, calWeekIdx))
 			return true;
 
@@ -570,7 +571,7 @@ public class PersonDialog extends JDialog {
 
 		for (int i = 0; i < newDatesUnavailable.size(); i++) {
 			DateRangeModel datesUnavail = newDatesUnavailable.get(i);
-			
+
 			if (Utilities.isDateWithinDateRange(today, datesUnavail.getStartDate(), datesUnavail.getEndDate(),
 					"Unable to parse " + person + "'s Unavailable start/end Dates.")) {
 				JOptionPane.showMessageDialog(PersonDialog.this,

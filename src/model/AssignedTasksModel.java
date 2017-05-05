@@ -9,6 +9,7 @@ public class AssignedTasksModel implements Serializable, Comparable<AssignedTask
 	private String taskName;
 	private boolean[] daysOfWeek;
 	private boolean[] weeksOfMonth;
+	private ListStatus elementStatus;
 
 	public AssignedTasksModel(int assignedTasksID, int personID, int taskID, String programName, String taskName,
 			boolean[] daysOfWeek, boolean[] weeksOfMonth) {
@@ -19,6 +20,7 @@ public class AssignedTasksModel implements Serializable, Comparable<AssignedTask
 		this.taskName = taskName;
 		this.daysOfWeek = daysOfWeek;
 		this.weeksOfMonth = weeksOfMonth;
+		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
 	}
 
 	public int getTaskID() {
@@ -33,6 +35,10 @@ public class AssignedTasksModel implements Serializable, Comparable<AssignedTask
 		assignedTaskID = id;
 	}
 
+	public int getPersonID() {
+		return personID;
+	}
+	
 	public void setPersonID(int id) {
 		personID = id;
 	}
@@ -63,6 +69,14 @@ public class AssignedTasksModel implements Serializable, Comparable<AssignedTask
 
 	public boolean[] getWeeksOfMonth() {
 		return weeksOfMonth;
+	}
+
+	public ListStatus getElementStatus() {
+		return elementStatus;
+	}
+
+	public void setElementStatus(ListStatus elementStatus) {
+		this.elementStatus = elementStatus;
 	}
 
 	@Override

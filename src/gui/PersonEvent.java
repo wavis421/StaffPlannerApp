@@ -8,6 +8,7 @@ import model.DateRangeModel;
 import model.SingleInstanceTaskModel;
 
 public class PersonEvent extends EventObject {
+	private int personID;
 	private String name;
 	private String phone;
 	private String email;
@@ -22,11 +23,12 @@ public class PersonEvent extends EventObject {
 		super(source);
 	}
 
-	public PersonEvent(Object source, String name, String phone, String email, boolean leader, String notes,
+	public PersonEvent(Object source, int personID, String name, String phone, String email, boolean leader, String notes,
 			ArrayList<AssignedTasksModel> assignedTaskChanges, AssignedTasksModel lastTaskAdded,
 			ArrayList<SingleInstanceTaskModel> extraDates, ArrayList<DateRangeModel> datesUnavailable) {
 		super(source);
 
+		this.personID = personID;
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
@@ -38,6 +40,10 @@ public class PersonEvent extends EventObject {
 		this.datesUnavailable = datesUnavailable;
 	}
 
+	public int getPersonID() {
+		return personID;
+	}
+	
 	public String getName() {
 		return name;
 	}
