@@ -1,5 +1,7 @@
 package model;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,6 +13,7 @@ import java.util.Calendar;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
@@ -1225,6 +1228,44 @@ public class MySqlDatabase {
 			addUnavailDates(personID, dates.getStartDate(), dates.getEndDate());
 		}
 	}
+	
+	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
+			String personNotes, ArrayList<AssignedTasksModel> personAssignedTasks,
+			ArrayList<SingleInstanceTaskModel> extraTasks, ArrayList<DateRangeModel> personDatesUnavailable) {
+
+		// TODO: Check if we have to check for person NAME changes???
+
+		// Update person info
+		updatePersonInfo(personName, personPhone, personEmail, personIsLeader, personNotes);
+
+		// Add or update the assigned tasks
+		for (int i = 0; i < personAssignedTasks.size(); i++) {
+			// Update Assigned Tasks database for this person
+			AssignedTasksModel assignedTask = personAssignedTasks.get(i);
+			if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+				// Assigned task not already in list, so insert
+				addAssignedTask(assignedTask.getPersonID(), assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
+						assignedTask.getWeeksOfMonth());
+			else if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_UPDATE)
+				// Assigned task exists, so update fields
+				updateAssignedTask(assignedTask.getAssignedTaskID(), assignedTask.getDaysOfWeek(),
+						assignedTask.getWeeksOfMonth());
+		}
+
+		// Add extraTasks (list only contains additions!!)
+		for (int i = 0; i < extraTasks.size(); i++) {
+			// Add single instance task to database
+			SingleInstanceTaskModel singleTask = extraTasks.get(i);
+			addSingleInstanceTask(personName, singleTask.getTaskID(), singleTask.getTaskDate(), singleTask.getColor());
+		}
+
+		// Add dates unavailable (check for duplicates)
+		for (int i = 0; i < personDatesUnavailable.size(); i++) {
+			// Add unavailable dates if not a duplicate
+			DateRangeModel date = personDatesUnavailable.get(i);
+			updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
+		}
+	}
 
 	private int addPersonInfo(String personName, String phone, String email, boolean leader, String notes) {
 		int personID = 0;
@@ -1726,44 +1767,7 @@ public class MySqlDatabase {
 		return dateList;
 	}
 
-	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
-			String personNotes, ArrayList<AssignedTasksModel> personAssignedTasks,
-			ArrayList<SingleInstanceTaskModel> extraTasks, ArrayList<DateRangeModel> personDatesUnavailable) {
-
-		// TODO: Check if we have to check for person NAME changes???
-
-		// Update person info
-		updatePersonInfo(personName, personPhone, personEmail, personIsLeader, personNotes);
-
-		// Merge in the assigned tasks
-		for (int i = 0; i < personAssignedTasks.size(); i++) {
-			// Update Assigned Tasks database for this person
-			AssignedTasksModel assignedTask = personAssignedTasks.get(i);
-			if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
-				// Assigned task not already in list, so insert
-				addAssignedTask(assignedTask.getPersonID(), assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
-						assignedTask.getWeeksOfMonth());
-			else if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_UPDATE)
-				// Assigned task exists, so update fields
-				updateAssignedTask(assignedTask.getAssignedTaskID(), assignedTask.getDaysOfWeek(),
-						assignedTask.getWeeksOfMonth());
-		}
-
-		// Add extraTasks (list only contains additions!!)
-		for (int i = 0; i < extraTasks.size(); i++) {
-			// Add single instance task to database
-			SingleInstanceTaskModel singleTask = extraTasks.get(i);
-			addSingleInstanceTask(personName, singleTask.getTaskID(), singleTask.getTaskDate(), singleTask.getColor());
-		}
-
-		// Add dates unavailable (check for duplicates)
-		for (int i = 0; i < personDatesUnavailable.size(); i++) {
-			// Add unavailable dates if not a duplicate
-			DateRangeModel date = personDatesUnavailable.get(i);
-			updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
-		}
-	}
-
+	
 	public void renamePerson(String oldName, String newName) {
 		if (!checkDatabaseConnection())
 			return;
@@ -2531,4 +2535,27 @@ public class MySqlDatabase {
 	 */
 	// TODO: Export mySQL Tables and save to a file, plus Import mySQL Tables
 	// from file
+	public void saveProgramToFile(JList<String> programNameList, File file) throws IOException {
+		JOptionPane.showMessageDialog(null, "Currently not supported");
+	}
+
+	public void loadProgramFromFile(File file) throws IOException {
+		JOptionPane.showMessageDialog(null, "Currently not supported");
+	}
+
+	public void loadProgramFromDatabase() {
+		JOptionPane.showMessageDialog(null, "Currently not supported");
+	}
+
+	public void loadRosterFromDatabase() {
+		JOptionPane.showMessageDialog(null, "Currently not supported");
+	}
+
+	public void saveRosterToFile(File file) throws IOException {
+		JOptionPane.showMessageDialog(null, "Currently not supported");
+	}
+
+	public void loadRosterFromFile(File file) throws IOException {
+		JOptionPane.showMessageDialog(null, "Currently not supported");
+	}
 }

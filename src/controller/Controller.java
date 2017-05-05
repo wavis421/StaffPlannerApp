@@ -23,7 +23,6 @@ import model.TaskModel;
 import model.TimeModel;
 
 public class Controller {
-	Database db = new Database();
 	MySqlDatabase sqlDb = new MySqlDatabase();
 
 	/*
@@ -217,26 +216,26 @@ public class Controller {
 	 */
 	// TODO: Implement any required save/restore features
 	public void saveProgramToFile(JList<String> programNameList, File file) throws IOException {
-		db.saveProgramToFile(programNameList, file);
+		sqlDb.saveProgramToFile(programNameList, file);
 	}
 
 	public void loadProgramFromFile(File file) throws IOException {
-		db.loadProgramFromFile(file);
+		sqlDb.loadProgramFromFile(file);
 	}
 
 	public void loadProgramFromDatabase() {
-		db.loadProgramFromDatabase();
+		sqlDb.loadProgramFromDatabase();
 	}
 
 	public void loadRosterFromDatabase() {
-		db.loadRosterFromDatabase();
+		sqlDb.loadRosterFromDatabase();
 	}
 
 	public void saveRosterToFile(File file) throws IOException {
-		db.saveRosterToFile(file);
+		sqlDb.saveRosterToFile(file);
 	}
 
 	public void loadRosterFromFile(File file) throws IOException {
-		db.loadRosterFromFile(file);
+		sqlDb.loadRosterFromFile(file);
 	}
 }

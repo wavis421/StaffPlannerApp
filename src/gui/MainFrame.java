@@ -765,7 +765,6 @@ public class MainFrame extends JFrame {
 						new PersonModel(dialogResponse.getPersonID(), dialogResponse.getName(),
 								dialogResponse.getPhone(), dialogResponse.getEmail(), dialogResponse.isLeader(),
 								dialogResponse.getNotes(), assignedTaskList, null, null),
-						assignedTaskList,
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
 						taskTree);
 				return personEvent;
@@ -799,7 +798,6 @@ public class MainFrame extends JFrame {
 								dialogResponse.getPhone(), dialogResponse.getEmail(), dialogResponse.isLeader(),
 								dialogResponse.getNotes(), assignedTasks, controller.getUnavailDates(origName),
 								thisPerson.getSingleInstanceTasks()),
-						assignedTasks,
 						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTasks), taskTree);
 				return personEvent;
 			} else {
@@ -821,8 +819,7 @@ public class MainFrame extends JFrame {
 			ArrayList<AssignedTasksModel> assignedList = controller.getAssignedTasks(origName);
 			JTree taskTree = createTaskTree(assignedList);
 			PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(), person,
-					new ArrayList<AssignedTasksModel>(), createAssignedTasksTree(null, taskTree, assignedList),
-					taskTree);
+					createAssignedTasksTree(null, taskTree, assignedList), taskTree);
 			do {
 				personEvent = processEditPersonDialog(personEvent, origName);
 			} while (personEvent != null);

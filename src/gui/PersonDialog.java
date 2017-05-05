@@ -127,7 +127,7 @@ public class PersonDialog extends JDialog {
 
 	// Constructor for updating existing person, PersonModel contains values
 	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, PersonModel person,
-			ArrayList<AssignedTasksModel> assignedTaskChanges, JTree assignedTasksTree, JTree taskTree) {
+			JTree assignedTasksTree, JTree taskTree) {
 		super(parent, "Edit person...", true);
 		setLocation(new Point(100, 100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
