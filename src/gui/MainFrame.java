@@ -546,9 +546,14 @@ public class MainFrame extends JFrame {
 		addPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ArrayList<AssignedTasksModel> assignedList = new ArrayList<AssignedTasksModel>();
-				JTree taskTree = createTaskTree(assignedList);
-				PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
-						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
+
+				// TODO: Must be a cleaner way to do this
+				ArrayList<ProgramModel> progList = controller.getAllPrograms();
+				ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
+				ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram = new ArrayList<ArrayList<AssignedTasksModel>>();
+				getAssignedTaskLists(assignedList, progList, taskListByProgram, assignedTaskListByProgram);
+				PersonDialog personEvent = new PersonDialog(MainFrame.this, selectedProgramName,
+						controller.getAllTasks(), progList, taskListByProgram, assignedTaskListByProgram);
 
 				do {
 					personEvent = processAddPersonDialog(personEvent);
@@ -597,9 +602,15 @@ public class MainFrame extends JFrame {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				// Add new person
 				ArrayList<AssignedTasksModel> assignedList = new ArrayList<AssignedTasksModel>();
-				JTree taskTree = createTaskTree(assignedList);
-				PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
-						createAssignedTasksTree(null, taskTree, assignedList), taskTree);
+
+				// TODO: Must be a cleaner way to do this
+				ArrayList<ProgramModel> progList = controller.getAllPrograms();
+				ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
+				ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram = new ArrayList<ArrayList<AssignedTasksModel>>();
+				getAssignedTaskLists(assignedList, progList, taskListByProgram, assignedTaskListByProgram);
+
+				PersonDialog personEvent = new PersonDialog(MainFrame.this, selectedProgramName,
+						controller.getAllTasks(), progList, taskListByProgram, assignedTaskListByProgram);
 				do {
 					personEvent = processAddPersonDialog(personEvent);
 				} while (personEvent != null);
@@ -760,13 +771,19 @@ public class MainFrame extends JFrame {
 
 				// Do not save; go back and edit person
 				ArrayList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTaskChanges();
-				JTree taskTree = createTaskTree(assignedTaskList);
-				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
+
+				// TODO: Must be a cleaner way to do this
+				ArrayList<ProgramModel> progList = controller.getAllPrograms();
+				ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
+				ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram = new ArrayList<ArrayList<AssignedTasksModel>>();
+				getAssignedTaskLists(assignedTaskList, progList, taskListByProgram, assignedTaskListByProgram);
+
+				personEvent = new PersonDialog(MainFrame.this, dialogResponse.getLastTaskAdded().getProgramName(),
+						controller.getAllTasks(),
 						new PersonModel(dialogResponse.getPersonID(), dialogResponse.getName(),
 								dialogResponse.getPhone(), dialogResponse.getEmail(), dialogResponse.isLeader(),
 								dialogResponse.getNotes(), assignedTaskList, null, null),
-						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTaskList),
-						taskTree);
+						progList, taskListByProgram, assignedTaskListByProgram);
 				return personEvent;
 
 			} else {
@@ -791,14 +808,20 @@ public class MainFrame extends JFrame {
 				// TODO: do we really need to re-fetch the assigned task list
 				// for this person??
 				ArrayList<AssignedTasksModel> assignedTasks = dialogResponse.getAssignedTaskChanges();
-				JTree taskTree = createTaskTree(assignedTasks);
 
-				personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(),
-						new PersonModel(thisPerson.getPersonID(), dialogResponse.getName(),
-								dialogResponse.getPhone(), dialogResponse.getEmail(), dialogResponse.isLeader(),
-								dialogResponse.getNotes(), assignedTasks, controller.getUnavailDates(origName),
+				// TODO: Must be a cleaner way to do this
+				ArrayList<ProgramModel> progList = controller.getAllPrograms();
+				ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
+				ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram = new ArrayList<ArrayList<AssignedTasksModel>>();
+				getAssignedTaskLists(assignedTasks, progList, taskListByProgram, assignedTaskListByProgram);
+
+				personEvent = new PersonDialog(MainFrame.this, dialogResponse.getLastTaskAdded().getProgramName(),
+						controller.getAllTasks(),
+						new PersonModel(thisPerson.getPersonID(), dialogResponse.getName(), dialogResponse.getPhone(),
+								dialogResponse.getEmail(), dialogResponse.isLeader(), dialogResponse.getNotes(),
+								assignedTasks, controller.getUnavailDates(origName),
 								thisPerson.getSingleInstanceTasks()),
-						createAssignedTasksTree(dialogResponse.getLastTaskAdded(), taskTree, assignedTasks), taskTree);
+						progList, taskListByProgram, assignedTaskListByProgram);
 				return personEvent;
 			} else {
 				// Update task list and refresh calendar
@@ -817,9 +840,15 @@ public class MainFrame extends JFrame {
 			JOptionPane.showMessageDialog(MainFrame.this, "Person does not exist");
 		else {
 			ArrayList<AssignedTasksModel> assignedList = controller.getAssignedTasks(origName);
-			JTree taskTree = createTaskTree(assignedList);
-			PersonDialog personEvent = new PersonDialog(MainFrame.this, controller.getAllTasks(), person,
-					createAssignedTasksTree(null, taskTree, assignedList), taskTree);
+
+			// TODO: Must be a cleaner way to do this
+			ArrayList<ProgramModel> progList = controller.getAllPrograms();
+			ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
+			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram = new ArrayList<ArrayList<AssignedTasksModel>>();
+			getAssignedTaskLists(assignedList, progList, taskListByProgram, assignedTaskListByProgram);
+
+			PersonDialog personEvent = new PersonDialog(MainFrame.this, selectedProgramName, controller.getAllTasks(),
+					person, progList, taskListByProgram, assignedTaskListByProgram);
 			do {
 				personEvent = processEditPersonDialog(personEvent, origName);
 			} while (personEvent != null);
@@ -1132,125 +1161,22 @@ public class MainFrame extends JFrame {
 		calPanel.setProgramName(selectedProgramName);
 	}
 
-	// TODO: Make the tree handling methods (below) a separate class
-	private JTree createTaskTree(ArrayList<AssignedTasksModel> assignedTaskList) {
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Select task to assign  >>>");
-		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
-		ArrayList<ProgramModel> programList = controller.getAllPrograms();
+	private void getAssignedTaskLists(ArrayList<AssignedTasksModel> assignedList, ArrayList<ProgramModel> progList,
+			ArrayList<JList<TaskModel>> taskListByProgram,
+			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
+		// TODO: Fix JList to use ArrayList
+		for (int i = 0; i < progList.size(); i++) {
+			String programName = progList.get(i).getProgramName();
+			taskListByProgram.add(i, controller.getAllTasksByProgram(programName));
 
-		for (int i = 0; i < programList.size(); i++) {
-			ProgramModel p = programList.get(i);
-			DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(p);
-			rootNode.add(pNode);
+			assignedTaskListByProgram.add(i, new ArrayList<AssignedTasksModel>());
+			ArrayList<AssignedTasksModel> thisAssignedTask = assignedTaskListByProgram.get(i);
 
-			JList<TaskModel> taskList = controller.getAllTasksByProgram(p.getProgramName());
-
-			// For each task in this program, add to program only if not yet
-			// assigned
-			for (int j = 0; j < taskList.getModel().getSize(); j++) {
-				TaskModel task = taskList.getModel().getElementAt(j);
-				if (findNodeInAssignedTaskList(assignedTaskList, task.getTaskName()) == -1)
-					pNode.add(new DefaultMutableTreeNode(task));
+			for (int j = 0; j < assignedList.size(); j++) {
+				AssignedTasksModel assignedTask = assignedList.get(j);
+				if (assignedTask.getProgramName().equals(programName))
+					thisAssignedTask.add(assignedTask);
 			}
 		}
-		JTree tree = new JTree(treeModel);
-		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		tree.setShowsRootHandles(true);
-		return (tree);
-	}
-
-	private JTree createAssignedTasksTree(AssignedTasksModel lastTaskAdded, JTree taskTree,
-			ArrayList<AssignedTasksModel> taskList) {
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Assigned tasks");
-		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
-		JTree assignedTree = new JTree(treeModel);
-		TreePath path;
-
-		for (int i = 0; i < taskList.size(); i++) {
-			AssignedTasksModel item = taskList.get(i);
-
-			// Check to see if this task is currently valid; if not, leave
-			// disabled
-			TaskModel thisTask = controller.getTaskByName(item.getProgramName(), item.getTaskName());
-			if (thisTask == null) {
-				System.out.println("Dropping program " + item.getProgramName() + ", task " + item.getTaskName());
-				continue;
-			}
-
-			// Create the event to be added to the tree
-			AssignTaskEvent taskEvent = new AssignTaskEvent(MainFrame.this, item.getProgramName(), thisTask,
-					item.getAssignedTaskID(), item.getDaysOfWeek(), item.getWeeksOfMonth());
-
-			// Find if the associated Program is already in tree
-			path = findNodeInTree((DefaultMutableTreeNode) assignedTree.getModel().getRoot(), item.getProgramName());
-			if (path != null) {
-				// Program node already exists
-				assignedTree.setSelectionPath(path);
-				assignedTree.expandRow(assignedTree.getRowForPath(path));
-				int childCount = treeModel.getChildCount(assignedTree.getSelectionPath().getLastPathComponent());
-
-				// AssignedTree is already sorted, so add to end
-				treeModel.insertNodeInto(new DefaultMutableTreeNode(taskEvent),
-						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(), childCount);
-
-			} else {
-				// Create program node, then add task event
-				DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(item.getProgramName());
-				assignedTree.setSelectionPath(assignedTree.getPathForRow(0));
-				treeModel.insertNodeInto(pNode,
-						(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(), 0);
-
-				pNode.add(new DefaultMutableTreeNode(taskEvent));
-			}
-		}
-
-		// Collapse all program nodes except last inserted task
-		String programName = null;
-		if (lastTaskAdded != null)
-			programName = lastTaskAdded.getProgramName();
-
-		collapseTree(assignedTree, programName);
-		collapseTree(taskTree, programName);
-
-		assignedTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		assignedTree.setShowsRootHandles(true);
-		return (assignedTree);
-	}
-
-	private void collapseTree(JTree tree, String s) {
-		tree.expandRow(0);
-		int row = tree.getRowCount() - 1;
-
-		// Collapse child nodes of root
-		while (row > 0) {
-			tree.collapseRow(row);
-			row--;
-		}
-
-		if (s != null) {
-			TreePath path = findNodeInTree((DefaultMutableTreeNode) tree.getModel().getRoot(), s);
-			tree.expandPath(path);
-		}
-	}
-
-	private TreePath findNodeInTree(DefaultMutableTreeNode root, String s) {
-		Enumeration<DefaultMutableTreeNode> e = root.depthFirstEnumeration();
-		while (e.hasMoreElements()) {
-			DefaultMutableTreeNode node = e.nextElement();
-			if (node.toString().equals(s)) {
-				return new TreePath(node.getPath());
-			}
-		}
-		return null;
-	}
-
-	private int findNodeInAssignedTaskList(ArrayList<AssignedTasksModel> list, String taskName) {
-		for (int idx = 0; idx < list.size(); idx++) {
-			AssignedTasksModel t = list.get(idx);
-			if (t.getTaskName().equals(taskName)) {
-				return idx;
-			}
-		}
-		return -1;
 	}
 }

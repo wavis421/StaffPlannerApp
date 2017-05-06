@@ -41,6 +41,7 @@ import model.AssignedTasksModel;
 import model.DateRangeModel;
 import model.ListStatus;
 import model.PersonModel;
+import model.ProgramModel;
 import model.SingleInstanceTaskModel;
 import model.TaskModel;
 import utilities.Utilities;
@@ -96,13 +97,18 @@ public class PersonDialog extends JDialog {
 	private JPanel staffPanel = new JPanel();
 	private PersonEvent dialogResponse;
 
-	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, JTree assignedTasksTree, JTree taskTree) {
+	public PersonDialog(JFrame parent, String currentProgram, JList<TaskModel> allTasks,
+			ArrayList<ProgramModel> programList, ArrayList<JList<TaskModel>> taskListByProgram,
+			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		// super(parent, "Add person...", true);
 		super(parent, "Add person...");
 		setLocation(new Point(100, 100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 
-		createTrees(assignedTasksTree, taskTree);
+		// TODO: find better names!!
+		AssignTaskCreateTree trees = new AssignTaskCreateTree(currentProgram, programList,
+				taskListByProgram, assignedTaskListByProgram);
+		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
 		this.allTasks = allTasks;
 		this.leaderButton.setSelected(true);
@@ -126,12 +132,17 @@ public class PersonDialog extends JDialog {
 	}
 
 	// Constructor for updating existing person, PersonModel contains values
-	public PersonDialog(JFrame parent, JList<TaskModel> allTasks, PersonModel person,
-			JTree assignedTasksTree, JTree taskTree) {
+	public PersonDialog(JFrame parent, String currentProgram, JList<TaskModel> allTasks, PersonModel person,
+			ArrayList<ProgramModel> programList, ArrayList<JList<TaskModel>> taskListByProgram,
+			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		super(parent, "Edit person...", true);
 		setLocation(new Point(100, 100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
-		createTrees(assignedTasksTree, taskTree);
+
+		// TODO: find better names!!
+		AssignTaskCreateTree trees = new AssignTaskCreateTree(currentProgram, programList,
+				taskListByProgram, assignedTaskListByProgram);
+		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
 		this.personID = person.getPersonID();
 		this.personName.setText(person.getName());

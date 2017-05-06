@@ -996,7 +996,9 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Tasks, Programs WHERE ProgramName=? ORDER BY Hour, Minute, TaskName;");
+						"SELECT * FROM Tasks, Programs "
+						+ "WHERE ProgramName=? AND Programs.ProgramID = Tasks.ProgramID "
+						+ "ORDER BY Hour, Minute, TaskName;");
 				selectStmt.setString(1, programName);
 
 				ResultSet result = selectStmt.executeQuery();
