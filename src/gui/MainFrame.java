@@ -611,9 +611,11 @@ public class MainFrame extends JFrame {
 
 				PersonDialog personEvent = new PersonDialog(MainFrame.this, selectedProgramName,
 						controller.getAllTasks(), progList, taskListByProgram, assignedTaskListByProgram);
+				
 				do {
 					personEvent = processAddPersonDialog(personEvent);
 				} while (personEvent != null);
+				
 			} else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
 				// Edit person
 				editPerson(event.getPersonName());

@@ -72,6 +72,7 @@ public class PersonDialog extends JDialog {
 	private JScrollPane taskTreeScrollPane;
 
 	// Lists
+	private AssignTaskCreateTree trees;
 	private ArrayList<AssignedTasksModel> assignedTasksList;
 	private ArrayList<SingleInstanceTaskModel> singleInstanceTaskList;
 	private ArrayList<DateRangeModel> datesUnavailableList;
@@ -106,7 +107,7 @@ public class PersonDialog extends JDialog {
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 
 		// TODO: find better names!!
-		AssignTaskCreateTree trees = new AssignTaskCreateTree(currentProgram, programList,
+		trees = new AssignTaskCreateTree(currentProgram, programList,
 				taskListByProgram, assignedTaskListByProgram);
 		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
@@ -140,7 +141,7 @@ public class PersonDialog extends JDialog {
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 
 		// TODO: find better names!!
-		AssignTaskCreateTree trees = new AssignTaskCreateTree(currentProgram, programList,
+		trees = new AssignTaskCreateTree(currentProgram, programList,
 				taskListByProgram, assignedTaskListByProgram);
 		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
@@ -462,15 +463,10 @@ public class PersonDialog extends JDialog {
 						ListStatus status = removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
 						if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
 							status = ListStatus.LIST_ELEMENT_UPDATE;
+						
+						// TODO: process lastAssignedTask (expand tree node)
 						lastAssignedTask.setElementStatus(status);
 						assignedTasksList.add(lastAssignedTask);
-
-						PersonEvent ev = new PersonEvent(this, personID, personName.getText(), phone.getText(),
-								email.getText(), leaderButton.isSelected() ? true : false, processNotesArea(),
-								assignedTasksList, lastAssignedTask, newSingleInstanceTasks, newDatesUnavailable);
-						dialogResponse = ev;
-						setVisible(false);
-						dispose();
 					}
 					assignedTasksTree.clearSelection();
 				}
@@ -512,12 +508,9 @@ public class PersonDialog extends JDialog {
 						lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
 						assignedTasksList.add(lastAssignedTask);
 
-						PersonEvent ev = new PersonEvent(this, personID, personName.getText(), phone.getText(),
-								email.getText(), leaderButton.isSelected() ? true : false, processNotesArea(),
-								assignedTasksList, lastAssignedTask, newSingleInstanceTasks, newDatesUnavailable);
-						dialogResponse = ev;
-						setVisible(false);
-						dispose();
+						// Remove node from task tree, add it to assigned task tree
+						trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(), eventResponse.getTask().getTaskName());
+						trees.addNodeToTree(assignedTasksTree, eventResponse.getProgramName(), eventResponse);
 					}
 					taskTree.clearSelection();
 				}
