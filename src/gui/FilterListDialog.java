@@ -48,6 +48,7 @@ public class FilterListDialog extends JDialog {
 		cbList = new JList<JCheckBox>(filterModel);
 		scrollPane = new JScrollPane(controlsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
 		// Create buttons panel
 		buttonsPanel.add(okButton);
@@ -57,10 +58,10 @@ public class FilterListDialog extends JDialog {
 		// Layout
 		setFilterLayout();
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		if (numRows < 21)
-			setSize(350, 120 + (20 * numRows));
+		if (numRows <= 16)
+			setSize(350, 120 + (25 * numRows));
 		else
-			setSize(350, 540);  // Maximum size
+			setSize(350, 545);  // Maximum size
 		setVisible(true);
 	}
 
