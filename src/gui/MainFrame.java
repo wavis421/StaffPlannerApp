@@ -537,8 +537,6 @@ public class MainFrame extends JFrame {
 		// Set up listeners for PERSONS menu
 		addPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO: Must be a cleaner way to do this
-				// TODO: Have personEvent return these lists!
 				ArrayList<AssignedTasksModel> assignedList = new ArrayList<AssignedTasksModel>();
 				ArrayList<ProgramModel> progList = controller.getAllPrograms();
 				ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
@@ -593,7 +591,6 @@ public class MainFrame extends JFrame {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				// Add new person
-				// TODO: Must be a cleaner way to do this
 				ArrayList<AssignedTasksModel> assignedList = new ArrayList<AssignedTasksModel>();
 				ArrayList<ProgramModel> progList = controller.getAllPrograms();
 				ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
@@ -755,25 +752,18 @@ public class MainFrame extends JFrame {
 		PersonEvent dialogResponse = personEvent.getDialogResponse();
 
 		if (dialogResponse != null) {
-			boolean personExists = controller.checkPersonExists(dialogResponse.getName());
-			if (personExists) {
+			if (controller.checkPersonExists(dialogResponse.getName())) {
 				JOptionPane.showMessageDialog(MainFrame.this,
 						"'" + dialogResponse.getName() + "' already exists. Please use a different name.");
 
 				// Do not save; go back and edit person
-				// TODO: Must be a cleaner way to do this
-				ArrayList<AssignedTasksModel> assignedTaskList = dialogResponse.getAssignedTaskChanges();
-				ArrayList<ProgramModel> progList = controller.getAllPrograms();
-				ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
-				ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram = new ArrayList<ArrayList<AssignedTasksModel>>();
-				getAssignedTaskLists(assignedTaskList, progList, taskListByProgram, assignedTaskListByProgram);
-
-				personEvent = new PersonDialog(MainFrame.this, selectedProgramName, controller.getAllTasks(),
+				personEvent = new PersonDialog(MainFrame.this, selectedProgramName, dialogResponse.getAllTasks(),
 						new PersonModel(dialogResponse.getPersonID(), dialogResponse.getName(),
 								dialogResponse.getPhone(), dialogResponse.getEmail(), dialogResponse.isLeader(),
-								dialogResponse.getNotes(), assignedTaskList, dialogResponse.getDatesUnavailable(),
-								dialogResponse.getExtraDates()),
-						progList, taskListByProgram, assignedTaskListByProgram);
+								dialogResponse.getNotes(), dialogResponse.getAssignedTaskChanges(),
+								dialogResponse.getDatesUnavailable(), dialogResponse.getExtraDates()),
+						dialogResponse.getProgramList(), dialogResponse.getTaskListByProgram(),
+						dialogResponse.getAssignedTaskListByProgram());
 				return personEvent;
 
 			} else {
@@ -798,20 +788,16 @@ public class MainFrame extends JFrame {
 				JOptionPane.showMessageDialog(MainFrame.this,
 						"'" + dialogResponse.getName() + "' already exists. Please use a different name.");
 
-				// TODO: Must be a cleaner way to do this
-				ArrayList<AssignedTasksModel> assignedTasks = dialogResponse.getAssignedTaskChanges();
-				ArrayList<ProgramModel> progList = controller.getAllPrograms();
-				ArrayList<JList<TaskModel>> taskListByProgram = new ArrayList<JList<TaskModel>>();
-				ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram = new ArrayList<ArrayList<AssignedTasksModel>>();
-				getAssignedTaskLists(assignedTasks, progList, taskListByProgram, assignedTaskListByProgram);
-
-				personEvent = new PersonDialog(MainFrame.this, selectedProgramName, controller.getAllTasks(),
-						new PersonModel(dialogResponse.getPersonID(), dialogResponse.getName(), dialogResponse.getPhone(),
-								dialogResponse.getEmail(), dialogResponse.isLeader(), dialogResponse.getNotes(),
-								assignedTasks, dialogResponse.getDatesUnavailable(), dialogResponse.getExtraDates()),
-						progList, taskListByProgram, assignedTaskListByProgram);
+				// Go back and edit person
+				personEvent = new PersonDialog(MainFrame.this, selectedProgramName, dialogResponse.getAllTasks(),
+						new PersonModel(dialogResponse.getPersonID(), dialogResponse.getName(),
+								dialogResponse.getPhone(), dialogResponse.getEmail(), dialogResponse.isLeader(),
+								dialogResponse.getNotes(), dialogResponse.getAssignedTaskChanges(),
+								dialogResponse.getDatesUnavailable(), dialogResponse.getExtraDates()),
+						dialogResponse.getProgramList(), dialogResponse.getTaskListByProgram(),
+						dialogResponse.getAssignedTaskListByProgram());
 				return personEvent;
-				
+
 			} else {
 				// Update task list and refresh calendar
 				if (!origName.equals(dialogResponse.getName()))

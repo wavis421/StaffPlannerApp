@@ -77,6 +77,9 @@ public class PersonDialog extends JDialog {
 	private ArrayList<SingleInstanceTaskModel> singleInstanceTaskList;
 	private ArrayList<DateRangeModel> datesUnavailableList;
 	private JList<TaskModel> allTasks;
+	private ArrayList<ProgramModel> programList;
+	private ArrayList<JList<TaskModel>> taskListByProgram;
+	private ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram;
 
 	// Labels
 	private JLabel nameLabel = new JLabel("Person's name: ");
@@ -105,7 +108,13 @@ public class PersonDialog extends JDialog {
 		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram);
 		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
+		// Save copy of lists used to build tree
 		this.allTasks = allTasks;
+		this.programList = programList;
+		this.taskListByProgram = taskListByProgram;
+		this.assignedTaskListByProgram = assignedTaskListByProgram;
+
+		// Create empty lists for new person
 		this.leaderButton.setSelected(true);
 		this.assignedTasksList = new ArrayList<AssignedTasksModel>();
 		this.singleInstanceTaskList = new ArrayList<SingleInstanceTaskModel>();
@@ -130,6 +139,13 @@ public class PersonDialog extends JDialog {
 		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram);
 		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
+		// Save copy of lists used to build tree
+		this.allTasks = allTasks;
+		this.programList = programList;
+		this.taskListByProgram = taskListByProgram;
+		this.assignedTaskListByProgram = assignedTaskListByProgram;
+
+		// Save person fields
 		this.personID = person.getPersonID();
 		this.personName.setText(person.getName());
 		this.phone.setText(person.getPhone());
@@ -223,7 +239,8 @@ public class PersonDialog extends JDialog {
 				} else {
 					PersonEvent ev = new PersonEvent(this, personID, personName.getText().trim(),
 							phone.getText().trim(), email.getText().trim(), leaderButton.isSelected() ? true : false,
-							processNotesArea(), assignedTasksList, singleInstanceTaskList, datesUnavailableList);
+							processNotesArea(), assignedTasksList, singleInstanceTaskList, datesUnavailableList,
+							allTasks, programList, taskListByProgram, assignedTaskListByProgram);
 					dialogResponse = ev;
 					setVisible(false);
 					dispose();
@@ -459,9 +476,12 @@ public class PersonDialog extends JDialog {
 								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
 						lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
 						assignedTasksList.add(lastAssignedTask);
+						
+						// Remove from task by prog list, add to assigned task by prog list
+						removeNodeFromTaskList(eventResponse.getTask().getTaskName());
+						addNodeToAssignedTaskList(eventResponse.getProgramName(), lastAssignedTask);
 
-						// Remove node from task tree, add it to assigned task
-						// tree
+						// Remove node from task tree, add to assigned task tree
 						trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(),
 								eventResponse.getTask().getTaskName());
 						trees.addNodeToTree(assignedTasksTree, eventResponse.getProgramName(), eventResponse);
@@ -470,6 +490,26 @@ public class PersonDialog extends JDialog {
 				}
 			}
 		});
+	}
+
+	private void removeNodeFromTaskList(String taskName) {
+		for (int i = 0; i < taskListByProgram.size(); i++) {
+			JList<TaskModel> t = taskListByProgram.get(i);
+			for (int j = 0; j < t.getModel().getSize(); j++) {
+				if (t.getModel().getElementAt(j).equals(taskName)) {
+					t.remove(j);
+				}
+			}
+		}
+	}
+	
+	private void addNodeToAssignedTaskList(String programName, AssignedTasksModel assignedTask) {
+		for (int i = 0; i < programList.size(); i++) {
+			ProgramModel prog = programList.get(i);
+			if (prog.getProgramName().equals(programName)) {
+				assignedTaskListByProgram.get(i).add(assignedTask);
+			}
+		}
 	}
 
 	private ListStatus removeNodeFromAssignedTaskList(String taskName) {
