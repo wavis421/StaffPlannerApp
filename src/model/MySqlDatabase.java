@@ -568,6 +568,7 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return calendarList;
 
+		// TODO: Check if person available
 		int day, personCount;
 		String taskName;
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -995,8 +996,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Tasks, Programs "
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM Tasks, Programs "
 						+ "WHERE ProgramName=? AND Programs.ProgramID = Tasks.ProgramID "
 						+ "ORDER BY Hour, Minute, TaskName;");
 				selectStmt.setString(1, programName);
@@ -1230,7 +1230,7 @@ public class MySqlDatabase {
 			addUnavailDates(personID, dates.getStartDate(), dates.getEndDate());
 		}
 	}
-	
+
 	public void updatePerson(String personName, String personPhone, String personEmail, boolean personIsLeader,
 			String personNotes, ArrayList<AssignedTasksModel> personAssignedTasks,
 			ArrayList<SingleInstanceTaskModel> extraTasks, ArrayList<DateRangeModel> personDatesUnavailable) {
@@ -1254,18 +1254,23 @@ public class MySqlDatabase {
 						assignedTask.getWeeksOfMonth());
 		}
 
-		// Add extraTasks (list only contains additions!!)
+		// Add extraTasks
 		for (int i = 0; i < extraTasks.size(); i++) {
 			// Add single instance task to database
 			SingleInstanceTaskModel singleTask = extraTasks.get(i);
-			addSingleInstanceTask(personName, singleTask.getTaskID(), singleTask.getTaskDate(), singleTask.getColor());
+			if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+				addSingleInstanceTask(personName, singleTask.getTaskID(), singleTask.getTaskDate(),
+						singleTask.getColor());
 		}
 
 		// Add dates unavailable (check for duplicates)
 		for (int i = 0; i < personDatesUnavailable.size(); i++) {
 			// Add unavailable dates if not a duplicate
 			DateRangeModel date = personDatesUnavailable.get(i);
-			updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
+
+			// TODO: dates added but doesn't do anything
+			if (date.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+				updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
 		}
 	}
 
@@ -1706,6 +1711,7 @@ public class MySqlDatabase {
 					// No match for start/end dates, so add date range
 					addUnavailDates(personName, startDate, endDate);
 				}
+
 				result.close();
 				prepStmt.close();
 				break;
@@ -1769,7 +1775,44 @@ public class MySqlDatabase {
 		return dateList;
 	}
 
-	
+	public ArrayList<DateRangeModel> getUnavailDates() {
+		ArrayList<DateRangeModel> dateList = new ArrayList<>();
+
+		if (!checkDatabaseConnection())
+			return dateList;
+
+		// TODO: Add missing fields
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT PersonID, StartDate, EndDate FROM UnavailDates ORDER BY StartDate, EndDate;");
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					dateList.add(new DateRangeModel(0, result.getInt("PersonID"),
+							result.getDate("StartDate").toString(), result.getDate("EndDate").toString()));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving Unavail Dates list from database: " + e.getMessage());
+				break;
+			}
+		}
+		return dateList;
+	}
+
 	public void renamePerson(String oldName, String newName) {
 		if (!checkDatabaseConnection())
 			return;
@@ -1923,22 +1966,26 @@ public class MySqlDatabase {
 	public JList<String> getAvailPersonsAsString(Calendar today) {
 		// Get all persons who are available today
 		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+		java.sql.Date sqlToday = java.sql.Date.valueOf(Utilities.getSqlDate(today));
 
 		if (!checkDatabaseConnection())
 			return new JList<String>(nameModel);
 
+		// TODO: Find more optimal way to do this
+		ArrayList<DateRangeModel> unavailDatesList = getUnavailDates();
+
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT PersonName FROM Persons, UnavailDates "
-								+ "WHERE ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)  "
-								+ "GROUP BY PersonName ORDER BY PersonName;");
-				selectStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(today)));
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT PersonName, PersonID,"
+						+ "(SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) AS Count "
+						+ "FROM Persons ORDER BY PersonName;");
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					nameModel.addElement(new String(result.getString("PersonName")));
+					if (result.getInt("Count") == 0
+							|| checkUnavailDates(result.getInt("PersonID"), sqlToday, unavailDatesList)) {
+						nameModel.addElement(new String(result.getString("PersonName")));
+					}
 				}
 				result.close();
 				selectStmt.close();
@@ -1969,7 +2016,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("COUNT(*) FROM Persons WHERE PersonName=?;");
+						.prepareStatement("SELECT COUNT(*) FROM Persons WHERE PersonName=?;");
 				selectStmt.setString(1, personName);
 
 				ResultSet result = selectStmt.executeQuery();
@@ -2489,6 +2536,17 @@ public class MySqlDatabase {
 			}
 		}
 		return count;
+	}
+
+	private boolean checkUnavailDates(int personID, java.sql.Date today, ArrayList<DateRangeModel> dateList) {
+		for (int i = 0; i < dateList.size(); i++) {
+			DateRangeModel thisDate = dateList.get(i);
+			if (personID == thisDate.getPersonID()) {
+				if (Utilities.isDateWithinDateRange(today, thisDate.getStartDate(), thisDate.getEndDate(), null))
+					return false;
+			}
+		}
+		return true;
 	}
 
 	/*

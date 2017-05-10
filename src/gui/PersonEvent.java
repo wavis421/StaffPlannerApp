@@ -15,7 +15,6 @@ public class PersonEvent extends EventObject {
 	private boolean leader;
 	private String notes;
 	private ArrayList<AssignedTasksModel> assignedTaskChanges;
-	private AssignedTasksModel lastTaskAdded;
 	private ArrayList<SingleInstanceTaskModel> extraDates;
 	private ArrayList<DateRangeModel> datesUnavailable;
 
@@ -23,8 +22,8 @@ public class PersonEvent extends EventObject {
 		super(source);
 	}
 
-	public PersonEvent(Object source, int personID, String name, String phone, String email, boolean leader, String notes,
-			ArrayList<AssignedTasksModel> assignedTaskChanges, AssignedTasksModel lastTaskAdded,
+	public PersonEvent(Object source, int personID, String name, String phone, String email, boolean leader,
+			String notes, ArrayList<AssignedTasksModel> assignedTaskChanges,
 			ArrayList<SingleInstanceTaskModel> extraDates, ArrayList<DateRangeModel> datesUnavailable) {
 		super(source);
 
@@ -35,7 +34,6 @@ public class PersonEvent extends EventObject {
 		this.leader = leader;
 		this.notes = notes;
 		this.assignedTaskChanges = assignedTaskChanges;
-		this.lastTaskAdded = lastTaskAdded;
 		this.extraDates = extraDates;
 		this.datesUnavailable = datesUnavailable;
 	}
@@ -43,7 +41,7 @@ public class PersonEvent extends EventObject {
 	public int getPersonID() {
 		return personID;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -68,14 +66,10 @@ public class PersonEvent extends EventObject {
 		return assignedTaskChanges;
 	}
 
-	public AssignedTasksModel getLastTaskAdded() {
-		return lastTaskAdded;
-	}
-
 	public ArrayList<SingleInstanceTaskModel> getExtraDates() {
 		return extraDates;
 	}
-	
+
 	public ArrayList<DateRangeModel> getDatesUnavailable() {
 		return datesUnavailable;
 	}

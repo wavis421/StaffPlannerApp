@@ -11,9 +11,9 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -78,11 +78,6 @@ public class PersonDialog extends JDialog {
 	private ArrayList<DateRangeModel> datesUnavailableList;
 	private JList<TaskModel> allTasks;
 
-	// Static variables
-	private static boolean okToSave;
-	private static ArrayList<SingleInstanceTaskModel> newSingleInstanceTasks;
-	private static ArrayList<DateRangeModel> newDatesUnavailable;
-
 	// Labels
 	private JLabel nameLabel = new JLabel("Person's name: ");
 	private JLabel phoneLabel = new JLabel("Phone #: ");
@@ -107,25 +102,16 @@ public class PersonDialog extends JDialog {
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 
 		// TODO: find better names!!
-		trees = new AssignTaskCreateTree(currentProgram, programList,
-				taskListByProgram, assignedTaskListByProgram);
+		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram);
 		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
 		this.allTasks = allTasks;
 		this.leaderButton.setSelected(true);
 		this.assignedTasksList = new ArrayList<AssignedTasksModel>();
-
-		if (newSingleInstanceTasks != null)
-			newSingleInstanceTasks.clear();
-		newSingleInstanceTasks = new ArrayList<SingleInstanceTaskModel>();
-
-		if (newDatesUnavailable != null)
-			newDatesUnavailable.clear();
-		newDatesUnavailable = new ArrayList<DateRangeModel>();
+		this.singleInstanceTaskList = new ArrayList<SingleInstanceTaskModel>();
+		this.datesUnavailableList = new ArrayList<DateRangeModel>();
 
 		createUnavailDateCombo();
-
-		okToSave = false;
 		createSingleInstanceTaskCombo();
 
 		setupPersonDialog();
@@ -141,8 +127,7 @@ public class PersonDialog extends JDialog {
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 
 		// TODO: find better names!!
-		trees = new AssignTaskCreateTree(currentProgram, programList,
-				taskListByProgram, assignedTaskListByProgram);
+		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram);
 		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
 		this.personID = person.getPersonID();
@@ -159,23 +144,6 @@ public class PersonDialog extends JDialog {
 		else
 			this.assistantButton.setSelected(true);
 
-		if (okToSave) {
-			// These lists were processed and can be cleared
-			newSingleInstanceTasks.clear();
-			newSingleInstanceTasks = new ArrayList<SingleInstanceTaskModel>();
-			newDatesUnavailable.clear();
-			newDatesUnavailable = new ArrayList<DateRangeModel>();
-
-			okToSave = false;
-
-		} else {
-			// Create lists first time after startup
-			if (newSingleInstanceTasks == null)
-				newSingleInstanceTasks = new ArrayList<SingleInstanceTaskModel>();
-			if (newDatesUnavailable == null)
-				newDatesUnavailable = new ArrayList<DateRangeModel>();
-		}
-
 		createUnavailDateCombo();
 		createSingleInstanceTaskCombo();
 
@@ -187,10 +155,6 @@ public class PersonDialog extends JDialog {
 
 	public PersonEvent getDialogResponse() {
 		return dialogResponse;
-	}
-
-	public boolean getOkToSaveStatus() {
-		return okToSave;
 	}
 
 	private void setupPersonDialog() {
@@ -211,7 +175,10 @@ public class PersonDialog extends JDialog {
 				DateRangeEvent dateResponse = ev.getDialogResponse();
 				if (dateResponse != null) {
 					// Date range valid. Add to Linked List and Combo Box.
-					newDatesUnavailable.add(dateResponse.getSqlDateRange());
+					DateRangeModel dateRangeModel = dateResponse.getSqlDateRange();
+					dateRangeModel.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
+					datesUnavailableList.add(dateRangeModel);
+
 					DefaultComboBoxModel<String> dateModel = (DefaultComboBoxModel<String>) dateUnavailCombo.getModel();
 					if (dateResponse.getDateRange().getStartDate().equals(dateResponse.getDateRange().getEndDate()))
 						// Add single date to list
@@ -237,7 +204,8 @@ public class PersonDialog extends JDialog {
 					// Check for date/time conflicts
 					if (!checkConflictsForSingleInstanceTask(singleTask)) {
 						// No conflicts; ready to add task
-						newSingleInstanceTasks.add(singleTask);
+						singleTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
+						singleInstanceTaskList.add(singleTask);
 
 						DefaultComboBoxModel<String> extraDateModel = (DefaultComboBoxModel<String>) singleInstanceTaskCombo
 								.getModel();
@@ -255,8 +223,7 @@ public class PersonDialog extends JDialog {
 				} else {
 					PersonEvent ev = new PersonEvent(this, personID, personName.getText().trim(),
 							phone.getText().trim(), email.getText().trim(), leaderButton.isSelected() ? true : false,
-							processNotesArea(), assignedTasksList, null, newSingleInstanceTasks, newDatesUnavailable);
-					okToSave = true;
+							processNotesArea(), assignedTasksList, singleInstanceTaskList, datesUnavailableList);
 					dialogResponse = ev;
 					setVisible(false);
 					dispose();
@@ -265,7 +232,6 @@ public class PersonDialog extends JDialog {
 		});
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				okToSave = true;
 				dialogResponse = null;
 				setVisible(false);
 				dispose();
@@ -354,24 +320,17 @@ public class PersonDialog extends JDialog {
 	private void createSingleInstanceTaskCombo() {
 		DefaultComboBoxModel<String> taskModel = new DefaultComboBoxModel<String>();
 
-		if (singleInstanceTaskList != null) {
-			for (int i = 0; i < singleInstanceTaskList.size(); i++) {
-				SingleInstanceTaskModel task = singleInstanceTaskList.get(i);
-				Calendar date = task.getTaskDate();
-				String taskName = task.getTaskName();
-				if (taskName == null || taskName.equals("")) {
-					taskName = "Floater";
-					taskModel.addElement(
-							taskName + " on " + Utilities.getDisplayDate(date) + " at " + Utilities.formatTime(date));
-				} else {
-					taskModel.addElement(taskName + " on " + Utilities.getDisplayDate(date));
-				}
+		for (int i = 0; i < singleInstanceTaskList.size(); i++) {
+			SingleInstanceTaskModel task = singleInstanceTaskList.get(i);
+			Calendar date = task.getTaskDate();
+			String taskName = task.getTaskName();
+			if (taskName == null || taskName.equals("")) {
+				taskName = "Floater";
+				taskModel.addElement(
+						taskName + " on " + Utilities.getDisplayDate(date) + " at " + Utilities.formatTime(date));
+			} else {
+				taskModel.addElement(taskName + " on " + Utilities.getDisplayDate(date));
 			}
-		}
-
-		for (int i = 0; i < newSingleInstanceTasks.size(); i++) {
-			SingleInstanceTaskModel task = newSingleInstanceTasks.get(i);
-			taskModel.addElement(task.getTaskName() + " on " + Utilities.getDisplayDate(task.getTaskDate()));
 		}
 
 		singleInstanceTaskCombo = new JComboBox<String>(taskModel);
@@ -383,15 +342,8 @@ public class PersonDialog extends JDialog {
 	private void createUnavailDateCombo() {
 		DefaultComboBoxModel<String> dateModel = new DefaultComboBoxModel<String>();
 
-		if (datesUnavailableList != null) {
-			for (int i = 0; i < datesUnavailableList.size(); i++) {
-				DateRangeModel dateUnavail = datesUnavailableList.get(i);
-				addDateUnavail(dateUnavail, dateModel);
-			}
-		}
-
-		for (int i = 0; i < newDatesUnavailable.size(); i++) {
-			DateRangeModel dateUnavail = newDatesUnavailable.get(i);
+		for (int i = 0; i < datesUnavailableList.size(); i++) {
+			DateRangeModel dateUnavail = datesUnavailableList.get(i);
 			addDateUnavail(dateUnavail, dateModel);
 		}
 
@@ -463,7 +415,7 @@ public class PersonDialog extends JDialog {
 						ListStatus status = removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
 						if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
 							status = ListStatus.LIST_ELEMENT_UPDATE;
-						
+
 						// TODO: process lastAssignedTask (expand tree node)
 						lastAssignedTask.setElementStatus(status);
 						assignedTasksList.add(lastAssignedTask);
@@ -508,8 +460,10 @@ public class PersonDialog extends JDialog {
 						lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
 						assignedTasksList.add(lastAssignedTask);
 
-						// Remove node from task tree, add it to assigned task tree
-						trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(), eventResponse.getTask().getTaskName());
+						// Remove node from task tree, add it to assigned task
+						// tree
+						trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(),
+								eventResponse.getTask().getTaskName());
 						trees.addNodeToTree(assignedTasksTree, eventResponse.getProgramName(), eventResponse);
 					}
 					taskTree.clearSelection();
@@ -548,34 +502,15 @@ public class PersonDialog extends JDialog {
 				calDayIdx, calWeekIdx))
 			return true;
 
-		if (singleInstanceTaskList != null) {
-			if (checkSingleInstanceTaskConflicts(person, singleInstanceTaskList, calDay, calDayIdx, calWeekIdx))
-				return true;
-		}
-
-		if (checkSingleInstanceTaskConflicts(person, newSingleInstanceTasks, calDay, calDayIdx, calWeekIdx))
+		if (checkSingleInstanceTaskConflicts(person, singleInstanceTaskList, calDay, calDayIdx, calWeekIdx))
 			return true;
 
 		return false;
 	}
 
 	private boolean isPersonAvailable(String person, Calendar thisDay, Date today) {
-		if (datesUnavailableList != null) {
-			for (int i = 0; i < datesUnavailableList.size(); i++) {
-				DateRangeModel datesUnavail = datesUnavailableList.get(i);
-				if (Utilities.isDateWithinDateRange(today, datesUnavail.getStartDate(), datesUnavail.getEndDate(),
-						"Unable to parse " + person + "'s Unavailable start/end Dates.")) {
-					JOptionPane.showMessageDialog(PersonDialog.this,
-							person + " is not available on " + Utilities.getDisplayDate(thisDay),
-							"Updating Person Info", JOptionPane.INFORMATION_MESSAGE);
-					return false;
-				}
-			}
-		}
-
-		for (int i = 0; i < newDatesUnavailable.size(); i++) {
-			DateRangeModel datesUnavail = newDatesUnavailable.get(i);
-
+		for (int i = 0; i < datesUnavailableList.size(); i++) {
+			DateRangeModel datesUnavail = datesUnavailableList.get(i);
 			if (Utilities.isDateWithinDateRange(today, datesUnavail.getStartDate(), datesUnavail.getEndDate(),
 					"Unable to parse " + person + "'s Unavailable start/end Dates.")) {
 				JOptionPane.showMessageDialog(PersonDialog.this,
@@ -584,7 +519,6 @@ public class PersonDialog extends JDialog {
 				return false;
 			}
 		}
-
 		return true;
 	}
 

@@ -9,12 +9,14 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 	private String taskName;
 	private Calendar taskDate;
 	private int color;
+	private ListStatus elementStatus;
 
 	public SingleInstanceTaskModel (int singleTaskID, int personID, int taskID, String taskName, Calendar taskDate, int color) {
 		this.singleTaskID = singleTaskID;
 		this.personID = personID;
 		this.taskID = taskID;
 		this.taskName = taskName;
+		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
 
 		taskDate.set(Calendar.SECOND, 0);
 		taskDate.set(Calendar.MILLISECOND, 0);
@@ -46,6 +48,14 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 
 	public int getColor() {
 		return color;
+	}
+
+	public ListStatus getElementStatus() {
+		return elementStatus;
+	}
+
+	public void setElementStatus(ListStatus elementStatus) {
+		this.elementStatus = elementStatus;
 	}
 
 	public int compareTo(SingleInstanceTaskModel otherTask) {

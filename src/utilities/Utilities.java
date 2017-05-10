@@ -95,8 +95,8 @@ public class Utilities {
 
 	public static boolean isDateWithinDateRange(Date today, String startDateStr, String endDateStr, String errorString) {
 		try {
-			Date startDate = dateFormatter.parse(startDateStr);
-			Date endDate = dateFormatter.parse(endDateStr);
+			Date startDate = sqlDateFormatter.parse(startDateStr);
+			Date endDate = sqlDateFormatter.parse(endDateStr);
 			
 			if (today.compareTo(startDate) >= 0 && today.compareTo(endDate) <= 0) {
 				// today is between startDate and endDate

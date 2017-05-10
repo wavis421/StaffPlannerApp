@@ -7,22 +7,28 @@ public class DateRangeModel implements Serializable, Comparable<DateRangeModel> 
 	private int unavailDatesID, personID;
 	private String startDate;
 	private String endDate;
-	
-	public DateRangeModel (int unavailDatesID, int personID, String startDate, String endDate) {
+	private ListStatus elementStatus;
+
+	public DateRangeModel(int unavailDatesID, int personID, String startDate, String endDate) {
 		this.unavailDatesID = unavailDatesID;
 		this.personID = personID;
 		this.startDate = startDate;
 		this.endDate = endDate;
+		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
 	}
 
 	public void setUnavailDatesID(int id) {
 		unavailDatesID = id;
 	}
-	
+
+	public int getPersonID() {
+		return personID;
+	}
+
 	public void setPersonID(int id) {
 		personID = id;
 	}
-	
+
 	public String getStartDate() {
 		return startDate;
 	}
@@ -38,11 +44,19 @@ public class DateRangeModel implements Serializable, Comparable<DateRangeModel> 
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
 	}
-	
+
+	public ListStatus getElementStatus() {
+		return elementStatus;
+	}
+
+	public void setElementStatus(ListStatus elementStatus) {
+		this.elementStatus = elementStatus;
+	}
+
 	public int compareTo(DateRangeModel otherDate) {
 		int dateCompareStart = this.startDate.compareTo(otherDate.getStartDate());
 		int dateCompareEnd = this.endDate.compareTo(otherDate.getEndDate());
-		
+
 		if (dateCompareStart != 0)
 			return dateCompareStart;
 		else
