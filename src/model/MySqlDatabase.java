@@ -363,9 +363,8 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateTask(String programName, String taskName, String location, int numLeadersReqd,
+	public void updateTask(int taskID, String programName, String taskName, String location, int numLeadersReqd,
 			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
-		// TODO: Update later to pass in TaskID
 		if (!checkDatabaseConnection())
 			return;
 
@@ -385,7 +384,7 @@ public class MySqlDatabase {
 				updateTaskStmt.setInt(col++, time.get24Hour());
 				updateTaskStmt.setInt(col++, time.getMinute());
 				updateTaskStmt.setInt(col++, color);
-				updateTaskStmt.setInt(col++, 0 /* taskID */);
+				updateTaskStmt.setInt(col++, taskID);
 
 				updateTaskStmt.executeUpdate();
 				updateTaskStmt.close();
@@ -440,11 +439,10 @@ public class MySqlDatabase {
 		}
 	}
 
-	public TaskModel getTaskByName(String programName, String taskName) {
+	public TaskModel getTaskByName(String taskName) {
 		if (!checkDatabaseConnection())
 			return null;
 
-		// TODO: Remove programName parameter, fill in missing fields
 		TaskModel task = null;
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -474,46 +472,6 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				System.out.println("Failure retreiving " + taskName + " task from database: " + e.getMessage());
-				break;
-			}
-		}
-		return task;
-	}
-
-	public TaskModel getTaskByID(String programName, int taskID) {
-		if (!checkDatabaseConnection())
-			return null;
-
-		// TODO: Remove programName parameter
-		TaskModel task = null;
-		for (int i = 0; i < 2; i++) {
-			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM Tasks WHERE TaskID=?;");
-				selectStmt.setInt(1, taskID);
-
-				ResultSet result = selectStmt.executeQuery();
-				if (result.next()) {
-					task = new TaskModel(result.getInt("TaskID"), result.getInt("ProgramID"),
-							result.getString("TaskName"), result.getString("Location"), result.getInt("NumLeadersReqd"),
-							result.getInt("TotalPersonsReqd"), createDaysOfWeekArray(result.getInt("DaysOfWeek")),
-							createDowInMonthArray(result.getInt("DowInMonth")),
-							new TimeModel(result.getInt("Hour"), result.getInt("Minute")), result.getInt("Color"));
-				}
-				result.close();
-				selectStmt.close();
-				break;
-
-			} catch (CommunicationsException e) {
-				if (i == 0) {
-					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
-					connectDatabase();
-				} else
-					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
-
-			} catch (SQLException e) {
-				System.out.println("Failure retreiving taskID=" + taskID + " from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -579,8 +537,6 @@ public class MySqlDatabase {
 						.prepareStatement("CALL MonthlyCalendar('" + date + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
-				boolean[] dayOfWeek = { false, true, true, true, true, true, false };
-				boolean[] weekOfMonth = { true, true, true, true, true, true };
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
@@ -589,8 +545,6 @@ public class MySqlDatabase {
 					Utilities.addTimeToCalendar(cal,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
-					// TODO: Add color field, figure out TaskModel, don't
-					// hard-code columns
 					if (taskName == null) {
 						// Floater
 						if (personCount == 1)
@@ -601,10 +555,10 @@ public class MySqlDatabase {
 									.add(new CalendarDayModel(null, personCount, results.getInt("LeaderCount"),
 											results.getInt("TaskColor"), cal, personCount + " Floaters"));
 					} else {
+						// Don't need all of the task fields for calendar day
 						TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"),
-								taskName, "" /* location */, results.getInt("NumLdrsReqd"),
-								results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
-								new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
+								taskName, "", results.getInt("NumLdrsReqd"), results.getInt("NumPersonsReqd"), null,
+								null, new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 								results.getInt("TaskColor"));
 						calendarList.get(day - 1)
 								.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
@@ -664,8 +618,6 @@ public class MySqlDatabase {
 						.prepareStatement("CALL MonthlyCalendarByLocation('" + date + "', '" + locFilter + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
-				boolean[] dayOfWeek = { false, true, true, true, true, true, false };
-				boolean[] weekOfMonth = { true, true, true, true, true, true };
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
@@ -674,10 +626,10 @@ public class MySqlDatabase {
 					Utilities.addTimeToCalendar(cal,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
-					// TODO: Figure out TaskModel, don't hard-code columns
+					// Don't need all task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
 							results.getString("Location"), results.getInt("NumLdrsReqd"),
-							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
+							results.getInt("NumPersonsReqd"), null, null,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -736,8 +688,6 @@ public class MySqlDatabase {
 						.prepareStatement("CALL MonthlyCalendarByTime('" + date + "', '" + timeFilter + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
-				boolean[] dayOfWeek = { false, true, true, true, true, true, false };
-				boolean[] weekOfMonth = { true, true, true, true, true, true };
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
@@ -746,10 +696,10 @@ public class MySqlDatabase {
 					Utilities.addTimeToCalendar(cal,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
-					// TODO: Figure out TaskModel, don't hard-code columns
+					// Don't need all of the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
 							results.getString("Location"), results.getInt("NumLdrsReqd"),
-							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
+							results.getInt("NumPersonsReqd"), null, null,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -810,8 +760,6 @@ public class MySqlDatabase {
 						.prepareStatement("CALL MonthlyCalendarByPersons('" + date + "', '" + personFilter + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
-				boolean[] dayOfWeek = { false, true, true, true, true, true, false };
-				boolean[] weekOfMonth = { true, true, true, true, true, true };
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
@@ -820,10 +768,10 @@ public class MySqlDatabase {
 					Utilities.addTimeToCalendar(cal,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
-					// TODO: Figure out TaskModel, don't hard-code columns
+					// Don't need all of the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
 							results.getString("Location"), results.getInt("NumLdrsReqd"),
-							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
+							results.getInt("NumPersonsReqd"), null, null,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -883,8 +831,6 @@ public class MySqlDatabase {
 						.prepareStatement("CALL MonthlyCalendarByProgram('" + date + "', '" + programFilter + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
-				boolean[] dayOfWeek = { false, true, true, true, true, true, false };
-				boolean[] weekOfMonth = { true, true, true, true, true, true };
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
@@ -893,10 +839,10 @@ public class MySqlDatabase {
 					Utilities.addTimeToCalendar(cal,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
-					// TODO: Figure out TaskModel, don't hard-code columns
+					// Don't need all the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
 							results.getString("Location"), results.getInt("NumLdrsReqd"),
-							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
+							results.getInt("NumPersonsReqd"), null, null,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -947,8 +893,6 @@ public class MySqlDatabase {
 						.prepareStatement("CALL MonthlyCalendarByRoster('" + date + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
-				boolean[] dayOfWeek = { false, true, true, true, true, true, false };
-				boolean[] weekOfMonth = { true, true, true, true, true, true };
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
@@ -957,10 +901,10 @@ public class MySqlDatabase {
 					Utilities.addTimeToCalendar(cal,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
-					// TODO: Figure out TaskModel, don't hard-code columns
+					// Don't need all of the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
 							results.getString("Location"), results.getInt("NumLdrsReqd"),
-							results.getInt("NumPersonsReqd"), dayOfWeek, weekOfMonth,
+							results.getInt("NumPersonsReqd"), null, null,
 							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
@@ -1142,7 +1086,6 @@ public class MySqlDatabase {
 		return new JList<String>(timeModel);
 	}
 
-	// TODO:
 	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
@@ -1158,7 +1101,7 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						// Select tasks with matching DOW and WOM
-						"SELECT Hour, Minute " + "FROM Tasks, Programs "
+						"SELECT Hour, Minute FROM Tasks, Programs "
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
@@ -1220,7 +1163,6 @@ public class MySqlDatabase {
 		}
 
 		for (int i = 0; i < extraTasks.size(); i++) {
-			// TODO: Also add floater color
 			SingleInstanceTaskModel task = extraTasks.get(i);
 			addSingleInstanceTask(name, task.getTaskID(), task.getTaskDate(), task.getColor());
 		}
@@ -1428,13 +1370,12 @@ public class MySqlDatabase {
 		}
 	}
 
-	public ArrayList<AssignedTasksModel> getAssignedTasks(String personName) {
+	private ArrayList<AssignedTasksModel> getAssignedTasks(String personName) {
 		ArrayList<AssignedTasksModel> taskList = new ArrayList<>();
 
 		if (!checkDatabaseConnection())
 			return taskList;
 
-		// TODO: Add missing fields
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT ProgramName, "
@@ -1442,7 +1383,7 @@ public class MySqlDatabase {
 						+ "  AssignedTasks.DaysOfWeek AS DaysOfWeek, AssignedTasks.DowInMonth AS DowInMonth "
 						+ "FROM AssignedTasks, Persons, Tasks, Programs WHERE Persons.PersonName = ? "
 						+ "  AND Persons.PersonID = AssignedTasks.PersonID "
-						+ "  AND Tasks.TaskID = AssignedTasks.TaskID " + "  AND Tasks.ProgramID = Programs.ProgramID "
+						+ "  AND Tasks.TaskID = AssignedTasks.TaskID AND Tasks.ProgramID = Programs.ProgramID "
 						+ "ORDER BY ProgramName, TaskName;");
 				selectStmt.setString(1, personName);
 
@@ -1475,7 +1416,7 @@ public class MySqlDatabase {
 		return taskList;
 	}
 
-	public void addSingleInstanceTask(String personName, int taskID, Calendar taskTime, int color) {
+	private void addSingleInstanceTask(String personName, int taskID, Calendar taskTime, int color) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -1529,24 +1470,23 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			PreparedStatement addSingleTaskStmt = null;
 			try {
-				if (task.getTaskID() == 0) {
+				int col = 1;
+				if (task == null || task.getTaskID() == 0) {
 					// TODO: Figure out how to add ProgramID for Floater
 					addSingleTaskStmt = dbConnection.prepareStatement(
 							"INSERT INTO SingleInstanceTasks (PersonID, SingleDate, SingleTime, Color) VALUES "
 									+ "((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?);");
+					addSingleTaskStmt.setString(col++, personName);
 				} else {
 					addSingleTaskStmt = dbConnection.prepareStatement(
 							"INSERT INTO SingleInstanceTasks (PersonID, TaskID, ProgramID, SingleDate, SingleTime, Color) "
 									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?, ?, ?);");
-				}
-
-				// Add new Single Instance Task
-				int col = 1;
-				addSingleTaskStmt.setString(col++, personName);
-				if (task.getTaskID() != 0) {
+					addSingleTaskStmt.setString(col++, personName);
 					addSingleTaskStmt.setInt(col++, task.getTaskID());
 					addSingleTaskStmt.setInt(col++, task.getProgramID());
 				}
+
+				// Add new Single Instance Task
 				addSingleTaskStmt.setDate(col++, java.sql.Date.valueOf(Utilities.getSqlDate(singleDate)));
 				addSingleTaskStmt.setTime(col++, java.sql.Time.valueOf(Utilities.getSqlTime(singleDate)));
 				addSingleTaskStmt.setInt(col, color);
@@ -1738,7 +1678,6 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return dateList;
 
-		// TODO: Add missing fields
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
@@ -2097,7 +2036,7 @@ public class MySqlDatabase {
 			try {
 				// TODO: Optimize by not selecting * from each table
 				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Persons, AssignedTasks, Tasks " + "WHERE Tasks.TaskID=?"
+						.prepareStatement("SELECT * FROM Persons, AssignedTasks, Tasks WHERE Tasks.TaskID=?"
 								+ "  AND AssignedTasks.TaskID = Tasks.TaskID "
 								+ "  AND AssignedTasks.PersonID = Persons.PersonID " + "ORDER BY PersonName;");
 				selectStmt.setInt(1, task.getTaskID());

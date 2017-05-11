@@ -71,8 +71,8 @@ public class Controller {
 				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 	}
 
-	public void updateTask(TaskEvent ev) {
-		sqlDb.updateTask(ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
+	public void updateTask(int taskID, TaskEvent ev) {
+		sqlDb.updateTask(taskID, ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
 				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 	}
 
@@ -80,8 +80,8 @@ public class Controller {
 		sqlDb.renameTask(programName, oldName, newName);
 	}
 
-	public TaskModel getTaskByName(String programName, String taskName) {
-		return sqlDb.getTaskByName(programName, taskName);
+	public TaskModel getTaskByName(String taskName) {
+		return sqlDb.getTaskByName(taskName);
 	}
 
 	public String findProgramByTaskName(String taskName) {
@@ -201,10 +201,6 @@ public class Controller {
 
 	public int getNumPersons() {
 		return sqlDb.getNumPersons();
-	}
-
-	public ArrayList<AssignedTasksModel> getAssignedTasks(String personName) {
-		return sqlDb.getAssignedTasks(personName);
 	}
 
 	public ArrayList<DateRangeModel> getUnavailDates(String personName) {

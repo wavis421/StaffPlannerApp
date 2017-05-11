@@ -406,8 +406,9 @@ public class PersonDialog extends JDialog {
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
 				(int) notesArea.getPreferredSize().getHeight() * 3));
+		assignedTasksScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		assignedTasksTree.setCellRenderer(new AssignTaskTreeRenderer());
-                assignedTasksTree.getVerticalScrollBar().setUnitIncrement(16);
+		
 
 		/* Add tree listener */
 		assignedTasksTree.addTreeSelectionListener(new TreeSelectionListener() {
@@ -447,8 +448,8 @@ public class PersonDialog extends JDialog {
 		taskTreeScrollPane = new JScrollPane(taskTree);
 		taskTreeScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
 				(int) notesArea.getPreferredSize().getHeight() * 3));
+		taskTreeScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		taskTree.setCellRenderer(new TaskTreeRenderer());
-                taskTree.getVerticalScrollBar().setUnitIncrement(16);
 
 		/* Add tree listener */
 		taskTree.addTreeSelectionListener(new TreeSelectionListener() {

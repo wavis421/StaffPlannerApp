@@ -691,7 +691,7 @@ public class MainFrame extends JFrame {
 		if (programName == null)
 			programName = controller.findProgramByTaskName(origTaskName);
 
-		TaskModel task = controller.getTaskByName(programName, origTaskName);
+		TaskModel task = controller.getTaskByName(origTaskName);
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, programName, task);
 		processCreateTaskDialog(taskEvent, origTaskName);
 	}
@@ -709,7 +709,7 @@ public class MainFrame extends JFrame {
 		// Loop until user enters valid and unique task name OR cancels
 		while (taskEvent.getDialogResponse() != null) {
 			TaskEvent dialogResponse = taskEvent.getDialogResponse();
-			TaskModel task = controller.getTaskByName(dialogResponse.getProgramName(), dialogResponse.getTaskName());
+			TaskModel task = controller.getTaskByName(dialogResponse.getTaskName());
 
 			if (task != null && (origTaskName == null || !origTaskName.equals(dialogResponse.getTaskName()))) {
 				// Task already exists!
@@ -741,7 +741,7 @@ public class MainFrame extends JFrame {
 				if (!origTaskName.equals(dialogResponse.getTaskName()))
 					controller.renameTask(dialogResponse.getProgramName(), origTaskName, dialogResponse.getTaskName());
 
-				controller.updateTask(dialogResponse);
+				controller.updateTask(task.getTaskID(), dialogResponse);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 				break;
 			}
@@ -846,8 +846,7 @@ public class MainFrame extends JFrame {
 
 				// Handle floater with null task
 				if (task.getTask() != null) {
-					String programName = controller.findProgramByTaskName(task.getTask().getTaskName());
-					selectedTask = controller.getTaskByName(programName, task.getTask().getTaskName());
+					selectedTask = controller.getTaskByName(task.getTask().getTaskName());
 				} else {
 					selectedTask = null;
 				}
