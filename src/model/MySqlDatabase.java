@@ -1177,8 +1177,6 @@ public class MySqlDatabase {
 			String personNotes, ArrayList<AssignedTasksModel> personAssignedTasks,
 			ArrayList<SingleInstanceTaskModel> extraTasks, ArrayList<DateRangeModel> personDatesUnavailable) {
 
-		// TODO: Check if we have to check for person NAME changes???
-
 		// Update person info
 		updatePersonInfo(personName, personPhone, personEmail, personIsLeader, personNotes);
 
@@ -1471,8 +1469,8 @@ public class MySqlDatabase {
 			PreparedStatement addSingleTaskStmt = null;
 			try {
 				int col = 1;
+				// TODO: Figure out how to add ProgramID for Floater & Sub
 				if (task == null || task.getTaskID() == 0) {
-					// TODO: Figure out how to add ProgramID for Floater
 					addSingleTaskStmt = dbConnection.prepareStatement(
 							"INSERT INTO SingleInstanceTasks (PersonID, SingleDate, SingleTime, Color) VALUES "
 									+ "((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?);");
@@ -1720,7 +1718,6 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return dateList;
 
-		// TODO: Add missing fields
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
@@ -2091,7 +2088,6 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return (ArrayList<PersonByTaskModel>) thisDaysPersons;
 
-		// TODO: add color, check for single instance task TIME
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
@@ -2211,7 +2207,6 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return (ArrayList<PersonByTaskModel>) persons;
 
-		// TODO: add color, check for single instance task TIME
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
@@ -2339,7 +2334,6 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return (ArrayList<PersonByTaskModel>) persons;
 
-		// TODO: add color, check for single instance task TIME
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
