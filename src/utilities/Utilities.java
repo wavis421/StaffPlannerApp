@@ -284,16 +284,6 @@ public class Utilities {
 		return womString;
 	}
 
-	private static String getFormattedTime(Calendar cal) {
-		// This method assumes that the calendar is already cloned...
-		int hour = cal.get(Calendar.HOUR);
-		if (hour == 0) {
-			cal.set(Calendar.HOUR, 12);
-			cal.set(Calendar.AM_PM, Calendar.AM);
-		}
-		return timeFormat.format(cal.getTime());
-	}
-
 	private static JDatePickerImpl setDate(JDatePickerImpl datePickerFrom, JDatePickerImpl datePickerTo) {
 		Calendar calFrom = (Calendar) datePickerFrom.getModel().getValue();
 		datePickerTo.getModel().setDate(calFrom.get(Calendar.YEAR), calFrom.get(Calendar.MONTH),

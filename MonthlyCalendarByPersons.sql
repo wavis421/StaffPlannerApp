@@ -1,7 +1,7 @@
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS MonthlyCalendarByPersons$$
-CREATE PROCEDURE MonthlyCalendarByPersons(IN startDate DATE, IN personFilter VARCHAR(150))
+CREATE PROCEDURE MonthlyCalendarByPersons(IN startDate DATE, IN personFilter VARCHAR(500))
 BEGIN
 	DECLARE firstDow INT Default (DAYOFWEEK(startDate) - 1);
 	DECLARE numDaysInMonth INT Default (DAYOFMONTH(LAST_DAY(startDate)));

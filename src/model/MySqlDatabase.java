@@ -626,6 +626,21 @@ public class MySqlDatabase {
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar,
 			JList<String> locations) {
+		return getTasksByFilterByMonth (calendar, locations, "MonthlyCalendarByLocation");
+	}
+	
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
+			JList<String> personList) {
+		return getTasksByFilterByMonth (calendar, personList, "MonthlyCalendarByPersons");
+	}
+
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByProgramByMonth(Calendar calendar,
+			JList<String> programList) {
+		return getTasksByFilterByMonth (calendar, programList, "MonthlyCalendarByProgram");
+	}
+
+	private ArrayList<ArrayList<CalendarDayModel>> getTasksByFilterByMonth (Calendar calendar,
+			JList<String> filterList, String subroutineName) {
 		// Create a calendar list for each day of the month
 		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
 
@@ -642,18 +657,18 @@ public class MySqlDatabase {
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
 		String date = Utilities.getSqlDate(calendar);
 
-		// Create filter string with locations
-		String locFilter = "";
-		for (int i = 0; i < locations.getModel().getSize(); i++) {
+		// Create filter string
+		String filterString = "";
+		for (int i = 0; i < filterList.getModel().getSize(); i++) {
 			if (i > 0)
-				locFilter += ",";
-			locFilter += locations.getModel().getElementAt(i);
+				filterString += ",";
+			filterString += filterList.getModel().getElementAt(i);
 		}
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement updateMonthStmt = dbConnection
-						.prepareStatement("CALL MonthlyCalendarByLocation('" + date + "', '" + locFilter + "');");
+						.prepareStatement("CALL " + subroutineName + "('" + date + "', '" + filterString + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
 				while (results.next()) {
@@ -729,143 +744,6 @@ public class MySqlDatabase {
 					personCount = results.getInt("PersonCount");
 
 					// Don't need all of the task fields for calendar
-					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
-							results.getString("Location"), results.getInt("NumLdrsReqd"),
-							results.getInt("NumPersonsReqd"), null, null,
-							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
-							results.getInt("TaskColor"));
-					calendarList.get(day - 1)
-							.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-									results.getInt("LeaderCount"), results.getInt("TaskColor"), null, ""));
-				}
-				results.close();
-				updateMonthStmt.close();
-				break;
-
-			} catch (CommunicationsException e) {
-				if (i == 0) {
-					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
-					connectDatabase();
-				} else
-					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
-
-			} catch (SQLException e) {
-				System.out.println("Failure loading Calendar month from database: " + e.getMessage());
-				break;
-			}
-		}
-		return calendarList;
-	}
-
-	// TODO: Combine this method with other methods that have filter list
-	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
-			JList<String> personList) {
-		// Create a calendar list for each day of the month
-		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
-
-		// Create an empty array list for each day of month
-		for (int i = 0; i < 31; i++)
-			calendarList.add(new ArrayList<CalendarDayModel>());
-
-		// Return empty list if unable to connect to database
-		if (!checkDatabaseConnection())
-			return calendarList;
-
-		int day, personCount;
-		String taskName;
-		calendar.set(Calendar.DAY_OF_MONTH, 1);
-		String date = Utilities.getSqlDate(calendar);
-
-		// Create filter string with locations
-		String personFilter = "";
-		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			if (i > 0)
-				personFilter += ",";
-			personFilter += personList.getModel().getElementAt(i);
-		}
-
-		for (int i = 0; i < 2; i++) {
-			try {
-				PreparedStatement updateMonthStmt = dbConnection
-						.prepareStatement("CALL MonthlyCalendarByPersons('" + date + "', '" + personFilter + "');");
-				ResultSet results = updateMonthStmt.executeQuery();
-
-				while (results.next()) {
-					day = results.getInt("Today");
-					taskName = results.getString("TaskName");
-					personCount = results.getInt("PersonCount");
-
-					// Don't need all of the task fields for calendar
-					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
-							results.getString("Location"), results.getInt("NumLdrsReqd"),
-							results.getInt("NumPersonsReqd"), null, null,
-							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")),
-							results.getInt("TaskColor"));
-					calendarList.get(day - 1)
-							.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-									results.getInt("LeaderCount"), results.getInt("TaskColor"), null, ""));
-				}
-				results.close();
-				updateMonthStmt.close();
-				break;
-
-			} catch (CommunicationsException e) {
-				if (i == 0) {
-					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
-					connectDatabase();
-				} else
-					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
-
-			} catch (SQLException e) {
-				System.out.println("Failure loading Calendar month from database: " + e.getMessage());
-				break;
-			}
-		}
-		return calendarList;
-	}
-
-	public ArrayList<ArrayList<CalendarDayModel>> getTasksByProgramByMonth(Calendar calendar,
-			JList<String> programList) {
-		// Create a calendar list for each day of the month
-		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
-
-		// Create an empty array list for each day of month
-		for (int i = 0; i < 31; i++)
-			calendarList.add(new ArrayList<CalendarDayModel>());
-
-		// Return empty list if unable to connect to database
-		if (!checkDatabaseConnection())
-			return calendarList;
-
-		int day, personCount;
-		String taskName;
-		calendar.set(Calendar.DAY_OF_MONTH, 1);
-		String date = Utilities.getSqlDate(calendar);
-
-		// Create filter string with programs
-		String programFilter = "";
-		for (int i = 0; i < programList.getModel().getSize(); i++) {
-			if (i > 0)
-				programFilter += ",";
-			programFilter += programList.getModel().getElementAt(i);
-		}
-
-		for (int i = 0; i < 2; i++) {
-			try {
-				PreparedStatement updateMonthStmt = dbConnection
-						.prepareStatement("CALL MonthlyCalendarByProgram('" + date + "', '" + programFilter + "');");
-				ResultSet results = updateMonthStmt.executeQuery();
-
-				while (results.next()) {
-					day = results.getInt("Today");
-					taskName = results.getString("TaskName");
-					personCount = results.getInt("PersonCount");
-
-					// Don't need all the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
 							results.getString("Location"), results.getInt("NumLdrsReqd"),
 							results.getInt("NumPersonsReqd"), null, null,
@@ -1444,22 +1322,26 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			PreparedStatement addSingleTaskStmt = null;
 			try {
-				// TODO: Figure out how to add ProgramID
+				// TODO: Figure out how to add ProgramID for floater
 				if (taskID == 0) {
 					addSingleTaskStmt = dbConnection.prepareStatement(
 							"INSERT INTO SingleInstanceTasks (PersonID, SingleDate, SingleTime, Color) "
 									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?);");
 				} else {
 					addSingleTaskStmt = dbConnection.prepareStatement(
-							"INSERT INTO SingleInstanceTasks (PersonID, TaskID, SingleDate, SingleTime, Color) "
-									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?, ?);");
+							"INSERT INTO SingleInstanceTasks (PersonID, ProgramID, TaskID, SingleDate, SingleTime, Color) "
+									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), "
+									+ "   (SELECT ProgramID FROM Tasks WHERE Tasks.TaskID=?), "
+									+ "   ?, ?, ?, ?);");
 				}
 
 				// Add new Single Instance Task
 				int col = 1;
 				addSingleTaskStmt.setString(col++, personName);
-				if (taskID != 0)
+				if (taskID != 0) {
 					addSingleTaskStmt.setInt(col++, taskID);
+					addSingleTaskStmt.setInt(col++, taskID);
+				}
 				addSingleTaskStmt.setDate(col++, java.sql.Date.valueOf(Utilities.getSqlDate(taskTime)));
 				addSingleTaskStmt.setTime(col++, java.sql.Time.valueOf(Utilities.getSqlTime(taskTime)));
 				addSingleTaskStmt.setInt(col, color);
