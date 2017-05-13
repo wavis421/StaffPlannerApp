@@ -364,7 +364,7 @@ public class MySqlDatabase {
 	}
 
 	public void updateTask(int taskID, String programName, String taskName, String location, int numLeadersReqd,
-			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
+			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color, TimeModel origTaskTime) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -388,6 +388,10 @@ public class MySqlDatabase {
 
 				updateTaskStmt.executeUpdate();
 				updateTaskStmt.close();
+				
+				// Check if task time has changed, and update single-instance tasks
+				if (!origTaskTime.equals(time))
+					updateSingleInstanceTaskTime(taskID, time);
 				break;
 
 			} catch (CommunicationsException e) {
@@ -401,6 +405,39 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				System.out.println("Failure updating " + taskName + " task in database: " + e.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void updateSingleInstanceTaskTime(int taskID, TimeModel newTime) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement updateTaskStmt = dbConnection
+						.prepareStatement("UPDATE SingleInstanceTasks SET SingleTime=? WHERE TaskID=?;");
+
+				int col = 1;
+				updateTaskStmt.setTime(col++, java.sql.Time.valueOf(Utilities.getSqlTime(newTime.getCalTime())));
+				updateTaskStmt.setInt(col++, taskID);
+
+				updateTaskStmt.executeUpdate();
+				updateTaskStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure updating task time in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -541,12 +578,13 @@ public class MySqlDatabase {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
 					personCount = results.getInt("PersonCount");
-					Calendar cal = Calendar.getInstance();
-					Utilities.addTimeToCalendar(cal,
-							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
 					if (taskName == null) {
 						// Floater
+						Calendar cal = (Calendar) calendar.clone();
+						cal.set(Calendar.DAY_OF_MONTH, day);
+						Utilities.addTimeToCalendar(cal,
+								new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 						if (personCount == 1)
 							calendarList.get(day - 1).add(new CalendarDayModel(null, personCount,
 									results.getInt("LeaderCount"), results.getInt("TaskColor"), cal, "Floater"));
@@ -622,9 +660,6 @@ public class MySqlDatabase {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
 					personCount = results.getInt("PersonCount");
-					Calendar cal = Calendar.getInstance();
-					Utilities.addTimeToCalendar(cal,
-							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
 					// Don't need all task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
@@ -692,9 +727,6 @@ public class MySqlDatabase {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
 					personCount = results.getInt("PersonCount");
-					Calendar cal = Calendar.getInstance();
-					Utilities.addTimeToCalendar(cal,
-							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
 					// Don't need all of the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
@@ -764,9 +796,6 @@ public class MySqlDatabase {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
 					personCount = results.getInt("PersonCount");
-					Calendar cal = Calendar.getInstance();
-					Utilities.addTimeToCalendar(cal,
-							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
 					// Don't need all of the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
@@ -835,9 +864,6 @@ public class MySqlDatabase {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
 					personCount = results.getInt("PersonCount");
-					Calendar cal = Calendar.getInstance();
-					Utilities.addTimeToCalendar(cal,
-							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
 					// Don't need all the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
@@ -897,9 +923,6 @@ public class MySqlDatabase {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
 					personCount = results.getInt("PersonCount");
-					Calendar cal = Calendar.getInstance();
-					Utilities.addTimeToCalendar(cal,
-							new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 
 					// Don't need all of the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,

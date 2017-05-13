@@ -71,9 +71,9 @@ public class Controller {
 				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
 	}
 
-	public void updateTask(int taskID, TaskEvent ev) {
+	public void updateTask(int taskID, TaskEvent ev, TimeModel origTaskTime) {
 		sqlDb.updateTask(taskID, ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
-				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor());
+				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor(), origTaskTime);
 	}
 
 	public void renameTask(String programName, String oldName, String newName) {

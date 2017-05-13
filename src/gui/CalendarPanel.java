@@ -353,7 +353,7 @@ public class CalendarPanel extends JPanel {
 								// Clone the calendar, update with selected day
 								Calendar calendar = (Calendar) currentCalendar.clone();
 								calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(e.getComponent().getName()));
-
+								
 								// Compute location for pop-up menu
 								Point point = new Point();
 								point.setLocation(dayBox.getX() + e.getPoint().getX(),

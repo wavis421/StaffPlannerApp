@@ -684,7 +684,7 @@ public class MainFrame extends JFrame {
 
 	private void createTask() {
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, selectedProgramName);
-		processCreateTaskDialog(taskEvent, null);
+		processCreateTaskDialog(taskEvent, null, null);
 	}
 
 	private void editTask(String programName, String origTaskName) {
@@ -692,20 +692,22 @@ public class MainFrame extends JFrame {
 			programName = controller.findProgramByTaskName(origTaskName);
 
 		TaskModel task = controller.getTaskByName(origTaskName);
+		TimeModel origTaskTime = task.getTime();
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, programName, task);
-		processCreateTaskDialog(taskEvent, origTaskName);
+		processCreateTaskDialog(taskEvent, origTaskName, origTaskTime);
 	}
 
 	private void cloneTask(TaskModel task) {
+		TimeModel origTaskTime = task.getTime();
 		TaskEvent ev = new TaskEvent(MainFrame.this, selectedProgramName, null, task.getLocation(),
 				task.getNumLeadersReqd(), task.getTotalPersonsReqd(), task.getDayOfWeek(), task.getWeekOfMonth(),
 				task.getTime(), task.getColor());
 
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev, task.getTaskID(), task.getProgramID());
-		processCreateTaskDialog(taskEvent, null);
+		processCreateTaskDialog(taskEvent, null, origTaskTime);
 	}
 
-	private void processCreateTaskDialog(TaskDialog taskEvent, String origTaskName) {
+	private void processCreateTaskDialog(TaskDialog taskEvent, String origTaskName, TimeModel origTaskTime) {
 		// Loop until user enters valid and unique task name OR cancels
 		while (taskEvent.getDialogResponse() != null) {
 			TaskEvent dialogResponse = taskEvent.getDialogResponse();
@@ -741,7 +743,7 @@ public class MainFrame extends JFrame {
 				if (!origTaskName.equals(dialogResponse.getTaskName()))
 					controller.renameTask(dialogResponse.getProgramName(), origTaskName, dialogResponse.getTaskName());
 
-				controller.updateTask(task.getTaskID(), dialogResponse);
+				controller.updateTask(task.getTaskID(), dialogResponse, origTaskTime);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 				break;
 			}

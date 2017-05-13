@@ -48,7 +48,7 @@ public class TaskTableDialog extends JDialog {
 
 	public TaskTableDialog(JFrame parent, String title, JList<TaskModel> taskList) {
 		super(parent, true);
-		setLocation(new Point(100,100));
+		setLocation(new Point(100, 100));
 		setTitle(title);
 		this.taskList = taskList;
 
@@ -130,7 +130,7 @@ public class TaskTableDialog extends JDialog {
 		removeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
-				TaskTableEvent ev = new TaskTableEvent(this, DELETE_ROW_BUTTON, 
+				TaskTableEvent ev = new TaskTableEvent(this, DELETE_ROW_BUTTON,
 						taskList.getModel().getElementAt(row).getTaskName());
 				dialogResponse = ev;
 				setVisible(false);
@@ -176,13 +176,13 @@ public class TaskTableDialog extends JDialog {
 				setText((String) value);
 			else if (value instanceof TimeModel)
 				setText((String) value.toString());
-			
+
 			if (column != -1) {
 				Color textColor = Color.black;
 				if (column == tableModel.getColumnForTaskName()) {
 					int modelRow = table.convertRowIndexToModel(row);
 					TaskModel task = (TaskModel) taskList.getModel().getElementAt(modelRow);
-						textColor = new Color(task.getColor());
+					textColor = new Color(task.getColor());
 				}
 				super.setForeground(textColor);
 
@@ -194,8 +194,7 @@ public class TaskTableDialog extends JDialog {
 				if (column == tableModel.getColumnForTaskName()) {
 					setText(" " + getText());
 					super.setHorizontalAlignment(LEFT);
-				}
-				else
+				} else
 					super.setHorizontalAlignment(CENTER);
 			}
 			return this;
@@ -213,7 +212,7 @@ public class TaskTableDialog extends JDialog {
 	public static int getDeleteRowButton() {
 		return DELETE_ROW_BUTTON;
 	}
-	
+
 	public static int getCloseButton() {
 		return CLOSE_BUTTON;
 	}

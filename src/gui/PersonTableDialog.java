@@ -348,7 +348,8 @@ public class PersonTableDialog extends JDialog {
 			if (column != -1) {
 				Color textColor = Color.black;
 				if (column == tableModel.getColumnForTaskName()) {
-					PersonByTaskModel person = personList.get(row);
+					int modelRow = table.convertRowIndexToModel(row);
+					PersonByTaskModel person = personList.get(modelRow);
 					if (person.getTask() != null)
 						textColor = new Color(person.getTask().getColor());
 					else
