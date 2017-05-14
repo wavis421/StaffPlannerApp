@@ -73,7 +73,8 @@ public class Controller {
 
 	public void updateTask(int taskID, TaskEvent ev, TimeModel origTaskTime) {
 		sqlDb.updateTask(taskID, ev.getProgramName(), ev.getTaskName(), ev.getLocation(), ev.getNumLeadersReqd(),
-				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor(), origTaskTime);
+				ev.getTotalPersonsReqd(), ev.getDayOfWeek(), ev.getWeekOfMonth(), ev.getTime(), ev.getColor(),
+				origTaskTime);
 	}
 
 	public void renameTask(String programName, String oldName, String newName) {
@@ -92,29 +93,29 @@ public class Controller {
 		return sqlDb.getAllTasksAndFloatersByMonth(calendar);
 	}
 
-	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar, JList<String> locations) {
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar,
+			JList<String> locations) {
 		return sqlDb.getTasksByLocationByMonth(calendar, locations);
 	}
-	
-	public ArrayList<ArrayList<CalendarDayModel>> getTasksByTimeByMonth(Calendar calendar,
-			JList<String> times) {
+
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByTimeByMonth(Calendar calendar, JList<String> times) {
 		return sqlDb.getTasksByTimeByMonth(calendar, times);
 	}
-	
+
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
 			JList<String> personList) {
 		return sqlDb.getTasksByPersonsByMonth(calendar, personList);
 	}
-	
+
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByProgramByMonth(Calendar calendar,
 			JList<String> programList) {
 		return sqlDb.getTasksByProgramByMonth(calendar, programList);
 	}
-	
+
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByIncompleteRosterByMonth(Calendar calendar) {
 		return sqlDb.getTasksByIncompleteRosterByMonth(calendar);
 	}
-	
+
 	public JList<TaskModel> getAllTasksByProgram(String programName) {
 		return sqlDb.getAllTasksByProgram(programName);
 	}
@@ -149,9 +150,10 @@ public class Controller {
 				ev.getAssignedTaskChanges(), ev.getExtraDates(), ev.getDatesUnavailable());
 	}
 
-	public void addSingleInstanceTask(JList<String> personList, Calendar day, TaskModel task, int color) {
+	public void addSingleInstanceTask(JList<String> personList, String programName, Calendar day, TaskModel task,
+			int color) {
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			sqlDb.addSingleInstanceTask(personList.getModel().getElementAt(i), day, task, color);
+			sqlDb.addSingleInstanceTask(personList.getModel().getElementAt(i), programName, day, task, color);
 		}
 	}
 
@@ -166,7 +168,7 @@ public class Controller {
 	public boolean checkPersonExists(String personName) {
 		return sqlDb.checkPersonExists(personName);
 	}
-	
+
 	public PersonModel getPersonByName(String name) {
 		return sqlDb.getPersonByName(name);
 	}

@@ -59,6 +59,7 @@ public class PersonDialog extends JDialog {
 
 	// Private instance variables
 	private int personID;
+	private String programName;
 	private JTextField personName = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField phone = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField email = new JTextField(TEXT_FIELD_SIZE);
@@ -113,6 +114,7 @@ public class PersonDialog extends JDialog {
 		this.programList = programList;
 		this.taskListByProgram = taskListByProgram;
 		this.assignedTaskListByProgram = assignedTaskListByProgram;
+		this.programName = currentProgram;
 
 		// Create empty lists for new person
 		this.leaderButton.setSelected(true);
@@ -144,6 +146,7 @@ public class PersonDialog extends JDialog {
 		this.programList = programList;
 		this.taskListByProgram = taskListByProgram;
 		this.assignedTaskListByProgram = assignedTaskListByProgram;
+		this.programName = currentProgram;
 
 		// Save person fields
 		this.personID = person.getPersonID();
@@ -214,7 +217,7 @@ public class PersonDialog extends JDialog {
 					// Date and task valid
 					Utilities.addTimeToCalendar(dateResponse.getStartDate(), dateResponse.getTask().getTime());
 					SingleInstanceTaskModel singleTask = new SingleInstanceTaskModel(0, 0,
-							dateResponse.getTask().getTaskID(), dateResponse.getTask().getTaskName(),
+							dateResponse.getTask().getTaskID(), programName, dateResponse.getTask().getTaskName(),
 							dateResponse.getStartDate(), dateResponse.getTask().getColor());
 
 					// Check for date/time conflicts

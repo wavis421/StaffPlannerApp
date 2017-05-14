@@ -7,14 +7,16 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 	private static final long serialVersionUID = 12340003L;
 	private int singleTaskID, personID, taskID;
 	private String taskName;
+	private String programName;
 	private Calendar taskDate;
 	private int color;
 	private ListStatus elementStatus;
 
-	public SingleInstanceTaskModel (int singleTaskID, int personID, int taskID, String taskName, Calendar taskDate, int color) {
+	public SingleInstanceTaskModel (int singleTaskID, int personID, int taskID, String programName, String taskName, Calendar taskDate, int color) {
 		this.singleTaskID = singleTaskID;
 		this.personID = personID;
 		this.taskID = taskID;
+		this.programName = programName;
 		this.taskName = taskName;
 		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
 
@@ -36,6 +38,10 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 
 	public int getTaskID() {
 		return taskID;
+	}
+
+	public String getProgramName() {
+		return programName;
 	}
 
 	public String getTaskName() {

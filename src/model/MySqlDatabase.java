@@ -364,7 +364,8 @@ public class MySqlDatabase {
 	}
 
 	public void updateTask(int taskID, String programName, String taskName, String location, int numLeadersReqd,
-			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color, TimeModel origTaskTime) {
+			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color,
+			TimeModel origTaskTime) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -388,8 +389,9 @@ public class MySqlDatabase {
 
 				updateTaskStmt.executeUpdate();
 				updateTaskStmt.close();
-				
-				// Check if task time has changed, and update single-instance tasks
+
+				// Check if task time has changed, and update single-instance
+				// tasks
 				if (!origTaskTime.equals(time))
 					updateSingleInstanceTaskTime(taskID, time);
 				break;
@@ -626,21 +628,21 @@ public class MySqlDatabase {
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar,
 			JList<String> locations) {
-		return getTasksByFilterByMonth (calendar, locations, "MonthlyCalendarByLocation");
+		return getTasksByFilterByMonth(calendar, locations, "MonthlyCalendarByLocation");
 	}
-	
+
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
 			JList<String> personList) {
-		return getTasksByFilterByMonth (calendar, personList, "MonthlyCalendarByPersons");
+		return getTasksByFilterByMonth(calendar, personList, "MonthlyCalendarByPersons");
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByProgramByMonth(Calendar calendar,
 			JList<String> programList) {
-		return getTasksByFilterByMonth (calendar, programList, "MonthlyCalendarByProgram");
+		return getTasksByFilterByMonth(calendar, programList, "MonthlyCalendarByProgram");
 	}
 
-	private ArrayList<ArrayList<CalendarDayModel>> getTasksByFilterByMonth (Calendar calendar,
-			JList<String> filterList, String subroutineName) {
+	private ArrayList<ArrayList<CalendarDayModel>> getTasksByFilterByMonth(Calendar calendar, JList<String> filterList,
+			String subroutineName) {
 		// Create a calendar list for each day of the month
 		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
 
@@ -1002,9 +1004,8 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						// Select tasks with matching DOW and WOM
-						"SELECT Hour, Minute FROM Tasks, Programs "
-								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
-								// Check if program expired
+						"SELECT Hour, Minute FROM Tasks, Programs WHERE (Tasks.ProgramID = Programs.ProgramID "
+						// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
 								+ "  AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
 
@@ -1065,7 +1066,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < extraTasks.size(); i++) {
 			SingleInstanceTaskModel task = extraTasks.get(i);
-			addSingleInstanceTask(name, task.getTaskID(), task.getTaskDate(), task.getColor());
+			addSingleInstanceTask(name, task.getProgramName(), task.getTaskID(), task.getTaskDate(), task.getColor());
 		}
 
 		for (int i = 0; i < datesUnavailable.size(); i++) {
@@ -1100,8 +1101,8 @@ public class MySqlDatabase {
 			// Add single instance task to database
 			SingleInstanceTaskModel singleTask = extraTasks.get(i);
 			if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
-				addSingleInstanceTask(personName, singleTask.getTaskID(), singleTask.getTaskDate(),
-						singleTask.getColor());
+				addSingleInstanceTask(personName, singleTask.getProgramName(), singleTask.getTaskID(),
+						singleTask.getTaskDate(), singleTask.getColor());
 		}
 
 		// Add dates unavailable (check for duplicates)
@@ -1315,30 +1316,32 @@ public class MySqlDatabase {
 		return taskList;
 	}
 
-	private void addSingleInstanceTask(String personName, int taskID, Calendar taskTime, int color) {
+	private void addSingleInstanceTask(String personName, String programName, int taskID, Calendar taskTime,
+			int color) {
 		if (!checkDatabaseConnection())
 			return;
 
 		for (int i = 0; i < 2; i++) {
 			PreparedStatement addSingleTaskStmt = null;
 			try {
-				// TODO: Figure out how to add ProgramID for floater
 				if (taskID == 0) {
 					addSingleTaskStmt = dbConnection.prepareStatement(
-							"INSERT INTO SingleInstanceTasks (PersonID, SingleDate, SingleTime, Color) "
-									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?);");
+							"INSERT INTO SingleInstanceTasks (PersonID, ProgramID, SingleDate, SingleTime, Color) "
+									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), "
+									+ "(SELECT ProgramID FROM Programs WHERE ProgramName=?), ?, ?, ?);");
 				} else {
 					addSingleTaskStmt = dbConnection.prepareStatement(
 							"INSERT INTO SingleInstanceTasks (PersonID, ProgramID, TaskID, SingleDate, SingleTime, Color) "
 									+ "VALUES ((SELECT PersonID FROM Persons WHERE PersonName=?), "
-									+ "   (SELECT ProgramID FROM Tasks WHERE Tasks.TaskID=?), "
-									+ "   ?, ?, ?, ?);");
+									+ "   (SELECT ProgramID FROM Tasks WHERE Tasks.TaskID=?), ?, ?, ?, ?);");
 				}
 
 				// Add new Single Instance Task
 				int col = 1;
 				addSingleTaskStmt.setString(col++, personName);
-				if (taskID != 0) {
+				if (taskID == 0)
+					addSingleTaskStmt.setString(col++, programName);
+				else {
 					addSingleTaskStmt.setInt(col++, taskID);
 					addSingleTaskStmt.setInt(col++, taskID);
 				}
@@ -1366,7 +1369,8 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void addSingleInstanceTask(String personName, Calendar singleDate, TaskModel task, int color) {
+	public void addSingleInstanceTask(String personName, String programName, Calendar singleDate, TaskModel task,
+			int color) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -1374,12 +1378,13 @@ public class MySqlDatabase {
 			PreparedStatement addSingleTaskStmt = null;
 			try {
 				int col = 1;
-				// TODO: Figure out how to add ProgramID for Floater & Sub
 				if (task == null || task.getTaskID() == 0) {
 					addSingleTaskStmt = dbConnection.prepareStatement(
-							"INSERT INTO SingleInstanceTasks (PersonID, SingleDate, SingleTime, Color) VALUES "
-									+ "((SELECT PersonID FROM Persons WHERE PersonName=?), ?, ?, ?);");
+							"INSERT INTO SingleInstanceTasks (PersonID, ProgramID, SingleDate, SingleTime, Color) VALUES "
+									+ "((SELECT PersonID FROM Persons WHERE PersonName=?), "
+									+ "(SELECT ProgramID FROM Programs WHERE ProgramName=?), ?, ?, ?);");
 					addSingleTaskStmt.setString(col++, personName);
+					addSingleTaskStmt.setString(col++, programName);
 				} else {
 					addSingleTaskStmt = dbConnection.prepareStatement(
 							"INSERT INTO SingleInstanceTasks (PersonID, TaskID, ProgramID, SingleDate, SingleTime, Color) "
@@ -1424,11 +1429,13 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT SingleInstanceID, TaskName, SingleInstanceTasks.TaskID, "
+								+ "Programs.ProgramName AS ProgramName, "
 								+ "SingleInstanceTasks.PersonID, SingleDate, SingleTime, SingleInstanceTasks.Color  "
-								+ "FROM SingleInstanceTasks, Tasks, Persons "
+								+ "FROM SingleInstanceTasks, Tasks, Persons, Programs "
 								+ "WHERE Persons.PersonName=? AND Persons.PersonID = SingleInstanceTasks.PersonID "
+								+ "AND Programs.ProgramID = SingleInstanceTasks.ProgramID "
 								+ "AND (SingleInstanceTasks.TaskID IS NULL OR SingleInstanceTasks.TaskID = Tasks.TaskID) "
-								+ "GROUP BY SingleInstanceID " + "ORDER BY SingleDate, SingleTime;");
+								+ "GROUP BY SingleInstanceID ORDER BY SingleDate, SingleTime;");
 				selectStmt.setString(1, personName);
 
 				ResultSet result = selectStmt.executeQuery();
@@ -1439,7 +1446,8 @@ public class MySqlDatabase {
 						taskName = result.getString("TaskName");
 
 					singleTaskList.add(new SingleInstanceTaskModel(result.getInt("SingleInstanceID"),
-							result.getInt("SingleInstanceTasks.PersonID"), taskID, taskName,
+							result.getInt("SingleInstanceTasks.PersonID"), taskID, result.getString("ProgramName"),
+							taskName,
 							Utilities.convertSqlDateTime(result.getDate("SingleDate"), result.getTime("SingleTime")),
 							result.getInt("SingleInstanceTasks.Color")));
 				}

@@ -944,8 +944,8 @@ public class MainFrame extends JFrame {
 	private PersonTableDialog processViewRosterByTaskDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
-				controller.addSingleInstanceTask(event.getPersonList(), selectedCalendar, selectedTask,
-						selectedTask.getColor());
+				controller.addSingleInstanceTask(event.getPersonList(), selectedProgramName, selectedCalendar,
+						selectedTask, selectedTask.getColor());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 
@@ -1003,7 +1003,8 @@ public class MainFrame extends JFrame {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
 				// Adding floater
-				controller.addSingleInstanceTask(event.getPersonList(), event.getCalendar(), null, event.getColor());
+				controller.addSingleInstanceTask(event.getPersonList(), selectedProgramName, event.getCalendar(), null,
+						event.getColor());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 
 			} else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
@@ -1067,7 +1068,8 @@ public class MainFrame extends JFrame {
 	private PersonTableDialog processViewCompleteRosterDialog(PersonTableEvent event) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
-				controller.addSingleInstanceTask(event.getPersonList(), event.getCalendar(), null, event.getColor());
+				controller.addSingleInstanceTask(event.getPersonList(), selectedProgramName, event.getCalendar(), null,
+						event.getColor());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 
 			} else if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
