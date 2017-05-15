@@ -1548,19 +1548,21 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// Check whether start/end dates within existing unavailable date range
 				PreparedStatement prepStmt = dbConnection.prepareStatement("SELECT COUNT(*) FROM UnavailDates, Persons "
-						+ "WHERE StartDate=? AND EndDate=? AND PersonName=? "
-						+ "   AND UnavailDates.PersonID = Persons.PersonID;");
+						+ "WHERE (? BETWEEN StartDate AND EndDate) AND (? BETWEEN StartDate AND EndDate) "
+						+ "   AND PersonName=? AND UnavailDates.PersonID = Persons.PersonID;");
 				prepStmt.setDate(1, java.sql.Date.valueOf(startDate));
 				prepStmt.setDate(2, java.sql.Date.valueOf(endDate));
 				prepStmt.setString(3, personName);
 				ResultSet result = prepStmt.executeQuery();
 				result.next();
 
-				// TODO: Check whether this is a superset of another date range
 				if (result.getInt(1) == 0) {
 					// No match for start/end dates, so add date range
 					addUnavailDates(personName, startDate, endDate);
+				} else {
+					System.out.println("Date(s) for " + personName + " already marked as unavailable.");
 				}
 
 				result.close();
@@ -1698,24 +1700,22 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return;
 
-		String displayDate = Utilities.getDisplayDate(today);
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement prepStmt = dbConnection.prepareStatement("SELECT COUNT(*) FROM UnavailDates, Persons "
-						+ "WHERE StartDate=? AND EndDate=? AND PersonName=? "
+						+ "WHERE (? BETWEEN StartDate AND EndDate) AND PersonName=? "
 						+ "AND UnavailDates.PersonID = Persons.PersonID;");
 				prepStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(today)));
-				prepStmt.setDate(2, java.sql.Date.valueOf(Utilities.getSqlDate(today)));
-				prepStmt.setString(3, personName);
+				prepStmt.setString(2, personName);
 				ResultSet result = prepStmt.executeQuery();
 				result.next();
 
-				// TODO: Check whether this is a superset of another date range
+				String displayDate = Utilities.getDisplayDate(today);
 				if (result.getInt(1) == 0) {
 					// No match for start/end dates, so add date range
 					addUnavailDates(personName, displayDate, displayDate);
 				} else
-					System.out.println("Date range for " + personName + " already exists.");
+					System.out.println(displayDate + " for " + personName + " already marked as unavailable.");
 
 				result.close();
 				prepStmt.close();
