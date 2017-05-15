@@ -1820,22 +1820,23 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return new JList<String>(nameModel);
 
-		// TODO: Find more optimal way to do this
-		ArrayList<DateRangeModel> unavailDatesList = getUnavailDates();
-
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT PersonName, PersonID,"
-						+ "(SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) AS Count "
-						+ "FROM Persons ORDER BY PersonName;");
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT PersonName, Persons.PersonID, StartDate, EndDate "
+						+ "FROM Persons, UnavailDates "
+						// Either person has no entries in avail list
+						+ "WHERE (SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
+						// ...OR date not within unavailable date range
+						+ "   OR (SELECT COUNT(*) FROM UnavailDates WHERE ? BETWEEN StartDate AND EndDate) = 0 "
+						+ "GROUP BY PersonName "
+						+ "ORDER BY PersonName;");
 
+				selectStmt.setDate(1, sqlToday);
 				ResultSet result = selectStmt.executeQuery();
-				while (result.next()) {
-					if (result.getInt("Count") == 0
-							|| checkUnavailDates(result.getInt("PersonID"), sqlToday, unavailDatesList)) {
-						nameModel.addElement(new String(result.getString("PersonName")));
-					}
-				}
+				while (result.next())
+					nameModel.addElement(new String(result.getString("PersonName")));
+
 				result.close();
 				selectStmt.close();
 				break;
@@ -2382,17 +2383,6 @@ public class MySqlDatabase {
 			}
 		}
 		return count;
-	}
-
-	private boolean checkUnavailDates(int personID, java.sql.Date today, ArrayList<DateRangeModel> dateList) {
-		for (int i = 0; i < dateList.size(); i++) {
-			DateRangeModel thisDate = dateList.get(i);
-			if (personID == thisDate.getPersonID()) {
-				if (Utilities.isDateWithinDateRange(today, thisDate.getStartDate(), thisDate.getEndDate(), null))
-					return false;
-			}
-		}
-		return true;
 	}
 
 	/*
