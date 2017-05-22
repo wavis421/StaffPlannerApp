@@ -11,15 +11,17 @@ public class CalendarDayModel implements Serializable, Comparable<CalendarDayMod
 	private int textColor;
 	private Calendar floaterTime;
 	private String floaterTaskName;
+	private boolean showCounts;
 
 	public CalendarDayModel(TaskModel task, int personCount, int leaderCount, int textColor, Calendar floaterTime,
-			String floaterTaskName) {
+			String floaterTaskName, boolean showCounts) {
 		this.task = task;
 		this.personCount = personCount;
 		this.leaderCount = leaderCount;
 		this.textColor = textColor;
 		this.floaterTime = floaterTime;
 		this.floaterTaskName = floaterTaskName;
+		this.showCounts = showCounts;
 	}
 
 	public String toString() {
@@ -55,6 +57,10 @@ public class CalendarDayModel implements Serializable, Comparable<CalendarDayMod
 
 	public void setFloaterTaskName(String floaterTaskName) {
 		this.floaterTaskName = floaterTaskName;
+	}
+
+	public boolean getShowCounts() {
+		return showCounts;
 	}
 
 	@Override

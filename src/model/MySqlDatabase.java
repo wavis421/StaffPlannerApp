@@ -579,7 +579,7 @@ public class MySqlDatabase {
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
-					personCount = results.getInt("PersonCount");
+					personCount = results.getInt("PersonCount") - results.getInt("UnavailCount");
 
 					if (taskName == null) {
 						// Floater
@@ -588,12 +588,15 @@ public class MySqlDatabase {
 						Utilities.addTimeToCalendar(cal,
 								new TimeModel(results.getInt("TaskHour"), results.getInt("TaskMinute")));
 						if (personCount == 1)
-							calendarList.get(day - 1).add(new CalendarDayModel(null, personCount,
-									results.getInt("LeaderCount"), results.getInt("TaskColor"), cal, "Floater"));
+							calendarList.get(day - 1)
+									.add(new CalendarDayModel(null, personCount,
+											results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+											results.getInt("TaskColor"), cal, "Floater", true));
 						else
 							calendarList.get(day - 1)
-									.add(new CalendarDayModel(null, personCount, results.getInt("LeaderCount"),
-											results.getInt("TaskColor"), cal, personCount + " Floaters"));
+									.add(new CalendarDayModel(null, personCount,
+											results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+											results.getInt("TaskColor"), cal, personCount + " Floaters", true));
 					} else {
 						// Don't need all of the task fields for calendar day
 						TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"),
@@ -602,7 +605,8 @@ public class MySqlDatabase {
 								results.getInt("TaskColor"));
 						calendarList.get(day - 1)
 								.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-										results.getInt("LeaderCount"), results.getInt("TaskColor"), null, ""));
+										results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+										results.getInt("TaskColor"), null, "", true));
 					}
 				}
 				results.close();
@@ -628,21 +632,21 @@ public class MySqlDatabase {
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar,
 			JList<String> locations) {
-		return getTasksByFilterByMonth(calendar, locations, "MonthlyCalendarByLocation");
+		return getTasksByFilterByMonth(calendar, locations, "MonthlyCalendarByLocation", true);
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
 			JList<String> personList) {
-		return getTasksByFilterByMonth(calendar, personList, "MonthlyCalendarByPersons");
+		return getTasksByFilterByMonth(calendar, personList, "MonthlyCalendarByPersons", false);
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByProgramByMonth(Calendar calendar,
 			JList<String> programList) {
-		return getTasksByFilterByMonth(calendar, programList, "MonthlyCalendarByProgram");
+		return getTasksByFilterByMonth(calendar, programList, "MonthlyCalendarByProgram", true);
 	}
 
 	private ArrayList<ArrayList<CalendarDayModel>> getTasksByFilterByMonth(Calendar calendar, JList<String> filterList,
-			String subroutineName) {
+			String subroutineName, boolean showCounts) {
 		// Create a calendar list for each day of the month
 		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
 
@@ -676,7 +680,7 @@ public class MySqlDatabase {
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
-					personCount = results.getInt("PersonCount");
+					personCount = results.getInt("PersonCount") - results.getInt("UnavailCount");
 
 					// Don't need all task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
@@ -686,7 +690,8 @@ public class MySqlDatabase {
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
 							.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-									results.getInt("LeaderCount"), results.getInt("TaskColor"), null, ""));
+									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+									results.getInt("TaskColor"), null, "", showCounts));
 				}
 				results.close();
 				updateMonthStmt.close();
@@ -743,7 +748,7 @@ public class MySqlDatabase {
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
-					personCount = results.getInt("PersonCount");
+					personCount = results.getInt("PersonCount") - results.getInt("UnavailCount");
 
 					// Don't need all of the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
@@ -753,7 +758,8 @@ public class MySqlDatabase {
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
 							.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-									results.getInt("LeaderCount"), results.getInt("TaskColor"), null, ""));
+									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+									results.getInt("TaskColor"), null, "", true));
 				}
 				results.close();
 				updateMonthStmt.close();
@@ -802,7 +808,7 @@ public class MySqlDatabase {
 				while (results.next()) {
 					day = results.getInt("Today");
 					taskName = results.getString("TaskName");
-					personCount = results.getInt("PersonCount");
+					personCount = results.getInt("PersonCount") - results.getInt("UnavailCount");
 
 					// Don't need all of the task fields for calendar
 					TaskModel newTask = new TaskModel(results.getInt("TaskID"), results.getInt("ProgramID"), taskName,
@@ -812,7 +818,8 @@ public class MySqlDatabase {
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
 							.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-									results.getInt("LeaderCount"), results.getInt("TaskColor"), null, ""));
+									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+									results.getInt("TaskColor"), null, "", true));
 				}
 				results.close();
 				updateMonthStmt.close();
@@ -1005,7 +1012,7 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						// Select tasks with matching DOW and WOM
 						"SELECT Hour, Minute FROM Tasks, Programs WHERE (Tasks.ProgramID = Programs.ProgramID "
-						// Check if program expired
+								// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
 								+ "  AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
 
@@ -1548,7 +1555,8 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				// Check whether start/end dates within existing unavailable date range
+				// Check whether start/end dates within existing unavailable
+				// date range
 				PreparedStatement prepStmt = dbConnection.prepareStatement("SELECT COUNT(*) FROM UnavailDates, Persons "
 						+ "WHERE (? BETWEEN StartDate AND EndDate) AND (? BETWEEN StartDate AND EndDate) "
 						+ "   AND PersonName=? AND UnavailDates.PersonID = Persons.PersonID;");
@@ -1823,14 +1831,12 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT PersonName, Persons.PersonID, StartDate, EndDate "
-						+ "FROM Persons, UnavailDates "
-						// Either person has no entries in avail list
-						+ "WHERE (SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-						// ...OR date not within unavailable date range
-						+ "   OR (SELECT COUNT(*) FROM UnavailDates WHERE ? BETWEEN StartDate AND EndDate) = 0 "
-						+ "GROUP BY PersonName "
-						+ "ORDER BY PersonName;");
+						"SELECT PersonName, Persons.PersonID, StartDate, EndDate FROM Persons, UnavailDates "
+								// Either person has no entries in avail list
+								+ "WHERE (SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
+								// ...OR date not within unavailable date range
+								+ "   OR (SELECT COUNT(*) FROM UnavailDates WHERE ? BETWEEN StartDate AND EndDate) = 0 "
+								+ "GROUP BY PersonName ORDER BY PersonName;");
 
 				selectStmt.setDate(1, sqlToday);
 				ResultSet result = selectStmt.executeQuery();
@@ -1945,7 +1951,6 @@ public class MySqlDatabase {
 		// Check if task is in person's assigned task list
 		for (int i = 0; i < 2; i++) {
 			try {
-				// TODO: Optimize by not selecting * from each table
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Persons, AssignedTasks, Tasks WHERE Tasks.TaskID=?"
 								+ "  AND AssignedTasks.TaskID = Tasks.TaskID "

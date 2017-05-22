@@ -16,12 +16,14 @@ BEGIN
 		Today INT(11),
 		TaskName VARCHAR(30),
 		TaskID INT(11),
-		ProgramID INT(11),   # Remove later
+		ProgramID INT(11),
 		TaskHour INT(11),
 		TaskMinute INT(11),
 		PersonCount INT(11),
 		LeaderCount INT(11),
 		SubCount INT(11),
+		UnavailCount INT(11),
+		UnavailLdrCount INT(11),
 		NumPersonsReqd INT(11),
 		NumLdrsReqd INT(11),
 		TaskColor INT(11),
@@ -32,26 +34,13 @@ BEGIN
 	# Insert tasks and floaters into table for each day of month
 	WHILE (thisDay <= numDaysInMonth) DO
 		INSERT INTO MonthTable
-		   (Today, TaskName, TaskID, ProgramID, TaskHour, TaskMinute, PersonCount, LeaderCount, SubCount,
-				NumPersonsReqd, NumLdrsReqd, TaskColor, Location)
+		   (Today, TaskName, TaskID, ProgramID, TaskHour, TaskMinute, TaskColor, Location)
 
 		   # Select Tasks by DOW and WOM
 		   # TODO: Optimize, counting assigned tasks does not need to be done for each assigned task
 		   (SELECT thisDay AS Today, Tasks.TaskName AS TaskName, Tasks.TaskID AS TaskID, Tasks.ProgramID AS ProgramID, 
 				Tasks.Hour AS TaskHour, Tasks.Minute AS TaskMinute, 
-				(SELECT COUNT(*) FROM AssignedTasks WHERE AssignedTasks.TaskID = Tasks.TaskID
-					AND (AssignedTasks.DaysOfWeek & (1 << currDow)) != 0
-					AND (AssignedTasks.DowInMonth & (1 << currDowInMonth)) != 0) AS PersonCount, 
-				(SELECT COUNT(*) FROM AssignedTasks, Persons WHERE AssignedTasks.TaskID = Tasks.TaskID
-					AND (AssignedTasks.DaysOfWeek & (1 << currDow)) != 0
-					AND (AssignedTasks.DowInMonth & (1 << currDowInMonth)) != 0
-					AND AssignedTasks.PersonID = Persons.PersonID
-					AND Persons.isLeader = 1) AS LeaderCount,
-				(SELECT COUNT(*) FROM SingleInstanceTasks WHERE SingleInstanceTasks.TaskID IS NOT NULL
-					AND SingleInstanceTasks.TaskID = Tasks.TaskID
-					AND SingleDate = currDate) AS SubCount, 
-				Tasks.TotalPersonsReqd AS NumPersonsReqd, Tasks.NumLeadersReqd AS NumLdrsReqd, Tasks.Color AS TaskColor,
-				Tasks.Location AS Location
+				Tasks.Color AS TaskColor, Tasks.Location AS Location
 			FROM Tasks, Programs, Persons, AssignedTasks
 			WHERE ((Tasks.DaysOfWeek & (1 << currDow)) != 0)
 				AND ((Tasks.DowInMonth & (1 << currDowInMonth)) != 0)
@@ -61,6 +50,12 @@ BEGIN
 					AND (AssignedTasks.DowInMonth & (1 << currDowInMonth)) != 0)
 				# Person assigned to this task is in filter list
 				AND (Persons.PersonID = AssignedTasks.PersonID AND FIND_IN_SET(Persons.PersonName, personFilter))
+				# Check that person is available
+				AND (SELECT COUNT(*) FROM Persons, UnavailDates 
+					WHERE ((SELECT COUNT(*) FROM Persons, UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) > 0
+						AND Persons.PersonID = AssignedTasks.PersonID
+						AND Persons.PersonID = UnavailDates.PersonID
+						AND currDate BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)) = 0
 				# Check if program expired
 				AND (Tasks.ProgramID = Programs.ProgramID
 					AND ((Programs.StartDate IS NULL) OR (currDate >= Programs.StartDate)) 
