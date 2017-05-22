@@ -565,7 +565,6 @@ public class MySqlDatabase {
 		if (!checkDatabaseConnection())
 			return calendarList;
 
-		// TODO: Check if person available
 		int day, personCount;
 		String taskName;
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -2029,8 +2028,12 @@ public class MySqlDatabase {
 								// Find associated person
 								+ "  AND Persons.PersonID = AssignedTasks.PersonID "
 								// Check if person available today
-								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
+								+ "  AND (SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "      WHERE ((SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "         WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
+								+ "      AND Persons.PersonID = AssignedTasks.PersonID "
+								+ "      AND Persons.PersonID = UnavailDates.PersonID "
+								+ "      AND ? BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)) = 0 "
 
 								+ "UNION " +
 
@@ -2049,8 +2052,12 @@ public class MySqlDatabase {
 								// Find associated person
 								+ "	 AND SingleInstanceTasks.PersonID = Persons.PersonID "
 								// Check if person available today
-								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
+								+ "  AND (SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "      WHERE ((SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "         WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
+								+ "      AND Persons.PersonID = SingleInstanceTasks.PersonID "
+								+ "      AND Persons.PersonID = UnavailDates.PersonID "
+								+ "      AND ? BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)) = 0 "
 
 								+ "GROUP BY PersonName, TaskID " + "ORDER BY PersonName, TaskName;");
 
@@ -2149,8 +2156,12 @@ public class MySqlDatabase {
 								// Find associated person
 								+ "  AND Persons.PersonID = AssignedTasks.PersonID "
 								// Check if person available today
-								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
+								+ "  AND (SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "      WHERE ((SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "         WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
+								+ "      AND Persons.PersonID = AssignedTasks.PersonID "
+								+ "      AND Persons.PersonID = UnavailDates.PersonID "
+								+ "      AND ? BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)) = 0 "
 								// Check for time match
 								+ "  AND Tasks.Hour = ? AND Tasks.Minute = ?) "
 
@@ -2173,8 +2184,12 @@ public class MySqlDatabase {
 								// Find associated person
 								+ "	 AND SingleInstanceTasks.PersonID = Persons.PersonID "
 								// Check if person available today
-								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
+								+ "  AND (SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "      WHERE ((SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "         WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
+								+ "      AND Persons.PersonID = SingleInstanceTasks.PersonID "
+								+ "      AND Persons.PersonID = UnavailDates.PersonID "
+								+ "      AND ? BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)) = 0 "
 								// Check for time match
 								+ "  AND HOUR(SingleTime)=? AND MINUTE(SingleTime)=? " + "GROUP BY SingleInstanceID) "
 
@@ -2276,8 +2291,12 @@ public class MySqlDatabase {
 								// Find associated person
 								+ "  AND Persons.PersonID = AssignedTasks.PersonID "
 								// Check if person available today
-								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
+								+ "  AND (SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "      WHERE ((SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "         WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
+								+ "      AND Persons.PersonID = AssignedTasks.PersonID "
+								+ "      AND Persons.PersonID = UnavailDates.PersonID "
+								+ "      AND ? BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)) = 0 "
 								// Check for location match
 								+ "  AND Tasks.Location = ? "
 
@@ -2299,8 +2318,12 @@ public class MySqlDatabase {
 								// Find associated person
 								+ "	 AND SingleInstanceTasks.PersonID = Persons.PersonID "
 								// Check if person available today
-								+ "  AND ((SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-								+ "      OR ? NOT BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) "
+								+ "  AND (SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "      WHERE ((SELECT COUNT(*) FROM Persons, UnavailDates "
+								+ "         WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
+								+ "      AND Persons.PersonID = SingleInstanceTasks.PersonID "
+								+ "      AND Persons.PersonID = UnavailDates.PersonID "
+								+ "      AND ? BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)) = 0 "
 								// Check for time match
 								+ "  AND Tasks.Location = ? "
 
