@@ -40,7 +40,7 @@ public class MySqlDatabase {
 		}
 
 		try {
-			String url = "jdbc:mysql://www.programplanner.org:3306/ProgramPlanner";
+			String url = "jdbc:mysql://www.programplanner.org:3306/TestDb421";
 			dbConnection = DriverManager.getConnection(url, "wavisTester1", "ImGladToBeTesting555&");
 			return;
 
@@ -1116,7 +1116,6 @@ public class MySqlDatabase {
 			// Add unavailable dates if not a duplicate
 			DateRangeModel date = personDatesUnavailable.get(i);
 
-			// TODO: dates added but doesn't do anything
 			if (date.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
 				updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
 		}

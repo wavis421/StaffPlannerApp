@@ -77,7 +77,7 @@ BEGIN
 						AND currDate BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate) 
 				) AS UnavailLdrCount, 
 				Tasks.TotalPersonsReqd AS NumPersonsReqd, Tasks.NumLeadersReqd AS NumLdrsReqd, Tasks.Color AS TaskColor
-			FROM Tasks, Programs, Persons
+			FROM Tasks, Programs
 			WHERE ((Tasks.DaysOfWeek & (1 << currDow)) != 0)
 				AND ((Tasks.DowInMonth & (1 << currDowInMonth)) != 0)
 				AND (Tasks.ProgramID = Programs.ProgramID   # Check if program expired
