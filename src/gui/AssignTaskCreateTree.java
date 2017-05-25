@@ -3,12 +3,10 @@ package gui;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -55,7 +53,20 @@ public class AssignTaskCreateTree {
 			}
 		}
 	}
-	
+
+	public void addNodeToTree (JTree tree, String programName, TaskModel taskEvent) {
+		for (int i = 0; i < tree.getModel().getChildCount(tree.getModel().getRoot()); i++) {
+			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel().getChild(tree.getModel().getRoot(), i);
+			if (progNode.toString().equals(programName)) {
+				progNode.add(new DefaultMutableTreeNode(taskEvent));
+				
+				((DefaultTreeModel) tree.getModel()).reload(progNode);
+				collapseTree(tree, programName);
+				return;
+			}
+		}
+	}
+
 	public void removeNodeFromTree (JTree tree, String programName, String taskName) {
 		for (int i = 0; i < tree.getModel().getChildCount(tree.getModel().getRoot()); i++) {
 			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel().getChild(tree.getModel().getRoot(), i);
@@ -101,7 +112,6 @@ public class AssignTaskCreateTree {
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Assigned tasks");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
 		JTree assignedTree = new JTree(treeModel);
-		TreePath path;
 
 		for (int i = 0; i < programList.size(); i++) {
 			// Create program node

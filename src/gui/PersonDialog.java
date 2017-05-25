@@ -439,13 +439,8 @@ public class PersonDialog extends JDialog {
 							personID, eventResponse.getTask().getTaskID(), eventResponse.getProgramName(),
 							eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
 							eventResponse.getWeeksOfMonth());
-					ListStatus status = removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
-					if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
-						status = ListStatus.LIST_ELEMENT_UPDATE;
-
-					// TODO: process lastAssignedTask (expand tree node)
-					lastAssignedTask.setElementStatus(status);
-					assignedTasksList.add(lastAssignedTask);
+					updateNodeInAssignedTaskList(lastAssignedTask);
+					selectedNode.setUserObject(eventResponse);
 				}
 				assignedTasksTree.clearSelection();
 				((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(false);
@@ -453,7 +448,21 @@ public class PersonDialog extends JDialog {
 		});
 		removeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				System.out.println("Remove assigned task not yet implemented.");
+				AssignTaskEvent ev = (AssignTaskEvent) selectedNode.getUserObject();
+				String programName = selectedNode.getParent().toString();
+				
+				// Remove task model from assigned tasks tree
+				trees.removeNodeFromTree(assignedTasksTree, programName, ev.getTask().getTaskName());
+
+				// Add task model to unassigned tasks tree
+				TaskModel taskModel = new TaskModel(ev.getTask().getTaskID(), ev.getTask().getProgramID(),
+						ev.getTask().getTaskName(), ev.getTask().getLocation(), ev.getTask().getNumLeadersReqd(),
+						ev.getTask().getTotalPersonsReqd(), ev.getTask().getDayOfWeek(), ev.getTask().getWeekOfMonth(),
+						ev.getTask().getTime(), ev.getTask().getColor());
+				trees.addNodeToTree(taskTree, programName, taskModel);
+
+				deleteNodeInAssignedTaskList(ev.getTask().getTaskName());
+
 				assignedTasksTree.clearSelection();
 				((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(false);
 			}
@@ -464,7 +473,7 @@ public class PersonDialog extends JDialog {
 			public void mousePressed(MouseEvent e) {
 				int row = assignedTasksTree.getClosestRowForLocation(e.getX(), e.getY());
 				assignedTasksTree.setSelectionRow(row);
-				
+
 				if (e.getButton() == MouseEvent.BUTTON3) {
 					selectedNode = (DefaultMutableTreeNode) assignedTasksTree.getPathForRow(row).getLastPathComponent();
 					if (selectedNode != null) {
@@ -535,6 +544,7 @@ public class PersonDialog extends JDialog {
 			for (int j = 0; j < t.getModel().getSize(); j++) {
 				if (t.getModel().getElementAt(j).equals(taskName)) {
 					t.remove(j);
+					return;
 				}
 			}
 		}
@@ -545,20 +555,37 @@ public class PersonDialog extends JDialog {
 			ProgramModel prog = programList.get(i);
 			if (prog.getProgramName().equals(programName)) {
 				assignedTaskListByProgram.get(i).add(assignedTask);
+				return;
 			}
 		}
 	}
 
-	private ListStatus removeNodeFromAssignedTaskList(String taskName) {
+	private void updateNodeInAssignedTaskList(AssignedTasksModel newTaskModel) {
+		for (int i = 0; i < assignedTasksList.size(); i++) {
+			AssignedTasksModel t = assignedTasksList.get(i);
+			if (t.getTaskName().equals(newTaskModel.getTaskName())) {
+				ListStatus status = t.getElementStatus();
+				if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
+					status = ListStatus.LIST_ELEMENT_UPDATE;
+				newTaskModel.setElementStatus(status);
+				
+				assignedTasksList.set(i, newTaskModel);
+			}
+		}
+	}
+
+	private void deleteNodeInAssignedTaskList(String taskName) {
 		for (int i = 0; i < assignedTasksList.size(); i++) {
 			AssignedTasksModel t = assignedTasksList.get(i);
 			if (t.getTaskName().equals(taskName)) {
-				int idx = assignedTasksList.indexOf(t);
-				assignedTasksList.remove(idx);
-				return t.getElementStatus();
+				if (t.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+					// Deleting a node that has just been added, so remove
+					assignedTasksList.remove(t);
+				else
+					// Mark element for deletion
+					t.setElementStatus(ListStatus.LIST_ELEMENT_DELETE);
 			}
 		}
-		return ListStatus.LIST_ELEMENT_NEW;
 	}
 
 	private boolean checkConflictsForSingleInstanceTask(SingleInstanceTaskModel newSingleTask) {

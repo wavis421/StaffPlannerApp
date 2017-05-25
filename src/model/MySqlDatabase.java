@@ -1100,6 +1100,9 @@ public class MySqlDatabase {
 				// Assigned task exists, so update fields
 				updateAssignedTask(assignedTask.getAssignedTaskID(), assignedTask.getDaysOfWeek(),
 						assignedTask.getWeeksOfMonth());
+			else if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_DELETE)
+				// Assigned task being deleted
+				deleteAssignedTask(assignedTask.getAssignedTaskID());
 		}
 
 		// Add extraTasks
@@ -1270,6 +1273,37 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				System.out.println("Failure updating task assignment: " + e.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void deleteAssignedTask(int assignedTaskID) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement deleteAssignedTaskStmt = dbConnection.prepareStatement(
+						"DELETE FROM AssignedTasks WHERE AssignedTaskID=?;");
+
+				// Delete assigned task
+				deleteAssignedTaskStmt.setInt(1, assignedTaskID);
+				deleteAssignedTaskStmt.executeUpdate();
+				deleteAssignedTaskStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure deleting task assignment: " + e.getMessage());
 				break;
 			}
 		}
