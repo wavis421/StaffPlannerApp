@@ -129,7 +129,7 @@ public class AssignTaskCreateTree {
 				// Create the event to be added to the tree
 				AssignTaskEvent taskEvent = new AssignTaskEvent(this, item.getProgramName(),
 						findNodeInTaskList(getTaskListByProgram(progName), item.getTaskName()),
-						item.getAssignedTaskID(), item.getDaysOfWeek(), item.getWeeksOfMonth(), false);
+						item.getAssignedTaskID(), item.getDaysOfWeek(), item.getWeeksOfMonth());
 
 				pNode.add(new DefaultMutableTreeNode(taskEvent));
 			}

@@ -23,7 +23,7 @@ public class AssignTaskTreeRenderer extends DefaultTreeCellRenderer {
 		super();
 
 		setOpaque(true);
-		
+
 		URL url = getClass().getResource("../images/calendar_16x16.png");
 		calIcon = new ImageIcon(url);
 		url = getClass().getResource("../images/calendar_plus_16x16.png");
@@ -36,39 +36,35 @@ public class AssignTaskTreeRenderer extends DefaultTreeCellRenderer {
 
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean isExpanded,
 			boolean isLeaf, int row, boolean hasFocus) {
-		
+
 		setFont(JTFTools.decodeFont(BASIC_FONT));
 		if (row == 0) {
 			setFont(JTFTools.decodeFont(ITALIC_FONT));
 			setClosedIcon(calIcon);
 			setOpenIcon(calIcon);
 			setLeafIcon(calIcon);
-		}
-		else if (tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 2) {
+		} else if (tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 2) {
 			setClosedIcon(calPlusIcon);
 			setOpenIcon(calPlusIcon);
 			setLeafIcon(calPlusIcon);
-		}
-		else {
+		} else {
 			setLeafIcon(null);
-		}	
+		}
 
 		textSelectionColor = Color.black;
 		textNonSelectionColor = Color.black;
 		setBackground(Color.WHITE);
-		
+
 		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
 			AssignTaskEvent taskEvent = (AssignTaskEvent) (((DefaultMutableTreeNode) value).getUserObject());
-			setText (taskEvent.getTask().getTaskName());
-			
+			setText(taskEvent.getTask().getTaskName());
+
 			setFont(JTFTools.decodeFont(BOLD_FONT));
 			textSelectionColor = new Color(taskEvent.getTask().getColor());
 			textNonSelectionColor = new Color(taskEvent.getTask().getColor());
 			if (taskEvent.getIsFocus() || hasFocus)
 				setBackground(new Color(0xDDDDDD));
-		} else if (hasFocus)
-			setBackground(new Color(0xDDDDDD));
-
+		}
 		super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, isLeaf, row, hasFocus);
 		return this;
 	}

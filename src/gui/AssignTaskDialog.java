@@ -112,7 +112,7 @@ public class AssignTaskDialog extends JDialog {
 
 				// Create TaskEvent and set response
 				AssignTaskEvent ev = new AssignTaskEvent(this, programName, task, assignedTaskID, daysOfWeekSelected,
-						weeksOfMonthSelected, false);
+						weeksOfMonthSelected);
 				dialogResponse = ev;
 				setVisible(false);
 				dispose();

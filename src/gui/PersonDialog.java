@@ -418,17 +418,16 @@ public class PersonDialog extends JDialog {
 		assignedTasksTree.setCellRenderer(new AssignTaskTreeRenderer());
 
 		// Assigned Task Tree POP UP menu
-		JPopupMenu popup = new JPopupMenu();
+		JPopupMenu assignPopup = new JPopupMenu();
 		JMenuItem editItem = new JMenuItem("Edit");
 		JMenuItem removeItem = new JMenuItem("Remove");
-		popup.add(editItem);
-		popup.add(removeItem);
-		popup.setPreferredSize(new Dimension(240, 50));
+		assignPopup.add(editItem);
+		assignPopup.add(removeItem);
+		assignPopup.setPreferredSize(new Dimension(240, 50));
 
 		// Assigned Task Tree POP UP action listeners
 		editItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				//setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 				AssignTaskDialog ev = new AssignTaskDialog(PersonDialog.this,
 						(AssignTaskEvent) selectedNode.getUserObject());
 
@@ -450,7 +449,7 @@ public class PersonDialog extends JDialog {
 			public void actionPerformed(ActionEvent event) {
 				AssignTaskEvent ev = (AssignTaskEvent) selectedNode.getUserObject();
 				String programName = selectedNode.getParent().toString();
-				
+
 				// Remove task model from assigned tasks tree
 				trees.removeNodeFromTree(assignedTasksTree, programName, ev.getTask().getTaskName());
 
@@ -479,7 +478,7 @@ public class PersonDialog extends JDialog {
 					if (selectedNode != null) {
 						if (selectedNode.getLevel() == 2) {
 							((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(true);
-							popup.show(e.getComponent(), e.getX(), e.getY());
+							assignPopup.show(e.getComponent(), e.getX(), e.getY());
 						}
 					}
 				}
@@ -493,46 +492,54 @@ public class PersonDialog extends JDialog {
 		taskTreeScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		taskTree.setCellRenderer(new TaskTreeRenderer());
 
-		// Unassigned task tree listener
-		taskTree.addTreeSelectionListener(new TreeSelectionListener() {
-			public void valueChanged(TreeSelectionEvent evt) {
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) taskTree.getLastSelectedPathComponent();
-				if (node == null)
-					return;
+		// Unassigned Task Tree POP UP menu
+		JPopupMenu unassignPopup = new JPopupMenu();
+		JMenuItem assignItem = new JMenuItem("Assign");
+		unassignPopup.add(assignItem);
+		unassignPopup.setPreferredSize(new Dimension(240, 25));
 
-				/* retrieve the node that was selected */
-				Object nodeInfo = node.getUserObject();
+		// Unassigned task tree POP UP Action Listeners
+		assignItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				TaskModel task = (TaskModel) selectedNode.getUserObject();
+				AssignTaskDialog ev = new AssignTaskDialog(PersonDialog.this, selectedNode.getParent().toString(), task);
 
-				if (node.getLevel() == 2) {
-					TreePath parentPath = taskTree.getSelectionPath();
-					DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (parentPath.getLastPathComponent());
+				AssignTaskEvent eventResponse = ev.getDialogResponse();
+				if (eventResponse != null) {
+					AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getAssignedTaskID(),
+							personID, eventResponse.getTask().getTaskID(), selectedNode.getParent().toString(),
+							selectedNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
+					lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
+					assignedTasksList.add(lastAssignedTask);
 
-					// Can't keep this dialog MODAL if the AssignTaskDialog is
-					// to be MODAL
-					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+					// Remove from task by prog list, add to assigned task by prog list
+					removeNodeFromTaskList(eventResponse.getTask().getTaskName());
+					addNodeToAssignedTaskList(eventResponse.getProgramName(), lastAssignedTask);
 
-					AssignTaskDialog event = new AssignTaskDialog(PersonDialog.this, node.getParent().toString(),
-							(TaskModel) nodeInfo);
+					// Remove node from task tree, add to assigned task tree
+					trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(),
+							eventResponse.getTask().getTaskName());
+					trees.addNodeToTree(assignedTasksTree, eventResponse.getProgramName(), eventResponse);
+				}
+				taskTree.clearSelection();
+				task.setIsFocus(false);
+			}
+		});
 
-					AssignTaskEvent eventResponse = event.getDialogResponse();
-					if (eventResponse != null) {
-						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getAssignedTaskID(),
-								personID, eventResponse.getTask().getTaskID(), node.getParent().toString(),
-								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
-						lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
-						assignedTasksList.add(lastAssignedTask);
+		// Unassigned Task Tree mouse listener
+		taskTree.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int row = taskTree.getClosestRowForLocation(e.getX(), e.getY());
+				taskTree.setSelectionRow(row);
 
-						// Remove from task by prog list, add to assigned task
-						// by prog list
-						removeNodeFromTaskList(eventResponse.getTask().getTaskName());
-						addNodeToAssignedTaskList(eventResponse.getProgramName(), lastAssignedTask);
-
-						// Remove node from task tree, add to assigned task tree
-						trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(),
-								eventResponse.getTask().getTaskName());
-						trees.addNodeToTree(assignedTasksTree, eventResponse.getProgramName(), eventResponse);
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					selectedNode = (DefaultMutableTreeNode) taskTree.getPathForRow(row).getLastPathComponent();
+					if (selectedNode != null) {
+						if (selectedNode.getLevel() == 2) {
+							((TaskModel) (selectedNode.getUserObject())).setIsFocus(true);
+							unassignPopup.show(e.getComponent(), e.getX(), e.getY());
+						}
 					}
-					taskTree.clearSelection();
 				}
 			}
 		});
@@ -568,7 +575,7 @@ public class PersonDialog extends JDialog {
 				if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
 					status = ListStatus.LIST_ELEMENT_UPDATE;
 				newTaskModel.setElementStatus(status);
-				
+
 				assignedTasksList.set(i, newTaskModel);
 			}
 		}

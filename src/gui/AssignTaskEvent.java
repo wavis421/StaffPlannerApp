@@ -10,10 +10,10 @@ public class AssignTaskEvent extends EventObject {
 	private int assignedTaskID;
 	private boolean[] daysOfWeek;
 	private boolean[] weeksOfMonth;
-	private boolean isFocus;
+	private boolean isFocus = false;
 	
 	public AssignTaskEvent(Object source, String programName, TaskModel task, int assignedTaskID, boolean[] daysOfWeek,
-			boolean[] weeksOfMonth, boolean isFocus) {
+			boolean[] weeksOfMonth) {
 		
 		super(source);
 
@@ -22,7 +22,6 @@ public class AssignTaskEvent extends EventObject {
 		this.assignedTaskID = assignedTaskID;
 		this.daysOfWeek = daysOfWeek;
 		this.weeksOfMonth = weeksOfMonth;
-		this.isFocus = isFocus;
 	}
 
 	public String toString () {
