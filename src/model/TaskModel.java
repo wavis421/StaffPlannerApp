@@ -13,6 +13,7 @@ public class TaskModel implements Serializable, Comparable<TaskModel> {
 	private boolean[] dayOfWeek;
 	private boolean[] weekOfMonth;
 	private int color;
+	private boolean isFocus = false;
 
 	public TaskModel(int taskID, int programID, String taskName, String location, int numLeadersReqd,
 			int totalPersonsReqd, boolean[] dayOfWeek, boolean[] weekOfMonth, TimeModel time, int color) {
@@ -74,6 +75,14 @@ public class TaskModel implements Serializable, Comparable<TaskModel> {
 
 	public int getColor() {
 		return color;
+	}
+
+	public boolean getIsFocus() {
+		return isFocus;
+	}
+
+	public void setIsFocus(boolean value) {
+		isFocus = value;
 	}
 
 	@Override

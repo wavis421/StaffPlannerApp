@@ -23,10 +23,8 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 	public TaskTreeRenderer() {
 		super();
 
-		setOpaque(false);
-		setBackgroundNonSelectionColor(Color.WHITE);
-		setBackgroundSelectionColor(Color.decode(Integer.toString(0xDDDDDD)));
-		
+		setOpaque(true);
+
 		URL url = getClass().getResource("../images/calendar_16x16.png");
 		calIcon = new ImageIcon(url);
 		url = getClass().getResource("../images/calendar_plus_16x16.png");
@@ -56,13 +54,18 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 
 		textSelectionColor = Color.black;
 		textNonSelectionColor = Color.black;
+		setBackground(Color.WHITE);
+
 		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
 			TaskModel task = (TaskModel) (((DefaultMutableTreeNode) value).getUserObject());
 			setText(task.getTaskName());
+			setPreferredSize(getPreferredSize());
 
 			setFont(JTFTools.decodeFont(BOLD_FONT));
 			textSelectionColor = new Color(task.getColor());
 			textNonSelectionColor = new Color(task.getColor());
+			if (task.getIsFocus() || hasFocus)
+				setBackground(new Color(0xDDDDDD));
 		}
 		super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, isLeaf, row, hasFocus);
 		return this;

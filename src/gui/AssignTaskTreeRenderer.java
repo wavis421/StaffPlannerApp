@@ -58,6 +58,7 @@ public class AssignTaskTreeRenderer extends DefaultTreeCellRenderer {
 		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
 			AssignTaskEvent taskEvent = (AssignTaskEvent) (((DefaultMutableTreeNode) value).getUserObject());
 			setText(taskEvent.getTask().getTaskName());
+			setPreferredSize(getPreferredSize());
 
 			setFont(JTFTools.decodeFont(BOLD_FONT));
 			textSelectionColor = new Color(taskEvent.getTask().getColor());
