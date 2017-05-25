@@ -55,6 +55,8 @@ public class AssignTaskTreeRenderer extends DefaultTreeCellRenderer {
 
 		textSelectionColor = Color.black;
 		textNonSelectionColor = Color.black;
+		setBackground(Color.WHITE);
+		
 		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
 			AssignTaskEvent taskEvent = (AssignTaskEvent) (((DefaultMutableTreeNode) value).getUserObject());
 			setText (taskEvent.getTask().getTaskName());
@@ -62,7 +64,11 @@ public class AssignTaskTreeRenderer extends DefaultTreeCellRenderer {
 			setFont(JTFTools.decodeFont(BOLD_FONT));
 			textSelectionColor = new Color(taskEvent.getTask().getColor());
 			textNonSelectionColor = new Color(taskEvent.getTask().getColor());
-		}
+			if (taskEvent.getIsFocus() || hasFocus)
+				setBackground(new Color(0xDDDDDD));
+		} else if (hasFocus)
+			setBackground(new Color(0xDDDDDD));
+
 		super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, isLeaf, row, hasFocus);
 		return this;
 	}

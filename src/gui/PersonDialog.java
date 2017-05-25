@@ -11,6 +11,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,8 +26,10 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -71,6 +75,7 @@ public class PersonDialog extends JDialog {
 	private JComboBox<String> dateUnavailCombo;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
+	private DefaultMutableTreeNode selectedNode;
 
 	// Lists
 	private AssignTaskCreateTree trees;
@@ -405,56 +410,81 @@ public class PersonDialog extends JDialog {
 	}
 
 	private void createTrees(JTree assignedTasksTree, JTree taskTree) {
-		/* Create assigned task tree */
+		/* === Create assigned task tree === */
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
 				(int) notesArea.getPreferredSize().getHeight() * 3));
 		assignedTasksScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		assignedTasksTree.setCellRenderer(new AssignTaskTreeRenderer());
-		
 
-		/* Add tree listener */
-		assignedTasksTree.addTreeSelectionListener(new TreeSelectionListener() {
-			public void valueChanged(TreeSelectionEvent evt) {
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) assignedTasksTree.getLastSelectedPathComponent();
-				if (node == null)
-					return;
+		// Assigned Task Tree POP UP menu
+		JPopupMenu popup = new JPopupMenu();
+		JMenuItem editItem = new JMenuItem("Edit");
+		JMenuItem removeItem = new JMenuItem("Remove");
+		popup.add(editItem);
+		popup.add(removeItem);
+		popup.setPreferredSize(new Dimension(240, 50));
 
-				/* retrieve the node that was selected */
-				Object nodeInfo = node.getUserObject();
+		// Assigned Task Tree POP UP action listeners
+		editItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				//setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+				AssignTaskDialog ev = new AssignTaskDialog(PersonDialog.this,
+						(AssignTaskEvent) selectedNode.getUserObject());
 
-				if (node.getLevel() == 2) {
-					setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
-					AssignTaskDialog event = new AssignTaskDialog(PersonDialog.this, (AssignTaskEvent) nodeInfo);
+				AssignTaskEvent eventResponse = ev.getDialogResponse();
+				if (eventResponse != null) {
+					// Update assigned task with new node info
+					AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getAssignedTaskID(),
+							personID, eventResponse.getTask().getTaskID(), eventResponse.getProgramName(),
+							eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
+							eventResponse.getWeeksOfMonth());
+					ListStatus status = removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
+					if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
+						status = ListStatus.LIST_ELEMENT_UPDATE;
 
-					AssignTaskEvent eventResponse = event.getDialogResponse();
-					if (eventResponse != null) {
-						// Update assigned task with new node info
-						AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getAssignedTaskID(),
-								personID, eventResponse.getTask().getTaskID(), eventResponse.getProgramName(),
-								eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
-								eventResponse.getWeeksOfMonth());
-						ListStatus status = removeNodeFromAssignedTaskList(lastAssignedTask.getTaskName());
-						if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
-							status = ListStatus.LIST_ELEMENT_UPDATE;
+					// TODO: process lastAssignedTask (expand tree node)
+					lastAssignedTask.setElementStatus(status);
+					assignedTasksList.add(lastAssignedTask);
+				}
+				assignedTasksTree.clearSelection();
+				((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(false);
+			}
+		});
+		removeItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				System.out.println("Remove assigned task not yet implemented.");
+				assignedTasksTree.clearSelection();
+				((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(false);
+			}
+		});
 
-						// TODO: process lastAssignedTask (expand tree node)
-						lastAssignedTask.setElementStatus(status);
-						assignedTasksList.add(lastAssignedTask);
+		// Assigned Task Tree mouse listener
+		assignedTasksTree.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int row = assignedTasksTree.getClosestRowForLocation(e.getX(), e.getY());
+				assignedTasksTree.setSelectionRow(row);
+				
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					selectedNode = (DefaultMutableTreeNode) assignedTasksTree.getPathForRow(row).getLastPathComponent();
+					if (selectedNode != null) {
+						if (selectedNode.getLevel() == 2) {
+							((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(true);
+							popup.show(e.getComponent(), e.getX(), e.getY());
+						}
 					}
-					assignedTasksTree.clearSelection();
 				}
 			}
 		});
 
-		/* Create unassigned task tree */
+		/* === Create unassigned task tree === */
 		taskTreeScrollPane = new JScrollPane(taskTree);
 		taskTreeScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
 				(int) notesArea.getPreferredSize().getHeight() * 3));
 		taskTreeScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		taskTree.setCellRenderer(new TaskTreeRenderer());
 
-		/* Add tree listener */
+		// Unassigned task tree listener
 		taskTree.addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent evt) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) taskTree.getLastSelectedPathComponent();
@@ -482,8 +512,9 @@ public class PersonDialog extends JDialog {
 								childNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
 						lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
 						assignedTasksList.add(lastAssignedTask);
-						
-						// Remove from task by prog list, add to assigned task by prog list
+
+						// Remove from task by prog list, add to assigned task
+						// by prog list
 						removeNodeFromTaskList(eventResponse.getTask().getTaskName());
 						addNodeToAssignedTaskList(eventResponse.getProgramName(), lastAssignedTask);
 
@@ -508,7 +539,7 @@ public class PersonDialog extends JDialog {
 			}
 		}
 	}
-	
+
 	private void addNodeToAssignedTaskList(String programName, AssignedTasksModel assignedTask) {
 		for (int i = 0; i < programList.size(); i++) {
 			ProgramModel prog = programList.get(i);
