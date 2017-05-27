@@ -169,9 +169,11 @@ public class MainFrame extends JFrame {
 		// Add persons sub-menus
 		JMenuItem personAddItem = new JMenuItem("Add person ");
 		JMenu personEditMenu = new JMenu("Edit person ");
+		JMenu personRemoveMenu = new JMenu("Remove person ");
 		JMenuItem personViewAllItem = new JMenuItem("View all persons ");
 		personMenu.add(personAddItem);
 		personMenu.add(personEditMenu);
+		personMenu.add(personRemoveMenu);
 		personMenu.add(personViewAllItem);
 
 		// Add calendar sub-menus
@@ -199,7 +201,7 @@ public class MainFrame extends JFrame {
 				exitItem);
 		createProgramMenuListeners(taskMenu, programCreateItem, programEditMenu, programSelectMenu);
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu, taskRosterMenu, taskViewAllItem);
-		createPersonMenuListeners(personAddItem, personEditMenu, personViewAllItem);
+		createPersonMenuListeners(personAddItem, personEditMenu, personRemoveMenu, personViewAllItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
 				filterByIncompleteRosterItem, filterByLocationItem, filterByTimeItem);
 
@@ -528,7 +530,7 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private void createPersonMenuListeners(JMenuItem addPersonItem, JMenu editPersonMenu,
+	private void createPersonMenuListeners(JMenuItem addPersonItem, JMenu editPersonMenu, JMenu removePersonMenu,
 			JMenuItem viewAllPersonsItem) {
 		// Set up listeners for PERSONS menu
 		addPersonItem.addActionListener(new ActionListener() {
@@ -563,6 +565,31 @@ public class MainFrame extends JFrame {
 							personList.removeAll();
 							editPersonMenu.removeAll();
 							updateMonth((Calendar) calPanel.getCurrentCalendar());
+						}
+					});
+				}
+			}
+		});
+		removePersonMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				removePersonMenu.removeAll();
+				JList<String> personList = controller.getAllPersonsAsString();
+
+				for (int i = 0; i < personList.getModel().getSize(); i++) {
+					JMenuItem personItem = new JMenuItem(personList.getModel().getElementAt(i));
+					removePersonMenu.add(personItem);
+
+					personItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent ev) {
+							// Remove person from roster
+							boolean changed = removePerson(personItem.getText());
+
+							// Clean up lists
+							personList.removeAll();
+							removePersonMenu.removeAll();
+
+							if (changed)
+								updateMonth((Calendar) calPanel.getCurrentCalendar());
 						}
 					});
 				}
@@ -824,6 +851,16 @@ public class MainFrame extends JFrame {
 				personEvent = processEditPersonDialog(personEvent, origName);
 			} while (personEvent != null);
 		}
+	}
+
+	private boolean removePerson(String personName) {
+		int answer = JOptionPane.showConfirmDialog(MainFrame.this,
+				"Are you sure you want to delete " + personName + "\n and all corresponding task assignments? ");
+		if (answer == JOptionPane.YES_OPTION) {
+			controller.removePerson(personName);
+			return true;
+		} else
+			return false;
 	}
 
 	private void setCalendarPopupMenu() {

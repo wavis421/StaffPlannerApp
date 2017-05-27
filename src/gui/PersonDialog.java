@@ -36,10 +36,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.border.Border;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 
 import model.AssignedTasksModel;
 import model.DateRangeModel;
@@ -63,7 +60,7 @@ public class PersonDialog extends JDialog {
 
 	// Private instance variables
 	private int personID;
-	private String programName;
+	private String currentProgramName;
 	private JTextField personName = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField phone = new JTextField(TEXT_FIELD_SIZE);
 	private JTextField email = new JTextField(TEXT_FIELD_SIZE);
@@ -109,6 +106,7 @@ public class PersonDialog extends JDialog {
 		super(parent, "Add person...");
 		setLocation(new Point(100, 100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
+		this.currentProgramName = currentProgram;
 
 		// TODO: find better names!!
 		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram);
@@ -119,7 +117,6 @@ public class PersonDialog extends JDialog {
 		this.programList = programList;
 		this.taskListByProgram = taskListByProgram;
 		this.assignedTaskListByProgram = assignedTaskListByProgram;
-		this.programName = currentProgram;
 
 		// Create empty lists for new person
 		this.leaderButton.setSelected(true);
@@ -141,6 +138,7 @@ public class PersonDialog extends JDialog {
 		super(parent, "Edit person...", true);
 		setLocation(new Point(100, 100));
 		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
+		this.currentProgramName = currentProgram;
 
 		// TODO: find better names!!
 		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram);
@@ -151,7 +149,6 @@ public class PersonDialog extends JDialog {
 		this.programList = programList;
 		this.taskListByProgram = taskListByProgram;
 		this.assignedTaskListByProgram = assignedTaskListByProgram;
-		this.programName = currentProgram;
 
 		// Save person fields
 		this.personID = person.getPersonID();
@@ -222,8 +219,9 @@ public class PersonDialog extends JDialog {
 					// Date and task valid
 					Utilities.addTimeToCalendar(dateResponse.getStartDate(), dateResponse.getTask().getTime());
 					SingleInstanceTaskModel singleTask = new SingleInstanceTaskModel(0, 0,
-							dateResponse.getTask().getTaskID(), programName, dateResponse.getTask().getTaskName(),
-							dateResponse.getStartDate(), dateResponse.getTask().getColor());
+							dateResponse.getTask().getTaskID(), currentProgramName,
+							dateResponse.getTask().getTaskName(), dateResponse.getStartDate(),
+							dateResponse.getTask().getColor());
 
 					// Check for date/time conflicts
 					if (!checkConflictsForSingleInstanceTask(singleTask)) {
@@ -411,11 +409,12 @@ public class PersonDialog extends JDialog {
 
 	private void createTrees(JTree assignedTasksTree, JTree taskTree) {
 		/* === Create assigned task tree === */
+		Dimension assignDimension = new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
+				(int) notesArea.getPreferredSize().getHeight() * 3);
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
-		assignedTasksScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
-				(int) notesArea.getPreferredSize().getHeight() * 3));
+		assignedTasksScrollPane.setPreferredSize(assignDimension);
 		assignedTasksScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-		assignedTasksTree.setCellRenderer(new AssignTaskTreeRenderer());
+		assignedTasksTree.setCellRenderer(new AssignTaskTreeRenderer((int) assignDimension.getWidth()));
 
 		// Assigned Task Tree POP UP menu
 		JPopupMenu assignPopup = new JPopupMenu();
@@ -486,11 +485,12 @@ public class PersonDialog extends JDialog {
 		});
 
 		/* === Create unassigned task tree === */
+		Dimension unassignDimension = new Dimension((int) notesArea.getPreferredSize().getWidth(),
+				(int) notesArea.getPreferredSize().getHeight() * 3);
 		taskTreeScrollPane = new JScrollPane(taskTree);
-		taskTreeScrollPane.setPreferredSize(new Dimension((int) notesArea.getPreferredSize().getWidth(),
-				(int) notesArea.getPreferredSize().getHeight() * 3));
+		taskTreeScrollPane.setPreferredSize(unassignDimension);
 		taskTreeScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-		taskTree.setCellRenderer(new TaskTreeRenderer());
+		taskTree.setCellRenderer(new TaskTreeRenderer((int) unassignDimension.getWidth()));
 
 		// Unassigned Task Tree POP UP menu
 		JPopupMenu unassignPopup = new JPopupMenu();
@@ -502,7 +502,8 @@ public class PersonDialog extends JDialog {
 		assignItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				TaskModel task = (TaskModel) selectedNode.getUserObject();
-				AssignTaskDialog ev = new AssignTaskDialog(PersonDialog.this, selectedNode.getParent().toString(), task);
+				AssignTaskDialog ev = new AssignTaskDialog(PersonDialog.this, selectedNode.getParent().toString(),
+						task);
 
 				AssignTaskEvent eventResponse = ev.getDialogResponse();
 				if (eventResponse != null) {
@@ -512,7 +513,8 @@ public class PersonDialog extends JDialog {
 					lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
 					assignedTasksList.add(lastAssignedTask);
 
-					// Remove from task by prog list, add to assigned task by prog list
+					// Remove from task by prog list, add to assigned task by
+					// prog list
 					removeNodeFromTaskList(eventResponse.getTask().getTaskName());
 					addNodeToAssignedTaskList(eventResponse.getProgramName(), lastAssignedTask);
 

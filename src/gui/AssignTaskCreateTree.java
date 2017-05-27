@@ -41,12 +41,13 @@ public class AssignTaskCreateTree {
 		return assignedTaskTree;
 	}
 
-	public void addNodeToTree (JTree tree, String programName, AssignTaskEvent taskEvent) {
+	public void addNodeToTree(JTree tree, String programName, AssignTaskEvent taskEvent) {
 		for (int i = 0; i < tree.getModel().getChildCount(tree.getModel().getRoot()); i++) {
-			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel().getChild(tree.getModel().getRoot(), i);
+			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel()
+					.getChild(tree.getModel().getRoot(), i);
 			if (progNode.toString().equals(programName)) {
 				progNode.add(new DefaultMutableTreeNode(taskEvent));
-				
+
 				((DefaultTreeModel) tree.getModel()).reload(progNode);
 				collapseTree(tree, programName);
 				return;
@@ -54,12 +55,13 @@ public class AssignTaskCreateTree {
 		}
 	}
 
-	public void addNodeToTree (JTree tree, String programName, TaskModel taskEvent) {
+	public void addNodeToTree(JTree tree, String programName, TaskModel taskEvent) {
 		for (int i = 0; i < tree.getModel().getChildCount(tree.getModel().getRoot()); i++) {
-			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel().getChild(tree.getModel().getRoot(), i);
+			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel()
+					.getChild(tree.getModel().getRoot(), i);
 			if (progNode.toString().equals(programName)) {
 				progNode.add(new DefaultMutableTreeNode(taskEvent));
-				
+
 				((DefaultTreeModel) tree.getModel()).reload(progNode);
 				collapseTree(tree, programName);
 				return;
@@ -67,9 +69,10 @@ public class AssignTaskCreateTree {
 		}
 	}
 
-	public void removeNodeFromTree (JTree tree, String programName, String taskName) {
+	public void removeNodeFromTree(JTree tree, String programName, String taskName) {
 		for (int i = 0; i < tree.getModel().getChildCount(tree.getModel().getRoot()); i++) {
-			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel().getChild(tree.getModel().getRoot(), i);
+			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel()
+					.getChild(tree.getModel().getRoot(), i);
 			if (progNode.toString().equals(programName)) {
 				for (int j = 0; j < progNode.getChildCount(); j++) {
 					if (progNode.getChildAt(j).toString().equals(taskName)) {

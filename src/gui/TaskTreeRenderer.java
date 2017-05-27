@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -18,12 +19,14 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 	private static final String BASIC_FONT = "Arial-12";
 	private static final String BOLD_FONT = "Arial-bold-12";
 	private static final String ITALIC_FONT = "Arial-italic-12";
+	private int treeWidth;
 
 	// TODO: Combine with other renderers!!
-	public TaskTreeRenderer() {
+	public TaskTreeRenderer(int treeWidth) {
 		super();
 
 		setOpaque(true);
+		this.treeWidth = treeWidth;
 
 		URL url = getClass().getResource("../images/calendar_16x16.png");
 		calIcon = new ImageIcon(url);
@@ -59,7 +62,6 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
 			TaskModel task = (TaskModel) (((DefaultMutableTreeNode) value).getUserObject());
 			setText(task.getTaskName());
-			setPreferredSize(getPreferredSize());
 
 			setFont(JTFTools.decodeFont(BOLD_FONT));
 			textSelectionColor = new Color(task.getColor());
@@ -67,6 +69,7 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 			if (task.getIsFocus() || hasFocus)
 				setBackground(new Color(0xDDDDDD));
 		}
+		setPreferredSize(new Dimension(treeWidth, 16));
 		super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, isLeaf, row, hasFocus);
 		return this;
 	}

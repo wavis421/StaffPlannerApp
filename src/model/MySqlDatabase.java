@@ -1124,6 +1124,37 @@ public class MySqlDatabase {
 		}
 	}
 
+	public void removePerson(String personName) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement deletePersonStmt = dbConnection.prepareStatement(
+						"DELETE FROM Persons WHERE PersonName=?;");
+
+				// Delete assigned task
+				deletePersonStmt.setString(1, personName);
+				deletePersonStmt.executeUpdate();
+				deletePersonStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure deleting " + personName + ": " + e.getMessage());
+				break;
+			}
+		}
+	}
+
 	private int addPersonInfo(String personName, String phone, String email, boolean leader, String notes) {
 		int personID = 0;
 		if (!checkDatabaseConnection())

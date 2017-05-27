@@ -150,6 +150,10 @@ public class Controller {
 				ev.getAssignedTaskChanges(), ev.getExtraDates(), ev.getDatesUnavailable());
 	}
 
+	public void removePerson(String personName) {
+		sqlDb.removePerson(personName);
+	}
+
 	public void addSingleInstanceTask(JList<String> personList, String programName, Calendar day, TaskModel task,
 			int color) {
 		for (int i = 0; i < personList.getModel().getSize(); i++) {
