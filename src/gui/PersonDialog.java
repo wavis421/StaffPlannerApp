@@ -414,7 +414,7 @@ public class PersonDialog extends JDialog {
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(assignDimension);
 		assignedTasksScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-		assignedTasksTree.setCellRenderer(new AssignTaskTreeRenderer((int) assignDimension.getWidth()));
+		assignedTasksTree.setCellRenderer(new TaskTreeRenderer((int) assignDimension.getWidth()));
 
 		// Assigned Task Tree POP UP menu
 		JPopupMenu assignPopup = new JPopupMenu();
