@@ -172,6 +172,37 @@ public class MySqlDatabase {
 		}
 	}
 
+	public void deleteProgram(String programName) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement deleteProgramStmt = dbConnection
+						.prepareStatement("DELETE FROM Programs WHERE ProgramName=?;");
+
+				// Delete program
+				deleteProgramStmt.setString(1, programName);
+				deleteProgramStmt.executeUpdate();
+				deleteProgramStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure deleting " + programName + ": " + e.getMessage());
+				break;
+			}
+		}
+	}
+
 	public ProgramModel getProgramByName(String programName) {
 		if (!checkDatabaseConnection())
 			return null;
@@ -473,6 +504,36 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				System.out.println("Failure updating " + oldName + " task in database: " + e.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void deleteTask(String taskName) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement deleteTaskStmt = dbConnection.prepareStatement("DELETE FROM Tasks WHERE TaskName=?;");
+
+				// Delete task
+				deleteTaskStmt.setString(1, taskName);
+				deleteTaskStmt.executeUpdate();
+				deleteTaskStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure deleting " + taskName + ": " + e.getMessage());
 				break;
 			}
 		}
@@ -1130,8 +1191,8 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement deletePersonStmt = dbConnection.prepareStatement(
-						"DELETE FROM Persons WHERE PersonName=?;");
+				PreparedStatement deletePersonStmt = dbConnection
+						.prepareStatement("DELETE FROM Persons WHERE PersonName=?;");
 
 				// Delete assigned task
 				deletePersonStmt.setString(1, personName);
@@ -1315,8 +1376,8 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement deleteAssignedTaskStmt = dbConnection.prepareStatement(
-						"DELETE FROM AssignedTasks WHERE AssignedTaskID=?;");
+				PreparedStatement deleteAssignedTaskStmt = dbConnection
+						.prepareStatement("DELETE FROM AssignedTasks WHERE AssignedTaskID=?;");
 
 				// Delete assigned task
 				deleteAssignedTaskStmt.setInt(1, assignedTaskID);

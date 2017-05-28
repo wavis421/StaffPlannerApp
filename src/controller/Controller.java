@@ -2,8 +2,8 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.swing.JList;
 
@@ -12,7 +12,6 @@ import gui.ProgramEvent;
 import gui.TaskEvent;
 import model.AssignedTasksModel;
 import model.CalendarDayModel;
-import model.Database;
 import model.DateRangeModel;
 import model.MySqlDatabase;
 import model.PersonByTaskModel;
@@ -47,6 +46,10 @@ public class Controller {
 		sqlDb.renameProgram(oldName, newName);
 	}
 
+	public void deleteProgram(String programName) {
+		sqlDb.deleteProgram(programName);
+	}
+
 	public ProgramModel getProgramByName(String programName) {
 		return sqlDb.getProgramByName(programName);
 	}
@@ -79,6 +82,10 @@ public class Controller {
 
 	public void renameTask(String programName, String oldName, String newName) {
 		sqlDb.renameTask(programName, oldName, newName);
+	}
+
+	public void deleteTask(String taskName) {
+		sqlDb.deleteTask(taskName);
 	}
 
 	public TaskModel getTaskByName(String taskName) {

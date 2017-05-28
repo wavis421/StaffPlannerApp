@@ -147,21 +147,25 @@ public class MainFrame extends JFrame {
 		fileMenu.add(exitItem);
 
 		// Add program sub-menus
-		JMenuItem programCreateItem = new JMenuItem("New program ");
+		JMenuItem programCreateItem = new JMenuItem("Create program ");
 		JMenu programEditMenu = new JMenu("Edit program ");
+		JMenu programDeleteMenu = new JMenu("Delete program ");
 		JMenu programSelectMenu = new JMenu("Select active program ");
 		programMenu.add(programCreateItem);
 		programMenu.add(programEditMenu);
+		programMenu.add(programDeleteMenu);
 		programMenu.add(programSelectMenu);
 
 		// Add task sub-menus
 		JMenuItem taskCreateItem = new JMenuItem("Create task ");
 		JMenu taskEditMenu = new JMenu("Edit task ");
+		JMenu taskDeleteMenu = new JMenu("Delete task ");
 		JMenu taskCloneMenu = new JMenu("Clone task ");
 		JMenu taskRosterMenu = new JMenu("Task roster ");
 		JMenuItem taskViewAllItem = new JMenuItem("View all tasks ");
 		taskMenu.add(taskCreateItem);
 		taskMenu.add(taskEditMenu);
+		taskMenu.add(taskDeleteMenu);
 		taskMenu.add(taskCloneMenu);
 		taskMenu.add(taskRosterMenu);
 		taskMenu.add(taskViewAllItem);
@@ -199,8 +203,9 @@ public class MainFrame extends JFrame {
 		// Create listeners
 		createFileMenuListeners(taskMenu, exportProgramItem, exportRosterItem, importProgramItem, importRosterItem,
 				exitItem);
-		createProgramMenuListeners(taskMenu, programCreateItem, programEditMenu, programSelectMenu);
-		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskCloneMenu, taskRosterMenu, taskViewAllItem);
+		createProgramMenuListeners(taskMenu, programCreateItem, programEditMenu, programDeleteMenu, programSelectMenu);
+		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskDeleteMenu, taskCloneMenu, taskRosterMenu,
+				taskViewAllItem);
 		createPersonMenuListeners(personAddItem, personEditMenu, personRemoveMenu, personViewAllItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
 				filterByIncompleteRosterItem, filterByLocationItem, filterByTimeItem);
@@ -318,7 +323,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createProgramMenuListeners(JMenu taskMenu, JMenuItem programCreateItem, JMenu programEditMenu,
-			JMenu programSelectMenu) {
+			JMenu programDeleteMenu, JMenu programSelectMenu) {
 		// Set up listeners for PROGRAM menu
 		programCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -388,6 +393,34 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+		programDeleteMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				programDeleteMenu.removeAll();
+				JList<String> programList = controller.getAllProgramsAsString();
+
+				for (int i = 0; i < programList.getModel().getSize(); i++) {
+					JMenuItem programItem = new JMenuItem(programList.getModel().getElementAt(i).toString());
+					programDeleteMenu.add(programItem);
+
+					programItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent ev) {
+							// Delete program
+							String programName = programItem.getText();
+							if (JOptionPane.showConfirmDialog(MainFrame.this,
+									"Are you sure you want to delete " + programName + " program"
+											+ "\n and all corresponding tasks? ") == JOptionPane.YES_OPTION) {
+								controller.deleteProgram(programName);
+								updateMonth((Calendar) calPanel.getCurrentCalendar());
+							}
+
+							// Clean up lists
+							programList.removeAll();
+							programDeleteMenu.removeAll();
+						}
+					});
+				}
+			}
+		});
 		programSelectMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				programSelectMenu.removeAll();
@@ -411,8 +444,8 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createTaskMenuListeners(JMenuItem taskCreateItem, JMenu taskEditMenu, JMenu taskCloneMenu,
-			JMenuItem taskRosterMenu, JMenuItem taskViewAllItem) {
+	private void createTaskMenuListeners(JMenuItem taskCreateItem, JMenu taskEditMenu, JMenu taskDeleteMenu,
+			JMenu taskCloneMenu, JMenuItem taskRosterMenu, JMenuItem taskViewAllItem) {
 		// Set up listeners for TASK menu
 		taskCreateItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -439,6 +472,38 @@ public class MainFrame extends JFrame {
 
 							taskList.removeAll();
 							taskEditMenu.removeAll();
+						}
+					});
+				}
+			}
+		});
+		taskDeleteMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				taskDeleteMenu.removeAll();
+
+				JList<TaskModel> taskList = controller.getAllTasksByProgram(selectedProgramName);
+				taskList.setCellRenderer(new TaskRenderer());
+
+				for (int i = 0; i < taskList.getModel().getSize(); i++) {
+					TaskModel task = taskList.getModel().getElementAt(i);
+					JMenuItem taskItem = new JMenuItem(task.toString());
+					taskItem.setForeground(new Color(task.getColor()));
+					taskDeleteMenu.add(taskItem);
+
+					taskItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							// Delete task
+							String taskName = taskItem.getText();
+							if (JOptionPane.showConfirmDialog(MainFrame.this, "Are you sure you want to delete "
+									+ taskName + " task"
+									+ "\n and all corresponding task assignments? ") == JOptionPane.YES_OPTION) {
+								controller.deleteTask(taskName);
+								updateMonth((Calendar) calPanel.getCurrentCalendar());
+							}
+
+							// Clean up lists
+							taskList.removeAll();
+							taskDeleteMenu.removeAll();
 						}
 					});
 				}
