@@ -118,6 +118,12 @@ public class PersonTableDialog extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					if (addButtonText.equals("Add floater")) {
 						// Adding floater
+						if (allPersons.getModel().getSize() == 0) {
+							// No persons available
+							JOptionPane.showMessageDialog(PersonTableDialog.this,
+									"No persons are available on " + Utilities.getDisplayDate(calendar));
+							return;
+						}
 						FloaterDialog floaterEvent;
 						if (allTimes.getModel().getSize() > 1)
 							floaterEvent = new FloaterDialog(PersonTableDialog.this,

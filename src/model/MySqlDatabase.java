@@ -1846,7 +1846,7 @@ public class MySqlDatabase {
 				ResultSet result = prepStmt.executeQuery();
 				result.next();
 
-				String displayDate = Utilities.getDisplayDate(today);
+				String displayDate = Utilities.getSqlDate(today);
 				if (result.getInt(1) == 0) {
 					// No match for start/end dates, so add date range
 					addUnavailDates(personName, displayDate, displayDate);

@@ -160,7 +160,8 @@ public class FloaterDialog extends JDialog {
 			personModel.addElement(persons.getModel().getElementAt(i));
 
 		personCombo = new JComboBox<String>(personModel);
-		personCombo.setSelectedIndex(0);
+		if (personModel.getSize() > 0)
+			personCombo.setSelectedIndex(0);
 		personCombo.setBorder(BorderFactory.createEtchedBorder());
 		personCombo.setMaximumSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
 	}
