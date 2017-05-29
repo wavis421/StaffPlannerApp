@@ -476,10 +476,11 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void renameTask(String programName, String oldName, String newName) {
+	public TaskModel renameTask(String programName, String oldName, String newName) {
 		if (!checkDatabaseConnection())
-			return;
+			return null;
 
+		TaskModel updatedTask = null;
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement updateTaskStmt = dbConnection
@@ -491,6 +492,8 @@ public class MySqlDatabase {
 
 				updateTaskStmt.executeUpdate();
 				updateTaskStmt.close();
+
+				updatedTask = getTaskByName(newName);
 				break;
 
 			} catch (CommunicationsException e) {
@@ -507,6 +510,7 @@ public class MySqlDatabase {
 				break;
 			}
 		}
+		return updatedTask;
 	}
 
 	public void deleteTask(String taskName) {
@@ -1956,7 +1960,8 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT PersonName, Persons.PersonID, StartDate, EndDate FROM Persons, UnavailDates "
-								// Don't select if person has entries in unavail list with matching date 
+								// Don't select if person has entries in unavail
+								// list with matching date
 								+ "WHERE ((SELECT COUNT(*) FROM UnavailDates "
 								+ "   WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
 								+ "   AND Persons.PersonID = UnavailDates.PersonID "

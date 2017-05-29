@@ -829,10 +829,13 @@ public class MainFrame extends JFrame {
 			} else {
 				// Editing existing task, so update task and refresh calendar
 				if (!origTaskName.equals(dialogResponse.getTaskName()))
-					controller.renameTask(dialogResponse.getProgramName(), origTaskName, dialogResponse.getTaskName());
+					task = controller.renameTask(dialogResponse.getProgramName(), origTaskName,
+							dialogResponse.getTaskName());
 
-				controller.updateTask(task.getTaskID(), dialogResponse, origTaskTime);
-				updateMonth((Calendar) calPanel.getCurrentCalendar());
+				if (task != null) {
+					controller.updateTask(task.getTaskID(), dialogResponse, origTaskTime);
+					updateMonth((Calendar) calPanel.getCurrentCalendar());
+				}
 				break;
 			}
 		}

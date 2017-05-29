@@ -80,8 +80,8 @@ public class Controller {
 				origTaskTime);
 	}
 
-	public void renameTask(String programName, String oldName, String newName) {
-		sqlDb.renameTask(programName, oldName, newName);
+	public TaskModel renameTask(String programName, String oldName, String newName) {
+		return sqlDb.renameTask(programName, oldName, newName);
 	}
 
 	public void deleteTask(String taskName) {
