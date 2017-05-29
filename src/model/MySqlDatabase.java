@@ -1956,10 +1956,11 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT PersonName, Persons.PersonID, StartDate, EndDate FROM Persons, UnavailDates "
-								// Either person has no entries in avail list
-								+ "WHERE (SELECT COUNT(*) FROM UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) = 0 "
-								// ...OR date not within unavailable date range
-								+ "   OR (SELECT COUNT(*) FROM UnavailDates WHERE ? BETWEEN StartDate AND EndDate) = 0 "
+								// Don't select if person has entries in unavail list with matching date 
+								+ "WHERE ((SELECT COUNT(*) FROM UnavailDates "
+								+ "   WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
+								+ "   AND Persons.PersonID = UnavailDates.PersonID "
+								+ "   AND ? BETWEEN StartDate AND EndDate) = 0 "
 								+ "GROUP BY PersonName ORDER BY PersonName;");
 
 				selectStmt.setDate(1, sqlToday);
@@ -2138,7 +2139,7 @@ public class MySqlDatabase {
 						"SELECT PersonName, isLeader AS Leader, false AS SingleInstance, Tasks.TaskID AS TaskID, "
 								+ "  TaskName, Hour AS Hour, Minute AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, 0 AS SingleInstanceColor "
-								+ "FROM Tasks, Persons, Programs, AssignedTasks, UnavailDates "
+								+ "FROM Tasks, Persons, Programs, AssignedTasks "
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
@@ -2166,7 +2167,7 @@ public class MySqlDatabase {
 								"SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
 								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor "
-								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks, UnavailDates "
+								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks "
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
 								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
@@ -2265,7 +2266,7 @@ public class MySqlDatabase {
 						"(SELECT PersonName, isLeader AS Leader, false AS SingleInstance, Tasks.TaskID AS TaskID, "
 								+ "  TaskName, Hour AS Hour, Minute AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, 0 AS SingleInstanceColor, 0 AS SingleInstanceID "
-								+ "FROM Tasks, Persons, Programs, AssignedTasks, UnavailDates "
+								+ "FROM Tasks, Persons, Programs, AssignedTasks "
 
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
@@ -2297,7 +2298,7 @@ public class MySqlDatabase {
 								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor, SingleInstanceID "
 
-								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks, UnavailDates "
+								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks "
 
 								+ "WHERE (SingleInstanceTasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
@@ -2390,6 +2391,7 @@ public class MySqlDatabase {
 
 		PersonByTaskModel personByLocation;
 		ArrayList<PersonByTaskModel> persons = new ArrayList<PersonByTaskModel>();
+
 		if (!checkDatabaseConnection())
 			return (ArrayList<PersonByTaskModel>) persons;
 
@@ -2400,7 +2402,7 @@ public class MySqlDatabase {
 						"SELECT PersonName, isLeader AS Leader, false AS SingleInstance, Tasks.TaskID AS TaskID, "
 								+ "  TaskName, Hour AS Hour, Minute AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, 0 AS SingleInstanceColor "
-								+ "FROM Tasks, Persons, Programs, AssignedTasks, UnavailDates "
+								+ "FROM Tasks, Persons, Programs, AssignedTasks "
 
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired
@@ -2431,7 +2433,7 @@ public class MySqlDatabase {
 								"SELECT PersonName, isLeader AS Leader, true AS SingleInstance, SingleInstanceTasks.TaskID AS TaskID, "
 								+ "TaskName, HOUR(SingleTime) AS Hour, MINUTE(SingleTime) AS Minute, Location, PhoneNumber, EMail, "
 								+ "Tasks.Color AS TaskColor, SingleInstanceTasks.Color AS SingleInstanceColor "
-								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks, UnavailDates "
+								+ "FROM Tasks, Persons, Programs, SingleInstanceTasks "
 
 								+ "WHERE (Tasks.ProgramID = Programs.ProgramID "
 								// Check if program expired

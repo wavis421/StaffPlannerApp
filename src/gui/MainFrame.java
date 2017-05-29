@@ -1000,22 +1000,27 @@ public class MainFrame extends JFrame {
 		});
 		viewRosterByLocationItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (selectedTask != null && selectedTask.getLocation() != null
-						&& !selectedTask.getLocation().equals("")) {
-					// View assigned persons by location
-					ArrayList<PersonByTaskModel> personsByLoc = controller.getPersonsByDayByLocation(selectedCalendar,
-							selectedTask.getLocation());
-					Calendar calendar = (Calendar) selectedCalendar.clone();
+				if (selectedTask != null) {
+					if (selectedTask.getLocation() != null && !selectedTask.getLocation().equals("")) {
+						// View assigned persons by location
+						ArrayList<PersonByTaskModel> personsByLoc = controller
+								.getPersonsByDayByLocation(selectedCalendar, selectedTask.getLocation());
+						Calendar calendar = (Calendar) selectedCalendar.clone();
 
-					JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
-					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
-							"Roster at " + selectedTask.getLocation() + " for "
-									+ Utilities.getDisplayDate(selectedCalendar),
-							PersonTableModel.getExpansionByDay(), null, personsByLoc, "", calendar, personsAvail, null);
+						JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
+						PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
+								"Roster at " + selectedTask.getLocation() + " for "
+										+ Utilities.getDisplayDate(selectedCalendar),
+								PersonTableModel.getExpansionByDay(), null, personsByLoc, "", calendar, personsAvail,
+								null);
 
-					do {
-						ev = processViewRosterByLocationDialog(ev.getDialogResponse());
-					} while (ev != null);
+						do {
+							ev = processViewRosterByLocationDialog(ev.getDialogResponse());
+						} while (ev != null);
+
+					} else {
+						JOptionPane.showMessageDialog(MainFrame.this, "Location not provided for this task");
+					}
 				}
 			}
 		});
