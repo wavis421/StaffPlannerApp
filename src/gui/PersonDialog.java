@@ -459,7 +459,9 @@ public class PersonDialog extends JDialog {
 						ev.getTask().getTime(), ev.getTask().getColor());
 				trees.addNodeToTree(taskTree, programName, taskModel);
 
+				// Remove from assigned tasks lists
 				deleteNodeInAssignedTaskList(ev.getTask().getTaskName());
+				deleteNodeInAssignedTaskByProgList(ev.getTask().getTaskName());
 
 				assignedTasksTree.clearSelection();
 				((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(false);
@@ -513,10 +515,8 @@ public class PersonDialog extends JDialog {
 					lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
 					assignedTasksList.add(lastAssignedTask);
 
-					// Remove from task by prog list, add to assigned task by
-					// prog list
-					removeNodeFromTaskList(eventResponse.getTask().getTaskName());
-					addNodeToAssignedTaskList(eventResponse.getProgramName(), lastAssignedTask);
+					// Add to assigned-by-program list
+					addNodeToAssignedTaskByProgList(eventResponse.getProgramName(), lastAssignedTask);
 
 					// Remove node from task tree, add to assigned task tree
 					trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(),
@@ -547,24 +547,24 @@ public class PersonDialog extends JDialog {
 		});
 	}
 
-	private void removeNodeFromTaskList(String taskName) {
-		for (int i = 0; i < taskListByProgram.size(); i++) {
-			JList<TaskModel> t = taskListByProgram.get(i);
-			for (int j = 0; j < t.getModel().getSize(); j++) {
-				if (t.getModel().getElementAt(j).equals(taskName)) {
-					t.remove(j);
-					return;
-				}
-			}
-		}
-	}
-
-	private void addNodeToAssignedTaskList(String programName, AssignedTasksModel assignedTask) {
+	private void addNodeToAssignedTaskByProgList(String programName, AssignedTasksModel assignedTask) {
 		for (int i = 0; i < programList.size(); i++) {
 			ProgramModel prog = programList.get(i);
 			if (prog.getProgramName().equals(programName)) {
 				assignedTaskListByProgram.get(i).add(assignedTask);
 				return;
+			}
+		}
+	}
+
+	private void deleteNodeInAssignedTaskByProgList(String taskName) {
+		for (int i = 0; i < assignedTaskListByProgram.size(); i++) {
+			ArrayList<AssignedTasksModel> tList = assignedTaskListByProgram.get(i);
+			for (int j = 0; j < tList.size(); j++) {
+				if (tList.get(j).getTaskName().equals(taskName)) {
+					tList.remove(j);
+					return;
+				}
 			}
 		}
 	}

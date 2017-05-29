@@ -1252,12 +1252,12 @@ public class MainFrame extends JFrame {
 			taskListByProgram.add(i, controller.getAllTasksByProgram(programName));
 
 			assignedTaskListByProgram.add(i, new ArrayList<AssignedTasksModel>());
-			ArrayList<AssignedTasksModel> thisAssignedTask = assignedTaskListByProgram.get(i);
+			ArrayList<AssignedTasksModel> thisAssignedTaskList = assignedTaskListByProgram.get(i);
 
 			for (int j = 0; j < assignedList.size(); j++) {
 				AssignedTasksModel assignedTask = assignedList.get(j);
 				if (assignedTask.getProgramName().equals(programName))
-					thisAssignedTask.add(assignedTask);
+					thisAssignedTaskList.add(assignedTask);
 			}
 		}
 	}

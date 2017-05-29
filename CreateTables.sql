@@ -11,7 +11,9 @@ BEGIN
 		# Program data
 		ProgramName varchar(60) DEFAULT NULL,
 		StartDate date DEFAULT NULL,
-		EndDate date DEFAULT NULL
+		EndDate date DEFAULT NULL,
+
+		UNIQUE KEY (ProgramName)
 	) ENGINE=InnoDB;
 	
 	CREATE TABLE IF NOT EXISTS Persons (
@@ -23,7 +25,9 @@ BEGIN
 		PhoneNumber varchar(12) DEFAULT NULL,
 		EMail varchar(50) DEFAULT NULL,
 		isLeader tinyint(1) DEFAULT NULL,
-		Notes varchar(140) DEFAULT NULL
+		Notes varchar(140) DEFAULT NULL,
+		
+		UNIQUE KEY (PersonName)
 	) ENGINE=InnoDB;
 	
 	CREATE TABLE IF NOT EXISTS Tasks (
@@ -45,7 +49,9 @@ BEGIN
 		DaysOfWeek int(11) DEFAULT NULL,
 		DowInMonth int(11) DEFAULT NULL,
 		Hour int(11) DEFAULT NULL,
-		Minute int(11) DEFAULT NULL
+		Minute int(11) DEFAULT NULL,
+				
+		UNIQUE KEY (TaskName)
 	) ENGINE=InnoDB;
 	
 	CREATE TABLE IF NOT EXISTS SingleInstanceTasks (
@@ -94,7 +100,9 @@ BEGIN
 		
 		# Assigned task data
 		DaysOfWeek int(11) DEFAULT NULL,
-		DowInMonth int(11) DEFAULT NULL
+		DowInMonth int(11) DEFAULT NULL,
+				
+		UNIQUE KEY (PersonID, TaskID)
 	) ENGINE=InnoDB;
 	
 	CREATE TABLE IF NOT EXISTS UnavailDates (
@@ -109,7 +117,9 @@ BEGIN
 		
 		# Unavail dates data
 		StartDate date DEFAULT NULL,
-		EndDate date DEFAULT NULL
+		EndDate date DEFAULT NULL,
+				
+		UNIQUE KEY (PersonID, StartDate, EndDate)
 	) ENGINE=InnoDB;
 
 END$$

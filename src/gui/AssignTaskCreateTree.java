@@ -11,6 +11,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import model.AssignedTasksModel;
+import model.ListStatus;
 import model.ProgramModel;
 import model.TaskModel;
 
@@ -129,12 +130,14 @@ public class AssignTaskCreateTree {
 			for (int j = 0; j < assignedTaskList.size(); j++) {
 				AssignedTasksModel item = assignedTaskList.get(j);
 
-				// Create the event to be added to the tree
-				AssignTaskEvent taskEvent = new AssignTaskEvent(this, item.getProgramName(),
-						findNodeInTaskList(getTaskListByProgram(progName), item.getTaskName()),
-						item.getAssignedTaskID(), item.getDaysOfWeek(), item.getWeeksOfMonth());
+				if (item.getElementStatus() != ListStatus.LIST_ELEMENT_DELETE) {
+					// Create the event to be added to the tree
+					AssignTaskEvent taskEvent = new AssignTaskEvent(this, item.getProgramName(),
+							findNodeInTaskList(getTaskListByProgram(progName), item.getTaskName()),
+							item.getAssignedTaskID(), item.getDaysOfWeek(), item.getWeeksOfMonth());
 
-				pNode.add(new DefaultMutableTreeNode(taskEvent));
+					pNode.add(new DefaultMutableTreeNode(taskEvent));
+				}
 			}
 		}
 
