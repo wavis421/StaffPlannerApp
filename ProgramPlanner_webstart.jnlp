@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- JNLP File for ProgramPlanner Application -->
+<jnlp
+  spec="6.0+"
+  codebase="https://www.ProgramPlanner.org"
+  href="ProgramPlanner_webstart.jnlp">
+  <information>
+    <title>ProgramPlanner Application</title>
+    <vendor>wavis consulting</vendor>
+  </information>
+  <resources>
+    <j2se version="1.6+" java-vm-args="-esa -Xnoclassgc"/>
+    <jar href="lib/ProgramPlannerJar.jar"/>
+  </resources>
+  <application-desc main-class="ProgramPlanner"/>
+</jnlp> 
