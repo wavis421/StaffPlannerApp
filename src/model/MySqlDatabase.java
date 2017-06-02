@@ -1170,11 +1170,13 @@ public class MySqlDatabase {
 				deleteAssignedTask(assignedTask.getAssignedTaskID());
 		}
 
-		// Add extraTasks
+		// Add/remove extraTasks
 		for (int i = 0; i < extraTasks.size(); i++) {
-			// Add single instance task to database
+			// Add/remove single instance task in database
 			SingleInstanceTaskModel singleTask = extraTasks.get(i);
-			if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+			if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_DELETE)
+				removeSingleInstanceTask(personName, singleTask.getTaskID(), singleTask.getTaskDate());
+			else if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
 				addSingleInstanceTask(personName, singleTask.getProgramName(), singleTask.getTaskID(),
 						singleTask.getTaskDate(), singleTask.getColor());
 		}
@@ -1499,6 +1501,41 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				System.out.println("Failure adding single instance task: " + e.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void removeSingleInstanceTask(String personName, int taskID, Calendar singleDate) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement deleteExtraTaskStmt = dbConnection.prepareStatement("DELETE FROM SingleInstanceTasks "
+						+ "WHERE PersonID=(SELECT PersonID FROM Persons WHERE PersonName=?) "
+						+ "AND TaskID=? AND SingleDate=? AND SingleTime=?;");
+
+				// Delete single instance task
+				deleteExtraTaskStmt.setString(1, personName);
+				deleteExtraTaskStmt.setInt(2, taskID);
+				deleteExtraTaskStmt.setDate(3, java.sql.Date.valueOf(Utilities.getSqlDate(singleDate)));
+				deleteExtraTaskStmt.setTime(4, java.sql.Time.valueOf(Utilities.getSqlTime(singleDate)));
+				deleteExtraTaskStmt.executeUpdate();
+				deleteExtraTaskStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure deleting extra task: " + e.getMessage());
 				break;
 			}
 		}

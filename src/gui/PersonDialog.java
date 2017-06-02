@@ -360,6 +360,52 @@ public class PersonDialog extends JDialog {
 		singleInstanceTaskCombo.setEditable(false);
 		singleInstanceTaskCombo.setBorder(BorderFactory.createEtchedBorder());
 		singleInstanceTaskCombo.setPreferredSize(new Dimension(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT));
+
+		// Single Instance Task Combo POP UP menu
+		JPopupMenu singleTaskComboPopup = new JPopupMenu();
+		JMenuItem removeItem = new JMenuItem("Remove");
+		singleTaskComboPopup.add(removeItem);
+		singleTaskComboPopup.setPreferredSize(new Dimension(240, 25));
+
+		// Single Instance Task Combo POP UP action listeners
+		removeItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				String selectedItem = (String) singleInstanceTaskCombo.getSelectedItem();
+				SingleInstanceTaskModel task = findSingleInstanceTaskMatch(selectedItem);
+				if (task == null) {
+					// This SHOULD NOT happen!!
+					System.out.println("Error removing single instance task: " + selectedItem);
+					return;
+				}
+
+				// Remove item from combo box and task list
+				((DefaultComboBoxModel<String>) singleInstanceTaskCombo.getModel()).removeElement(selectedItem);
+				if (task.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+					// Was just added, so remove from list
+					singleInstanceTaskList.remove(task);
+				else
+					// Mark for deletion
+					task.setElementStatus(ListStatus.LIST_ELEMENT_DELETE);
+			}
+		});
+
+		singleInstanceTaskCombo.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3 && singleInstanceTaskCombo.getModel().getSize() > 0) {
+					singleTaskComboPopup.show(singleInstanceTaskCombo, e.getX(), e.getY());
+				}
+			}
+		});
+	}
+
+	private SingleInstanceTaskModel findSingleInstanceTaskMatch(String text) {
+		for (int i = 0; i < singleInstanceTaskList.size(); i++) {
+			SingleInstanceTaskModel task = singleInstanceTaskList.get(i);
+			if (text.startsWith(task.getTaskName()) && text.contains(Utilities.getDisplayDate(task.getTaskDate()))) {
+				return task;
+			}
+		}
+		return null;
 	}
 
 	private void createUnavailDateCombo() {
