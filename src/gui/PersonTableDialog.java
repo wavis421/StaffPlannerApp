@@ -287,7 +287,7 @@ public class PersonTableDialog extends JDialog {
 		});
 		// When "Remove person" selected, then trigger PersonTableListener
 		// action for this row
-		if (calendar != null) {
+		if (calendar != null || allPersons == null) {
 			removeItem = new JMenuItem("");
 			popup.add(removeItem);
 			removeItem.addActionListener(new ActionListener() {
@@ -312,6 +312,8 @@ public class PersonTableDialog extends JDialog {
 					int row = table.rowAtPoint(e.getPoint());
 					if (calendar != null)
 						removeItem.setText("Mark person unavailable for " + Utilities.getDisplayDate(calendar));
+					else if (removeItem != null)
+						removeItem.setText("Remove person from roster");
 					table.getSelectionModel().setSelectionInterval(row, row);
 				}
 			}

@@ -408,7 +408,8 @@ public class MainFrame extends JFrame {
 							String programName = programItem.getText();
 							if (JOptionPane.showConfirmDialog(MainFrame.this,
 									"Are you sure you want to delete " + programName + " program"
-											+ "\n and all corresponding tasks? ") == JOptionPane.YES_OPTION) {
+											+ "\n and all corresponding tasks? ",
+											"Program Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 								controller.deleteProgram(programName);
 								updateMonth((Calendar) calPanel.getCurrentCalendar());
 							}
@@ -494,12 +495,8 @@ public class MainFrame extends JFrame {
 						public void actionPerformed(ActionEvent e) {
 							// Delete task
 							String taskName = taskItem.getText();
-							if (JOptionPane.showConfirmDialog(MainFrame.this, "Are you sure you want to delete "
-									+ taskName + " task"
-									+ "\n and all corresponding task assignments? ") == JOptionPane.YES_OPTION) {
-								controller.deleteTask(taskName);
+							if (deleteTask(taskName))
 								updateMonth((Calendar) calPanel.getCurrentCalendar());
-							}
 
 							// Clean up lists
 							taskList.removeAll();
@@ -582,9 +579,14 @@ public class MainFrame extends JFrame {
 			if (event.getButtonId() == TaskTableDialog.getAddTaskButton()) {
 				createTask();
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
+
 			} else if (event.getButtonId() == TaskTableDialog.getEditRowButton()) {
 				editTask(selectedProgramName, event.getTaskName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
+
+			} else if (event.getButtonId() == TaskTableDialog.getDeleteRowButton()) {
+				if (deleteTask(event.getTaskName()))
+					updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 
 			// Refresh data and re-open Task Table dialog
@@ -698,6 +700,12 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 
+			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
+				// Remove person from roster
+				if (removePerson(event.getPersonName()))
+					updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+
 			// Refresh data and re-open Person Table dialog
 			ArrayList<PersonByTaskModel> allPersons = controller.getAllPersons();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
@@ -793,6 +801,16 @@ public class MainFrame extends JFrame {
 
 		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev, task.getTaskID(), task.getProgramID());
 		processCreateTaskDialog(taskEvent, null, origTaskTime);
+	}
+
+	private boolean deleteTask(String taskName) {
+		if (JOptionPane.showConfirmDialog(MainFrame.this,
+				"Are you sure you want to delete " + taskName + " task" + "\n and all corresponding task assignments? ",
+				"Task Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+			controller.deleteTask(taskName);
+			return true;
+		}
+		return false;
 	}
 
 	private void processCreateTaskDialog(TaskDialog taskEvent, String origTaskName, TimeModel origTaskTime) {
@@ -923,7 +941,8 @@ public class MainFrame extends JFrame {
 
 	private boolean removePerson(String personName) {
 		int answer = JOptionPane.showConfirmDialog(MainFrame.this,
-				"Are you sure you want to delete " + personName + "\n and all corresponding task assignments? ");
+				"Are you sure you want to permanently remove\n" + personName + " from the roster?",
+				"Remove person", JOptionPane.YES_NO_OPTION);
 		if (answer == JOptionPane.YES_OPTION) {
 			controller.removePerson(personName);
 			return true;

@@ -108,10 +108,10 @@ public class TaskTableDialog extends JDialog {
 		table.setAutoCreateRowSorter(true);
 
 		popup = new JPopupMenu();
-		removeItem = new JMenuItem("Delete row");
-		editItem = new JMenuItem("Edit row");
-		popup.add(removeItem);
+		editItem = new JMenuItem("Edit task");
+		removeItem = new JMenuItem("Delete task ");
 		popup.add(editItem);
+		popup.add(removeItem);
 
 		// Detect right mouse click on table, then pop-up "Delete/Edit row"
 		// and select row
