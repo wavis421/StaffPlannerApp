@@ -128,8 +128,9 @@ public class Utilities {
 	}
 	
 	public static String getSqlDate(Calendar calendar) {
-		return (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
-				+ calendar.get(Calendar.DAY_OF_MONTH));
+		return (calendar.get(Calendar.YEAR) + "-" 
+				+ String.format("%02d", calendar.get(Calendar.MONTH) + 1) + "-"
+				+ String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
 	}
 	
 	public static String getSqlDate(String displayDate) {

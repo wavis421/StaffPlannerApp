@@ -420,6 +420,57 @@ public class PersonDialog extends JDialog {
 		dateUnavailCombo.setEditable(false);
 		dateUnavailCombo.setBorder(BorderFactory.createEtchedBorder());
 		dateUnavailCombo.setPreferredSize(new Dimension(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT));
+
+		// Date Unavail Combo POP UP menu
+		JPopupMenu dateUnavailComboPopup = new JPopupMenu();
+		JMenuItem removeItem = new JMenuItem("Remove");
+		dateUnavailComboPopup.add(removeItem);
+		dateUnavailComboPopup.setPreferredSize(new Dimension(240, 25));
+
+		// Date Unavail Combo POP UP action listeners
+		removeItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				String selectedItem = (String) dateUnavailCombo.getSelectedItem();
+				DateRangeModel date = findDatesUnavailMatch(selectedItem);
+				if (date == null) {
+					// This SHOULD NOT happen!!
+					System.out.println("Error removing Unavailable Dates: " + selectedItem);
+					return;
+				}
+
+				// Remove item from combo box and unavail dates list
+				((DefaultComboBoxModel<String>) dateUnavailCombo.getModel()).removeElement(selectedItem);
+				if (date.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+					// Was just added, so remove from list
+					datesUnavailableList.remove(date);
+				else
+					// Mark for deletion
+					date.setElementStatus(ListStatus.LIST_ELEMENT_DELETE);
+			}
+		});
+
+		dateUnavailCombo.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3 && dateUnavailCombo.getModel().getSize() > 0) {
+					dateUnavailComboPopup.show(dateUnavailCombo, e.getX(), e.getY());
+				}
+			}
+		});
+	}
+
+	private DateRangeModel findDatesUnavailMatch(String text) {
+		for (int i = 0; i < datesUnavailableList.size(); i++) {
+			DateRangeModel date = datesUnavailableList.get(i);
+			if (date.getStartDate().equals(date.getEndDate())) {
+				if (text.equals(Utilities.convertSqlDateToString(date.getStartDate()))) {
+					return date;
+				}
+			} else if (text.equals((Utilities.convertSqlDateToString(date.getStartDate())) + "  to  "
+						+ Utilities.convertSqlDateToString(date.getEndDate()))) {
+				return date;
+			}
+		}
+		return null;
 	}
 
 	private void addDateUnavail(DateRangeModel dateUnavail, DefaultComboBoxModel<String> dateModel) {

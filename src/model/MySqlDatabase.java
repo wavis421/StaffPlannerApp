@@ -1181,12 +1181,13 @@ public class MySqlDatabase {
 						singleTask.getTaskDate(), singleTask.getColor());
 		}
 
-		// Add dates unavailable (check for duplicates)
+		// Add/remove dates unavailable (check for duplicates)
 		for (int i = 0; i < personDatesUnavailable.size(); i++) {
-			// Add unavailable dates if not a duplicate
+			// Add/remove unavailable dates if not a duplicate
 			DateRangeModel date = personDatesUnavailable.get(i);
-
-			if (date.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+			if (date.getElementStatus() == ListStatus.LIST_ELEMENT_DELETE)
+				removeUnavailDates(personName, date.getStartDate(), date.getEndDate());
+			else if (date.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
 				updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
 		}
 	}
@@ -1753,6 +1754,40 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				System.out.println("Failure adding unavailable dates: " + e.getMessage());
+				break;
+			}
+		}
+	}
+	
+	private void removeUnavailDates(String personName, String startDate, String endDate) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement deletePersonStmt = dbConnection.prepareStatement("DELETE FROM UnavailDates "
+						+ "WHERE PersonID=(SELECT PersonID FROM Persons WHERE PersonName=?) "
+						+ "AND StartDate=? AND EndDate=?;");
+
+				// Delete assigned task
+				deletePersonStmt.setString(1, personName);
+				deletePersonStmt.setString(2, startDate);
+				deletePersonStmt.setString(3, endDate);
+				deletePersonStmt.executeUpdate();
+				deletePersonStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure deleting " + personName + ": " + e.getMessage());
 				break;
 			}
 		}
