@@ -1,16 +1,14 @@
 package gui;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.EventObject;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
 
 public class PersonTableEvent extends EventObject {
 
 	private int buttonId;
 	private String personName = "";
-	private JList<String> personList;
+	private ArrayList<String> personList;
 	private Calendar calendar;
 	private int color;
 
@@ -22,16 +20,15 @@ public class PersonTableEvent extends EventObject {
 		this.color = color;
 		this.personName = personName;
 
-		// Create JList with person name
+		// Create list with person name
 		if (personName != null && !personName.equals("")) {
-			DefaultListModel<String> pModel = new DefaultListModel<String>();
-			pModel.addElement(new String(personName));
-			this.personList = new JList<String>(pModel);
+			ArrayList<String> pList = new ArrayList<String>();
+			pList.add(new String(personName));
+			this.personList = pList;
 		}
 	}
 
-	public PersonTableEvent(Object source, int buttonId, JList<String> personList, Calendar calendar,
-			int color) {
+	public PersonTableEvent(Object source, int buttonId, ArrayList<String> personList, Calendar calendar, int color) {
 		super(source);
 
 		this.buttonId = buttonId;
@@ -49,7 +46,7 @@ public class PersonTableEvent extends EventObject {
 		return personName;
 	}
 
-	public JList<String> getPersonList() {
+	public ArrayList<String> getPersonList() {
 		return personList;
 	}
 

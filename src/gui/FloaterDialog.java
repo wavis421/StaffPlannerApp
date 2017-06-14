@@ -10,6 +10,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
@@ -19,7 +20,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
@@ -34,9 +34,9 @@ public class FloaterDialog extends JDialog {
 	private JButton cancelButton = new JButton("Cancel");
 
 	// Private instance variables
-	private JList<String> personsList;
+	private ArrayList<String> personsList;
 	private JComboBox<String> personCombo;
-	private JList<TimeModel> timesList;
+	private ArrayList<TimeModel> timesList;
 	private JComboBox<String> timeCombo;
 	private Calendar calendar;
 	private JPanel colorPanel = new JPanel();
@@ -53,7 +53,8 @@ public class FloaterDialog extends JDialog {
 	private FloaterEvent dialogResponse;
 
 	// Constructor for adding floater
-	public FloaterDialog(JDialog parent, String title, Calendar date, JList<String> personsList, JList<TimeModel> timesList) {
+	public FloaterDialog(JDialog parent, String title, Calendar date, ArrayList<String> personsList,
+			ArrayList<TimeModel> timesList) {
 		super(parent, title, true);
 
 		this.calendar = date;
@@ -72,7 +73,7 @@ public class FloaterDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				// Add selected time to calendar
 				int idx = timeCombo.getSelectedIndex();
-				Utilities.addTimeToCalendar(calendar, timesList.getModel().getElementAt(idx));
+				Utilities.addTimeToCalendar(calendar, timesList.get(idx));
 
 				// Create FloaterEvent and set response
 				FloaterEvent ev = new FloaterEvent(this, personCombo.getSelectedItem().toString(), calendar,
@@ -153,11 +154,11 @@ public class FloaterDialog extends JDialog {
 		controlsPanel.add(value2, gcon);
 	}
 
-	private void createPersonsComboBox(JList<String> persons) {
+	private void createPersonsComboBox(ArrayList<String> persons) {
 		DefaultComboBoxModel<String> personModel = new DefaultComboBoxModel<String>();
 
-		for (int i = 0; i < persons.getModel().getSize(); i++)
-			personModel.addElement(persons.getModel().getElementAt(i));
+		for (int i = 0; i < persons.size(); i++)
+			personModel.addElement(persons.get(i));
 
 		personCombo = new JComboBox<String>(personModel);
 		if (personModel.getSize() > 0)
@@ -166,11 +167,11 @@ public class FloaterDialog extends JDialog {
 		personCombo.setMaximumSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
 	}
 
-	private void createTimesComboBox(JList<TimeModel> times) {
+	private void createTimesComboBox(ArrayList<TimeModel> times) {
 		DefaultComboBoxModel<String> timeModel = new DefaultComboBoxModel<String>();
 
-		for (int i = 0; i < times.getModel().getSize(); i++) {
-			String timeString = times.getModel().getElementAt(i).toString();
+		for (int i = 0; i < times.size(); i++) {
+			String timeString = times.get(i).toString();
 			timeModel.addElement(timeString);
 		}
 

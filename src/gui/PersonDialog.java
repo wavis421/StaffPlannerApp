@@ -79,7 +79,7 @@ public class PersonDialog extends JDialog {
 	private ArrayList<AssignedTasksModel> assignedTasksList;
 	private ArrayList<SingleInstanceTaskModel> singleInstanceTaskList;
 	private ArrayList<DateRangeModel> datesUnavailableList;
-	private JList<TaskModel> allTasks;
+	private ArrayList<TaskModel> allTasks;
 	private ArrayList<ProgramModel> programList;
 	private ArrayList<JList<TaskModel>> taskListByProgram;
 	private ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram;
@@ -99,7 +99,7 @@ public class PersonDialog extends JDialog {
 	private JPanel staffPanel = new JPanel();
 	private PersonEvent dialogResponse;
 
-	public PersonDialog(JFrame parent, String currentProgram, JList<TaskModel> allTasks,
+	public PersonDialog(JFrame parent, String currentProgram, ArrayList<TaskModel> allTasks,
 			ArrayList<ProgramModel> programList, ArrayList<JList<TaskModel>> taskListByProgram,
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		// super(parent, "Add person...", true);
@@ -132,7 +132,7 @@ public class PersonDialog extends JDialog {
 	}
 
 	// Constructor for updating existing person, PersonModel contains values
-	public PersonDialog(JFrame parent, String currentProgram, JList<TaskModel> allTasks, PersonModel person,
+	public PersonDialog(JFrame parent, String currentProgram, ArrayList<TaskModel> allTasks, PersonModel person,
 			ArrayList<ProgramModel> programList, ArrayList<JList<TaskModel>> taskListByProgram,
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		super(parent, "Edit person...", true);

@@ -10,8 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Calendar;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -56,8 +56,8 @@ public class PersonTableDialog extends JDialog {
 
 	private String addButtonText;
 
-	private JList<String> allPersons;
-	private JList<TimeModel> allTimes;
+	private ArrayList<String> allPersons;
+	private ArrayList<TimeModel> allTimes;
 	private Calendar calendar;
 	private String conflictingTask = null;
 	private PersonTableEvent dialogResponse;
@@ -65,8 +65,8 @@ public class PersonTableDialog extends JDialog {
 	private JDialog child;
 
 	public PersonTableDialog(JFrame parent, String title, int columnExpansionLevel, String taskName,
-			ArrayList<PersonByTaskModel> personList, String addButtonText, Calendar calendar, JList<String> allPersons,
-			JList<TimeModel> allTimes) {
+			ArrayList<PersonByTaskModel> personList, String addButtonText, Calendar calendar,
+			ArrayList<String> allPersons, ArrayList<TimeModel> allTimes) {
 		super(parent, true);
 		setLocation(new Point(100, 100));
 
@@ -118,14 +118,14 @@ public class PersonTableDialog extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					if (addButtonText.equals("Add floater")) {
 						// Adding floater
-						if (allPersons.getModel().getSize() == 0) {
+						if (allPersons.size() == 0) {
 							// No persons available
 							JOptionPane.showMessageDialog(PersonTableDialog.this,
 									"No persons are available on " + Utilities.getDisplayDate(calendar));
 							return;
 						}
 						FloaterDialog floaterEvent;
-						if (allTimes.getModel().getSize() > 1)
+						if (allTimes.size() > 1)
 							floaterEvent = new FloaterDialog(PersonTableDialog.this,
 									"Add floater for " + Utilities.getDisplayDate(calendar), calendar, allPersons,
 									allTimes);
@@ -152,9 +152,9 @@ public class PersonTableDialog extends JDialog {
 						FilterListDialog ev1 = new FilterListDialog(parent,
 								"Assign person(s) to " + taskName + " on " + Utilities.getDisplayDate(calendar),
 								allPersons);
-						JList<String> filterListResponse = ev1.getDialogResponse();
+						ArrayList<String> filterListResponse = ev1.getDialogResponse();
 
-						if (filterListResponse != null && filterListResponse.getModel().getSize() > 0) {
+						if (filterListResponse != null && filterListResponse.size() > 0) {
 							if (!isPersonAlreadyAssigned(filterListResponse, calendar, taskName)) {
 								// New time for this person, create event
 								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, filterListResponse,
@@ -168,9 +168,9 @@ public class PersonTableDialog extends JDialog {
 						// Adding person to task
 						FilterListDialog ev1 = new FilterListDialog(parent, "Assign person(s) to " + taskName,
 								allPersons);
-						JList<String> filterListResponse = ev1.getDialogResponse();
+						ArrayList<String> filterListResponse = ev1.getDialogResponse();
 
-						if (filterListResponse != null && filterListResponse.getModel().getSize() > 0) {
+						if (filterListResponse != null && filterListResponse.size() > 0) {
 							PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, filterListResponse,
 									null, 0);
 							dialogResponse = ev;
@@ -426,11 +426,10 @@ public class PersonTableDialog extends JDialog {
 		return false;
 	}
 
-	private boolean isPersonAlreadyAssigned(JList<String> newPersonList, Calendar calendar, String taskName) {
-		DefaultListModel model = (DefaultListModel) newPersonList.getModel();
+	private boolean isPersonAlreadyAssigned(ArrayList<String> newPersonList, Calendar calendar, String taskName) {
 
-		for (int i = 0; i < newPersonList.getModel().getSize(); i++) {
-			String newPersonName = newPersonList.getModel().getElementAt(i);
+		for (int i = 0; i < newPersonList.size(); i++) {
+			String newPersonName = newPersonList.get(i);
 
 			for (int j = 0; j < fullList.size(); j++) {
 				PersonByTaskModel personByDay = fullList.get(j);
@@ -450,14 +449,14 @@ public class PersonTableDialog extends JDialog {
 								"Failed to add " + personByDayName + " to " + taskName, JOptionPane.WARNING_MESSAGE);
 
 					// Remove from list
-					model.removeElementAt(i);
+					newPersonList.remove(i);
 					i--;
 					break;
 				}
 			}
 		}
 
-		if (model.getSize() > 0)
+		if (newPersonList.size() > 0)
 			// List still contains at least 1 person, then not all were assigned
 			return false;
 		else

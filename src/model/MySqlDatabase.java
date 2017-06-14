@@ -241,10 +241,11 @@ public class MySqlDatabase {
 		return program;
 	}
 
-	public JList<String> getAllProgramsAsString() {
-		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+	public ArrayList<String> getAllProgramsAsString() {
+		ArrayList<String> nameList = new ArrayList<String>();
+
 		if (!checkDatabaseConnection())
-			return (new JList<String>(nameModel));
+			return nameList;
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -252,7 +253,7 @@ public class MySqlDatabase {
 						.prepareStatement("SELECT ProgramName FROM Programs ORDER BY ProgramName;");
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					nameModel.addElement(result.getString("ProgramName"));
+					nameList.add(result.getString("ProgramName"));
 				}
 
 				result.close();
@@ -273,7 +274,7 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return (new JList<String>(nameModel));
+		return nameList;
 	}
 
 	public ArrayList<ProgramModel> getAllPrograms() {
@@ -669,7 +670,8 @@ public class MySqlDatabase {
 								results.getInt("TaskColor"));
 						calendarList.get(day - 1)
 								.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-										results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+										results.getInt("LeaderCount") - results.getInt("UnavailLdrCount")
+												+ results.getInt("SubLeaderCount"),
 										results.getInt("TaskColor"), null, "", true));
 					}
 				}
@@ -695,22 +697,22 @@ public class MySqlDatabase {
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar,
-			JList<String> locations) {
+			ArrayList<String> locations) {
 		return getTasksByFilterByMonth(calendar, locations, "MonthlyCalendarByLocation", true);
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
-			JList<String> personList) {
+			ArrayList<String> personList) {
 		return getTasksByFilterByMonth(calendar, personList, "MonthlyCalendarByPersons", false);
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByProgramByMonth(Calendar calendar,
-			JList<String> programList) {
+			ArrayList<String> programList) {
 		return getTasksByFilterByMonth(calendar, programList, "MonthlyCalendarByProgram", true);
 	}
 
-	private ArrayList<ArrayList<CalendarDayModel>> getTasksByFilterByMonth(Calendar calendar, JList<String> filterList,
-			String subroutineName, boolean showCounts) {
+	private ArrayList<ArrayList<CalendarDayModel>> getTasksByFilterByMonth(Calendar calendar,
+			ArrayList<String> filterList, String subroutineName, boolean showCounts) {
 		// Create a calendar list for each day of the month
 		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
 
@@ -729,10 +731,10 @@ public class MySqlDatabase {
 
 		// Create filter string
 		String filterString = "";
-		for (int i = 0; i < filterList.getModel().getSize(); i++) {
+		for (int i = 0; i < filterList.size(); i++) {
 			if (i > 0)
 				filterString += ",";
-			filterString += filterList.getModel().getElementAt(i);
+			filterString += filterList.get(i);
 		}
 
 		for (int i = 0; i < 2; i++) {
@@ -754,7 +756,8 @@ public class MySqlDatabase {
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
 							.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount")
+											+ results.getInt("SubLeaderCount"),
 									results.getInt("TaskColor"), null, "", showCounts));
 				}
 				results.close();
@@ -778,7 +781,7 @@ public class MySqlDatabase {
 		return calendarList;
 	}
 
-	public ArrayList<ArrayList<CalendarDayModel>> getTasksByTimeByMonth(Calendar calendar, JList<String> times) {
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByTimeByMonth(Calendar calendar, ArrayList<String> times) {
 		// Create a calendar list for each day of the month
 		ArrayList<ArrayList<CalendarDayModel>> calendarList = new ArrayList<>();
 
@@ -797,10 +800,10 @@ public class MySqlDatabase {
 
 		// Create filter string with times
 		String timeFilter = "";
-		for (int i = 0; i < times.getModel().getSize(); i++) {
+		for (int i = 0; i < times.size(); i++) {
 			if (i > 0)
 				timeFilter += ",";
-			timeFilter += Utilities.getSqlTime(Utilities.getCalendarTime(times.getModel().getElementAt(i)));
+			timeFilter += Utilities.getSqlTime(Utilities.getCalendarTime(times.get(i)));
 		}
 
 		for (int i = 0; i < 2; i++) {
@@ -822,7 +825,8 @@ public class MySqlDatabase {
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
 							.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount")
+											+ results.getInt("SubLeaderCount"),
 									results.getInt("TaskColor"), null, "", true));
 				}
 				results.close();
@@ -882,7 +886,8 @@ public class MySqlDatabase {
 							results.getInt("TaskColor"));
 					calendarList.get(day - 1)
 							.add(new CalendarDayModel(newTask, personCount + results.getInt("SubCount"),
-									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount"),
+									results.getInt("LeaderCount") - results.getInt("UnavailLdrCount")
+											+ results.getInt("SubLeaderCount"),
 									results.getInt("TaskColor"), null, "", true));
 				}
 				results.close();
@@ -948,11 +953,11 @@ public class MySqlDatabase {
 		return new JList<TaskModel>(taskModel);
 	}
 
-	public JList<TaskModel> getAllTasks() {
-		DefaultListModel<TaskModel> taskModel = new DefaultListModel<TaskModel>();
+	public ArrayList<TaskModel> getAllTasks() {
+		ArrayList<TaskModel> taskList = new ArrayList<TaskModel>();
 
 		if (!checkDatabaseConnection())
-			return new JList<TaskModel>(taskModel);
+			return taskList;
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -961,11 +966,11 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					taskModel.addElement(new TaskModel(result.getInt("TaskID"), result.getInt("ProgramID"),
+					taskList.add((new TaskModel(result.getInt("TaskID"), result.getInt("ProgramID"),
 							result.getString("TaskName"), result.getString("Location"), result.getInt("NumLeadersReqd"),
 							result.getInt("TotalPersonsReqd"), createDaysOfWeekArray(result.getInt("DaysOfWeek")),
 							createDowInMonthArray(result.getInt("DowInMonth")),
-							new TimeModel(result.getInt("Hour"), result.getInt("Minute")), result.getInt("Color")));
+							new TimeModel(result.getInt("Hour"), result.getInt("Minute")), result.getInt("Color"))));
 				}
 				result.close();
 				selectStmt.close();
@@ -985,14 +990,14 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return new JList<TaskModel>(taskModel);
+		return taskList;
 	}
 
-	public JList<String> getAllLocationsAsString() {
-		DefaultListModel<String> locationModel = new DefaultListModel<String>();
+	public ArrayList<String> getAllLocationsAsString() {
+		ArrayList<String> locationList = new ArrayList<String>();
 
 		if (!checkDatabaseConnection())
-			return new JList<String>(locationModel);
+			return locationList;
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -1001,7 +1006,7 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					locationModel.addElement(result.getString("Location"));
+					locationList.add(result.getString("Location"));
 				}
 				result.close();
 				selectStmt.close();
@@ -1021,14 +1026,14 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return new JList<String>(locationModel);
+		return locationList;
 	}
 
-	public JList<String> getAllTimesAsString() {
-		DefaultListModel<String> timeModel = new DefaultListModel<String>();
+	public ArrayList<String> getAllTimesAsString() {
+		ArrayList<String> timeList = new ArrayList<String>();
 
 		if (!checkDatabaseConnection())
-			return new JList<String>(timeModel);
+			return timeList;
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -1037,7 +1042,7 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					timeModel.addElement(new TimeModel(result.getInt("Hour"), result.getInt("Minute")).toString());
+					timeList.add(new TimeModel(result.getInt("Hour"), result.getInt("Minute")).toString());
 				}
 				result.close();
 				selectStmt.close();
@@ -1057,19 +1062,19 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return new JList<String>(timeModel);
+		return timeList;
 	}
 
-	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
+	public ArrayList<TimeModel> getAllTimesByDay(Calendar calendar) {
 		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		Calendar localCalendar = (Calendar) calendar.clone();
 		String sqlDate = Utilities.getSqlDate(localCalendar);
 
-		DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
+		ArrayList<TimeModel> timeList = new ArrayList<TimeModel>();
 
 		if (!checkDatabaseConnection())
-			return new JList<TimeModel>(timeModel);
+			return timeList;
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -1096,7 +1101,7 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					timeModel.addElement(new TimeModel(result.getInt("Hour"), result.getInt("Minute")));
+					timeList.add(new TimeModel(result.getInt("Hour"), result.getInt("Minute")));
 				}
 				result.close();
 				selectStmt.close();
@@ -1116,7 +1121,7 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return new JList<TimeModel>(timeModel);
+		return timeList;
 	}
 
 	/*
@@ -1758,7 +1763,7 @@ public class MySqlDatabase {
 			}
 		}
 	}
-	
+
 	private void removeUnavailDates(String personName, String startDate, String endDate) {
 		if (!checkDatabaseConnection())
 			return;
@@ -1945,11 +1950,11 @@ public class MySqlDatabase {
 		}
 	}
 
-	public JList<String> getAllPersonsAsString() {
-		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+	public ArrayList<String> getAllPersonsAsString() {
+		ArrayList<String> nameList = new ArrayList<String>();
 
 		if (!checkDatabaseConnection())
-			return new JList<String>(nameModel);
+			return nameList;
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -1958,7 +1963,7 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					nameModel.addElement(new String(result.getString("PersonName")));
+					nameList.add(new String(result.getString("PersonName")));
 				}
 				result.close();
 				selectStmt.close();
@@ -1978,7 +1983,7 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return (new JList<String>(nameModel));
+		return nameList;
 	}
 
 	public ArrayList<PersonByTaskModel> getAllPersons() {
@@ -2020,13 +2025,13 @@ public class MySqlDatabase {
 		return personsByTask;
 	}
 
-	public JList<String> getAvailPersonsAsString(Calendar today) {
+	public ArrayList<String> getAvailPersonsAsString(Calendar today) {
 		// Get all persons who are available today
-		DefaultListModel<String> nameModel = new DefaultListModel<String>();
+		ArrayList<String> nameList = new ArrayList<String>();
 		java.sql.Date sqlToday = java.sql.Date.valueOf(Utilities.getSqlDate(today));
 
 		if (!checkDatabaseConnection())
-			return new JList<String>(nameModel);
+			return nameList;
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -2043,7 +2048,7 @@ public class MySqlDatabase {
 				selectStmt.setDate(1, sqlToday);
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next())
-					nameModel.addElement(new String(result.getString("PersonName")));
+					nameList.add(new String(result.getString("PersonName")));
 
 				result.close();
 				selectStmt.close();
@@ -2063,7 +2068,7 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return (new JList<String>(nameModel));
+		return nameList;
 	}
 
 	public boolean checkPersonExists(String personName) {
@@ -2622,7 +2627,7 @@ public class MySqlDatabase {
 	 */
 	private boolean[] createDaysOfWeekArray(int dow) {
 		boolean[] dowBool = { false, false, false, false, false, false, false };
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 7; i++) {
 			if ((dow & 1) == 1)
 				dowBool[i] = true;
 			dow >>= 1;
@@ -2663,7 +2668,7 @@ public class MySqlDatabase {
 	 */
 	// TODO: Export mySQL Tables and save to a file, plus Import mySQL Tables
 	// from file
-	public void saveProgramToFile(JList<String> programNameList, File file) throws IOException {
+	public void saveProgramToFile(ArrayList<String> programNameList, File file) throws IOException {
 		JOptionPane.showMessageDialog(null, "Currently not supported");
 	}
 

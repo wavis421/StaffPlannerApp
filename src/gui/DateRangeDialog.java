@@ -9,10 +9,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
@@ -21,7 +19,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
@@ -42,7 +39,7 @@ public class DateRangeDialog extends JDialog {
 	private JDatePickerImpl endDatePicker;
 	private JPanel datePanel = new JPanel();
 	private String dateLabelText;
-	private JList<TaskModel> allTasks;
+	private ArrayList<TaskModel> allTasks;
 	private JComboBox<TaskModel> taskCombo;
 
 	// Dialog panels
@@ -50,7 +47,7 @@ public class DateRangeDialog extends JDialog {
 	private JPanel buttonsPanel;
 	private DateRangeEvent dialogResponse;
 
-	public DateRangeDialog(JDialog parent, String title, String dateLabel, JList<TaskModel> allTasks) {
+	public DateRangeDialog(JDialog parent, String title, String dateLabel, ArrayList<TaskModel> allTasks) {
 		super(parent, title, true);
 		this.dateLabelText = dateLabel;
 		this.allTasks = allTasks;
@@ -74,8 +71,8 @@ public class DateRangeDialog extends JDialog {
 		} else {
 			// Add task combo box
 			DefaultComboBoxModel<String> taskModel = new DefaultComboBoxModel<String>();
-			for (int i = 0; i < allTasks.getModel().getSize(); i++)
-				taskModel.addElement(allTasks.getModel().getElementAt(i).toString());
+			for (int i = 0; i < allTasks.size(); i++)
+				taskModel.addElement(allTasks.get(i).toString());
 			taskCombo = new JComboBox(taskModel);
 			taskCombo.setEditable(false);
 		}
@@ -103,8 +100,7 @@ public class DateRangeDialog extends JDialog {
 					} else {
 						// Assigning substitute, task selected
 						int idx = taskCombo.getSelectedIndex();
-						dialogResponse = new DateRangeEvent(DateRangeDialog.this,
-								(TaskModel) allTasks.getModel().getElementAt(idx),
+						dialogResponse = new DateRangeEvent(DateRangeDialog.this, (TaskModel) allTasks.get(idx),
 								(Calendar) startDatePicker.getModel().getValue(), null);
 						setVisible(false);
 						dispose();

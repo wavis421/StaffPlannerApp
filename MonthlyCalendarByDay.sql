@@ -22,6 +22,7 @@ BEGIN
 		PersonCount INT(11),
 		LeaderCount INT(11),
 		SubCount INT(11),
+		SubLeaderCount INT(11),
 		UnavailCount INT(11),
 		UnavailLdrCount INT(11),
 		NumPersonsReqd INT(11),
@@ -34,7 +35,7 @@ BEGIN
 	# Insert tasks and floaters into table for each day of month
 	WHILE (thisDay <= numDaysInMonth) DO
 		INSERT INTO MonthTable
-		   (Today, TaskName, TaskID, ProgramID, TaskHour, TaskMinute, PersonCount, LeaderCount, SubCount,
+		   (Today, TaskName, TaskID, ProgramID, TaskHour, TaskMinute, PersonCount, LeaderCount, SubCount, SubLeaderCount,
 				UnavailCount, UnavailLdrCount, NumPersonsReqd, NumLdrsReqd, TaskColor)
 
 		   # Select Tasks by DOW and WOM
@@ -55,6 +56,12 @@ BEGIN
 				(SELECT COUNT(*) FROM SingleInstanceTasks WHERE SingleInstanceTasks.TaskID IS NOT NULL
 					AND SingleInstanceTasks.TaskID = Tasks.TaskID
 					AND SingleDate = currDate) AS SubCount, 
+				# Count number of substitutes who are leaders
+				(SELECT COUNT(*) FROM SingleInstanceTasks, Persons WHERE SingleInstanceTasks.TaskID IS NOT NULL
+					AND SingleInstanceTasks.TaskID = Tasks.TaskID
+					AND SingleDate = currDate
+					AND SingleInstanceTasks.PersonID = Persons.PersonID
+					AND Persons.isLeader = 1) AS SubLeaderCount, 				
 				# Count number of persons unavailable
 				(SELECT COUNT(*) FROM AssignedTasks, Persons, UnavailDates 
 					WHERE Tasks.TaskID = AssignedTasks.TaskID 
@@ -88,7 +95,7 @@ BEGIN
 
 		   # Floater tasks determined by unassigned TaskID (NULL) and matching date
 		   (SELECT thisDay, NULL AS TaskName, SingleInstanceTasks.TaskID AS TaskID, Programs.ProgramID AS ProgramID,
-				HOUR(SingleTime), MINUTE(SingleTime), COUNT(*) AS PersonCount, 0, 0,
+				HOUR(SingleTime), MINUTE(SingleTime), COUNT(*) AS PersonCount, 0, 0, 0,
 				# Count number of persons unavailable
 				(SELECT COUNT(*) FROM SingleInstanceTasks, Persons, UnavailDates 
 					WHERE SingleInstanceTasks.PersonID = Persons.PersonID

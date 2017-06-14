@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -64,7 +63,7 @@ public class MainFrame extends JFrame {
 	private final int LOCATION_FILTER = 4;
 	private final int TIME_FILTER = 5;
 	private int selectedFilterId = NO_FILTER;
-	private JList<String> filteredList = null;
+	private ArrayList<String> filteredList = null;
 
 	private final String[] filterNames = { "", "Program", "Persons", "Incomplete Roster", "Location", "Time" };
 
@@ -218,9 +217,9 @@ public class MainFrame extends JFrame {
 		// Set up listeners for FILE menu
 		exportProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JList<String> programList = controller.getAllProgramsAsString();
+				ArrayList<String> programList = controller.getAllProgramsAsString();
 				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Select Program(s) to export", programList);
-				JList<String> dialogResponse = ev.getDialogResponse();
+				ArrayList<String> dialogResponse = ev.getDialogResponse();
 
 				if (dialogResponse != null) {
 					if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
@@ -301,12 +300,12 @@ public class MainFrame extends JFrame {
 		if (numPrograms > 1)
 			filterByProgramMenuItem.setEnabled(true);
 		if (numPrograms == 1) {
-			JList<String> programList = controller.getAllProgramsAsString();
-			setProgramName(programList.getModel().getElementAt(0));
+			ArrayList<String> programList = controller.getAllProgramsAsString();
+			setProgramName(programList.get(0));
 			taskMenu.setEnabled(true);
 
 		} else if (numPrograms > 1 && selectedProgramName == null) {
-			JList<String> programList = controller.getAllProgramsAsString();
+			ArrayList<String> programList = controller.getAllProgramsAsString();
 			SelectActiveProgramDialog ev = new SelectActiveProgramDialog(MainFrame.this, programList);
 			String dialogResponse = ev.getDialogResponse();
 			if (dialogResponse != null) {
@@ -355,10 +354,10 @@ public class MainFrame extends JFrame {
 		programEditMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				programEditMenu.removeAll();
-				JList<String> programList = controller.getAllProgramsAsString();
+				ArrayList<String> programList = controller.getAllProgramsAsString();
 
-				for (int i = 0; i < programList.getModel().getSize(); i++) {
-					JMenuItem programItem = new JMenuItem(programList.getModel().getElementAt(i).toString());
+				for (int i = 0; i < programList.size(); i++) {
+					JMenuItem programItem = new JMenuItem(programList.get(i).toString());
 					programEditMenu.add(programItem);
 
 					programItem.addActionListener(new ActionListener() {
@@ -386,7 +385,7 @@ public class MainFrame extends JFrame {
 								updateMonth((Calendar) calPanel.getCurrentCalendar());
 							}
 
-							programList.removeAll();
+							programList.clear();
 							programEditMenu.removeAll();
 						}
 					});
@@ -396,10 +395,10 @@ public class MainFrame extends JFrame {
 		programDeleteMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				programDeleteMenu.removeAll();
-				JList<String> programList = controller.getAllProgramsAsString();
+				ArrayList<String> programList = controller.getAllProgramsAsString();
 
-				for (int i = 0; i < programList.getModel().getSize(); i++) {
-					JMenuItem programItem = new JMenuItem(programList.getModel().getElementAt(i).toString());
+				for (int i = 0; i < programList.size(); i++) {
+					JMenuItem programItem = new JMenuItem(programList.get(i).toString());
 					programDeleteMenu.add(programItem);
 
 					programItem.addActionListener(new ActionListener() {
@@ -409,13 +408,13 @@ public class MainFrame extends JFrame {
 							if (JOptionPane.showConfirmDialog(MainFrame.this,
 									"Are you sure you want to delete " + programName + " program"
 											+ "\n and all corresponding tasks? ",
-											"Program Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+									"Program Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 								controller.deleteProgram(programName);
 								updateMonth((Calendar) calPanel.getCurrentCalendar());
 							}
 
 							// Clean up lists
-							programList.removeAll();
+							programList.clear();
 							programDeleteMenu.removeAll();
 						}
 					});
@@ -425,10 +424,10 @@ public class MainFrame extends JFrame {
 		programSelectMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				programSelectMenu.removeAll();
-				JList<String> programList = controller.getAllProgramsAsString();
+				ArrayList<String> programList = controller.getAllProgramsAsString();
 
-				for (int i = 0; i < programList.getModel().getSize(); i++) {
-					JMenuItem programItem = new JMenuItem(programList.getModel().getElementAt(i).toString());
+				for (int i = 0; i < programList.size(); i++) {
+					JMenuItem programItem = new JMenuItem(programList.get(i).toString());
 					programSelectMenu.add(programItem);
 
 					programItem.addActionListener(new ActionListener() {
@@ -436,7 +435,7 @@ public class MainFrame extends JFrame {
 							setProgramName(programItem.getText());
 							taskMenu.setEnabled(true);
 
-							programList.removeAll();
+							programList.clear();
 							programSelectMenu.removeAll();
 						}
 					});
@@ -545,7 +544,7 @@ public class MainFrame extends JFrame {
 					taskItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							ArrayList<PersonByTaskModel> personsByTask = controller.getPersonsByTask(task);
-							JList<String> personsAvail = controller.getAllPersonsAsString();
+							ArrayList<String> personsAvail = controller.getAllPersonsAsString();
 							PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 									"Complete Roster for " + task.getTaskName(), PersonTableModel.getExpansionByTask(),
 									task.getTaskName(), personsByTask, "Add person", null, personsAvail, null);
@@ -618,10 +617,10 @@ public class MainFrame extends JFrame {
 		editPersonMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				editPersonMenu.removeAll();
-				JList<String> personList = controller.getAllPersonsAsString();
+				ArrayList<String> personList = controller.getAllPersonsAsString();
 
-				for (int i = 0; i < personList.getModel().getSize(); i++) {
-					JMenuItem personItem = new JMenuItem(personList.getModel().getElementAt(i));
+				for (int i = 0; i < personList.size(); i++) {
+					JMenuItem personItem = new JMenuItem(personList.get(i));
 					editPersonMenu.add(personItem);
 
 					personItem.addActionListener(new ActionListener() {
@@ -629,7 +628,7 @@ public class MainFrame extends JFrame {
 							String origName = personItem.getText();
 							editPerson(origName);
 
-							personList.removeAll();
+							personList.clear();
 							editPersonMenu.removeAll();
 							updateMonth((Calendar) calPanel.getCurrentCalendar());
 						}
@@ -640,10 +639,10 @@ public class MainFrame extends JFrame {
 		removePersonMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				removePersonMenu.removeAll();
-				JList<String> personList = controller.getAllPersonsAsString();
+				ArrayList<String> personList = controller.getAllPersonsAsString();
 
-				for (int i = 0; i < personList.getModel().getSize(); i++) {
-					JMenuItem personItem = new JMenuItem(personList.getModel().getElementAt(i));
+				for (int i = 0; i < personList.size(); i++) {
+					JMenuItem personItem = new JMenuItem(personList.get(i));
 					removePersonMenu.add(personItem);
 
 					personItem.addActionListener(new ActionListener() {
@@ -652,7 +651,7 @@ public class MainFrame extends JFrame {
 							boolean changed = removePerson(personItem.getText());
 
 							// Clean up lists
-							personList.removeAll();
+							personList.clear();
 							removePersonMenu.removeAll();
 
 							if (changed)
@@ -721,9 +720,9 @@ public class MainFrame extends JFrame {
 		// Set up listeners for CALENDAR menu
 		filterByProgramItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JList<String> programList = controller.getAllProgramsAsString();
+				ArrayList<String> programList = controller.getAllProgramsAsString();
 				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by program", programList);
-				JList<String> dialogResponse = ev.getDialogResponse();
+				ArrayList<String> dialogResponse = ev.getDialogResponse();
 
 				// Only one filter can be active
 				setCalendarFilter(PROGRAM_FILTER, dialogResponse);
@@ -732,9 +731,9 @@ public class MainFrame extends JFrame {
 		});
 		filterByPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JList<String> personList = controller.getAllPersonsAsString();
+				ArrayList<String> personList = controller.getAllPersonsAsString();
 				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by person", personList);
-				JList<String> dialogResponse = ev.getDialogResponse();
+				ArrayList<String> dialogResponse = ev.getDialogResponse();
 
 				// Only one filter can be active
 				setCalendarFilter(PERSON_FILTER, dialogResponse);
@@ -750,9 +749,9 @@ public class MainFrame extends JFrame {
 		});
 		filterByLocationItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JList<String> locationList = controller.getAllLocationsAsString();
+				ArrayList<String> locationList = controller.getAllLocationsAsString();
 				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by location", locationList);
-				JList<String> dialogResponse = ev.getDialogResponse();
+				ArrayList<String> dialogResponse = ev.getDialogResponse();
 
 				// Only one filter can be active
 				setCalendarFilter(LOCATION_FILTER, dialogResponse);
@@ -761,9 +760,9 @@ public class MainFrame extends JFrame {
 		});
 		filterByTimeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JList<String> timeList = controller.getAllTimesAsString();
+				ArrayList<String> timeList = controller.getAllTimesAsString();
 				FilterListDialog ev = new FilterListDialog(MainFrame.this, "Filter Calendar by time", timeList);
-				JList<String> dialogResponse = ev.getDialogResponse();
+				ArrayList<String> dialogResponse = ev.getDialogResponse();
 
 				// Only one filter can be active
 				setCalendarFilter(TIME_FILTER, dialogResponse);
@@ -941,8 +940,8 @@ public class MainFrame extends JFrame {
 
 	private boolean removePerson(String personName) {
 		int answer = JOptionPane.showConfirmDialog(MainFrame.this,
-				"Are you sure you want to permanently remove\n" + personName + " from the roster?",
-				"Remove person", JOptionPane.YES_NO_OPTION);
+				"Are you sure you want to permanently remove\n" + personName + " from the roster?", "Remove person",
+				JOptionPane.YES_NO_OPTION);
 		if (answer == JOptionPane.YES_OPTION) {
 			controller.removePerson(personName);
 			return true;
@@ -982,7 +981,7 @@ public class MainFrame extends JFrame {
 				if (selectedTask != null) {
 					// View assigned persons
 					ArrayList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
-					JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
+					ArrayList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 					Calendar calendar = (Calendar) selectedCalendar.clone();
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 							"Roster for " + selectedTask.getTaskName() + " on "
@@ -999,14 +998,12 @@ public class MainFrame extends JFrame {
 		viewRosterByTimeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Create time list with single time element
-				DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
-				TimeModel thisTime = new TimeModel(selectedCalendar);
-				timeModel.addElement(thisTime);
-				JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
+				ArrayList<TimeModel> timeList = new ArrayList<TimeModel>();
+				timeList.add(new TimeModel(selectedCalendar));
 
 				// View assigned persons by time
 				ArrayList<PersonByTaskModel> personsByTime = controller.getPersonsByDayByTime(selectedCalendar);
-				JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
+				ArrayList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 				Calendar calendar = (Calendar) selectedCalendar.clone();
 
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
@@ -1029,7 +1026,7 @@ public class MainFrame extends JFrame {
 								.getPersonsByDayByLocation(selectedCalendar, selectedTask.getLocation());
 						Calendar calendar = (Calendar) selectedCalendar.clone();
 
-						JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
+						ArrayList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 						PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 								"Roster at " + selectedTask.getLocation() + " for "
 										+ Utilities.getDisplayDate(selectedCalendar),
@@ -1050,8 +1047,8 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// View all persons
 				ArrayList<PersonByTaskModel> personsByTask = controller.getPersonsByDay(selectedCalendar);
-				JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
-				JList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
+				ArrayList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
+				ArrayList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
 				Calendar calendar = (Calendar) selectedCalendar.clone();
 
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
@@ -1086,7 +1083,7 @@ public class MainFrame extends JFrame {
 
 			// Refresh data and re-open Person Table Dialog
 			ArrayList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
-			JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
+			ArrayList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 			Calendar calendar = (Calendar) selectedCalendar.clone();
 
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
@@ -1102,8 +1099,8 @@ public class MainFrame extends JFrame {
 	private PersonTableDialog processViewCompleteRosterByTaskDialog(PersonTableEvent event, TaskModel task) {
 		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
 			if (event.getButtonId() == PersonTableDialog.getAddPersonButtonId()) {
-				for (int i = 0; i < event.getPersonList().getModel().getSize(); i++)
-					editPerson(event.getPersonList().getModel().getElementAt(i));
+				for (int i = 0; i < event.getPersonList().size(); i++)
+					editPerson(event.getPersonList().get(i));
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 
@@ -1114,7 +1111,7 @@ public class MainFrame extends JFrame {
 
 			// Refresh data and re-open Person Table Dialog
 			ArrayList<PersonByTaskModel> personsByTask = controller.getPersonsByTask(task);
-			JList<String> personsAvail = controller.getAllPersonsAsString();
+			ArrayList<String> personsAvail = controller.getAllPersonsAsString();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Monthly Roster for " + task.getTaskName(),
 					PersonTableModel.getExpansionByTask(), task.getTaskName(), personsByTask, "Add person", null,
 					personsAvail, null);
@@ -1143,14 +1140,12 @@ public class MainFrame extends JFrame {
 			}
 
 			// Create time list with single time element
-			DefaultListModel<TimeModel> timeModel = new DefaultListModel<TimeModel>();
-			TimeModel thisTime = new TimeModel(event.getCalendar());
-			timeModel.addElement(thisTime);
-			JList<TimeModel> timeList = new JList<TimeModel>(timeModel);
+			ArrayList<TimeModel> timeList = new ArrayList<TimeModel>();
+			timeList.add(new TimeModel(event.getCalendar()));
 
 			// Refresh data and re-open Person Table dialog
 			ArrayList<PersonByTaskModel> personsByTime = controller.getPersonsByDayByTime(event.getCalendar());
-			JList<String> personsAvail = controller.getAvailPersonsAsString(event.getCalendar());
+			ArrayList<String> personsAvail = controller.getAvailPersonsAsString(event.getCalendar());
 			Calendar calendar = (Calendar) selectedCalendar.clone();
 
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
@@ -1209,8 +1204,8 @@ public class MainFrame extends JFrame {
 
 			// Refresh data and re-open Person Table Dialog
 			ArrayList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
-			JList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
-			JList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
+			ArrayList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
+			ArrayList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
 			Calendar calendar = (Calendar) selectedCalendar.clone();
 
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
@@ -1243,9 +1238,9 @@ public class MainFrame extends JFrame {
 	}
 
 	// Calendar filters
-	private void setCalendarFilter(int filterId, JList<String> list) {
+	private void setCalendarFilter(int filterId, ArrayList<String> list) {
 		if (filteredList != null)
-			filteredList.removeAll();
+			filteredList.clear();
 		filteredList = list;
 
 		// Roster filter has a null list

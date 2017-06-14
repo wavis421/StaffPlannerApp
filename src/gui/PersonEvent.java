@@ -23,7 +23,7 @@ public class PersonEvent extends EventObject {
 	private ArrayList<DateRangeModel> datesUnavailable;
 
 	// Lists used to create task trees
-	private JList<TaskModel> allTasks;
+	private ArrayList<TaskModel> allTasks;
 	private ArrayList<ProgramModel> programList;
 	private ArrayList<JList<TaskModel>> taskListByProgram;
 	private ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram;
@@ -35,7 +35,7 @@ public class PersonEvent extends EventObject {
 	public PersonEvent(Object source, int personID, String name, String phone, String email, boolean leader,
 			String notes, ArrayList<AssignedTasksModel> assignedTaskChanges,
 			ArrayList<SingleInstanceTaskModel> extraDates, ArrayList<DateRangeModel> datesUnavailable,
-			JList<TaskModel> allTasks, ArrayList<ProgramModel> programList,
+			ArrayList<TaskModel> allTasks, ArrayList<ProgramModel> programList,
 			ArrayList<JList<TaskModel>> taskListByProgram,
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		super(source);
@@ -92,7 +92,7 @@ public class PersonEvent extends EventObject {
 		return datesUnavailable;
 	}
 
-	public JList<TaskModel> getAllTasks() {
+	public ArrayList<TaskModel> getAllTasks() {
 		return allTasks;
 	}
 

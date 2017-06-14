@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -28,20 +29,20 @@ public class FilterListDialog extends JDialog {
 	private JPanel controlsPanel = new JPanel();
 	private JPanel buttonsPanel = new JPanel();
 	private JList<JCheckBox> cbList = new JList<JCheckBox>();
-	private JList<String> dialogResponse = null;
+	private ArrayList<String> dialogResponse = null;
 
-	public FilterListDialog(JFrame parent, String filterName, JList<String> filterList) {
+	public FilterListDialog(JFrame parent, String filterName, ArrayList<String> filterList) {
 		super(parent, filterName + "...", true);
 		DefaultListModel<JCheckBox> filterModel = new DefaultListModel<JCheckBox>();
 
 		// Set layout for control and button panels
-		int numRows = filterList.getModel().getSize();
+		int numRows = filterList.size();
 		controlsPanel.setLayout(new GridLayout(numRows, 1));
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
 		// Create check boxes for control panel
 		for (int i = 0; i < numRows; i++) {
-			JCheckBox c = new JCheckBox(filterList.getModel().getElementAt(i), false);
+			JCheckBox c = new JCheckBox(filterList.get(i), false);
 			filterModel.addElement(c);
 			controlsPanel.add(c);
 		}
@@ -61,7 +62,7 @@ public class FilterListDialog extends JDialog {
 		if (numRows <= 16)
 			setSize(350, 120 + (25 * numRows));
 		else
-			setSize(350, 545);  // Maximum size
+			setSize(350, 545); // Maximum size
 		setVisible(true);
 	}
 
@@ -70,13 +71,13 @@ public class FilterListDialog extends JDialog {
 			public void actionPerformed(ActionEvent ev) {
 				int numItems = cbList.getModel().getSize();
 				if (numItems > 0) {
-					DefaultListModel<String> responseModel = new DefaultListModel<String>();
+					ArrayList<String> responseList = new ArrayList<String>();
 					for (int i = 0; i < numItems; i++) {
 						if (cbList.getModel().getElementAt(i).isSelected())
-							responseModel.addElement(new String(cbList.getModel().getElementAt(i).getText()));
+							responseList.add(new String(cbList.getModel().getElementAt(i).getText()));
 					}
-					if (responseModel.getSize() > 0)
-						dialogResponse = new JList<String>(responseModel);
+					if (responseList.size() > 0)
+						dialogResponse = responseList;
 				}
 				setVisible(false);
 				dispose();
@@ -106,7 +107,7 @@ public class FilterListDialog extends JDialog {
 		okButton.setPreferredSize(btnSize);
 	}
 
-	public JList<String> getDialogResponse() {
+	public ArrayList<String> getDialogResponse() {
 		return dialogResponse;
 	}
 }

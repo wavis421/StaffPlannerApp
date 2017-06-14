@@ -6,13 +6,13 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
@@ -24,24 +24,24 @@ public class SelectActiveProgramDialog extends JDialog {
 	// Dialog panels
 	private JPanel controlsPanel = new JPanel();
 	private JPanel buttonsPanel = new JPanel();
-	private JList<String> programList;
+	private ArrayList<String> programList;
 	private JRadioButton[] buttonList;
 	private ButtonGroup programGroup = new ButtonGroup();
 	private String dialogResponse;
 
-	public SelectActiveProgramDialog(JFrame parent, JList<String> programList) {
+	public SelectActiveProgramDialog(JFrame parent, ArrayList<String> programList) {
 		super(parent, "Select active program...", true);
 		this.programList = programList;
 
 		// Set layout for control and button panels
-		int numRows = programList.getModel().getSize();
+		int numRows = programList.size();
 		controlsPanel.setLayout(new GridLayout(numRows, 1));
 		buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
 		// Create check boxes for control panel
 		buttonList = new JRadioButton[numRows];
 		for (int i = 0; i < numRows; i++) {
-			buttonList[i] = new JRadioButton(programList.getModel().getElementAt(i));
+			buttonList[i] = new JRadioButton(programList.get(i));
 			programGroup.add(buttonList[i]);
 			controlsPanel.add(buttonList[i]);
 		}
@@ -63,8 +63,8 @@ public class SelectActiveProgramDialog extends JDialog {
 	public String getDialogResponse() {
 		return dialogResponse;
 	}
-	
-	private void setupButtonsListener() { 
+
+	private void setupButtonsListener() {
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				for (int i = 0; i < buttonList.length; i++) {
@@ -72,7 +72,7 @@ public class SelectActiveProgramDialog extends JDialog {
 						dialogResponse = buttonList[i].getText();
 						setVisible(false);
 						dispose();
-					}	
+					}
 				}
 			}
 		});

@@ -54,7 +54,7 @@ public class Controller {
 		return sqlDb.getProgramByName(programName);
 	}
 
-	public JList<String> getAllProgramsAsString() {
+	public ArrayList<String> getAllProgramsAsString() {
 		return sqlDb.getAllProgramsAsString();
 	}
 
@@ -101,21 +101,21 @@ public class Controller {
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar,
-			JList<String> locations) {
+			ArrayList<String> locations) {
 		return sqlDb.getTasksByLocationByMonth(calendar, locations);
 	}
 
-	public ArrayList<ArrayList<CalendarDayModel>> getTasksByTimeByMonth(Calendar calendar, JList<String> times) {
+	public ArrayList<ArrayList<CalendarDayModel>> getTasksByTimeByMonth(Calendar calendar, ArrayList<String> times) {
 		return sqlDb.getTasksByTimeByMonth(calendar, times);
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
-			JList<String> personList) {
+			ArrayList<String> personList) {
 		return sqlDb.getTasksByPersonsByMonth(calendar, personList);
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByProgramByMonth(Calendar calendar,
-			JList<String> programList) {
+			ArrayList<String> programList) {
 		return sqlDb.getTasksByProgramByMonth(calendar, programList);
 	}
 
@@ -127,19 +127,19 @@ public class Controller {
 		return sqlDb.getAllTasksByProgram(programName);
 	}
 
-	public JList<TaskModel> getAllTasks() {
+	public ArrayList<TaskModel> getAllTasks() {
 		return sqlDb.getAllTasks();
 	}
 
-	public JList<String> getAllLocationsAsString() {
+	public ArrayList<String> getAllLocationsAsString() {
 		return sqlDb.getAllLocationsAsString();
 	}
 
-	public JList<String> getAllTimesAsString() {
+	public ArrayList<String> getAllTimesAsString() {
 		return sqlDb.getAllTimesAsString();
 	}
 
-	public JList<TimeModel> getAllTimesByDay(Calendar calendar) {
+	public ArrayList<TimeModel> getAllTimesByDay(Calendar calendar) {
 		return sqlDb.getAllTimesByDay(calendar);
 	}
 
@@ -161,10 +161,10 @@ public class Controller {
 		sqlDb.removePerson(personName);
 	}
 
-	public void addSingleInstanceTask(JList<String> personList, String programName, Calendar day, TaskModel task,
+	public void addSingleInstanceTask(ArrayList<String> personList, String programName, Calendar day, TaskModel task,
 			int color) {
-		for (int i = 0; i < personList.getModel().getSize(); i++) {
-			sqlDb.addSingleInstanceTask(personList.getModel().getElementAt(i), programName, day, task, color);
+		for (int i = 0; i < personList.size(); i++) {
+			sqlDb.addSingleInstanceTask(personList.get(i), programName, day, task, color);
 		}
 	}
 
@@ -184,11 +184,11 @@ public class Controller {
 		return sqlDb.getPersonByName(name);
 	}
 
-	public JList<String> getAllPersonsAsString() {
+	public ArrayList<String> getAllPersonsAsString() {
 		return sqlDb.getAllPersonsAsString();
 	}
 
-	public JList<String> getAvailPersonsAsString(Calendar today) {
+	public ArrayList<String> getAvailPersonsAsString(Calendar today) {
 		return sqlDb.getAvailPersonsAsString(today);
 	}
 
@@ -224,7 +224,7 @@ public class Controller {
 	 * ------- File save/restore items -------
 	 */
 	// TODO: Implement any required save/restore features
-	public void saveProgramToFile(JList<String> programNameList, File file) throws IOException {
+	public void saveProgramToFile(ArrayList<String> programNameList, File file) throws IOException {
 		sqlDb.saveProgramToFile(programNameList, file);
 	}
 
