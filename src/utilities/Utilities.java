@@ -2,11 +2,12 @@ package utilities;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -36,7 +37,7 @@ public class Utilities {
 		Calendar localCal = Calendar.getInstance();
 		return timeFormat.format(localCal.getTime());
 	}
-	
+
 	public static boolean checkForTimeMatch(Calendar time1, Calendar time2) {
 		if (time1.get(Calendar.HOUR) == time2.get(Calendar.HOUR)
 				&& time1.get(Calendar.MINUTE) == time2.get(Calendar.MINUTE)
@@ -58,14 +59,14 @@ public class Utilities {
 		try {
 			cal.setTime(timeFormat.parse(time));
 			return cal;
-			
+
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Unable to parse time " + time + ": " + e.getMessage());
 			return null;
 		}
 	}
-	
+
 	public static String getDisplayDate(Calendar calendar) {
 		String month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
 		return (month + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR));
@@ -93,11 +94,12 @@ public class Utilities {
 		}
 	}
 
-	public static boolean isDateWithinDateRange(Date today, String startDateStr, String endDateStr, String errorString) {
+	public static boolean isDateWithinDateRange(Date today, String startDateStr, String endDateStr,
+			String errorString) {
 		try {
 			Date startDate = sqlDateFormatter.parse(startDateStr);
 			Date endDate = sqlDateFormatter.parse(endDateStr);
-			
+
 			if (today.compareTo(startDate) >= 0 && today.compareTo(endDate) <= 0) {
 				// today is between startDate and endDate
 				return true;
@@ -126,13 +128,12 @@ public class Utilities {
 
 		return (String.format("%02d", hour) + ":" + String.format("%02d", calendar.get(Calendar.MINUTE)) + ":00");
 	}
-	
+
 	public static String getSqlDate(Calendar calendar) {
-		return (calendar.get(Calendar.YEAR) + "-" 
-				+ String.format("%02d", calendar.get(Calendar.MONTH) + 1) + "-"
+		return (calendar.get(Calendar.YEAR) + "-" + String.format("%02d", calendar.get(Calendar.MONTH) + 1) + "-"
 				+ String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
 	}
-	
+
 	public static String getSqlDate(String displayDate) {
 		try {
 			Calendar cal = Calendar.getInstance();
@@ -169,8 +170,7 @@ public class Utilities {
 			return getDisplayDate(cal);
 
 		} catch (ParseException e) {
-			JOptionPane.showMessageDialog(null,
-					"Unable to parse date '" + sqlDate.toString() + "': " + e.getMessage(),
+			JOptionPane.showMessageDialog(null, "Unable to parse date '" + sqlDate.toString() + "': " + e.getMessage(),
 					"Parsing Error", JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
@@ -185,13 +185,12 @@ public class Utilities {
 			return getDisplayDate(cal);
 
 		} catch (ParseException e) {
-			JOptionPane.showMessageDialog(null,
-					"Unable to parse date '" + sqlDateString + "': " + e.getMessage(),
+			JOptionPane.showMessageDialog(null, "Unable to parse date '" + sqlDateString + "': " + e.getMessage(),
 					"Parsing Error", JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
 	}
-	
+
 	public static boolean isDateInThePast(String dateString, String errorString) {
 		Calendar today = Calendar.getInstance();
 		Calendar date = Calendar.getInstance();
@@ -294,30 +293,12 @@ public class Utilities {
 	}
 
 	/* <<<<<<<<<< List Utilities >>>>>>>>>> */
-	public static boolean findStringMatchInJList(String findString, JList<String> list) {
-		for (int i = 0; i < list.getModel().getSize(); i++) {
-			if (findString == null || list.getModel().getElementAt(i) == null)
-				return false;
-
-			if (list.getModel().getElementAt(i).equals(findString))
-				return true;
-		}
-		return false;
+	public static void removeDuplicateEntriesInList(ArrayList<String> inputList) {
+		Set<String> set = new HashSet<String>(inputList);
+		inputList.clear();
+		inputList.addAll(set);
 	}
 
-	public static JList<String> removeDuplicateEntriesInJlist(JList<String> inputList) {
-		DefaultListModel<String> newListModel = new DefaultListModel<String>();
-		JList<String> newJList = new JList<String>(newListModel);
-
-		for (int i = 0; i < inputList.getModel().getSize(); i++) {
-			String findString = inputList.getModel().getElementAt(i);
-			if (!findStringMatchInJList(findString, newJList)) {
-				newListModel.addElement(findString);
-			}
-		}
-		return newJList;
-	}
-	
 	/* <<<<<<<<<< Color Utilities >>>>>>>>>> */
 	public static int[] getColorSelection() {
 		int[] colorSelections = { 0x000000, // Black

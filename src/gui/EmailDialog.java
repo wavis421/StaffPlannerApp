@@ -13,6 +13,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -26,7 +27,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -52,13 +52,13 @@ public class EmailDialog extends JDialog {
 	private static String userName = "";
 	private static char[] password;
 	private static int port;
-	private JList<String> emailRecipients;
+	private ArrayList<String> emailRecipients;
 
 	// Dialog panels
 	private JPanel controlsPanel;
 	private JPanel buttonsPanel;
 
-	public EmailDialog(JDialog parent, JList<String> emailRecipients) {
+	public EmailDialog(JDialog parent, ArrayList<String> emailRecipients) {
 		super(parent, "Send email...", true);
 		this.emailRecipients = emailRecipients;
 
@@ -123,10 +123,10 @@ public class EmailDialog extends JDialog {
 		buttonsPanel = new JPanel();
 
 		String toText = "";
-		for (int i = 0; i < emailRecipients.getModel().getSize(); i++) {
+		for (int i = 0; i < emailRecipients.size(); i++) {
 			if (!toText.equals(""))
 				toText += ", ";
-			toText += emailRecipients.getModel().getElementAt(i);
+			toText += emailRecipients.get(i);
 		}
 		toField.setText(toText);
 		JScrollPane toPane = new JScrollPane(toField);

@@ -13,12 +13,10 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -213,19 +211,18 @@ public class PersonTableDialog extends JDialog {
 				if (table.getSelectedRowCount() == 0)
 					JOptionPane.showMessageDialog(child, "Please first select email recipients.");
 				else {
-					DefaultListModel<String> emailModel = new DefaultListModel<String>();
+					ArrayList<String> emailList = new ArrayList<String>();
 					int[] selectedRows = table.getSelectedRows();
 
 					for (int i = 0; i < selectedRows.length; i++) {
 						int row = table.convertRowIndexToModel(selectedRows[i]);
 						String emailElement = (String) tableModel.getValueAt(row, tableModel.getColumnForEmail());
 						if (emailElement != null && !emailElement.equals(""))
-							emailModel.addElement(emailElement);
+							emailList.add(emailElement);
 					}
-					if (emailModel.getSize() > 0) {
-						JList<String> parsedEmailList = Utilities
-								.removeDuplicateEntriesInJlist(new JList<String>(emailModel));
-						EmailDialog emailDialog = new EmailDialog(child, parsedEmailList);
+					if (emailList.size() > 0) {
+						Utilities.removeDuplicateEntriesInList(emailList);
+						EmailDialog emailDialog = new EmailDialog(child, emailList);
 					} else
 						JOptionPane.showMessageDialog(child,
 								"Please first select email recipients\n      with email field filled in.");
