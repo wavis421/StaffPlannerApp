@@ -40,7 +40,7 @@ public class DateRangeDialog extends JDialog {
 	private JPanel datePanel = new JPanel();
 	private String dateLabelText;
 	private ArrayList<TaskModel> allTasks;
-	private JComboBox<TaskModel> taskCombo;
+	private JComboBox<String> taskCombo;
 
 	// Dialog panels
 	private JPanel controlsPanel;
@@ -73,7 +73,7 @@ public class DateRangeDialog extends JDialog {
 			DefaultComboBoxModel<String> taskModel = new DefaultComboBoxModel<String>();
 			for (int i = 0; i < allTasks.size(); i++)
 				taskModel.addElement(allTasks.get(i).toString());
-			taskCombo = new JComboBox(taskModel);
+			taskCombo = new JComboBox<String>(taskModel);
 			taskCombo.setEditable(false);
 		}
 

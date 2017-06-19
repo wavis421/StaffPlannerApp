@@ -43,7 +43,6 @@ public class AssignTaskDialog extends JDialog {
 	// Track current program and task
 	private String programName;
 	private TaskModel task;
-	private int assignedTaskID;
 
 	public AssignTaskDialog(JDialog parent, AssignTaskEvent taskEvent) {
 		super(parent, "Assign task...", true);
@@ -73,7 +72,6 @@ public class AssignTaskDialog extends JDialog {
 			boolean[] weeksOfMonth) {
 		this.programName = programName;
 		this.task = task;
-		this.assignedTaskID = assignedTaskID;
 
 		createDayOfWeekButtons(daysOfWeek);
 		createWeekOfMonthButtons(weeksOfMonth);

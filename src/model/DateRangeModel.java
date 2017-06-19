@@ -4,21 +4,16 @@ import java.io.Serializable;
 
 public class DateRangeModel implements Serializable, Comparable<DateRangeModel> {
 	private static final long serialVersionUID = 12340002L;
-	private int unavailDatesID, personID;
+	private int personID;
 	private String startDate;
 	private String endDate;
 	private ListStatus elementStatus;
 
-	public DateRangeModel(int unavailDatesID, int personID, String startDate, String endDate) {
-		this.unavailDatesID = unavailDatesID;
+	public DateRangeModel(int personID, String startDate, String endDate) {
 		this.personID = personID;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
-	}
-
-	public void setUnavailDatesID(int id) {
-		unavailDatesID = id;
 	}
 
 	public int getPersonID() {

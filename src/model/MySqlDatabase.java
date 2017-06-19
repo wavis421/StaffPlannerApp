@@ -1605,10 +1605,9 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT SingleInstanceID, TaskName, SingleInstanceTasks.TaskID, "
-								+ "Programs.ProgramName AS ProgramName, "
-								+ "SingleInstanceTasks.PersonID, SingleDate, SingleTime, SingleInstanceTasks.Color  "
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT TaskName, SingleInstanceTasks.TaskID, " + "Programs.ProgramName AS ProgramName, "
+								+ "SingleDate, SingleTime, SingleInstanceTasks.Color  "
 								+ "FROM SingleInstanceTasks, Tasks, Persons, Programs "
 								+ "WHERE Persons.PersonName=? AND Persons.PersonID = SingleInstanceTasks.PersonID "
 								+ "AND Programs.ProgramID = SingleInstanceTasks.ProgramID "
@@ -1623,9 +1622,7 @@ public class MySqlDatabase {
 					if (taskID > 0)
 						taskName = result.getString("TaskName");
 
-					singleTaskList.add(new SingleInstanceTaskModel(result.getInt("SingleInstanceID"),
-							result.getInt("SingleInstanceTasks.PersonID"), taskID, result.getString("ProgramName"),
-							taskName,
+					singleTaskList.add(new SingleInstanceTaskModel(taskID, result.getString("ProgramName"), taskName,
 							Utilities.convertSqlDateTime(result.getDate("SingleDate"), result.getTime("SingleTime")),
 							result.getInt("SingleInstanceTasks.Color")));
 				}
@@ -1807,16 +1804,15 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT UnavailDates.UnavailDatesID AS UnavailID, Persons.PersonID AS PersonID, StartDate, EndDate "
-								+ "FROM UnavailDates, Persons "
+						"SELECT Persons.PersonID AS PersonID, StartDate, EndDate " + "FROM UnavailDates, Persons "
 								+ "WHERE Persons.PersonName = ? AND Persons.PersonID = UnavailDates.PersonID "
 								+ "ORDER BY StartDate, EndDate;");
 				selectStmt.setString(1, personName);
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					dateList.add(new DateRangeModel(result.getInt("UnavailID"), result.getInt("PersonID"),
-							result.getDate("StartDate").toString(), result.getDate("EndDate").toString()));
+					dateList.add(new DateRangeModel(result.getInt("PersonID"), result.getDate("StartDate").toString(),
+							result.getDate("EndDate").toString()));
 				}
 				result.close();
 				selectStmt.close();
@@ -1853,8 +1849,8 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					dateList.add(new DateRangeModel(0, result.getInt("PersonID"),
-							result.getDate("StartDate").toString(), result.getDate("EndDate").toString()));
+					dateList.add(new DateRangeModel(result.getInt("PersonID"), result.getDate("StartDate").toString(),
+							result.getDate("EndDate").toString()));
 				}
 				result.close();
 				selectStmt.close();

@@ -218,9 +218,8 @@ public class PersonDialog extends JDialog {
 				if (dateResponse != null && dateResponse.getTask() != null) {
 					// Date and task valid
 					Utilities.addTimeToCalendar(dateResponse.getStartDate(), dateResponse.getTask().getTime());
-					SingleInstanceTaskModel singleTask = new SingleInstanceTaskModel(0, 0,
-							dateResponse.getTask().getTaskID(), currentProgramName,
-							dateResponse.getTask().getTaskName(), dateResponse.getStartDate(),
+					SingleInstanceTaskModel singleTask = new SingleInstanceTaskModel(dateResponse.getTask().getTaskID(),
+							currentProgramName, dateResponse.getTask().getTaskName(), dateResponse.getStartDate(),
 							dateResponse.getTask().getColor());
 
 					// Check for date/time conflicts
@@ -466,7 +465,7 @@ public class PersonDialog extends JDialog {
 					return date;
 				}
 			} else if (text.equals((Utilities.convertSqlDateToString(date.getStartDate())) + "  to  "
-						+ Utilities.convertSqlDateToString(date.getEndDate()))) {
+					+ Utilities.convertSqlDateToString(date.getEndDate()))) {
 				return date;
 			}
 		}

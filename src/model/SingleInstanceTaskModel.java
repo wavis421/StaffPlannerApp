@@ -5,16 +5,14 @@ import java.util.Calendar;
 
 public class SingleInstanceTaskModel implements Serializable, Comparable<SingleInstanceTaskModel> {
 	private static final long serialVersionUID = 12340003L;
-	private int singleTaskID, personID, taskID;
+	private int taskID;
 	private String taskName;
 	private String programName;
 	private Calendar taskDate;
 	private int color;
 	private ListStatus elementStatus;
 
-	public SingleInstanceTaskModel (int singleTaskID, int personID, int taskID, String programName, String taskName, Calendar taskDate, int color) {
-		this.singleTaskID = singleTaskID;
-		this.personID = personID;
+	public SingleInstanceTaskModel (int taskID, String programName, String taskName, Calendar taskDate, int color) {
 		this.taskID = taskID;
 		this.programName = programName;
 		this.taskName = taskName;
@@ -26,14 +24,6 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 
 		// Note: Color parameter only valid when taskName is blank
 		this.color = color;
-	}
-
-	public void setSingleTaskID(int id) {
-		singleTaskID = id;
-	}
-
-	public void setPersonID(int id) {
-		personID = id;
 	}
 
 	public int getTaskID() {

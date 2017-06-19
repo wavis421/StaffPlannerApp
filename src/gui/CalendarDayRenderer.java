@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.Calendar;
 
 import javax.swing.JLabel;
 import javax.swing.JList;

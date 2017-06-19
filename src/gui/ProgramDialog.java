@@ -30,7 +30,6 @@ import javax.swing.border.Border;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilCalendarModel;
-import org.jdatepicker.impl.UtilDateModel;
 
 import model.ProgramModel;
 import utilities.Utilities;

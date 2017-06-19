@@ -1260,7 +1260,6 @@ public class MainFrame extends JFrame {
 	private void getAssignedTaskLists(ArrayList<AssignedTasksModel> assignedList, ArrayList<ProgramModel> progList,
 			ArrayList<JList<TaskModel>> taskListByProgram,
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
-		// TODO: Fix JList to use ArrayList
 		for (int i = 0; i < progList.size(); i++) {
 			String programName = progList.get(i).getProgramName();
 			taskListByProgram.add(i, controller.getAllTasksByProgram(programName));

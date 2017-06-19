@@ -19,7 +19,6 @@ import java.awt.event.MouseEvent;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.ArrayList;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
@@ -347,8 +346,7 @@ public class CalendarPanel extends JPanel {
 						// Right mouse button event
 						if (dayListener != null) {
 							// Check whether a list item has been selected
-							int listIdx = ((JList<String>) e.getComponent().getComponentAt(e.getPoint()))
-									.getSelectedIndex();
+							int listIdx = ((JList<String>) e.getComponent().getComponentAt(e.getPoint())).getSelectedIndex();
 							if (listIdx != -1) {
 								// Clone the calendar, update with selected day
 								Calendar calendar = (Calendar) currentCalendar.clone();

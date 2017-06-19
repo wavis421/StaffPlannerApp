@@ -222,7 +222,7 @@ public class PersonTableDialog extends JDialog {
 					}
 					if (emailList.size() > 0) {
 						Utilities.removeDuplicateEntriesInList(emailList);
-						EmailDialog emailDialog = new EmailDialog(child, emailList);
+						new EmailDialog(child, emailList);
 					} else
 						JOptionPane.showMessageDialog(child,
 								"Please first select email recipients\n      with email field filled in.");

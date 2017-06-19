@@ -24,14 +24,12 @@ public class SelectActiveProgramDialog extends JDialog {
 	// Dialog panels
 	private JPanel controlsPanel = new JPanel();
 	private JPanel buttonsPanel = new JPanel();
-	private ArrayList<String> programList;
 	private JRadioButton[] buttonList;
 	private ButtonGroup programGroup = new ButtonGroup();
 	private String dialogResponse;
 
 	public SelectActiveProgramDialog(JFrame parent, ArrayList<String> programList) {
 		super(parent, "Select active program...", true);
-		this.programList = programList;
 
 		// Set layout for control and button panels
 		int numRows = programList.size();
