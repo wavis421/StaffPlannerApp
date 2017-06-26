@@ -21,6 +21,7 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -104,10 +105,10 @@ public class PersonTableDialog extends JDialog {
 		add(buttonPanel, BorderLayout.SOUTH);
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		if (columnExpansionLevel == PersonTableModel.getExpansionWithNotes())
-			setSize(PREF_DIALOG_WIDTH + 100, PREF_DIALOG_HEIGHT);
-		else
+		if (columnExpansionLevel == PersonTableModel.getMinimumExpansion())
 			setSize(PREF_DIALOG_WIDTH, PREF_DIALOG_HEIGHT);
+		else
+			setSize(PREF_DIALOG_WIDTH + 100, PREF_DIALOG_HEIGHT);
 		setVisible(true);
 	}
 
@@ -265,7 +266,7 @@ public class PersonTableDialog extends JDialog {
 		table.setRowHeight(origRowHeight + ROW_GAP);
 		table.getColumnModel().getColumn(tableModel.getColumnForLeader()).setMaxWidth(35);
 		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setMaxWidth(100);
-		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setPreferredWidth(90);
+		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setPreferredWidth(95);
 		if (columnExpansionLevel == PersonTableModel.getExpansionByDay()) {
 			table.getColumnModel().getColumn(tableModel.getColumnForSub()).setMaxWidth(35);
 			table.getColumnModel().getColumn(tableModel.getColumnForTime()).setMaxWidth(75);
@@ -277,6 +278,8 @@ public class PersonTableDialog extends JDialog {
 		} else if (columnExpansionLevel == PersonTableModel.getExpansionWithNotes()) {
 			table.getColumnModel().getColumn(tableModel.getColumnForNotes()).setPreferredWidth(200);
 			table.setRowHeight((3 * origRowHeight) + ROW_GAP);
+			table.getColumnModel().getColumn(tableModel.getColumnForNotes())
+					.setCellRenderer(new PersonTableNotesRenderer());
 			table.getColumnModel().getColumn(tableModel.getColumnForNotes()).setCellEditor(new TextAreaEditor());
 		}
 		table.setDefaultRenderer(Object.class, new PersonTableRenderer());
@@ -354,24 +357,15 @@ public class PersonTableDialog extends JDialog {
 		tableModel.fireTableDataChanged();
 	}
 
-	public class PersonTableRenderer extends JTextArea implements TableCellRenderer {
+	public class PersonTableRenderer extends JLabel implements TableCellRenderer {
 		private PersonTableRenderer() {
 			super();
 			super.setOpaque(true);
-
-			setLineWrap(true);
-			setWrapStyleWord(true);
 		}
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			// cell margins: top, left, bottom, right
-			if (column == tableModel.getColumnForLeader())
-				setMargin(new Insets(0, 10, 3, 0));
-			else
-				setMargin(new Insets(0, 4, 3, 4));
-
 			if (value instanceof String)
 				setText((String) value);
 			else if (value instanceof TimeModel)
@@ -395,14 +389,45 @@ public class PersonTableDialog extends JDialog {
 				else
 					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
-				// TODO: Fix text alignment
+				super.setVerticalAlignment(TOP);
 				if (column == tableModel.getColumnForPersonName()) {
-					super.setText(super.getText());
-					// super.setHorizontalAlignment(JTextArea.LEFT_ALIGNMENT);
+					super.setText(" " + super.getText());
+					super.setHorizontalAlignment(LEFT);
 				} else {
-					// super.setHorizontalAlignment(JTextArea.CENTER_ALIGNMENT);
+					super.setHorizontalAlignment(CENTER);
 				}
 			}
+			return this;
+		}
+	}
+
+	public class PersonTableNotesRenderer extends JTextArea implements TableCellRenderer {
+		private PersonTableNotesRenderer() {
+			super();
+			super.setOpaque(true);
+
+			setLineWrap(true);
+			setWrapStyleWord(true);
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			// cell margins: top, left, bottom, right
+			if (column == tableModel.getColumnForLeader())
+				setMargin(new Insets(0, 10, 3, 0));
+			else
+				setMargin(new Insets(0, 4, 3, 4));
+
+			setText((String) value);
+
+			setFont(CustomFonts.TABLE_TEXT_FONT);
+			super.setForeground(CustomFonts.DEFAULT_TEXT_COLOR);
+
+			if (isSelected)
+				super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);
+			else
+				super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
 			return this;
 		}

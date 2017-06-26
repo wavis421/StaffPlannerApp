@@ -11,6 +11,7 @@ public class CustomFonts {
 	public static final Color SELECTED_BACKGROUND_COLOR = new Color(0xDDDDDD);
 	public static final Color UNSELECTED_BACKGROUND_COLOR = Color.WHITE;
 	public static final Color EDIT_TEXT_COLOR = new Color(0x00994C);
+	public static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
 
 	// Calendar panel fonts
 	public static final Font CAL_TITLE_FONT = JTFTools.decodeFont("Serif-36");
