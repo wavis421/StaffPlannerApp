@@ -7,14 +7,10 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-import acm.util.JTFTools;
 import model.CalendarDayModel;
 import utilities.Utilities;
 
 public class CalendarDayRenderer extends JLabel implements ListCellRenderer<CalendarDayModel> {
-
-	private static final String DEFAULT_FONT = "Serif-bold-14";
-	private static final String ITALIC_FONT = "Serif-italic-14";
 
 	public CalendarDayRenderer() {
 		setOpaque(true);
@@ -23,7 +19,7 @@ public class CalendarDayRenderer extends JLabel implements ListCellRenderer<Cale
 	public Component getListCellRendererComponent(JList<? extends CalendarDayModel> list, CalendarDayModel calendarDay,
 			int index, boolean isSelected, boolean cellHasFocus) {
 
-		setFont(JTFTools.decodeFont(DEFAULT_FONT));
+		setFont(CustomFonts.CAL_BOLD_DEFAULT_FONT);
 		setForeground(new Color(calendarDay.getTextColor()));
 		if (isSelected)
 			setBackground(new Color(0xDDDDDD));
@@ -46,7 +42,7 @@ public class CalendarDayRenderer extends JLabel implements ListCellRenderer<Cale
 				setText("*" + calendarDay.getTask().getTaskName() + " (" + calendarDay.getPersonCount() + "/"
 						+ calendarDay.getTask().getTotalPersonsReqd() + ")");
 			if (calendarDay.getPersonCount() < calendarDay.getTask().getTotalPersonsReqd()) {
-				setFont(JTFTools.decodeFont(ITALIC_FONT));
+				setFont(CustomFonts.CAL_ITALIC_DEFAULT_FONT);
 			}
 		}
 		return this;

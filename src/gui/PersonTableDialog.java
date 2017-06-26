@@ -4,25 +4,31 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import model.PersonByTaskModel;
@@ -32,6 +38,7 @@ import utilities.Utilities;
 public class PersonTableDialog extends JDialog {
 	private static final int PREF_DIALOG_WIDTH = 800;
 	private static final int PREF_DIALOG_HEIGHT = 300;
+	private static final int NOTES_MAX_TEXT_LENGTH = 140;
 
 	private static final int ADD_PERSON_BUTTON = 0;
 	private static final int EMAIL_BUTTON = 1;
@@ -51,6 +58,7 @@ public class PersonTableDialog extends JDialog {
 	private ArrayList<PersonByTaskModel> personList;
 	private ArrayList<PersonByTaskModel> fullList = null;
 	private String taskName;
+	private int activeRow = -1;
 
 	private String addButtonText;
 
@@ -96,7 +104,10 @@ public class PersonTableDialog extends JDialog {
 		add(buttonPanel, BorderLayout.SOUTH);
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		setSize(PREF_DIALOG_WIDTH, PREF_DIALOG_HEIGHT);
+		if (columnExpansionLevel == PersonTableModel.getExpansionWithNotes())
+			setSize(PREF_DIALOG_WIDTH + 100, PREF_DIALOG_HEIGHT);
+		else
+			setSize(PREF_DIALOG_WIDTH, PREF_DIALOG_HEIGHT);
 		setVisible(true);
 	}
 
@@ -232,6 +243,7 @@ public class PersonTableDialog extends JDialog {
 
 		closeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				// TODO: Fix this to return notes field
 				PersonTableEvent ev = new PersonTableEvent(this, CLOSE_BUTTON, (String) null, null, 0);
 				dialogResponse = ev;
 				setVisible(false);
@@ -247,12 +259,13 @@ public class PersonTableDialog extends JDialog {
 		tableModel = new PersonTableModel(columnExpansionLevel, personList);
 		table = new JTable(tableModel);
 
-		table.setFont(new Font("Serif", Font.PLAIN, 14));
-		table.getTableHeader().setFont(new Font("Serif", Font.BOLD, 16));
-		table.setRowHeight(table.getRowHeight() + ROW_GAP);
+		table.setFont(CustomFonts.TABLE_TEXT_FONT);
+		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
+		int origRowHeight = table.getRowHeight();
+		table.setRowHeight(origRowHeight + ROW_GAP);
 		table.getColumnModel().getColumn(tableModel.getColumnForLeader()).setMaxWidth(35);
 		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setMaxWidth(100);
-		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setPreferredWidth(95);
+		table.getColumnModel().getColumn(tableModel.getColumnForPhone()).setPreferredWidth(90);
 		if (columnExpansionLevel == PersonTableModel.getExpansionByDay()) {
 			table.getColumnModel().getColumn(tableModel.getColumnForSub()).setMaxWidth(35);
 			table.getColumnModel().getColumn(tableModel.getColumnForTime()).setMaxWidth(75);
@@ -261,60 +274,66 @@ public class PersonTableDialog extends JDialog {
 			table.getColumnModel().getColumn(tableModel.getColumnForDow()).setPreferredWidth(140);
 			table.getColumnModel().getColumn(tableModel.getColumnForWom()).setMaxWidth(90);
 			table.getColumnModel().getColumn(tableModel.getColumnForWom()).setPreferredWidth(90);
+		} else if (columnExpansionLevel == PersonTableModel.getExpansionWithNotes()) {
+			table.getColumnModel().getColumn(tableModel.getColumnForNotes()).setPreferredWidth(200);
+			table.setRowHeight((3 * origRowHeight) + ROW_GAP);
+			table.getColumnModel().getColumn(tableModel.getColumnForNotes()).setCellEditor(new TextAreaEditor());
 		}
 		table.setDefaultRenderer(Object.class, new PersonTableRenderer());
 		table.setAutoCreateRowSorter(true);
 
-		// *** POP UP CONTAINS "Edit row" and "Remove person'
-		popup = new JPopupMenu();
+		if (columnExpansionLevel != PersonTableModel.getExpansionWithNotes()) {
+			// *** POP UP CONTAINS "Edit row" and "Remove person'
+			popup = new JPopupMenu();
 
-		// When "Edit row" selected, then trigger PersonTableListener action
-		// for this row
-		editItem = new JMenuItem("Edit person");
-		popup.add(editItem);
-		editItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				int row = table.convertRowIndexToModel(table.getSelectedRow());
-				PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON,
-						(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
-				dialogResponse = ev;
-				setVisible(false);
-				dispose();
-			}
-		});
-		// When "Remove person" selected, then trigger PersonTableListener
-		// action for this row
-		if (calendar != null || allPersons == null) {
-			removeItem = new JMenuItem("");
-			popup.add(removeItem);
-			removeItem.addActionListener(new ActionListener() {
+			// When "Edit row" selected, then trigger PersonTableListener action
+			// for this row
+			editItem = new JMenuItem("Edit person");
+			popup.add(editItem);
+			editItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
 					int row = table.convertRowIndexToModel(table.getSelectedRow());
-					PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON,
+					PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON,
 							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
 					dialogResponse = ev;
 					setVisible(false);
 					dispose();
 				}
 			});
-			popup.setPreferredSize(new Dimension(240, 50));
-		} else
-			popup.setPreferredSize(new Dimension(240, 30));
+			// When "Remove person" selected, then trigger PersonTableListener
+			// action for this row
+			if (calendar != null || allPersons == null) {
+				removeItem = new JMenuItem("");
+				popup.add(removeItem);
+				removeItem.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent event) {
+						int row = table.convertRowIndexToModel(table.getSelectedRow());
+						PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON,
+								(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
+						dialogResponse = ev;
+						setVisible(false);
+						dispose();
+					}
+				});
+				popup.setPreferredSize(new Dimension(240, 50));
+			} else
+				popup.setPreferredSize(new Dimension(240, 30));
 
-		// Detect right mouse click on table and show pop up menu
-		table.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON3) {
-					popup.show(table, e.getX(), e.getY());
-					int row = table.rowAtPoint(e.getPoint());
-					if (calendar != null)
-						removeItem.setText("Mark person unavailable for " + Utilities.getDisplayDate(calendar));
-					else if (removeItem != null)
-						removeItem.setText("Remove person from roster");
-					table.getSelectionModel().setSelectionInterval(row, row);
+			// Detect right mouse click on table and show pop up menu
+			table.addMouseListener(new MouseAdapter() {
+				public void mousePressed(MouseEvent e) {
+					if (e.getButton() == MouseEvent.BUTTON3) {
+						popup.show(table, e.getX(), e.getY());
+						int row = table.rowAtPoint(e.getPoint());
+						if (calendar != null)
+							removeItem.setText("Mark person unavailable for " + Utilities.getDisplayDate(calendar));
+						else if (removeItem != null)
+							removeItem.setText("Remove person from roster");
+						table.getSelectionModel().setSelectionInterval(row, row);
+					}
 				}
-			}
-		});
+			});
+		}
 
 		panel.setLayout(new BorderLayout());
 		panel.add(new JScrollPane(table), BorderLayout.CENTER);
@@ -335,15 +354,23 @@ public class PersonTableDialog extends JDialog {
 		tableModel.fireTableDataChanged();
 	}
 
-	public class PersonTableRenderer extends JLabel implements TableCellRenderer {
+	public class PersonTableRenderer extends JTextArea implements TableCellRenderer {
 		private PersonTableRenderer() {
 			super();
 			super.setOpaque(true);
+
+			setLineWrap(true);
+			setWrapStyleWord(true);
 		}
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
+			// cell margins: top, left, bottom, right
+			if (column == tableModel.getColumnForLeader())
+				setMargin(new Insets(0, 10, 3, 0));
+			else
+				setMargin(new Insets(0, 4, 3, 4));
 
 			if (value instanceof String)
 				setText((String) value);
@@ -351,6 +378,7 @@ public class PersonTableDialog extends JDialog {
 				setText(((TimeModel) value).toString());
 
 			if (column != -1) {
+				setFont(CustomFonts.TABLE_TEXT_FONT);
 				Color textColor = Color.black;
 				if (column == tableModel.getColumnForTaskName()) {
 					int modelRow = table.convertRowIndexToModel(row);
@@ -363,17 +391,66 @@ public class PersonTableDialog extends JDialog {
 				super.setForeground(textColor);
 
 				if (isSelected)
-					super.setBackground(new Color(0xDDDDDD));
+					super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);
 				else
-					super.setBackground(Color.WHITE);
+					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
+				// TODO: Fix text alignment
 				if (column == tableModel.getColumnForPersonName()) {
-					super.setText(" " + super.getText());
-					super.setHorizontalAlignment(LEFT);
-				} else
-					super.setHorizontalAlignment(CENTER);
+					super.setText(super.getText());
+					// super.setHorizontalAlignment(JTextArea.LEFT_ALIGNMENT);
+				} else {
+					// super.setHorizontalAlignment(JTextArea.CENTER_ALIGNMENT);
+				}
 			}
+
 			return this;
+		}
+	}
+
+	public class TextAreaEditor extends AbstractCellEditor implements TableCellEditor {
+		JTextArea textArea;
+		boolean textChanged = false;
+
+		public TextAreaEditor() {
+			textArea = new JTextArea();
+			textArea.setLineWrap(true);
+			textArea.setWrapStyleWord(true);
+
+			textArea.addKeyListener(new KeyAdapter() {
+				public void keyTyped(KeyEvent evt) {
+					// Limit text length
+					if (textArea.getText().length() > NOTES_MAX_TEXT_LENGTH)
+						textArea.setText(textArea.getText().substring(0, NOTES_MAX_TEXT_LENGTH));
+					textChanged = true;
+				}
+			});
+			textArea.addFocusListener(new FocusAdapter() {
+				public void focusLost(FocusEvent e) {
+					if (textChanged) {
+						tableModel.setValueAt(textArea.getText(), activeRow, tableModel.getColumnForNotes());
+						textChanged = false;
+					}
+				}
+			});
+		}
+
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+				int column) {
+			// top, left, bottom, right
+			textArea.setMargin(new Insets(0, 4, 3, 4));
+			activeRow = row;
+
+			// font and color
+			textArea.setFont(CustomFonts.TABLE_TEXT_FONT);
+			textArea.setForeground(CustomFonts.EDIT_TEXT_COLOR);
+			textArea.setText((String) value);
+
+			return textArea;
+		}
+
+		public Object getCellEditorValue() {
+			return textArea.getText();
 		}
 	}
 

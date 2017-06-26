@@ -170,10 +170,12 @@ public class MainFrame extends JFrame {
 		taskMenu.add(taskViewAllItem);
 
 		// Add persons sub-menus
+		JMenuItem personViewNotesItem = new JMenuItem("View roster notes ");
 		JMenuItem personAddItem = new JMenuItem("Add person ");
 		JMenu personEditMenu = new JMenu("Edit person ");
 		JMenu personRemoveMenu = new JMenu("Remove person ");
 		JMenuItem personViewAllItem = new JMenuItem("View all persons ");
+		personMenu.add(personViewNotesItem);
 		personMenu.add(personAddItem);
 		personMenu.add(personEditMenu);
 		personMenu.add(personRemoveMenu);
@@ -205,7 +207,8 @@ public class MainFrame extends JFrame {
 		createProgramMenuListeners(taskMenu, programCreateItem, programEditMenu, programDeleteMenu, programSelectMenu);
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskDeleteMenu, taskCloneMenu, taskRosterMenu,
 				taskViewAllItem);
-		createPersonMenuListeners(personAddItem, personEditMenu, personRemoveMenu, personViewAllItem);
+		createPersonMenuListeners(personViewNotesItem, personAddItem, personEditMenu, personRemoveMenu,
+				personViewAllItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
 				filterByIncompleteRosterItem, filterByLocationItem, filterByTimeItem);
 
@@ -596,9 +599,20 @@ public class MainFrame extends JFrame {
 		return null;
 	}
 
-	private void createPersonMenuListeners(JMenuItem addPersonItem, JMenu editPersonMenu, JMenu removePersonMenu,
-			JMenuItem viewAllPersonsItem) {
+	private void createPersonMenuListeners(JMenuItem viewNotesItem, JMenuItem addPersonItem, JMenu editPersonMenu,
+			JMenu removePersonMenu, JMenuItem viewAllPersonsItem) {
 		// Set up listeners for PERSONS menu
+		viewNotesItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ArrayList<PersonByTaskModel> allPersons = controller.getAllPersonsWithNotes();
+				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Roster Notes",
+						PersonTableModel.getExpansionWithNotes(), null, allPersons, "", null, null, null);
+				if (ev != null && ev.getDialogResponse() != null) {
+					// TODO: update database with changed notes
+					//controller.updatePerson(ev.getDialogResponse());
+				}
+			}
+		});
 		addPersonItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ArrayList<AssignedTasksModel> assignedList = new ArrayList<AssignedTasksModel>();

@@ -99,8 +99,8 @@ public class TaskTableDialog extends JDialog {
 		tableModel = new TaskTableModel(taskList);
 		table = new JTable(tableModel);
 
-		table.setFont(new Font("Serif", Font.PLAIN, 14));
-		table.getTableHeader().setFont(new Font("Serif", Font.BOLD, 16));
+		table.setFont(CustomFonts.TABLE_TEXT_FONT);
+		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 		table.setRowHeight(table.getRowHeight() + ROW_GAP);
 		table.getColumnModel().getColumn(tableModel.getColumnForTime()).setMaxWidth(75);
 

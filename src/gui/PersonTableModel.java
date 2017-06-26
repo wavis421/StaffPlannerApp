@@ -22,6 +22,7 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final int PERSON_TABLE_MINIMUM_EXPANSION = 0;
 	private static final int PERSON_TABLE_EXPAND_BY_DAY = 1;
 	private static final int PERSON_TABLE_EXPAND_BY_TASK = 2;
+	private static final int PERSON_TABLE_EXPAND_WITH_NOTES = 3;
 
 	// Columns for PERSON_TABLE_MINIMUM_EXPANSION
 	private static final int PERSON_NAME_COLUMN = 0;
@@ -43,11 +44,15 @@ public class PersonTableModel extends AbstractTableModel {
 	private static final int PHONE_COLUMN_EXPAND_BY_TASK = 4;
 	private static final int EMAIL_COLUMN_EXPAND_BY_TASK = 5;
 
+	// PERSON_TABLE_EXPAND_WITH_NOTES
+	private static final int NOTES_COLUMN = 4;
+
 	private static final long serialVersionUID = 12340002L;
 	private ArrayList<PersonByTaskModel> personList;
 	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail" };
 	private String colNamesExpandByDay[] = { "Name", "Ldr", "Sub", "Task", "Time", "Location", "Phone #", "E-Mail" };
 	private String colNamesExpandByTask[] = { "Name", "Ldr", "DOW", "WOM", "Phone #", "E-Mail" };
+	private String colNamesExpandWithNotes[] = { "Name", "Ldr", "Phone #", "E-Mail", "Notes" };
 	private String colNames[];
 	private int expansionLevel;
 
@@ -58,6 +63,8 @@ public class PersonTableModel extends AbstractTableModel {
 			colNames = colNamesExpandByDay;
 		} else if (columnExpansionLevel == PERSON_TABLE_EXPAND_BY_TASK) {
 			colNames = colNamesExpandByTask;
+		} else if (columnExpansionLevel == PERSON_TABLE_EXPAND_WITH_NOTES) {
+			colNames = colNamesExpandWithNotes;
 		} else {
 			colNames = colNamesBasic;
 		}
@@ -88,6 +95,14 @@ public class PersonTableModel extends AbstractTableModel {
 			return TimeModel.class;
 		else
 			return String.class;
+	}
+
+	@Override
+	public boolean isCellEditable(int row, int col) {
+		if (expansionLevel == PERSON_TABLE_EXPAND_WITH_NOTES && col == NOTES_COLUMN)
+			return true;
+		else
+			return false;
 	}
 
 	@Override
@@ -141,6 +156,19 @@ public class PersonTableModel extends AbstractTableModel {
 			case 5: // email
 				return person.getPerson().getEmail();
 			}
+		} else if (expansionLevel == PERSON_TABLE_EXPAND_WITH_NOTES) {
+			switch (col) {
+			case 0: // Person name
+				return person.getPerson().getName();
+			case 1: // is leader?
+				return (String) (Character.toString(person.getPerson().isLeader() ? '\u2713' : ' '));
+			case 2: // phone number
+				return person.getPerson().getPhone();
+			case 3: // email
+				return person.getPerson().getEmail();
+			case 4: // notes
+				return person.getPerson().getNotes();
+			}
 		} else { // Minimum expansion
 			switch (col) {
 			case 0: // Person name
@@ -154,6 +182,15 @@ public class PersonTableModel extends AbstractTableModel {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void setValueAt(Object value, int row, int column) {
+		if (expansionLevel == PERSON_TABLE_EXPAND_WITH_NOTES) {
+			// The only editable field is the notes column
+			PersonByTaskModel person = personList.get(row);
+			person.getPerson().setNotes((String) value);
+		}
 	}
 
 	public int getColumnForPersonName() {
@@ -224,6 +261,13 @@ public class PersonTableModel extends AbstractTableModel {
 			return -1;
 	}
 
+	public int getColumnForNotes() {
+		if (expansionLevel == PERSON_TABLE_EXPAND_WITH_NOTES)
+			return NOTES_COLUMN;
+		else
+			return -1;
+	}
+
 	public static int getMinimumExpansion() {
 		return PERSON_TABLE_MINIMUM_EXPANSION;
 	}
@@ -234,6 +278,10 @@ public class PersonTableModel extends AbstractTableModel {
 
 	public static int getExpansionByTask() {
 		return PERSON_TABLE_EXPAND_BY_TASK;
+	}
+
+	public static int getExpansionWithNotes() {
+		return PERSON_TABLE_EXPAND_WITH_NOTES;
 	}
 
 	private AssignedTasksModel getTaskMatchInAssignedTaskList(String taskName, ArrayList<AssignedTasksModel> list) {

@@ -211,6 +211,10 @@ public class Controller {
 	public ArrayList<PersonByTaskModel> getAllPersons() {
 		return sqlDb.getAllPersons();
 	}
+	
+	public ArrayList<PersonByTaskModel> getAllPersonsWithNotes() {
+		return sqlDb.getAllPersonsWithNotes();
+	}
 
 	public int getNumPersons() {
 		return sqlDb.getNumPersons();

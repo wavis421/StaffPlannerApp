@@ -42,13 +42,6 @@ import utilities.Utilities;
  */
 public class CalendarPanel extends JPanel {
 	// Private constants
-	private static final Color EMPTY_BACKGROUND = new Color(0xDDDDDD);
-	private static final String TITLE_FONT = "Serif-36";
-	private static final String TITLE_BOLD_FONT = "Serif-bold-36";
-	private static final String PROGRAM_FONT = "Serif-italic-22";
-	private static final String LABEL_FONT = "Serif-bold-14";
-	private static final String FILTER_FONT = "Serif-italic-13";
-	private static final String DATE_FONT = "Serif-11";
 	private static final int DAY_PANEL_WIDTH = 300;
 	private static final int DAY_PANEL_HEIGHT = 200;
 
@@ -100,11 +93,11 @@ public class CalendarPanel extends JPanel {
 
 		// Set up header label
 		programLabel.setHorizontalAlignment(JLabel.CENTER);
-		programLabel.setFont(JTFTools.decodeFont(PROGRAM_FONT));
+		programLabel.setFont(CustomFonts.CAL_SUBTITLE_FONT);
 
 		// Set up filter label
 		filterLabel.setHorizontalAlignment(JLabel.RIGHT);
-		filterLabel.setFont(JTFTools.decodeFont(FILTER_FONT));
+		filterLabel.setFont(CustomFonts.CAL_ITALIC_SMALL_FONT);
 
 		// Initialize calendar parameters
 		currentCalendar = Calendar.getInstance(locale);
@@ -223,8 +216,8 @@ public class CalendarPanel extends JPanel {
 		leftLabel = new JLabel("<<", SwingConstants.RIGHT);
 		rightLabel = new JLabel(">>");
 
-		leftLabel.setFont(JTFTools.decodeFont(TITLE_BOLD_FONT));
-		rightLabel.setFont(JTFTools.decodeFont(TITLE_BOLD_FONT));
+		leftLabel.setFont(CustomFonts.CAL_TITLE_BOLD_FONT);
+		rightLabel.setFont(CustomFonts.CAL_TITLE_BOLD_FONT);
 
 		// ADD listeners
 		leftLabel.addMouseListener(new MouseAdapter() {
@@ -250,7 +243,7 @@ public class CalendarPanel extends JPanel {
 		String monthName = capitalize(monthNames[month]);
 
 		JLabel label = new JLabel(monthName + " " + year);
-		label.setFont(JTFTools.decodeFont(TITLE_FONT));
+		label.setFont(CustomFonts.CAL_TITLE_FONT);
 		label.setHorizontalAlignment(JLabel.CENTER);
 		return label;
 	}
@@ -261,7 +254,7 @@ public class CalendarPanel extends JPanel {
 			int weekday = (Calendar.SUNDAY + i + 6) % 7 + 1;
 			weekdayLabels[i] = new JLabel(capitalize(weekdayNames[weekday]));
 
-			weekdayLabels[i].setFont(JTFTools.decodeFont(LABEL_FONT));
+			weekdayLabels[i].setFont(CustomFonts.CAL_BOLD_DEFAULT_FONT);
 			weekdayLabels[i].setHorizontalAlignment(JLabel.CENTER);
 		}
 	}
@@ -295,14 +288,14 @@ public class CalendarPanel extends JPanel {
 		boolean highlight;
 
 		if (text == null) {
-			dayBox.setBackground(EMPTY_BACKGROUND);
+			dayBox.setBackground(CustomFonts.EMPTY_BACKGROUND_COLOR);
 		} else {
 			JLabel label = new JLabel(text);
 			int dayIdx = Integer.parseInt(text) - 1;
 			highlight = false;
 
 			// Add day of month
-			label.setFont(JTFTools.decodeFont(DATE_FONT));
+			label.setFont(CustomFonts.CAL_DATE_FONT);
 			label.setOpaque(true);
 			dayBox.setBackground(Color.WHITE);
 			dayBox.add(label, BorderLayout.BEFORE_FIRST_LINE);

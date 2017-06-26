@@ -1196,6 +1196,40 @@ public class MySqlDatabase {
 				updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
 		}
 	}
+	
+	public void updatePersonNotes(String personName, String personNotes) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement updatePersonStmt = dbConnection.prepareStatement(
+						"UPDATE Persons SET Notes=? WHERE PersonName=?;");
+
+				// Update person notes field
+				updatePersonStmt.setString(1, personNotes);
+				updatePersonStmt.setString(2, personName);
+
+				updatePersonStmt.executeUpdate();
+				updatePersonStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure updating " + personName + " notes to database: " + e.getMessage());
+				break;
+			}
+		}
+		return;
+	}
 
 	public void removePerson(String personName) {
 		if (!checkDatabaseConnection())
@@ -1992,6 +2026,47 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Persons ORDER BY PersonName;");
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					PersonModel p = new PersonModel(result.getInt("PersonID"), result.getString("PersonName"),
+							result.getString("PhoneNumber"), result.getString("EMail"), result.getBoolean("isLeader"),
+							result.getString("Notes"), null, null, null);
+					personsByTask.add(new PersonByTaskModel(p, null, false, 0, null));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				break;
+			}
+		}
+		return personsByTask;
+	}
+
+	public ArrayList<PersonByTaskModel> getAllPersonsWithNotes() {
+		ArrayList<PersonByTaskModel> personsByTask = new ArrayList<PersonByTaskModel>();
+
+		if (!checkDatabaseConnection())
+			return personsByTask;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Persons "
+								+ "WHERE Persons.Notes IS NOT NULL AND Persons.Notes != '' "
+								+ "ORDER BY PersonName;");
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
