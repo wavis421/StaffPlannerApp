@@ -8,6 +8,7 @@ import java.util.Calendar;
 import javax.swing.JList;
 
 import gui.PersonEvent;
+import gui.PersonTableNotesModel;
 import gui.ProgramEvent;
 import gui.TaskEvent;
 import model.AssignedTasksModel;
@@ -157,6 +158,13 @@ public class Controller {
 				ev.getAssignedTaskChanges(), ev.getExtraDates(), ev.getDatesUnavailable());
 	}
 
+	public void updatePersonNotes(ArrayList<PersonTableNotesModel> personNotesList) {
+		for (int i = 0; i < personNotesList.size(); i++) {
+			PersonTableNotesModel item = personNotesList.get(i);
+			sqlDb.updatePersonNotes(item.getPersonName(), item.getPersonNotes());
+		}
+	}
+
 	public void removePerson(String personName) {
 		sqlDb.removePerson(personName);
 	}
@@ -211,7 +219,7 @@ public class Controller {
 	public ArrayList<PersonByTaskModel> getAllPersons() {
 		return sqlDb.getAllPersons();
 	}
-	
+
 	public ArrayList<PersonByTaskModel> getAllPersonsWithNotes() {
 		return sqlDb.getAllPersonsWithNotes();
 	}

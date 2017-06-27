@@ -607,9 +607,8 @@ public class MainFrame extends JFrame {
 				ArrayList<PersonByTaskModel> allPersons = controller.getAllPersonsWithNotes();
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Roster Notes",
 						PersonTableModel.getExpansionWithNotes(), null, allPersons, "", null, null, null);
-				if (ev != null && ev.getDialogResponse() != null) {
-					// TODO: update database with changed notes
-					//controller.updatePerson(ev.getDialogResponse());
+				if (ev != null && ev.getDialogNotesResponse() != null) {
+					controller.updatePersonNotes(ev.getDialogNotesResponse().getPersonNotesList());
 				}
 			}
 		});

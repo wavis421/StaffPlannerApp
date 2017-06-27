@@ -58,6 +58,7 @@ public class PersonTableDialog extends JDialog {
 	private JMenuItem editItem;
 	private ArrayList<PersonByTaskModel> personList;
 	private ArrayList<PersonByTaskModel> fullList = null;
+	private ArrayList<PersonTableNotesModel> notesList;
 	private String taskName;
 	private int activeRow = -1;
 
@@ -68,6 +69,7 @@ public class PersonTableDialog extends JDialog {
 	private Calendar calendar;
 	private String conflictingTask = null;
 	private PersonTableEvent dialogResponse;
+	private PersonTableNotesEvent dialogNotesResponse;
 	private JFrame parent;
 	private JDialog child;
 
@@ -97,6 +99,9 @@ public class PersonTableDialog extends JDialog {
 		this.allTimes = allTimes;
 		this.calendar = calendar;
 
+		if (columnExpansionLevel == PersonTableModel.getExpansionWithNotes())
+			initializeNotesList(personList);
+
 		tablePanel = createPersonTablePanel();
 
 		setLayout(new BorderLayout());
@@ -114,6 +119,10 @@ public class PersonTableDialog extends JDialog {
 
 	public PersonTableEvent getDialogResponse() {
 		return dialogResponse;
+	}
+
+	public PersonTableNotesEvent getDialogNotesResponse() {
+		return dialogNotesResponse;
 	}
 
 	private JPanel createButtonPanel() {
@@ -244,15 +253,44 @@ public class PersonTableDialog extends JDialog {
 
 		closeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO: Fix this to return notes field
-				PersonTableEvent ev = new PersonTableEvent(this, CLOSE_BUTTON, (String) null, null, 0);
-				dialogResponse = ev;
+				if (columnExpansionLevel == PersonTableModel.getExpansionWithNotes()) {
+					extractNotesListChanges();
+					dialogNotesResponse = new PersonTableNotesEvent(this, notesList);
+				} else {
+					dialogResponse = new PersonTableEvent(this, CLOSE_BUTTON, (String) null, null, 0);
+				}
 				setVisible(false);
 				dispose();
 			}
 		});
 
 		return panel;
+	}
+
+	private void initializeNotesList(ArrayList<PersonByTaskModel> inputList) {
+		notesList = new ArrayList<PersonTableNotesModel>();
+
+		for (int i = 0; i < inputList.size(); i++) {
+			notesList.add(new PersonTableNotesModel(inputList.get(i).getPerson().getName()));
+		}
+	}
+
+	private void updateNotesList(String name, String notes) {
+		for (int i = 0; i < notesList.size(); i++) {
+			if (notesList.get(i).getPersonName().equals(name)) {
+				notesList.get(i).setPersonNotes(notes);
+				return;
+			}
+		}
+	}
+
+	private void extractNotesListChanges() {
+		for (int i = 0; i < notesList.size(); i++) {
+			if (notesList.get(i).getPersonNotes() == null) {
+				notesList.remove(i);
+				i--;  // Adjust for removed item
+			}
+		}
 	}
 
 	private JPanel createPersonTablePanel() {
@@ -454,6 +492,8 @@ public class PersonTableDialog extends JDialog {
 				public void focusLost(FocusEvent e) {
 					if (textChanged) {
 						tableModel.setValueAt(textArea.getText(), activeRow, tableModel.getColumnForNotes());
+						updateNotesList((String) tableModel.getValueAt(activeRow, tableModel.getColumnForPersonName()),
+								textArea.getText());
 						textChanged = false;
 					}
 				}
@@ -464,6 +504,13 @@ public class PersonTableDialog extends JDialog {
 				int column) {
 			// top, left, bottom, right
 			textArea.setMargin(new Insets(0, 4, 3, 4));
+			
+			if (textChanged) {
+				tableModel.setValueAt(textArea.getText(), activeRow, tableModel.getColumnForNotes());
+				updateNotesList((String) tableModel.getValueAt(activeRow, tableModel.getColumnForPersonName()),
+						textArea.getText());
+				textChanged = false;
+			}
 			activeRow = row;
 
 			// font and color
