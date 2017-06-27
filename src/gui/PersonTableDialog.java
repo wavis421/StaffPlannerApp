@@ -46,8 +46,11 @@ public class PersonTableDialog extends JDialog {
 	private static final int CLOSE_BUTTON = 2;
 	private static final int EDIT_PERSON_ROW_BUTTON = 3;
 	private static final int REMOVE_PERSON_ROW_BUTTON = 4;
+	private static final int FLOATER_TO_SUB_ROW_BUTTON = 5;
+	private static final int SUB_TO_FLOATER_ROW_BUTTON = 6;
 
 	private static final int ROW_GAP = 5;
+	private static final int POPUP_WIDTH = 240;
 
 	private int columnExpansionLevel;
 	private JPanel tablePanel;
@@ -56,11 +59,14 @@ public class PersonTableDialog extends JDialog {
 	private JPopupMenu popup;
 	private JMenuItem removeItem;
 	private JMenuItem editItem;
+	private JMenuItem floaterToSubItem;
+	private JMenuItem subToFloaterItem;
 	private ArrayList<PersonByTaskModel> personList;
 	private ArrayList<PersonByTaskModel> fullList = null;
 	private ArrayList<PersonTableNotesModel> notesList;
 	private String taskName;
 	private int activeRow = -1;
+	private int popupHeightCurr = 30, popupHeightAdjust = 20;
 
 	private String addButtonText;
 
@@ -288,7 +294,7 @@ public class PersonTableDialog extends JDialog {
 		for (int i = 0; i < notesList.size(); i++) {
 			if (notesList.get(i).getPersonNotes() == null) {
 				notesList.remove(i);
-				i--;  // Adjust for removed item
+				i--; // Adjust for removed item
 			}
 		}
 	}
@@ -324,11 +330,11 @@ public class PersonTableDialog extends JDialog {
 		table.setAutoCreateRowSorter(true);
 
 		if (columnExpansionLevel != PersonTableModel.getExpansionWithNotes()) {
-			// *** POP UP CONTAINS "Edit row" and "Remove person'
+			// *** POP UP CONTAINS "Edit person", "Remove person",
+			// "Floater to Sub" and "Sub to Floater"
 			popup = new JPopupMenu();
 
-			// When "Edit row" selected, then trigger PersonTableListener action
-			// for this row
+			// When "Edit person" selected, trigger PersonTableListener for row
 			editItem = new JMenuItem("Edit person");
 			popup.add(editItem);
 			editItem.addActionListener(new ActionListener() {
@@ -341,8 +347,7 @@ public class PersonTableDialog extends JDialog {
 					dispose();
 				}
 			});
-			// When "Remove person" selected, then trigger PersonTableListener
-			// action for this row
+			// When "Remove person" selected, trigger PersonTableListener
 			if (calendar != null || allPersons == null) {
 				removeItem = new JMenuItem("");
 				popup.add(removeItem);
@@ -356,21 +361,64 @@ public class PersonTableDialog extends JDialog {
 						dispose();
 					}
 				});
-				popup.setPreferredSize(new Dimension(240, 50));
-			} else
-				popup.setPreferredSize(new Dimension(240, 30));
+				popupHeightCurr += popupHeightAdjust;
+			}
+			popup.setPreferredSize(new Dimension(POPUP_WIDTH, popupHeightCurr));
+
+			// When "Sub to Floater" selected, trigger PersonTableListener
+			subToFloaterItem = new JMenuItem("Change from Sub to Floater");
+			subToFloaterItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					int row = table.convertRowIndexToModel(table.getSelectedRow());
+					PersonTableEvent ev = new PersonTableEvent(this, SUB_TO_FLOATER_ROW_BUTTON,
+							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
+					dialogResponse = ev;
+					setVisible(false);
+					dispose();
+				}
+			});
+			// When "Sub to Floater" selected, trigger PersonTableListener
+			floaterToSubItem = new JMenuItem("Change from Floater to Sub");
+			floaterToSubItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					int row = table.convertRowIndexToModel(table.getSelectedRow());
+					PersonTableEvent ev = new PersonTableEvent(this, FLOATER_TO_SUB_ROW_BUTTON,
+							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
+					dialogResponse = ev;
+					setVisible(false);
+					dispose();
+				}
+			});
 
 			// Detect right mouse click on table and show pop up menu
 			table.addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent e) {
 					if (e.getButton() == MouseEvent.BUTTON3) {
-						popup.show(table, e.getX(), e.getY());
 						int row = table.rowAtPoint(e.getPoint());
+						if (tableModel.isSubstitute(row)) {
+							// If SUB row selected, add sub-to-floater menu item
+							popup.setPopupSize(POPUP_WIDTH, popupHeightCurr + popupHeightAdjust);
+							popup.add(subToFloaterItem);
+							popup.remove(floaterToSubItem);
+						} else if (tableModel.isFloater(row)) {
+							// If floater, add floater-to-sub menu item
+							popup.setPopupSize(POPUP_WIDTH, popupHeightCurr + popupHeightAdjust);
+							popup.add(floaterToSubItem);
+							popup.remove(subToFloaterItem);
+						} else {
+							// Neither floater or sub
+							popup.setPopupSize(POPUP_WIDTH, popupHeightCurr);
+							popup.remove(subToFloaterItem);
+							popup.remove(floaterToSubItem);
+						}
+
 						if (calendar != null)
 							removeItem.setText("Mark person unavailable for " + Utilities.getDisplayDate(calendar));
 						else if (removeItem != null)
 							removeItem.setText("Remove person from roster");
+
 						table.getSelectionModel().setSelectionInterval(row, row);
+						popup.show(table, e.getX(), e.getY());
 					}
 				}
 			});
@@ -504,7 +552,7 @@ public class PersonTableDialog extends JDialog {
 				int column) {
 			// top, left, bottom, right
 			textArea.setMargin(new Insets(0, 4, 3, 4));
-			
+
 			if (textChanged) {
 				tableModel.setValueAt(textArea.getText(), activeRow, tableModel.getColumnForNotes());
 				updateNotesList((String) tableModel.getValueAt(activeRow, tableModel.getColumnForPersonName()),
@@ -544,6 +592,14 @@ public class PersonTableDialog extends JDialog {
 
 	public static int getRemovePersonRowButtonId() {
 		return REMOVE_PERSON_ROW_BUTTON;
+	}
+
+	public static int getFloaterToSubRowButtonId() {
+		return FLOATER_TO_SUB_ROW_BUTTON;
+	}
+
+	public static int getSubToFloaterRowButtonId() {
+		return SUB_TO_FLOATER_ROW_BUTTON;
 	}
 
 	private boolean isTimeAlreadyAssigned(String thisPerson, Calendar thisTime) {

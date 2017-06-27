@@ -184,6 +184,16 @@ public class PersonTableModel extends AbstractTableModel {
 		return null;
 	}
 
+	public boolean isSubstitute(int row) {
+		PersonByTaskModel person = personList.get(row);
+		return person.isSubstitute();
+	}
+
+	public boolean isFloater(int row) {
+		PersonByTaskModel person = personList.get(row);
+		return (person.getTask() == null);
+	}
+
 	@Override
 	public void setValueAt(Object value, int row, int column) {
 		if (expansionLevel == PERSON_TABLE_EXPAND_WITH_NOTES) {
