@@ -96,15 +96,17 @@ BEGIN
 		   # Floater tasks determined by unassigned TaskID (NULL) and matching date
 		   (SELECT thisDay, NULL AS TaskName, SingleInstanceTasks.TaskID AS TaskID, Programs.ProgramID AS ProgramID,
 				HOUR(SingleTime), MINUTE(SingleTime), COUNT(*) AS PersonCount, 0, 0, 0,
-				# Count number of persons unavailable
+				# Count number of persons unavailable that are assigned as floaters today
 				(SELECT COUNT(*) FROM SingleInstanceTasks, Persons, UnavailDates 
 					WHERE SingleInstanceTasks.PersonID = Persons.PersonID
+					AND SingleInstanceTasks.SingleDate = currDate
 					AND ((SELECT COUNT(*) FROM Persons, UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) > 0
 						AND Persons.PersonID = UnavailDates.PersonID
 						AND currDate BETWEEN UnavailDates.StartDate AND UnavailDates.EndDate)) AS UnavailCount,
 				# Count number of leaders unavailable
 				(SELECT COUNT(*) FROM SingleInstanceTasks, Persons, UnavailDates 
 					WHERE SingleInstanceTasks.PersonID = Persons.PersonID
+					AND SingleInstanceTasks.SingleDate = currDate
 					AND Persons.isLeader = 1
 					AND ((SELECT COUNT(*) FROM Persons, UnavailDates WHERE Persons.PersonID = UnavailDates.PersonID) > 0
 						AND Persons.PersonID = UnavailDates.PersonID

@@ -1196,15 +1196,15 @@ public class MySqlDatabase {
 				updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
 		}
 	}
-	
+
 	public void updatePersonNotes(String personName, String personNotes) {
 		if (!checkDatabaseConnection())
 			return;
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement updatePersonStmt = dbConnection.prepareStatement(
-						"UPDATE Persons SET Notes=? WHERE PersonName=?;");
+				PreparedStatement updatePersonStmt = dbConnection
+						.prepareStatement("UPDATE Persons SET Notes=? WHERE PersonName=?;");
 
 				// Update person notes field
 				updatePersonStmt.setString(1, personNotes);
@@ -2063,10 +2063,8 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Persons "
-								+ "WHERE Persons.Notes IS NOT NULL AND Persons.Notes != '' "
-								+ "ORDER BY PersonName;");
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM Persons "
+						+ "WHERE Persons.Notes IS NOT NULL AND Persons.Notes != '' ORDER BY PersonName;");
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
