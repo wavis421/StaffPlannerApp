@@ -194,6 +194,24 @@ public class PersonTableModel extends AbstractTableModel {
 		return (person.getTask() == null);
 	}
 
+	public TimeModel getTaskTime(int row) {
+		PersonByTaskModel person = personList.get(row);
+		if (person.getTask() == null) {
+			return new TimeModel(person.getTaskDate());
+		} else {
+			return person.getTask().getTime();
+		}
+	}
+
+	public String getTaskName(int row) {
+		PersonByTaskModel person = personList.get(row);
+		if (person.getTask() == null) {
+			return null;
+		} else {
+			return person.getTask().getTaskName();
+		}
+	}
+
 	@Override
 	public void setValueAt(Object value, int row, int column) {
 		if (expansionLevel == PERSON_TABLE_EXPAND_WITH_NOTES) {

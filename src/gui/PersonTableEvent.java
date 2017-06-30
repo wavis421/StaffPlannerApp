@@ -10,13 +10,16 @@ public class PersonTableEvent extends EventObject {
 	private String personName = "";
 	private ArrayList<String> personList;
 	private Calendar calendar;
+	private String taskName;
 	private int color;
 
-	public PersonTableEvent(Object source, int buttonId, String personName, Calendar calendar, int color) {
+	public PersonTableEvent(Object source, int buttonId, String personName, Calendar calendar, String taskName,
+			int color) {
 		super(source);
 
 		this.buttonId = buttonId;
 		this.calendar = calendar;
+		this.taskName = taskName;
 		this.color = color;
 		this.personName = personName;
 
@@ -28,11 +31,13 @@ public class PersonTableEvent extends EventObject {
 		}
 	}
 
-	public PersonTableEvent(Object source, int buttonId, ArrayList<String> personList, Calendar calendar, int color) {
+	public PersonTableEvent(Object source, int buttonId, ArrayList<String> personList, Calendar calendar,
+			String taskName, int color) {
 		super(source);
 
 		this.buttonId = buttonId;
 		this.calendar = calendar;
+		this.taskName = taskName;
 		this.color = color;
 		this.personName = "";
 		this.personList = personList;
@@ -52,6 +57,10 @@ public class PersonTableEvent extends EventObject {
 
 	public Calendar getCalendar() {
 		return calendar;
+	}
+
+	public String getTaskName() {
+		return taskName;
 	}
 
 	public int getColor() {

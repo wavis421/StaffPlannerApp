@@ -20,6 +20,7 @@ import model.PersonModel;
 import model.ProgramModel;
 import model.SingleInstanceTaskModel;
 import model.TaskModel;
+import model.TaskTimeModel;
 import model.TimeModel;
 
 public class Controller {
@@ -81,6 +82,10 @@ public class Controller {
 				origTaskTime);
 	}
 
+	public void updateSingleInstanceTaskId(String personName, Calendar calendar, String taskName) {
+		sqlDb.updateSingleInstanceTaskId(personName, calendar, taskName);
+	}
+	
 	public TaskModel renameTask(String programName, String oldName, String newName) {
 		return sqlDb.renameTask(programName, oldName, newName);
 	}
@@ -132,6 +137,10 @@ public class Controller {
 		return sqlDb.getAllTasks();
 	}
 
+	public ArrayList<TaskTimeModel> getAllTasksWithTimeByDay(Calendar calendar) {
+		return sqlDb.getAllTasksWithTimeByDay(calendar);
+	}
+	
 	public ArrayList<String> getAllLocationsAsString() {
 		return sqlDb.getAllLocationsAsString();
 	}

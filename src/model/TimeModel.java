@@ -57,6 +57,15 @@ public class TimeModel implements Comparable<TimeModel>, Serializable {
 
 	@Override
 	public int compareTo(TimeModel otherTime) {
-		return calTime.compareTo(otherTime.getCalTime());
+		if (this.get24Hour() == otherTime.get24Hour() && this.getMinute() == otherTime.getMinute())
+			return 0;
+		else if (this.get24Hour() < otherTime.get24Hour()) 
+			return -1; 
+		else if (this.get24Hour() > otherTime.get24Hour())
+			return 1;
+		else if (this.getMinute() < otherTime.getMinute())
+			return -1;
+		else
+			return 1;
 	}
 }

@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -33,6 +34,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import model.PersonByTaskModel;
+import model.TaskTimeModel;
 import model.TimeModel;
 import utilities.Utilities;
 
@@ -59,8 +61,8 @@ public class PersonTableDialog extends JDialog {
 	private JPopupMenu popup;
 	private JMenuItem removeItem;
 	private JMenuItem editItem;
-	private JMenuItem floaterToSubItem;
 	private JMenuItem subToFloaterItem;
+	private JMenu floaterToSubMenu;
 	private ArrayList<PersonByTaskModel> personList;
 	private ArrayList<PersonByTaskModel> fullList = null;
 	private ArrayList<PersonTableNotesModel> notesList;
@@ -70,8 +72,9 @@ public class PersonTableDialog extends JDialog {
 
 	private String addButtonText;
 
-	private ArrayList<String> allPersons;
+	private ArrayList<String> availPersons;
 	private ArrayList<TimeModel> allTimes;
+	private ArrayList<TaskTimeModel> allTasks;
 	private Calendar calendar;
 	private String conflictingTask = null;
 	private PersonTableEvent dialogResponse;
@@ -81,7 +84,7 @@ public class PersonTableDialog extends JDialog {
 
 	public PersonTableDialog(JFrame parent, String title, int columnExpansionLevel, String taskName,
 			ArrayList<PersonByTaskModel> personList, String addButtonText, Calendar calendar,
-			ArrayList<String> allPersons, ArrayList<TimeModel> allTimes) {
+			ArrayList<String> availPersons, ArrayList<TimeModel> allTimes, ArrayList<TaskTimeModel> allTasks) {
 		super(parent, true);
 		setLocation(new Point(100, 100));
 
@@ -101,8 +104,9 @@ public class PersonTableDialog extends JDialog {
 			this.personList = createPersonListByTask(taskName, fullList);
 		}
 
-		this.allPersons = allPersons;
+		this.availPersons = availPersons;
 		this.allTimes = allTimes;
+		this.allTasks = allTasks;
 		this.calendar = calendar;
 
 		if (columnExpansionLevel == PersonTableModel.getExpansionWithNotes())
@@ -143,7 +147,7 @@ public class PersonTableDialog extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					if (addButtonText.equals("Add floater")) {
 						// Adding floater
-						if (allPersons.size() == 0) {
+						if (availPersons.size() == 0) {
 							// No persons available
 							JOptionPane.showMessageDialog(PersonTableDialog.this,
 									"No persons are available on " + Utilities.getDisplayDate(calendar));
@@ -152,12 +156,12 @@ public class PersonTableDialog extends JDialog {
 						FloaterDialog floaterEvent;
 						if (allTimes.size() > 1)
 							floaterEvent = new FloaterDialog(PersonTableDialog.this,
-									"Add floater for " + Utilities.getDisplayDate(calendar), calendar, allPersons,
+									"Add floater for " + Utilities.getDisplayDate(calendar), calendar, availPersons,
 									allTimes);
 						else
 							floaterEvent = new FloaterDialog(PersonTableDialog.this, "Add floater for "
 									+ Utilities.getDisplayDate(calendar) + " at " + Utilities.formatTime(calendar),
-									calendar, allPersons, allTimes);
+									calendar, availPersons, allTimes);
 						FloaterEvent floaterResponse = floaterEvent.getDialogResponse();
 
 						if (floaterResponse != null) {
@@ -165,7 +169,7 @@ public class PersonTableDialog extends JDialog {
 									floaterResponse.getCalendar())) {
 								// New time for this person, create event
 								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON,
-										floaterResponse.getPersonName(), floaterResponse.getCalendar(),
+										floaterResponse.getPersonName(), floaterResponse.getCalendar(), null,
 										floaterResponse.getColor());
 								dialogResponse = ev;
 								setVisible(false);
@@ -176,14 +180,14 @@ public class PersonTableDialog extends JDialog {
 						// Adding task substitute
 						FilterListDialog ev1 = new FilterListDialog(parent,
 								"Assign person(s) to " + taskName + " on " + Utilities.getDisplayDate(calendar),
-								allPersons);
+								availPersons);
 						ArrayList<String> filterListResponse = ev1.getDialogResponse();
 
 						if (filterListResponse != null && filterListResponse.size() > 0) {
 							if (!isPersonAlreadyAssigned(filterListResponse, calendar, taskName)) {
 								// New time for this person, create event
 								PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, filterListResponse,
-										calendar, 0);
+										calendar, null, 0);
 								dialogResponse = ev;
 								setVisible(false);
 								dispose();
@@ -192,19 +196,20 @@ public class PersonTableDialog extends JDialog {
 					} else if (columnExpansionLevel == PersonTableModel.getExpansionByTask()) {
 						// Adding person to task
 						FilterListDialog ev1 = new FilterListDialog(parent, "Assign person(s) to " + taskName,
-								allPersons);
+								availPersons);
 						ArrayList<String> filterListResponse = ev1.getDialogResponse();
 
 						if (filterListResponse != null && filterListResponse.size() > 0) {
 							PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, filterListResponse,
-									null, 0);
+									null, null, 0);
 							dialogResponse = ev;
 							setVisible(false);
 							dispose();
 						}
 					} else {
 						// Adding new person
-						PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, (String) null, null, 0);
+						PersonTableEvent ev = new PersonTableEvent(this, ADD_PERSON_BUTTON, (String) null, null, null,
+								0);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -263,7 +268,7 @@ public class PersonTableDialog extends JDialog {
 					extractNotesListChanges();
 					dialogNotesResponse = new PersonTableNotesEvent(this, notesList);
 				} else {
-					dialogResponse = new PersonTableEvent(this, CLOSE_BUTTON, (String) null, null, 0);
+					dialogResponse = new PersonTableEvent(this, CLOSE_BUTTON, (String) null, null, null, 0);
 				}
 				setVisible(false);
 				dispose();
@@ -334,28 +339,30 @@ public class PersonTableDialog extends JDialog {
 			// "Floater to Sub" and "Sub to Floater"
 			popup = new JPopupMenu();
 
-			// When "Edit person" selected, trigger PersonTableListener for row
+			// When "Edit person" selected, trigger PersonTableEvent for row
 			editItem = new JMenuItem("Edit person");
 			popup.add(editItem);
 			editItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
 					int row = table.convertRowIndexToModel(table.getSelectedRow());
 					PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON,
-							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
+							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, null,
+							0);
 					dialogResponse = ev;
 					setVisible(false);
 					dispose();
 				}
 			});
-			// When "Remove person" selected, trigger PersonTableListener
-			if (calendar != null || allPersons == null) {
+			// When "Remove person" selected, trigger PersonTableEvent
+			if (calendar != null || availPersons == null) {
 				removeItem = new JMenuItem("");
 				popup.add(removeItem);
 				removeItem.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent event) {
 						int row = table.convertRowIndexToModel(table.getSelectedRow());
 						PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON,
-								(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
+								(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar,
+								null, 0);
 						dialogResponse = ev;
 						setVisible(false);
 						dispose();
@@ -365,30 +372,17 @@ public class PersonTableDialog extends JDialog {
 			}
 			popup.setPreferredSize(new Dimension(POPUP_WIDTH, popupHeightCurr));
 
-			// When "Sub to Floater" selected, trigger PersonTableListener
+			// When "Sub to Floater" selected, trigger PersonTableEvent
 			subToFloaterItem = new JMenuItem("Change from Sub to Floater");
 			subToFloaterItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
-					int row = table.convertRowIndexToModel(table.getSelectedRow());
-					PersonTableEvent ev = new PersonTableEvent(this, SUB_TO_FLOATER_ROW_BUTTON,
-							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
-					dialogResponse = ev;
+					switchSubAndFloater(SUB_TO_FLOATER_ROW_BUTTON, null);
 					setVisible(false);
 					dispose();
 				}
 			});
-			// When "Sub to Floater" selected, trigger PersonTableListener
-			floaterToSubItem = new JMenuItem("Change from Floater to Sub");
-			floaterToSubItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent event) {
-					int row = table.convertRowIndexToModel(table.getSelectedRow());
-					PersonTableEvent ev = new PersonTableEvent(this, FLOATER_TO_SUB_ROW_BUTTON,
-							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, 0);
-					dialogResponse = ev;
-					setVisible(false);
-					dispose();
-				}
-			});
+			// When "Floater to Sub" selected, task menu is displayed
+			floaterToSubMenu = new JMenu("Change from Floater to Sub");
 
 			// Detect right mouse click on table and show pop up menu
 			table.addMouseListener(new MouseAdapter() {
@@ -399,17 +393,18 @@ public class PersonTableDialog extends JDialog {
 							// If SUB row selected, add sub-to-floater menu item
 							popup.setPopupSize(POPUP_WIDTH, popupHeightCurr + popupHeightAdjust);
 							popup.add(subToFloaterItem);
-							popup.remove(floaterToSubItem);
+							popup.remove(floaterToSubMenu);
 						} else if (tableModel.isFloater(row)) {
-							// If floater, add floater-to-sub menu item
+							// If floater, add menu to select task
+							createTaskSubmenu(tableModel.getTaskTime(row), floaterToSubMenu);
 							popup.setPopupSize(POPUP_WIDTH, popupHeightCurr + popupHeightAdjust);
-							popup.add(floaterToSubItem);
+							popup.add(floaterToSubMenu);
 							popup.remove(subToFloaterItem);
 						} else {
 							// Neither floater or sub
 							popup.setPopupSize(POPUP_WIDTH, popupHeightCurr);
 							popup.remove(subToFloaterItem);
-							popup.remove(floaterToSubItem);
+							popup.remove(floaterToSubMenu);
 						}
 
 						if (calendar != null)
@@ -675,5 +670,32 @@ public class PersonTableDialog extends JDialog {
 				newPersonList.add(person);
 		}
 		return newPersonList;
+	}
+
+	private void switchSubAndFloater(int rowButton, String taskName) {
+		int row = table.convertRowIndexToModel(table.getSelectedRow());
+		Utilities.addTimeToCalendar(calendar, tableModel.getTaskTime(row));
+		dialogResponse = new PersonTableEvent(this, rowButton,
+				(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar,
+				taskName, 0);
+	}
+
+	private void createTaskSubmenu(TimeModel time, JMenuItem parentMenu) {
+		TaskTimeModel task;
+		parentMenu.removeAll();
+		for (int i = 0; i < allTasks.size(); i++) {
+			task = allTasks.get(i);
+			if (task.getTime().compareTo(time) == 0) {
+				JMenuItem subItem = new JMenuItem(task.getTaskName());
+				parentMenu.add(subItem);
+				subItem.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						switchSubAndFloater(FLOATER_TO_SUB_ROW_BUTTON, ((JMenuItem) e.getSource()).getText());
+						setVisible(false);
+						dispose();
+					}
+				});
+			}
+		}
 	}
 }

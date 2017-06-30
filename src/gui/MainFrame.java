@@ -35,6 +35,7 @@ import model.PersonByTaskModel;
 import model.PersonModel;
 import model.ProgramModel;
 import model.TaskModel;
+import model.TaskTimeModel;
 import model.TimeModel;
 import utilities.Utilities;
 
@@ -550,7 +551,7 @@ public class MainFrame extends JFrame {
 							ArrayList<String> personsAvail = controller.getAllPersonsAsString();
 							PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 									"Complete Roster for " + task.getTaskName(), PersonTableModel.getExpansionByTask(),
-									task.getTaskName(), personsByTask, "Add person", null, personsAvail, null);
+									task.getTaskName(), personsByTask, "Add person", null, personsAvail, null, null);
 
 							do {
 								ev = processViewCompleteRosterByTaskDialog(ev.getDialogResponse(), task);
@@ -606,7 +607,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				ArrayList<PersonByTaskModel> allPersons = controller.getAllPersonsWithNotes();
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Roster Notes",
-						PersonTableModel.getExpansionWithNotes(), null, allPersons, "", null, null, null);
+						PersonTableModel.getExpansionWithNotes(), null, allPersons, "", null, null, null, null);
 				if (ev != null && ev.getDialogNotesResponse() != null) {
 					controller.updatePersonNotes(ev.getDialogNotesResponse().getPersonNotesList());
 				}
@@ -679,7 +680,7 @@ public class MainFrame extends JFrame {
 				if (controller.getNumPersons() > 0) {
 					ArrayList<PersonByTaskModel> allPersons = controller.getAllPersons();
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
-							PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null);
+							PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null, null);
 
 					do {
 						ev = processViewAllPersonsDialog(ev.getDialogResponse());
@@ -721,7 +722,7 @@ public class MainFrame extends JFrame {
 			// Refresh data and re-open Person Table dialog
 			ArrayList<PersonByTaskModel> allPersons = controller.getAllPersons();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
-					PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null);
+					PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null, null);
 			return ev;
 		}
 		return null;
@@ -1000,7 +1001,7 @@ public class MainFrame extends JFrame {
 							"Roster for " + selectedTask.getTaskName() + " on "
 									+ Utilities.getDisplayDate(selectedCalendar),
 							PersonTableModel.getExpansionByDay(), selectedTask.getTaskName(), personsToday, "Add sub",
-							calendar, personsAvail, null);
+							calendar, personsAvail, null, null);
 
 					do {
 						ev = processViewRosterByTaskDialog(ev.getDialogResponse());
@@ -1023,7 +1024,7 @@ public class MainFrame extends JFrame {
 						"Roster for " + Utilities.getDisplayDate(selectedCalendar) + " at "
 								+ Utilities.formatTime(selectedCalendar),
 						PersonTableModel.getExpansionByDay(), null, personsByTime, "Add floater", calendar,
-						personsAvail, timeList);
+						personsAvail, timeList, null);
 
 				do {
 					ev = processViewRosterByTimeDialog(ev.getDialogResponse());
@@ -1044,7 +1045,7 @@ public class MainFrame extends JFrame {
 								"Roster at " + selectedTask.getLocation() + " for "
 										+ Utilities.getDisplayDate(selectedCalendar),
 								PersonTableModel.getExpansionByDay(), null, personsByLoc, "", calendar, personsAvail,
-								null);
+								null, null);
 
 						do {
 							ev = processViewRosterByLocationDialog(ev.getDialogResponse());
@@ -1062,12 +1063,13 @@ public class MainFrame extends JFrame {
 				ArrayList<PersonByTaskModel> personsByTask = controller.getPersonsByDay(selectedCalendar);
 				ArrayList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 				ArrayList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
+				ArrayList<TaskTimeModel> tasksToday = controller.getAllTasksWithTimeByDay(selectedCalendar);
 				Calendar calendar = (Calendar) selectedCalendar.clone();
 
 				PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 						"Roster for " + Utilities.getDisplayDate(selectedCalendar),
 						PersonTableModel.getExpansionByDay(), null, personsByTask, "Add floater", calendar,
-						personsAvail, timesToday);
+						personsAvail, timesToday, tasksToday);
 
 				do {
 					ev = processViewCompleteRosterDialog(ev.getDialogResponse());
@@ -1102,7 +1104,7 @@ public class MainFrame extends JFrame {
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 					"Roster for " + selectedTask.getTaskName() + " on " + Utilities.getDisplayDate(selectedCalendar),
 					PersonTableModel.getExpansionByDay(), selectedTask.getTaskName(), personsToday, "Add sub", calendar,
-					personsAvail, null);
+					personsAvail, null, null);
 
 			return ev;
 		}
@@ -1127,7 +1129,7 @@ public class MainFrame extends JFrame {
 			ArrayList<String> personsAvail = controller.getAllPersonsAsString();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Monthly Roster for " + task.getTaskName(),
 					PersonTableModel.getExpansionByTask(), task.getTaskName(), personsByTask, "Add person", null,
-					personsAvail, null);
+					personsAvail, null, null);
 
 			return ev;
 		}
@@ -1165,7 +1167,7 @@ public class MainFrame extends JFrame {
 					"Roster for " + Utilities.getDisplayDate(event.getCalendar()) + " at "
 							+ Utilities.formatTime(event.getCalendar()),
 					PersonTableModel.getExpansionByDay(), null, personsByTime, "Add floater", calendar, personsAvail,
-					timeList);
+					timeList, null);
 
 			return ev;
 		}
@@ -1191,7 +1193,7 @@ public class MainFrame extends JFrame {
 
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 					"Roster at " + selectedTask.getLocation() + " for " + Utilities.getDisplayDate(selectedCalendar),
-					PersonTableModel.getExpansionByDay(), null, personsByLoc, "", calendar, null, null);
+					PersonTableModel.getExpansionByDay(), null, personsByLoc, "", calendar, null, null, null);
 
 			return ev;
 		}
@@ -1215,15 +1217,26 @@ public class MainFrame extends JFrame {
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 
+			else if (event.getButtonId() == PersonTableDialog.getSubToFloaterRowButtonId()) {
+				controller.updateSingleInstanceTaskId(event.getPersonName(), event.getCalendar(), event.getTaskName());
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+
+			else if (event.getButtonId() == PersonTableDialog.getFloaterToSubRowButtonId()) {
+				controller.updateSingleInstanceTaskId(event.getPersonName(), event.getCalendar(), event.getTaskName());
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+
 			// Refresh data and re-open Person Table Dialog
 			ArrayList<PersonByTaskModel> personsToday = controller.getPersonsByDay(selectedCalendar);
 			ArrayList<String> personsAvail = controller.getAvailPersonsAsString(selectedCalendar);
 			ArrayList<TimeModel> timesToday = controller.getAllTimesByDay(selectedCalendar);
+			ArrayList<TaskTimeModel> tasksToday = controller.getAllTasksWithTimeByDay(selectedCalendar);
 			Calendar calendar = (Calendar) selectedCalendar.clone();
 
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this,
 					"Roster for " + Utilities.getDisplayDate(selectedCalendar), PersonTableModel.getExpansionByDay(),
-					null, personsToday, "Add floater", calendar, personsAvail, timesToday);
+					null, personsToday, "Add floater", calendar, personsAvail, timesToday, tasksToday);
 
 			return ev;
 		}

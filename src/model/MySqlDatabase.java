@@ -15,7 +15,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+import com.mysql.jdbc.CommunicationsException;
 
 import utilities.Utilities;
 
@@ -210,8 +210,8 @@ public class MySqlDatabase {
 		ProgramModel program = null;
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT ProgramID, StartDate, EndDate " + "FROM Programs WHERE ProgramName=?;");
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT ProgramID, StartDate, EndDate FROM Programs WHERE ProgramName=?;");
 				selectStmt.setString(1, programName);
 
 				ResultSet result = selectStmt.executeQuery();
@@ -439,6 +439,52 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				System.out.println("Failure updating " + taskName + " task in database: " + e.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void updateSingleInstanceTaskId(String personName, Calendar calendar, String taskName) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement updateTaskStmt;
+				int col = 1;
+
+				if (taskName == null) {
+					// Update SUB to Floater
+					updateTaskStmt = dbConnection.prepareStatement("UPDATE SingleInstanceTasks "
+							+ "INNER JOIN Persons ON SingleInstanceTasks.PersonID = Persons.PersonID "
+							+ "SET TaskID=NULL WHERE Persons.PersonName=? AND SingleDate=? AND SingleTime=?;");
+				} else {
+					// Update floater to SUB
+					updateTaskStmt = dbConnection.prepareStatement("UPDATE SingleInstanceTasks "
+							+ "INNER JOIN Persons ON SingleInstanceTasks.PersonID = Persons.PersonID "
+							+ "SET TaskID=(SELECT Tasks.TaskID FROM Tasks WHERE Tasks.TaskName=?) "
+							+ "WHERE Persons.PersonName=? AND SingleDate=? AND SingleTime=?;");
+					updateTaskStmt.setString(col++, taskName);
+				}
+				updateTaskStmt.setString(col++, personName);
+				updateTaskStmt.setDate(col++, java.sql.Date.valueOf(Utilities.getSqlDate(calendar)));
+				updateTaskStmt.setTime(col, java.sql.Time.valueOf(Utilities.getSqlTime(calendar)));
+
+				updateTaskStmt.executeUpdate();
+				updateTaskStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure switching sub & floater in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -993,6 +1039,62 @@ public class MySqlDatabase {
 		return taskList;
 	}
 
+	public ArrayList<TaskTimeModel> getAllTasksWithTimeByDay(Calendar calendar) {
+		int dayOfWeekInMonthIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
+		int dayOfWeekIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		Calendar localCalendar = (Calendar) calendar.clone();
+		String sqlDate = Utilities.getSqlDate(localCalendar);
+
+		ArrayList<TaskTimeModel> taskTimeList = new ArrayList<TaskTimeModel>();
+
+		if (!checkDatabaseConnection())
+			return taskTimeList;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						// Select tasks with matching DOW and WOM
+						"SELECT TaskName, Hour, Minute FROM Tasks, Programs WHERE (Tasks.ProgramID = Programs.ProgramID "
+								// Check if program expired
+								+ "  AND ((Programs.StartDate IS NULL) OR (? >= Programs.StartDate)) "
+								+ "  AND ((Programs.EndDate IS NULL) OR (? <= Programs.EndDate))) "
+
+								// Check if task is active today
+								+ "  AND (Tasks.DaysOfWeek & (1 << ?)) != 0 "
+								+ "  AND (Tasks.DowInMonth & (1 << ?)) != 0;");
+
+				int row = 1;
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setString(row++, sqlDate);
+				selectStmt.setInt(row++, dayOfWeekIdx);
+				selectStmt.setInt(row, dayOfWeekInMonthIdx);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					taskTimeList.add(new TaskTimeModel(result.getString("TaskName"),
+							new TimeModel(result.getInt("Hour"), result.getInt("Minute"))));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving task list from database: " + e.getMessage());
+				break;
+			}
+		}
+		return taskTimeList;
+	}
+
 	public ArrayList<String> getAllLocationsAsString() {
 		ArrayList<String> locationList = new ArrayList<String>();
 
@@ -1180,7 +1282,7 @@ public class MySqlDatabase {
 			// Add/remove single instance task in database
 			SingleInstanceTaskModel singleTask = extraTasks.get(i);
 			if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_DELETE)
-				removeSingleInstanceTask(personName, singleTask.getTaskID(), singleTask.getTaskDate());
+				removeSingleInstanceTask(personName, singleTask.getTaskDate());
 			else if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
 				addSingleInstanceTask(personName, singleTask.getProgramName(), singleTask.getTaskID(),
 						singleTask.getTaskDate(), singleTask.getColor());
@@ -1546,7 +1648,7 @@ public class MySqlDatabase {
 		}
 	}
 
-	private void removeSingleInstanceTask(String personName, int taskID, Calendar singleDate) {
+	private void removeSingleInstanceTask(String personName, Calendar singleDate) {
 		if (!checkDatabaseConnection())
 			return;
 
@@ -1554,13 +1656,12 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement deleteExtraTaskStmt = dbConnection.prepareStatement("DELETE FROM SingleInstanceTasks "
 						+ "WHERE PersonID=(SELECT PersonID FROM Persons WHERE PersonName=?) "
-						+ "AND TaskID=? AND SingleDate=? AND SingleTime=?;");
+						+ "AND SingleDate=? AND SingleTime=?;");
 
 				// Delete single instance task
 				deleteExtraTaskStmt.setString(1, personName);
-				deleteExtraTaskStmt.setInt(2, taskID);
-				deleteExtraTaskStmt.setDate(3, java.sql.Date.valueOf(Utilities.getSqlDate(singleDate)));
-				deleteExtraTaskStmt.setTime(4, java.sql.Time.valueOf(Utilities.getSqlTime(singleDate)));
+				deleteExtraTaskStmt.setDate(2, java.sql.Date.valueOf(Utilities.getSqlDate(singleDate)));
+				deleteExtraTaskStmt.setTime(3, java.sql.Time.valueOf(Utilities.getSqlTime(singleDate)));
 				deleteExtraTaskStmt.executeUpdate();
 				deleteExtraTaskStmt.close();
 				break;
@@ -2108,8 +2209,9 @@ public class MySqlDatabase {
 						"SELECT PersonName, Persons.PersonID, StartDate, EndDate FROM Persons, UnavailDates "
 								// Don't select if person has entries in unavail
 								// list with matching date
-								+ "WHERE ((SELECT COUNT(*) FROM UnavailDates "
-								+ "   WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
+								+ "WHERE (SELECT COUNT(*) FROM UnavailDates "
+								+ "   WHERE (SELECT COUNT(*) FROM UnavailDates "
+								+ "         WHERE Persons.PersonID = UnavailDates.PersonID) > 0 "
 								+ "   AND Persons.PersonID = UnavailDates.PersonID "
 								+ "   AND ? BETWEEN StartDate AND EndDate) = 0 "
 								+ "GROUP BY PersonName ORDER BY PersonName;");
