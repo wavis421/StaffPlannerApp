@@ -85,7 +85,7 @@ public class Controller {
 	public void updateSingleInstanceTaskId(String personName, Calendar calendar, String taskName) {
 		sqlDb.updateSingleInstanceTaskId(personName, calendar, taskName);
 	}
-	
+
 	public TaskModel renameTask(String programName, String oldName, String newName) {
 		return sqlDb.renameTask(programName, oldName, newName);
 	}
@@ -140,7 +140,7 @@ public class Controller {
 	public ArrayList<TaskTimeModel> getAllTasksWithTimeByDay(Calendar calendar) {
 		return sqlDb.getAllTasksWithTimeByDay(calendar);
 	}
-	
+
 	public ArrayList<String> getAllLocationsAsString() {
 		return sqlDb.getAllLocationsAsString();
 	}
@@ -183,6 +183,10 @@ public class Controller {
 		for (int i = 0; i < personList.size(); i++) {
 			sqlDb.addSingleInstanceTask(personList.get(i), programName, day, task, color);
 		}
+	}
+
+	public void removeSingleInstanceTask(String personName, Calendar singleDate) {
+		sqlDb.removeSingleInstanceTask(personName, singleDate);
 	}
 
 	public void renamePerson(String oldName, String newName) {

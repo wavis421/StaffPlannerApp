@@ -262,7 +262,7 @@ public class PersonDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setPersonLayout();
-		setSize(750, 500);
+		setSize(750, 600);
 	}
 
 	private void setPersonLayout() {
@@ -506,7 +506,8 @@ public class PersonDialog extends JDialog {
 	private void createTrees(JTree assignedTasksTree, JTree taskTree) {
 		/* === Create assigned task tree === */
 		Dimension assignDimension = new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
-				(int) notesArea.getPreferredSize().getHeight() * 3);
+				(int) (notesArea.getPreferredSize().getHeight() * 5));
+		System.out.println(assignDimension.getHeight());
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(assignDimension);
 		assignedTasksScrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -584,7 +585,7 @@ public class PersonDialog extends JDialog {
 
 		/* === Create unassigned task tree === */
 		Dimension unassignDimension = new Dimension((int) notesArea.getPreferredSize().getWidth(),
-				(int) notesArea.getPreferredSize().getHeight() * 3);
+				(int) (notesArea.getPreferredSize().getHeight() * 5));
 		taskTreeScrollPane = new JScrollPane(taskTree);
 		taskTreeScrollPane.setPreferredSize(unassignDimension);
 		taskTreeScrollPane.getVerticalScrollBar().setUnitIncrement(16);

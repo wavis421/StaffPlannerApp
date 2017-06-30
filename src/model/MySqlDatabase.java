@@ -15,7 +15,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
-import com.mysql.jdbc.CommunicationsException;
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
 import utilities.Utilities;
 
@@ -1648,7 +1648,7 @@ public class MySqlDatabase {
 		}
 	}
 
-	private void removeSingleInstanceTask(String personName, Calendar singleDate) {
+	public void removeSingleInstanceTask(String personName, Calendar singleDate) {
 		if (!checkDatabaseConnection())
 			return;
 

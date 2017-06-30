@@ -12,9 +12,10 @@ public class PersonTableEvent extends EventObject {
 	private Calendar calendar;
 	private String taskName;
 	private int color;
+	private boolean isSingleInstance;
 
 	public PersonTableEvent(Object source, int buttonId, String personName, Calendar calendar, String taskName,
-			int color) {
+			int color, boolean isSingleInstance) {
 		super(source);
 
 		this.buttonId = buttonId;
@@ -22,6 +23,7 @@ public class PersonTableEvent extends EventObject {
 		this.taskName = taskName;
 		this.color = color;
 		this.personName = personName;
+		this.isSingleInstance = isSingleInstance;
 
 		// Create list with person name
 		if (personName != null && !personName.equals("")) {
@@ -65,5 +67,9 @@ public class PersonTableEvent extends EventObject {
 
 	public int getColor() {
 		return color;
+	}
+
+	public boolean isSingleInstanceTask() {
+		return isSingleInstance;
 	}
 }

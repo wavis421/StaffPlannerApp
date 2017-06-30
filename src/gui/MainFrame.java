@@ -1213,7 +1213,10 @@ public class MainFrame extends JFrame {
 			}
 
 			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
-				controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
+				if (event.isSingleInstanceTask())
+					controller.removeSingleInstanceTask(event.getPersonName(), event.getCalendar());
+				else
+					controller.markPersonUnavail(event.getPersonName(), selectedCalendar);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
 			}
 
