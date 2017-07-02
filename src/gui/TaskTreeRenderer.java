@@ -14,6 +14,10 @@ import acm.util.JTFTools;
 import model.TaskModel;
 
 public class TaskTreeRenderer extends DefaultTreeCellRenderer {
+	// Task list path count = 1, Assign tasks path count = 2
+	private static final int PROGRAM_PATH_COUNT = 3;
+	private static final int LEAF_PATH_COUNT = 4;
+
 	private static ImageIcon calIcon;
 	private static ImageIcon calPlusIcon;
 	private static final String BASIC_FONT = "Arial-12";
@@ -46,7 +50,7 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 			setClosedIcon(calIcon);
 			setOpenIcon(calIcon);
 			setLeafIcon(calIcon);
-		} else if (tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 2) {
+		} else if (tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() <= PROGRAM_PATH_COUNT) {
 			setClosedIcon(calPlusIcon);
 			setOpenIcon(calPlusIcon);
 			setLeafIcon(calPlusIcon);
@@ -58,7 +62,8 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 		textNonSelectionColor = Color.black;
 		setBackground(Color.WHITE);
 
-		if (value != null && tree.getPathForRow(row) != null && tree.getPathForRow(row).getPathCount() == 3) {
+		if (value != null && tree.getPathForRow(row) != null
+				&& tree.getPathForRow(row).getPathCount() == LEAF_PATH_COUNT) {
 			Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
 			TaskModel task;
 			boolean taskIsFocus;
@@ -81,5 +86,9 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 		}
 		super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, isLeaf, row, hasFocus);
 		return this;
+	}
+
+	public static int getProgramPathCount() {
+		return PROGRAM_PATH_COUNT;
 	}
 }

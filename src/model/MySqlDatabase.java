@@ -78,14 +78,29 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement addProgramStmt = dbConnection
-						.prepareStatement("INSERT INTO Programs (ProgramName, StartDate, EndDate) VALUES (?, ?, ?);");
+				PreparedStatement addProgramStmt;
 
 				// Add new program
-				int col = 1;
-				addProgramStmt.setString(col++, programName);
-				addProgramStmt.setDate(col++, java.sql.Date.valueOf(Utilities.getSqlDate(startDate)));
-				addProgramStmt.setDate(col++, java.sql.Date.valueOf(Utilities.getSqlDate(endDate)));
+				if (startDate == null && endDate == null) {
+					addProgramStmt = dbConnection.prepareStatement("INSERT INTO Programs (ProgramName) VALUES (?);");
+					addProgramStmt.setString(1, programName);
+				} else if (startDate == null) {
+					addProgramStmt = dbConnection
+							.prepareStatement("INSERT INTO Programs (ProgramName, EndDate) VALUES (?, ?);");
+					addProgramStmt.setString(1, programName);
+					addProgramStmt.setDate(2, java.sql.Date.valueOf(Utilities.getSqlDate(endDate)));
+				} else if (endDate == null) {
+					addProgramStmt = dbConnection
+							.prepareStatement("INSERT INTO Programs (ProgramName, StartDate) VALUES (?, ?);");
+					addProgramStmt.setString(1, programName);
+					addProgramStmt.setDate(2, java.sql.Date.valueOf(Utilities.getSqlDate(startDate)));
+				} else {
+					addProgramStmt = dbConnection.prepareStatement(
+							"INSERT INTO Programs (ProgramName, StartDate, EndDate) VALUES (?, ?, ?);");
+					addProgramStmt.setString(1, programName);
+					addProgramStmt.setDate(2, java.sql.Date.valueOf(Utilities.getSqlDate(startDate)));
+					addProgramStmt.setDate(3, java.sql.Date.valueOf(Utilities.getSqlDate(endDate)));
+				}
 
 				addProgramStmt.executeUpdate();
 				addProgramStmt.close();
@@ -113,12 +128,36 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				// Update program name
-				PreparedStatement updateProgramStmt = dbConnection
-						.prepareStatement("UPDATE Programs SET StartDate=?, EndDate=? WHERE ProgramName=?;");
-				updateProgramStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(startDate)));
-				updateProgramStmt.setDate(2, java.sql.Date.valueOf(Utilities.getSqlDate(endDate)));
-				updateProgramStmt.setString(3, programName);
+				PreparedStatement updateProgramStmt;
+
+				// Handle start/end date fields that are blank
+				if (startDate != null && startDate.equals(""))
+					startDate = null;
+				if (endDate != null && endDate.equals(""))
+					endDate = null;
+				
+				// Update program
+				if (startDate == null && endDate == null) {
+					updateProgramStmt = dbConnection
+							.prepareStatement("UPDATE Programs SET StartDate=NULL, EndDate=NULL WHERE ProgramName=?;");
+					updateProgramStmt.setString(1, programName);
+				} else if (startDate == null) {
+					updateProgramStmt = dbConnection
+							.prepareStatement("UPDATE Programs SET StartDate=NULL, EndDate=? WHERE ProgramName=?;");
+					updateProgramStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(endDate)));
+					updateProgramStmt.setString(2, programName);
+				} else if (endDate == null) {
+					updateProgramStmt = dbConnection
+							.prepareStatement("UPDATE Programs SET StartDate=?, EndDate=NULL WHERE ProgramName=?;");
+					updateProgramStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(startDate)));
+					updateProgramStmt.setString(2, programName);
+				} else {
+					updateProgramStmt = dbConnection
+							.prepareStatement("UPDATE Programs SET StartDate=?, EndDate=? WHERE ProgramName=?;");
+					updateProgramStmt.setDate(1, java.sql.Date.valueOf(Utilities.getSqlDate(startDate)));
+					updateProgramStmt.setDate(2, java.sql.Date.valueOf(Utilities.getSqlDate(endDate)));
+					updateProgramStmt.setString(3, programName);
+				}
 
 				updateProgramStmt.executeUpdate();
 				updateProgramStmt.close();

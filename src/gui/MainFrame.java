@@ -680,7 +680,8 @@ public class MainFrame extends JFrame {
 				if (controller.getNumPersons() > 0) {
 					ArrayList<PersonByTaskModel> allPersons = controller.getAllPersons();
 					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
-							PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null, null);
+							PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null,
+							null);
 
 					do {
 						ev = processViewAllPersonsDialog(ev.getDialogResponse());
@@ -1290,12 +1291,15 @@ public class MainFrame extends JFrame {
 			ArrayList<JList<TaskModel>> taskListByProgram,
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		for (int i = 0; i < progList.size(); i++) {
+			// Get all tasks for each program and add to task list
 			String programName = progList.get(i).getProgramName();
 			taskListByProgram.add(i, controller.getAllTasksByProgram(programName));
 
+			// Create new assigned task list for this program
 			assignedTaskListByProgram.add(i, new ArrayList<AssignedTasksModel>());
 			ArrayList<AssignedTasksModel> thisAssignedTaskList = assignedTaskListByProgram.get(i);
 
+			// Add any assigned task to assigned task list for this program
 			for (int j = 0; j < assignedList.size(); j++) {
 				AssignedTasksModel assignedTask = assignedList.get(j);
 				if (assignedTask.getProgramName().equals(programName))

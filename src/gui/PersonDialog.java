@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -105,7 +104,6 @@ public class PersonDialog extends JDialog {
 		// super(parent, "Add person...", true);
 		super(parent, "Add person...");
 		setLocation(new Point(100, 100));
-		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		this.currentProgramName = currentProgram;
 
 		// TODO: find better names!!
@@ -137,7 +135,6 @@ public class PersonDialog extends JDialog {
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		super(parent, "Edit person...", true);
 		setLocation(new Point(100, 100));
-		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		this.currentProgramName = currentProgram;
 
 		// TODO: find better names!!
@@ -507,7 +504,6 @@ public class PersonDialog extends JDialog {
 		/* === Create assigned task tree === */
 		Dimension assignDimension = new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
 				(int) (notesArea.getPreferredSize().getHeight() * 5));
-		System.out.println(assignDimension.getHeight());
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(assignDimension);
 		assignedTasksScrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -574,7 +570,7 @@ public class PersonDialog extends JDialog {
 				if (e.getButton() == MouseEvent.BUTTON3) {
 					selectedNode = (DefaultMutableTreeNode) assignedTasksTree.getPathForRow(row).getLastPathComponent();
 					if (selectedNode != null) {
-						if (selectedNode.getLevel() == 2) {
+						if (selectedNode.getLevel() == TaskTreeRenderer.getProgramPathCount()) {
 							((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(true);
 							assignPopup.show(e.getComponent(), e.getX(), e.getY());
 						}
@@ -634,7 +630,7 @@ public class PersonDialog extends JDialog {
 				if (e.getButton() == MouseEvent.BUTTON3) {
 					selectedNode = (DefaultMutableTreeNode) taskTree.getPathForRow(row).getLastPathComponent();
 					if (selectedNode != null) {
-						if (selectedNode.getLevel() == 2) {
+						if (selectedNode.getLevel() == TaskTreeRenderer.getProgramPathCount()) {
 							((TaskModel) (selectedNode.getUserObject())).setIsFocus(true);
 							unassignPopup.show(e.getComponent(), e.getX(), e.getY());
 						}

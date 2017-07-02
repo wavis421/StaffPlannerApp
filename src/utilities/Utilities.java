@@ -162,6 +162,9 @@ public class Utilities {
 	}
 
 	public static String convertSqlDateToString(java.sql.Date sqlDate) {
+		if (sqlDate == null)
+			return null;
+		
 		try {
 			// TODO: There must be a better way to do this!
 			Calendar cal = Calendar.getInstance();

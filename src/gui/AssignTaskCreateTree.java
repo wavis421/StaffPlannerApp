@@ -43,9 +43,12 @@ public class AssignTaskCreateTree {
 	}
 
 	public void addNodeToTree(JTree tree, String programName, AssignTaskEvent taskEvent) {
-		for (int i = 0; i < tree.getModel().getChildCount(tree.getModel().getRoot()); i++) {
-			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel()
-					.getChild(tree.getModel().getRoot(), i);
+		DefaultMutableTreeNode assignedTasksNode = (DefaultMutableTreeNode) tree.getModel()
+				.getChild(tree.getModel().getRoot(), 0);
+
+		for (int i = 0; i < tree.getModel().getChildCount(assignedTasksNode); i++) {
+			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel().getChild(assignedTasksNode, i);
+
 			if (progNode.toString().equals(programName)) {
 				progNode.add(new DefaultMutableTreeNode(taskEvent));
 
@@ -57,9 +60,12 @@ public class AssignTaskCreateTree {
 	}
 
 	public void addNodeToTree(JTree tree, String programName, TaskModel taskEvent) {
-		for (int i = 0; i < tree.getModel().getChildCount(tree.getModel().getRoot()); i++) {
-			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel()
-					.getChild(tree.getModel().getRoot(), i);
+		DefaultMutableTreeNode tasksNode = (DefaultMutableTreeNode) tree.getModel().getChild(tree.getModel().getRoot(),
+				0);
+
+		for (int i = 0; i < tree.getModel().getChildCount(tasksNode); i++) {
+			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel().getChild(tasksNode, i);
+
 			if (progNode.toString().equals(programName)) {
 				progNode.add(new DefaultMutableTreeNode(taskEvent));
 
@@ -71,9 +77,11 @@ public class AssignTaskCreateTree {
 	}
 
 	public void removeNodeFromTree(JTree tree, String programName, String taskName) {
-		for (int i = 0; i < tree.getModel().getChildCount(tree.getModel().getRoot()); i++) {
-			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel()
-					.getChild(tree.getModel().getRoot(), i);
+		DefaultMutableTreeNode tasksNode = (DefaultMutableTreeNode) tree.getModel().getChild(tree.getModel().getRoot(),
+				0);
+
+		for (int i = 0; i < tree.getModel().getChildCount(tasksNode); i++) {
+			DefaultMutableTreeNode progNode = (DefaultMutableTreeNode) tree.getModel().getChild(tasksNode, i);
 			if (progNode.toString().equals(programName)) {
 				for (int j = 0; j < progNode.getChildCount(); j++) {
 					if (progNode.getChildAt(j).toString().equals(taskName)) {
@@ -89,13 +97,19 @@ public class AssignTaskCreateTree {
 	}
 
 	private JTree createTaskTree() {
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Select task to assign  >>>");
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Available Tasks");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
+		JTree tree = new JTree(treeModel);
+
+		DefaultMutableTreeNode tasksNode = new DefaultMutableTreeNode("Select task to assign  >>>");
+		tree.setSelectionPath(tree.getPathForRow(0));
+		treeModel.insertNodeInto(tasksNode, (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent(), 0);
 
 		for (int i = 0; i < programList.size(); i++) {
+			// Create program node
 			ProgramModel p = programList.get(i);
 			DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(p);
-			rootNode.add(pNode);
+			tasksNode.add(pNode);
 
 			JList<TaskModel> taskList = taskListByProgram.get(i);
 
@@ -106,24 +120,29 @@ public class AssignTaskCreateTree {
 					pNode.add(new DefaultMutableTreeNode(task));
 			}
 		}
-		JTree tree = new JTree(treeModel);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		tree.setShowsRootHandles(true);
+		tree.setShowsRootHandles(false);
 		return (tree);
 	}
 
 	private JTree createAssignedTasksTree(String currProgram) {
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Assigned tasks");
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Assigned Tasks");
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
-		JTree assignedTree = new JTree(treeModel);
+		JTree activeTasksTree = new JTree(treeModel);
+
+		DefaultMutableTreeNode assignedTasksNode = new DefaultMutableTreeNode("Regularly Scheduled Tasks");
+		DefaultMutableTreeNode extraTasksNode = new DefaultMutableTreeNode("Extra Tasks");
+		activeTasksTree.setSelectionPath(activeTasksTree.getPathForRow(0));
+		treeModel.insertNodeInto(assignedTasksNode,
+				(DefaultMutableTreeNode) activeTasksTree.getSelectionPath().getLastPathComponent(), 0);
+		treeModel.insertNodeInto(extraTasksNode,
+				(DefaultMutableTreeNode) activeTasksTree.getSelectionPath().getLastPathComponent(), 1);
 
 		for (int i = 0; i < programList.size(); i++) {
 			// Create program node
 			String progName = programList.get(i).getProgramName();
 			DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(progName);
-			assignedTree.setSelectionPath(assignedTree.getPathForRow(0));
-			treeModel.insertNodeInto(pNode,
-					(DefaultMutableTreeNode) assignedTree.getSelectionPath().getLastPathComponent(), 0);
+			assignedTasksNode.add(pNode);
 
 			// Add tasks for this program
 			ArrayList<AssignedTasksModel> assignedTaskList = assignedTasksByProgram.get(i);
@@ -142,16 +161,17 @@ public class AssignTaskCreateTree {
 		}
 
 		// Collapse all program nodes except last inserted task
-		collapseTree(assignedTree, currProgram);
+		collapseTree(activeTasksTree, currProgram);
 		collapseTree(taskTree, currProgram);
 
-		assignedTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		assignedTree.setShowsRootHandles(true);
-		return (assignedTree);
+		activeTasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		activeTasksTree.setShowsRootHandles(false);
+		return (activeTasksTree);
 	}
 
 	private void collapseTree(JTree tree, String s) {
 		tree.expandRow(0);
+		tree.expandRow(1);
 		int row = tree.getRowCount() - 1;
 
 		// Collapse child nodes of root
