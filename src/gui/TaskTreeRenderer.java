@@ -25,6 +25,9 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 	private static final String BOLD_FONT = "Arial-bold-12";
 	private static final String ITALIC_FONT = "Arial-italic-12";
 
+	// Track last object to have focus
+	private Object lastFocusObject = null;
+
 	// TODO: Combine with other renderers!!
 	public TaskTreeRenderer(int treeWidth) {
 		super();
@@ -70,6 +73,16 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 			int taskColor;
 			boolean taskIsFocus;
 
+			// Clear override focus of last object selected if different
+			if (lastFocusObject != null && lastFocusObject != userObject) {
+				if (lastFocusObject instanceof TaskModel)
+					((TaskModel) lastFocusObject).setIsFocus(false);
+				else if (lastFocusObject instanceof AssignTaskEvent)
+					((AssignTaskEvent) lastFocusObject).setIsFocus(false);
+				else if (lastFocusObject instanceof SingleInstanceTaskModel)
+					((SingleInstanceTaskModel) lastFocusObject).setIsFocus(false);
+			}
+
 			// This renderer is used for task, assigned task, single task
 			if (userObject instanceof TaskModel) {
 				taskName = ((TaskModel) userObject).getTaskName();
@@ -84,6 +97,7 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 				taskColor = ((SingleInstanceTaskModel) userObject).getColor();
 				taskIsFocus = ((SingleInstanceTaskModel) userObject).getIsFocus();
 			}
+			lastFocusObject = userObject;
 
 			setText(taskName);
 			setFont(JTFTools.decodeFont(BOLD_FONT));

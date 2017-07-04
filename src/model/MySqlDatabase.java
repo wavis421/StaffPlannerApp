@@ -135,7 +135,7 @@ public class MySqlDatabase {
 					startDate = null;
 				if (endDate != null && endDate.equals(""))
 					endDate = null;
-				
+
 				// Update program
 				if (startDate == null && endDate == null) {
 					updateProgramStmt = dbConnection
@@ -501,8 +501,10 @@ public class MySqlDatabase {
 					// Update floater to SUB
 					updateTaskStmt = dbConnection.prepareStatement("UPDATE SingleInstanceTasks "
 							+ "INNER JOIN Persons ON SingleInstanceTasks.PersonID = Persons.PersonID "
-							+ "SET TaskID=(SELECT Tasks.TaskID FROM Tasks WHERE Tasks.TaskName=?) "
+							+ "SET TaskID=(SELECT Tasks.TaskID FROM Tasks WHERE Tasks.TaskName=?),"
+							+ "   Color=(SELECT Tasks.Color FROM Tasks WHERE Tasks.TaskName=?) "
 							+ "WHERE Persons.PersonName=? AND SingleDate=? AND SingleTime=?;");
+					updateTaskStmt.setString(col++, taskName);
 					updateTaskStmt.setString(col++, taskName);
 				}
 				updateTaskStmt.setString(col++, personName);

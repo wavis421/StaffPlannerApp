@@ -68,11 +68,11 @@ public class PersonDialog extends JDialog {
 	private JRadioButton leaderButton = new JRadioButton("Leader");
 	private JRadioButton assistantButton = new JRadioButton("Assistant");
 	private ButtonGroup staffGroup = new ButtonGroup();
-	private int popupHeightCurr = 30, popupHeightAdjust = 20;
 	private JComboBox<String> dateUnavailCombo;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
 	private DefaultMutableTreeNode selectedNode;
+	private int popupHeightCurr = 30, popupHeightAdjust = 20;
 
 	// Lists
 	private AssignTaskCreateTree trees;
