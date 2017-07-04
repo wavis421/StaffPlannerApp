@@ -11,6 +11,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import acm.util.JTFTools;
+import model.SingleInstanceTaskModel;
 import model.TaskModel;
 
 public class TaskTreeRenderer extends DefaultTreeCellRenderer {
@@ -65,22 +66,29 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 		if (value != null && tree.getPathForRow(row) != null
 				&& tree.getPathForRow(row).getPathCount() == LEAF_PATH_COUNT) {
 			Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-			TaskModel task;
+			String taskName;
+			int taskColor;
 			boolean taskIsFocus;
 
-			// This renderer is used for both task and assigned task
+			// This renderer is used for task, assigned task, single task
 			if (userObject instanceof TaskModel) {
-				task = (TaskModel) userObject;
-				taskIsFocus = task.getIsFocus();
-			} else {
-				task = ((AssignTaskEvent) userObject).getTask();
+				taskName = ((TaskModel) userObject).getTaskName();
+				taskColor = ((TaskModel) userObject).getColor();
+				taskIsFocus = ((TaskModel) userObject).getIsFocus();
+			} else if (userObject instanceof AssignTaskEvent) {
+				taskName = ((AssignTaskEvent) userObject).getTask().getTaskName();
+				taskColor = ((AssignTaskEvent) userObject).getTask().getColor();
 				taskIsFocus = ((AssignTaskEvent) userObject).getIsFocus();
+			} else { // SingleInstanceTaskModel
+				taskName = ((SingleInstanceTaskModel) userObject).getTaskName();
+				taskColor = ((SingleInstanceTaskModel) userObject).getColor();
+				taskIsFocus = ((SingleInstanceTaskModel) userObject).getIsFocus();
 			}
 
-			setText(task.getTaskName());
+			setText(taskName);
 			setFont(JTFTools.decodeFont(BOLD_FONT));
-			textSelectionColor = new Color(task.getColor());
-			textNonSelectionColor = new Color(task.getColor());
+			textSelectionColor = new Color(taskColor);
+			textNonSelectionColor = new Color(taskColor);
 			if (taskIsFocus || hasFocus)
 				setBackground(new Color(0xDDDDDD));
 		}

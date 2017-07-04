@@ -3,6 +3,8 @@ package model;
 import java.io.Serializable;
 import java.util.Calendar;
 
+import utilities.Utilities;
+
 public class SingleInstanceTaskModel implements Serializable, Comparable<SingleInstanceTaskModel> {
 	private static final long serialVersionUID = 12340003L;
 	private int taskID;
@@ -10,9 +12,10 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 	private String programName;
 	private Calendar taskDate;
 	private int color;
+	private boolean isFocus = false;
 	private ListStatus elementStatus;
 
-	public SingleInstanceTaskModel (int taskID, String programName, String taskName, Calendar taskDate, int color) {
+	public SingleInstanceTaskModel(int taskID, String programName, String taskName, Calendar taskDate, int color) {
 		this.taskID = taskID;
 		this.programName = programName;
 		this.taskName = taskName;
@@ -24,6 +27,14 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 
 		// Note: Color parameter only valid when taskName is blank
 		this.color = color;
+	}
+
+	public String toString() {
+		if (taskName == null || taskName.equals("")) {
+			return "Floater on " + Utilities.getDisplayDate(taskDate) + " at " + Utilities.formatTime(taskDate);
+		} else {
+			return taskName + " on " + Utilities.getDisplayDate(taskDate);
+		}
 	}
 
 	public int getTaskID() {
@@ -52,6 +63,14 @@ public class SingleInstanceTaskModel implements Serializable, Comparable<SingleI
 
 	public void setElementStatus(ListStatus elementStatus) {
 		this.elementStatus = elementStatus;
+	}
+
+	public boolean getIsFocus() {
+		return isFocus;
+	}
+
+	public void setIsFocus(boolean value) {
+		isFocus = value;
 	}
 
 	public int compareTo(SingleInstanceTaskModel otherTask) {

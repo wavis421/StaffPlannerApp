@@ -51,6 +51,7 @@ public class PersonDialog extends JDialog {
 	private static final int TEXT_FIELD_SIZE = 30;
 	private static final int COMBO_BOX_WIDTH = 334;
 	private static final int COMBO_BOX_HEIGHT = 30;
+	private static final int POPUP_WIDTH = 240;
 
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
@@ -67,7 +68,7 @@ public class PersonDialog extends JDialog {
 	private JRadioButton leaderButton = new JRadioButton("Leader");
 	private JRadioButton assistantButton = new JRadioButton("Assistant");
 	private ButtonGroup staffGroup = new ButtonGroup();
-	private JComboBox<String> singleInstanceTaskCombo;
+	private int popupHeightCurr = 30, popupHeightAdjust = 20;
 	private JComboBox<String> dateUnavailCombo;
 	private JScrollPane assignedTasksScrollPane;
 	private JScrollPane taskTreeScrollPane;
@@ -90,7 +91,6 @@ public class PersonDialog extends JDialog {
 	private JLabel staffLabel = new JLabel("Leader or assistant: ");
 	private JLabel notesLabel = new JLabel("Notes: ");
 	private JLabel datesLabel = new JLabel("Dates Unavailable: ");
-	private JLabel singleTaskLabel = new JLabel("Extra Dates: ");
 
 	// Dialog panels
 	private JPanel controlsPanel;
@@ -123,7 +123,7 @@ public class PersonDialog extends JDialog {
 		this.datesUnavailableList = new ArrayList<DateRangeModel>();
 
 		createUnavailDateCombo();
-		createSingleInstanceTaskCombo();
+		createSingleInstanceTaskEntries();
 
 		setupPersonDialog();
 		setVisible(true);
@@ -163,7 +163,7 @@ public class PersonDialog extends JDialog {
 			this.assistantButton.setSelected(true);
 
 		createUnavailDateCombo();
-		createSingleInstanceTaskCombo();
+		createSingleInstanceTaskEntries();
 
 		this.allTasks = allTasks;
 
@@ -225,10 +225,7 @@ public class PersonDialog extends JDialog {
 						singleTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
 						singleInstanceTaskList.add(singleTask);
 
-						DefaultComboBoxModel<String> extraDateModel = (DefaultComboBoxModel<String>) singleInstanceTaskCombo
-								.getModel();
-						extraDateModel.addElement(dateResponse.getTask().getTaskName() + " on "
-								+ Utilities.getDisplayDate(dateResponse.getStartDate()));
+						trees.addExtraTaskNodeToTree(trees.getAssignedTaskTree(), singleTask);
 					}
 				}
 			}
@@ -259,7 +256,7 @@ public class PersonDialog extends JDialog {
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setPersonLayout();
-		setSize(750, 600);
+		setSize(750, 575);
 	}
 
 	private void setPersonLayout() {
@@ -287,7 +284,6 @@ public class PersonDialog extends JDialog {
 		addRowToControlPanel(gc, emailLabel, email, gridY++);
 		addRowToControlPanel(gc, staffLabel, staffPanel, gridY++);
 		addRowToControlPanel(gc, datesLabel, dateUnavailCombo, gridY++);
-		addRowToControlPanel(gc, singleTaskLabel, singleInstanceTaskCombo, gridY++);
 		addRowToControlPanel(gc, notesLabel, notesArea, gridY++);
 		addRowToControlPanel(gc, taskTreeScrollPane, assignedTasksScrollPane, gridY++);
 
@@ -336,72 +332,11 @@ public class PersonDialog extends JDialog {
 		staffGroup.add(assistantButton);
 	}
 
-	private void createSingleInstanceTaskCombo() {
-		DefaultComboBoxModel<String> taskModel = new DefaultComboBoxModel<String>();
-
+	private void createSingleInstanceTaskEntries() {
 		for (int i = 0; i < singleInstanceTaskList.size(); i++) {
 			SingleInstanceTaskModel task = singleInstanceTaskList.get(i);
-			Calendar date = task.getTaskDate();
-			String taskName = task.getTaskName();
-			if (taskName == null || taskName.equals("")) {
-				taskName = "Floater";
-				taskModel.addElement(
-						taskName + " on " + Utilities.getDisplayDate(date) + " at " + Utilities.formatTime(date));
-			} else {
-				taskModel.addElement(taskName + " on " + Utilities.getDisplayDate(date));
-			}
+			trees.addExtraTaskNodeToTree(trees.getAssignedTaskTree(), task);
 		}
-
-		singleInstanceTaskCombo = new JComboBox<String>(taskModel);
-		singleInstanceTaskCombo.setEditable(false);
-		singleInstanceTaskCombo.setBorder(BorderFactory.createEtchedBorder());
-		singleInstanceTaskCombo.setPreferredSize(new Dimension(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT));
-
-		// Single Instance Task Combo POP UP menu
-		JPopupMenu singleTaskComboPopup = new JPopupMenu();
-		JMenuItem removeItem = new JMenuItem("Remove");
-		singleTaskComboPopup.add(removeItem);
-		singleTaskComboPopup.setPreferredSize(new Dimension(240, 25));
-
-		// Single Instance Task Combo POP UP action listeners
-		removeItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				String selectedItem = (String) singleInstanceTaskCombo.getSelectedItem();
-				SingleInstanceTaskModel task = findSingleInstanceTaskMatch(selectedItem);
-				if (task == null) {
-					// This SHOULD NOT happen!!
-					System.out.println("Error removing single instance task: " + selectedItem);
-					return;
-				}
-
-				// Remove item from combo box and task list
-				((DefaultComboBoxModel<String>) singleInstanceTaskCombo.getModel()).removeElement(selectedItem);
-				if (task.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
-					// Was just added, so remove from list
-					singleInstanceTaskList.remove(task);
-				else
-					// Mark for deletion
-					task.setElementStatus(ListStatus.LIST_ELEMENT_DELETE);
-			}
-		});
-
-		singleInstanceTaskCombo.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON3 && singleInstanceTaskCombo.getModel().getSize() > 0) {
-					singleTaskComboPopup.show(singleInstanceTaskCombo, e.getX(), e.getY());
-				}
-			}
-		});
-	}
-
-	private SingleInstanceTaskModel findSingleInstanceTaskMatch(String text) {
-		for (int i = 0; i < singleInstanceTaskList.size(); i++) {
-			SingleInstanceTaskModel task = singleInstanceTaskList.get(i);
-			if (text.startsWith(task.getTaskName()) && text.contains(Utilities.getDisplayDate(task.getTaskDate()))) {
-				return task;
-			}
-		}
-		return null;
 	}
 
 	private void createUnavailDateCombo() {
@@ -421,7 +356,7 @@ public class PersonDialog extends JDialog {
 		JPopupMenu dateUnavailComboPopup = new JPopupMenu();
 		JMenuItem removeItem = new JMenuItem("Remove");
 		dateUnavailComboPopup.add(removeItem);
-		dateUnavailComboPopup.setPreferredSize(new Dimension(240, 25));
+		dateUnavailComboPopup.setPreferredSize(new Dimension(POPUP_WIDTH, 25));
 
 		// Date Unavail Combo POP UP action listeners
 		removeItem.addActionListener(new ActionListener() {
@@ -513,9 +448,8 @@ public class PersonDialog extends JDialog {
 		JPopupMenu assignPopup = new JPopupMenu();
 		JMenuItem editItem = new JMenuItem("Edit");
 		JMenuItem removeItem = new JMenuItem("Remove");
-		assignPopup.add(editItem);
 		assignPopup.add(removeItem);
-		assignPopup.setPreferredSize(new Dimension(240, 50));
+		assignPopup.setPreferredSize(new Dimension(POPUP_WIDTH, popupHeightCurr));
 
 		// Assigned Task Tree POP UP action listeners
 		editItem.addActionListener(new ActionListener() {
@@ -539,25 +473,44 @@ public class PersonDialog extends JDialog {
 		});
 		removeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				AssignTaskEvent ev = (AssignTaskEvent) selectedNode.getUserObject();
-				String programName = selectedNode.getParent().toString();
+				if (selectedNode.getUserObject() instanceof AssignTaskEvent) {
+					AssignTaskEvent ev = (AssignTaskEvent) selectedNode.getUserObject();
+					String programName = selectedNode.getParent().toString();
 
-				// Remove task model from assigned tasks tree
-				trees.removeNodeFromTree(assignedTasksTree, programName, ev.getTask().getTaskName());
+					// Remove task model from assigned tasks tree
+					trees.removeNodeFromTree(assignedTasksTree, programName, ev.getTask().getTaskName());
 
-				// Add task model to unassigned tasks tree
-				TaskModel taskModel = new TaskModel(ev.getTask().getTaskID(), ev.getTask().getProgramID(),
-						ev.getTask().getTaskName(), ev.getTask().getLocation(), ev.getTask().getNumLeadersReqd(),
-						ev.getTask().getTotalPersonsReqd(), ev.getTask().getDayOfWeek(), ev.getTask().getWeekOfMonth(),
-						ev.getTask().getTime(), ev.getTask().getColor());
-				trees.addNodeToTree(taskTree, programName, taskModel);
+					// Add task model to unassigned tasks tree
+					TaskModel taskModel = new TaskModel(ev.getTask().getTaskID(), ev.getTask().getProgramID(),
+							ev.getTask().getTaskName(), ev.getTask().getLocation(), ev.getTask().getNumLeadersReqd(),
+							ev.getTask().getTotalPersonsReqd(), ev.getTask().getDayOfWeek(),
+							ev.getTask().getWeekOfMonth(), ev.getTask().getTime(), ev.getTask().getColor());
+					trees.addNodeToTree(taskTree, programName, taskModel);
 
-				// Remove from assigned tasks lists
-				deleteNodeInAssignedTaskList(ev.getTask().getTaskName());
-				deleteNodeInAssignedTaskByProgList(ev.getTask().getTaskName());
+					// Remove from assigned tasks lists
+					deleteNodeInAssignedTaskList(ev.getTask().getTaskName());
+					deleteNodeInAssignedTaskByProgList(ev.getTask().getTaskName());
 
-				assignedTasksTree.clearSelection();
-				((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(false);
+					assignedTasksTree.clearSelection();
+					((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(false);
+
+				} else {
+					SingleInstanceTaskModel task = (SingleInstanceTaskModel) selectedNode.getUserObject();
+
+					// Remove item from single instance tree
+					trees.removeExtraTaskNodeFromTree(task);
+
+					// Update status in single instance task list
+					if (task.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+						// Was just added, so remove from list
+						singleInstanceTaskList.remove(task);
+					else
+						// Mark for deletion
+						task.setElementStatus(ListStatus.LIST_ELEMENT_DELETE);
+
+					assignedTasksTree.clearSelection();
+					((SingleInstanceTaskModel) (selectedNode.getUserObject())).setIsFocus(false);
+				}
 			}
 		});
 
@@ -571,7 +524,15 @@ public class PersonDialog extends JDialog {
 					selectedNode = (DefaultMutableTreeNode) assignedTasksTree.getPathForRow(row).getLastPathComponent();
 					if (selectedNode != null) {
 						if (selectedNode.getLevel() == TaskTreeRenderer.getProgramPathCount()) {
-							((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(true);
+							if (selectedNode.getUserObject() instanceof AssignTaskEvent) {
+								((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(true);
+								assignPopup.add(editItem);
+								assignPopup.setPopupSize(POPUP_WIDTH, popupHeightCurr + popupHeightAdjust);
+							} else { // SingleInstanceTaskModel
+								((SingleInstanceTaskModel) (selectedNode.getUserObject())).setIsFocus(true);
+								assignPopup.remove(editItem);
+								assignPopup.setPopupSize(POPUP_WIDTH, popupHeightCurr);
+							}
 							assignPopup.show(e.getComponent(), e.getX(), e.getY());
 						}
 					}
@@ -591,7 +552,7 @@ public class PersonDialog extends JDialog {
 		JPopupMenu unassignPopup = new JPopupMenu();
 		JMenuItem assignItem = new JMenuItem("Assign");
 		unassignPopup.add(assignItem);
-		unassignPopup.setPreferredSize(new Dimension(240, 25));
+		unassignPopup.setPreferredSize(new Dimension(POPUP_WIDTH, 25));
 
 		// Unassigned task tree POP UP Action Listeners
 		assignItem.addActionListener(new ActionListener() {
