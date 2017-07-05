@@ -64,18 +64,20 @@ public class AssignTaskCreateTree {
 	}
 
 	public void addExtraTaskNodeToTree(JTree tree, SingleInstanceTaskModel extraTaskEvent) {
-		// Get 'extra tasks' node
-		DefaultMutableTreeNode extraTaskNode = (DefaultMutableTreeNode) tree.getModel()
-				.getChild(tree.getModel().getRoot(), 1);
-
 		// TODO: Initialize subs/floaters all at once for optimization
+		DefaultMutableTreeNode task = new DefaultMutableTreeNode(extraTaskEvent);
+		DefaultMutableTreeNode root;
+		
+		// Determine root, either substitute or floater
 		if (extraTaskEvent.getTaskID() == 0)
-			floaterRootNode.add(new DefaultMutableTreeNode(extraTaskEvent));
+			root = floaterRootNode;
 		else
-			substituteRootNode.add(new DefaultMutableTreeNode(extraTaskEvent));
-
-		((DefaultTreeModel) tree.getModel()).reload(extraTaskNode);
-		expandExtraTaskNode(tree);
+			root = substituteRootNode;
+		
+		// Add task to root and reload tree
+		root.add(task);
+		((DefaultTreeModel) tree.getModel()).reload(root);
+		assignedTaskTree.expandPath(new TreePath(root.getPath()));
 	}
 
 	public void removeNodeFromTree(JTree tree, String programName, String taskName) {
@@ -200,7 +202,7 @@ public class AssignTaskCreateTree {
 		int row = regularTaskRootNode.getChildCount() + 1;
 
 		// Collapse child nodes of 'Regularly Scheduled Tasks'
-		while (row > 0) {
+		while (row > 1) {
 			tree.collapseRow(row);
 			row--;
 		}
@@ -210,14 +212,6 @@ public class AssignTaskCreateTree {
 			TreePath path = findNodeInTree((DefaultMutableTreeNode) tree.getModel().getRoot(), s);
 			tree.expandPath(path);
 		}
-	}
-
-	private void expandExtraTaskNode(JTree tree) {
-		DefaultMutableTreeNode extraTaskNode = (DefaultMutableTreeNode) tree.getModel()
-				.getChild(tree.getModel().getRoot(), 1);
-
-		// Expand 'extra tasks' row
-		tree.expandPath(new TreePath(extraTaskNode.getPath()));
 	}
 
 	private TreePath findNodeInTree(DefaultMutableTreeNode root, String s) {
