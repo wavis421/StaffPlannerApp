@@ -1,11 +1,9 @@
 package model;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class TimeModel implements Comparable<TimeModel>, Serializable {
-	private static final long serialVersionUID = 12340001L;
+public class TimeModel implements Comparable<TimeModel> {
 	private Calendar calTime = Calendar.getInstance();
 	private static final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
 

@@ -47,7 +47,6 @@ public class PersonTableModel extends AbstractTableModel {
 	// PERSON_TABLE_EXPAND_WITH_NOTES
 	private static final int NOTES_COLUMN = 4;
 
-	private static final long serialVersionUID = 12340002L;
 	private ArrayList<PersonByTaskModel> personList;
 	private String colNamesBasic[] = { "Name", "Ldr", "Phone #", "E-Mail" };
 	private String colNamesExpandByDay[] = { "Name", "Ldr", "Sub", "Task", "Time", "Location", "Phone #", "E-Mail" };

@@ -1,10 +1,8 @@
 package model;
 
-import java.io.Serializable;
 import java.util.Calendar;
 
-public class CalendarDayModel implements Serializable, Comparable<CalendarDayModel> {
-	private static final long serialVersionUID = 12340002L;
+public class CalendarDayModel implements Comparable<CalendarDayModel> {
 	private TaskModel task;
 	private int personCount;
 	private int leaderCount;

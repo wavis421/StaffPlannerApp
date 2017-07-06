@@ -1,10 +1,8 @@
 package model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class PersonModel implements Serializable, Comparable<PersonModel> {
-	private static final long serialVersionUID = 12340004L;
+public class PersonModel implements Comparable<PersonModel> {
 	private int personID;
 	private String name;
 	private String phone;

@@ -32,7 +32,7 @@ public class AssignTaskCreateTree {
 			ArrayList<JList<TaskModel>> taskListByProgram,
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram,
 			ArrayList<SingleInstanceTaskModel> singleInstanceTasks) {
-		
+
 		this.programList = programList;
 		this.taskListByProgram = taskListByProgram;
 		this.assignedTasksByProgram = assignedTaskListByProgram;
@@ -70,13 +70,13 @@ public class AssignTaskCreateTree {
 	public void addExtraTaskNodeToTree(JTree tree, SingleInstanceTaskModel extraTaskEvent) {
 		DefaultMutableTreeNode task = new DefaultMutableTreeNode(extraTaskEvent);
 		DefaultMutableTreeNode root;
-		
+
 		// Determine root, either substitute or floater
 		if (extraTaskEvent.getTaskID() == 0)
 			root = floaterRootNode;
 		else
 			root = substituteRootNode;
-		
+
 		// Add task to root and reload tree
 		root.add(task);
 		((DefaultTreeModel) tree.getModel()).reload(root);
@@ -187,17 +187,17 @@ public class AssignTaskCreateTree {
 				}
 			}
 		}
-		
+
 		for (int i = 0; i < singleInstanceTasks.size(); i++) {
 			DefaultMutableTreeNode root;
 			SingleInstanceTaskModel task = singleInstanceTasks.get(i);
-			
+
 			// Determine root, either substitute or floater
 			if (task.getTaskID() == 0)
 				root = floaterRootNode;
 			else
 				root = substituteRootNode;
-			
+
 			// Add task to root and reload tree
 			root.add(new DefaultMutableTreeNode(task));
 		}
@@ -205,7 +205,7 @@ public class AssignTaskCreateTree {
 		// Collapse all program nodes except last inserted task
 		collapseTree(activeTasksTree, currProgram);
 		collapseTree(taskTree, currProgram);
-		
+
 		// Expand extra tasks
 		((DefaultTreeModel) activeTasksTree.getModel()).reload(floaterRootNode);
 		activeTasksTree.expandPath(new TreePath(floaterRootNode.getPath()));
@@ -238,9 +238,11 @@ public class AssignTaskCreateTree {
 	}
 
 	private TreePath findNodeInTree(DefaultMutableTreeNode root, String s) {
-		Enumeration<DefaultMutableTreeNode> e = root.depthFirstEnumeration();
-		while (e.hasMoreElements()) {
-			DefaultMutableTreeNode node = e.nextElement();
+		@SuppressWarnings("unchecked")
+		Enumeration<DefaultMutableTreeNode> en = root.depthFirstEnumeration();
+
+		while (en.hasMoreElements()) {
+			DefaultMutableTreeNode node = en.nextElement();
 			if (node.toString().equals(s)) {
 				return new TreePath(node.getPath());
 			}

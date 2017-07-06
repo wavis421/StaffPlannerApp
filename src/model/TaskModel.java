@@ -1,9 +1,6 @@
 package model;
 
-import java.io.Serializable;
-
-public class TaskModel implements Serializable, Comparable<TaskModel> {
-	private static final long serialVersionUID = 12340002L;
+public class TaskModel implements Comparable<TaskModel> {
 	private int taskID, programID;
 	private String taskName;
 	private TimeModel time;

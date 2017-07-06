@@ -14,7 +14,6 @@ public class TaskTableModel extends AbstractTableModel {
 	private static final int DAY_OF_WEEK_COLUMN = 3;
 	private static final int DOW_IN_MONTH_COLUMN = 4;
 
-	private static final long serialVersionUID = 12340001L;
 	private JList<TaskModel> taskList;
 	private String colNames[] = { "Task", "Time", "Location", "Day of Week", "Week of Month" };
 

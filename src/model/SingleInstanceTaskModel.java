@@ -1,12 +1,10 @@
 package model;
 
-import java.io.Serializable;
 import java.util.Calendar;
 
 import utilities.Utilities;
 
-public class SingleInstanceTaskModel implements Serializable, Comparable<SingleInstanceTaskModel> {
-	private static final long serialVersionUID = 12340003L;
+public class SingleInstanceTaskModel implements Comparable<SingleInstanceTaskModel> {
 	private int taskID;
 	private String taskName;
 	private String programName;

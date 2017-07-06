@@ -1,9 +1,6 @@
 package model;
 
-import java.io.Serializable;
-
-public class DateRangeModel implements Serializable, Comparable<DateRangeModel> {
-	private static final long serialVersionUID = 12340002L;
+public class DateRangeModel implements Comparable<DateRangeModel> {
 	private int personID;
 	private String startDate;
 	private String endDate;

@@ -159,8 +159,8 @@ public class PersonDialog extends JDialog {
 			this.assistantButton.setSelected(true);
 
 		// TODO: find better names!!
-		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, 
-				assignedTaskListByProgram, singleInstanceTaskList);
+		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram,
+				singleInstanceTaskList);
 		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
 		createUnavailDateCombo();

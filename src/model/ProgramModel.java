@@ -1,10 +1,8 @@
 package model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ProgramModel implements Serializable, Comparable<ProgramModel> {
-	private static final long serialVersionUID = 12340002L;
+public class ProgramModel implements Comparable<ProgramModel> {
 	private int programID;
 	private String programName;
 	private String startDate, endDate;

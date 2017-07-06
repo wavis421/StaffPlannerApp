@@ -33,7 +33,6 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 import acm.gui.TableLayout;
-import acm.util.JTFTools;
 import model.CalendarDayModel;
 import utilities.Utilities;
 
@@ -52,6 +51,7 @@ public class CalendarPanel extends JPanel {
 
 	// Private instance variables
 	private JLabel leftLabel, rightLabel;
+	@SuppressWarnings("unchecked")
 	private ArrayList<CalendarDayModel>[] dayBoxTaskList = new ArrayList[31];
 	private JLabel programLabel = new JLabel("   ");
 	private JLabel filterLabel = new JLabel("");
@@ -339,7 +339,9 @@ public class CalendarPanel extends JPanel {
 						// Right mouse button event
 						if (dayListener != null) {
 							// Check whether a list item has been selected
-							int listIdx = ((JList<String>) e.getComponent().getComponentAt(e.getPoint())).getSelectedIndex();
+							@SuppressWarnings("unchecked")
+							int listIdx = ((JList<CalendarDayModel>) e.getComponent().getComponentAt(e.getPoint())).getSelectedIndex();
+							
 							if (listIdx != -1) {
 								// Clone the calendar, update with selected day
 								Calendar calendar = (Calendar) currentCalendar.clone();
