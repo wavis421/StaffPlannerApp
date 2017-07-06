@@ -106,10 +106,6 @@ public class PersonDialog extends JDialog {
 		setLocation(new Point(100, 100));
 		this.currentProgramName = currentProgram;
 
-		// TODO: find better names!!
-		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram);
-		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
-
 		// Save copy of lists used to build tree
 		this.allTasks = allTasks;
 		this.programList = programList;
@@ -122,8 +118,12 @@ public class PersonDialog extends JDialog {
 		this.singleInstanceTaskList = new ArrayList<SingleInstanceTaskModel>();
 		this.datesUnavailableList = new ArrayList<DateRangeModel>();
 
+		// TODO: find better names!!
+		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram,
+				singleInstanceTaskList);
+		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
+
 		createUnavailDateCombo();
-		createSingleInstanceTaskEntries();
 
 		setupPersonDialog();
 		setVisible(true);
@@ -136,10 +136,6 @@ public class PersonDialog extends JDialog {
 		super(parent, "Edit person...", true);
 		setLocation(new Point(100, 100));
 		this.currentProgramName = currentProgram;
-
-		// TODO: find better names!!
-		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, assignedTaskListByProgram);
-		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
 
 		// Save copy of lists used to build tree
 		this.allTasks = allTasks;
@@ -162,8 +158,12 @@ public class PersonDialog extends JDialog {
 		else
 			this.assistantButton.setSelected(true);
 
+		// TODO: find better names!!
+		trees = new AssignTaskCreateTree(currentProgram, programList, taskListByProgram, 
+				assignedTaskListByProgram, singleInstanceTaskList);
+		createTrees(trees.getAssignedTaskTree(), trees.getTaskTree());
+
 		createUnavailDateCombo();
-		createSingleInstanceTaskEntries();
 
 		this.allTasks = allTasks;
 
@@ -330,13 +330,6 @@ public class PersonDialog extends JDialog {
 
 		staffGroup.add(leaderButton);
 		staffGroup.add(assistantButton);
-	}
-
-	private void createSingleInstanceTaskEntries() {
-		for (int i = 0; i < singleInstanceTaskList.size(); i++) {
-			SingleInstanceTaskModel task = singleInstanceTaskList.get(i);
-			trees.addExtraTaskNodeToTree(trees.getAssignedTaskTree(), task);
-		}
 	}
 
 	private void createUnavailDateCombo() {

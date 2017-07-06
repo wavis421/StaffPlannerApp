@@ -20,6 +20,7 @@ public class AssignTaskCreateTree {
 	private ArrayList<ProgramModel> programList;
 	private ArrayList<JList<TaskModel>> taskListByProgram;
 	private ArrayList<ArrayList<AssignedTasksModel>> assignedTasksByProgram;
+	private ArrayList<SingleInstanceTaskModel> singleInstanceTasks;
 
 	private JTree taskTree;
 	private JTree assignedTaskTree;
@@ -29,10 +30,13 @@ public class AssignTaskCreateTree {
 
 	public AssignTaskCreateTree(String currentProgram, ArrayList<ProgramModel> programList,
 			ArrayList<JList<TaskModel>> taskListByProgram,
-			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
+			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram,
+			ArrayList<SingleInstanceTaskModel> singleInstanceTasks) {
+		
 		this.programList = programList;
 		this.taskListByProgram = taskListByProgram;
 		this.assignedTasksByProgram = assignedTaskListByProgram;
+		this.singleInstanceTasks = singleInstanceTasks;
 
 		taskTree = createTaskTree();
 		assignedTaskTree = createAssignedTasksTree(currentProgram);
@@ -64,7 +68,6 @@ public class AssignTaskCreateTree {
 	}
 
 	public void addExtraTaskNodeToTree(JTree tree, SingleInstanceTaskModel extraTaskEvent) {
-		// TODO: Initialize subs/floaters all at once for optimization
 		DefaultMutableTreeNode task = new DefaultMutableTreeNode(extraTaskEvent);
 		DefaultMutableTreeNode root;
 		
@@ -184,10 +187,30 @@ public class AssignTaskCreateTree {
 				}
 			}
 		}
+		
+		for (int i = 0; i < singleInstanceTasks.size(); i++) {
+			DefaultMutableTreeNode root;
+			SingleInstanceTaskModel task = singleInstanceTasks.get(i);
+			
+			// Determine root, either substitute or floater
+			if (task.getTaskID() == 0)
+				root = floaterRootNode;
+			else
+				root = substituteRootNode;
+			
+			// Add task to root and reload tree
+			root.add(new DefaultMutableTreeNode(task));
+		}
 
 		// Collapse all program nodes except last inserted task
 		collapseTree(activeTasksTree, currProgram);
 		collapseTree(taskTree, currProgram);
+		
+		// Expand extra tasks
+		((DefaultTreeModel) activeTasksTree.getModel()).reload(floaterRootNode);
+		activeTasksTree.expandPath(new TreePath(floaterRootNode.getPath()));
+		((DefaultTreeModel) activeTasksTree.getModel()).reload(substituteRootNode);
+		activeTasksTree.expandPath(new TreePath(substituteRootNode.getPath()));
 
 		activeTasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		activeTasksTree.setShowsRootHandles(false);
