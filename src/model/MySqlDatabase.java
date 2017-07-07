@@ -1489,13 +1489,16 @@ public class MySqlDatabase {
 	}
 
 	private void addAssignedTask(int personID, int taskID, boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+		int assignedTaskID = 0;
+
 		if (!checkDatabaseConnection())
 			return;
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement addAssignedTaskStmt = dbConnection.prepareStatement(
-						"INSERT INTO AssignedTasks (PersonID, taskID, DaysOfWeek, DowInMonth) VALUES (?, ?, ?, ?);");
+						"INSERT INTO AssignedTasks (PersonID, taskID, DaysOfWeek, DowInMonth) VALUES (?, ?, ?, ?);",
+						Statement.RETURN_GENERATED_KEYS);
 
 				// Add new assigned task
 				int col = 1;
@@ -1505,7 +1508,14 @@ public class MySqlDatabase {
 				addAssignedTaskStmt.setInt(col++, getWomAsInt(weeksOfMonth));
 
 				addAssignedTaskStmt.executeUpdate();
+				ResultSet result = addAssignedTaskStmt.getGeneratedKeys();
+				if (result.next())
+					assignedTaskID = result.getInt(1);
 				addAssignedTaskStmt.close();
+				result.close();
+
+				// Now remove any subs/floaters that conflict with this new task
+				removeSingleInstanceTaskConflicts(assignedTaskID);
 				break;
 
 			} catch (CommunicationsException e) {
@@ -1541,6 +1551,9 @@ public class MySqlDatabase {
 
 				updateAssignedTaskStmt.executeUpdate();
 				updateAssignedTaskStmt.close();
+
+				// Now remove any subs/floaters that conflict with this new task
+				removeSingleInstanceTaskConflicts(assignedTaskID);
 				break;
 
 			} catch (CommunicationsException e) {
@@ -1585,6 +1598,49 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				System.out.println("Failure deleting task assignment: " + e.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void removeSingleInstanceTaskConflicts(int assignedTaskID) {
+		if (!checkDatabaseConnection())
+			return;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement deleteExtraTaskStmt = dbConnection.prepareStatement(
+						"DELETE FROM SingleInstanceTasks USING SingleInstanceTasks, AssignedTasks, Tasks "
+								+ "WHERE AssignedTasks.AssignedTaskID = ? "
+								+ "  AND AssignedTasks.TaskID = Tasks.TaskID "
+								+ "  AND AssignedTasks.PersonID = SingleInstanceTasks.PersonID "
+								+ "  AND (SingleInstanceTasks.TaskID = AssignedTasks.TaskID OR "
+								+ "       SingleInstanceTasks.TaskID IS NULL) "
+
+								// Match TIME
+								+ "	 AND HOUR(SingleTime) = Tasks.Hour AND MINUTE(SingleTime) = Tasks.Minute "
+
+								// Match DATE
+								+ "  AND AssignedTasks.DaysOfWeek & (1 << (DAYOFWEEK(SingleDate) - 1)) != 0 "
+								+ "  AND AssignedTasks.DowInMonth & (1 << ((DAYOFMONTH(SingleDate) - 1)/7)) != 0;");
+
+				// Delete the conflicting single instance tasks
+				deleteExtraTaskStmt.setInt(1, assignedTaskID);
+				deleteExtraTaskStmt.executeUpdate();
+				deleteExtraTaskStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure removing sub/floater conflicts: " + e.getMessage());
 				break;
 			}
 		}

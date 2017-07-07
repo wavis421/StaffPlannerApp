@@ -347,8 +347,8 @@ public class PersonTableDialog extends JDialog {
 				public void actionPerformed(ActionEvent event) {
 					int row = table.convertRowIndexToModel(table.getSelectedRow());
 					PersonTableEvent ev = new PersonTableEvent(this, EDIT_PERSON_ROW_BUTTON,
-							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, null,
-							0, (tableModel.isFloater(row) || tableModel.isSubstitute(row)) ? true : false);
+							(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar, null, 0,
+							(tableModel.isFloater(row) || tableModel.isSubstitute(row)) ? true : false);
 					dialogResponse = ev;
 					setVisible(false);
 					dispose();

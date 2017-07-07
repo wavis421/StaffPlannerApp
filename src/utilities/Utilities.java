@@ -111,16 +111,6 @@ public class Utilities {
 		return false;
 	}
 
-	public static String getSqlTimestamp(Calendar calendar) {
-		int hour = calendar.get(Calendar.HOUR);
-		if (calendar.get(Calendar.AM_PM) == Calendar.PM)
-			hour += 12;
-
-		return (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
-				+ calendar.get(Calendar.DAY_OF_MONTH) + " " + String.format("%02d", hour) + ":"
-				+ String.format("%02d", calendar.get(Calendar.MINUTE)) + ":00");
-	}
-
 	public static String getSqlTime(Calendar calendar) {
 		int hour = calendar.get(Calendar.HOUR);
 		if (calendar.get(Calendar.AM_PM) == Calendar.PM)
@@ -164,7 +154,7 @@ public class Utilities {
 	public static String convertSqlDateToString(java.sql.Date sqlDate) {
 		if (sqlDate == null)
 			return null;
-		
+
 		try {
 			// TODO: There must be a better way to do this!
 			Calendar cal = Calendar.getInstance();
