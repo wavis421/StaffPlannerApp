@@ -529,9 +529,9 @@ public class PersonTableDialog extends JDialog {
 
 			textArea.addKeyListener(new KeyAdapter() {
 				public void keyTyped(KeyEvent evt) {
-					// Limit text length
-					if (textArea.getText().length() > NOTES_MAX_TEXT_LENGTH)
-						textArea.setText(textArea.getText().substring(0, NOTES_MAX_TEXT_LENGTH));
+					// Limit text length; allow for key still being processed!
+					if (textArea.getText().length() >= NOTES_MAX_TEXT_LENGTH)
+						textArea.setText(textArea.getText().substring(0, (NOTES_MAX_TEXT_LENGTH - 1)));
 					textChanged = true;
 				}
 			});

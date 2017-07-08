@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -10,6 +11,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -53,6 +56,9 @@ public class PersonDialog extends JDialog {
 	private static final int COMBO_BOX_WIDTH = 334;
 	private static final int COMBO_BOX_HEIGHT = 30;
 	private static final int POPUP_WIDTH = 240;
+	private static final int NOTES_WIDTH = 330;
+	private static final int NOTES_HEIGHT = 48;
+	private static final int NOTES_MAX_TEXT_LENGTH = 140;
 
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel");
@@ -105,6 +111,7 @@ public class PersonDialog extends JDialog {
 		// super(parent, "Add person...", true);
 		super(parent, "Add person...");
 		setLocation(new Point(100, 100));
+		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		this.currentProgramName = currentProgram;
 
 		// Save copy of lists used to build tree
@@ -136,6 +143,7 @@ public class PersonDialog extends JDialog {
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		super(parent, "Edit person...", true);
 		setLocation(new Point(100, 100));
+		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 		this.currentProgramName = currentProgram;
 
 		// Save copy of lists used to build tree
@@ -185,7 +193,13 @@ public class PersonDialog extends JDialog {
 		notesArea.setRows(3);
 		notesArea.setMargin(new Insets(20, 20, 20, 20));
 		notesArea.setAutoscrolls(false);
-		notesArea.setPreferredSize(notesArea.getPreferredSize());
+		notesArea.addKeyListener(new KeyAdapter() {
+			public void keyTyped(KeyEvent e) {
+				// Limit text length; allow for key still being processed!
+				if (notesArea.getText().length() >= NOTES_MAX_TEXT_LENGTH)
+					notesArea.setText(notesArea.getText().substring(0, (NOTES_MAX_TEXT_LENGTH - 1)));
+			}
+		});
 
 		unavailDatesButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -431,8 +445,7 @@ public class PersonDialog extends JDialog {
 
 	private void createTrees(JTree assignedTasksTree, JTree taskTree) {
 		/* === Create assigned task tree === */
-		Dimension assignDimension = new Dimension((int) notesArea.getPreferredSize().getWidth() + 4,
-				(int) (notesArea.getPreferredSize().getHeight() * 5));
+		Dimension assignDimension = new Dimension(NOTES_WIDTH + 4, NOTES_HEIGHT * 5);
 		assignedTasksScrollPane = new JScrollPane(assignedTasksTree);
 		assignedTasksScrollPane.setPreferredSize(assignDimension);
 		assignedTasksScrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -537,8 +550,7 @@ public class PersonDialog extends JDialog {
 		});
 
 		/* === Create unassigned task tree === */
-		Dimension unassignDimension = new Dimension((int) notesArea.getPreferredSize().getWidth(),
-				(int) (notesArea.getPreferredSize().getHeight() * 5));
+		Dimension unassignDimension = new Dimension(NOTES_WIDTH, NOTES_HEIGHT * 5);
 		taskTreeScrollPane = new JScrollPane(taskTree);
 		taskTreeScrollPane.setPreferredSize(unassignDimension);
 		taskTreeScrollPane.getVerticalScrollBar().setUnitIncrement(16);
