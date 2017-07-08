@@ -50,7 +50,7 @@ public class AssignTaskDialog extends JDialog {
 		// setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
 
 		initAssignTaskDialog(taskEvent.getProgramName(), taskEvent.getTask(), taskEvent.getAssignedTaskID(),
-				taskEvent.getDaysOfWeek(), taskEvent.getWeeksOfMonth());
+				taskEvent.getDaysOfWeek(), taskEvent.getWeeksOfMonth(), taskEvent.getHour(), taskEvent.getMinute());
 	}
 
 	public AssignTaskDialog(JDialog parent, String programName, TaskModel task) {
@@ -61,7 +61,7 @@ public class AssignTaskDialog extends JDialog {
 		boolean[] daysOfWeek = { false, false, false, false, false, false, false };
 		boolean[] weeksOfMonth = { false, false, false, false, false };
 
-		initAssignTaskDialog(programName, task, 0, daysOfWeek, weeksOfMonth);
+		initAssignTaskDialog(programName, task, 0, daysOfWeek, weeksOfMonth, task.getTime().get24Hour(), task.getTime().getMinute());
 	}
 
 	public AssignTaskEvent getDialogResponse() {
@@ -69,7 +69,7 @@ public class AssignTaskDialog extends JDialog {
 	}
 
 	private void initAssignTaskDialog(String programName, TaskModel task, int assignedTaskID, boolean[] daysOfWeek,
-			boolean[] weeksOfMonth) {
+			boolean[] weeksOfMonth, int hour, int minute) {
 		this.programName = programName;
 		this.task = task;
 
@@ -110,7 +110,7 @@ public class AssignTaskDialog extends JDialog {
 
 				// Create TaskEvent and set response
 				AssignTaskEvent ev = new AssignTaskEvent(this, programName, task, assignedTaskID, daysOfWeekSelected,
-						weeksOfMonthSelected);
+						weeksOfMonthSelected, hour, minute);
 				dialogResponse = ev;
 				setVisible(false);
 				dispose();

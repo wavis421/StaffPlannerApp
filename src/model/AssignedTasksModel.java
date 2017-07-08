@@ -6,10 +6,11 @@ public class AssignedTasksModel implements Comparable<AssignedTasksModel> {
 	private String taskName;
 	private boolean[] daysOfWeek;
 	private boolean[] weeksOfMonth;
+	private int hour, minute;
 	private ListStatus elementStatus;
 
 	public AssignedTasksModel(int assignedTasksID, int personID, int taskID, String programName, String taskName,
-			boolean[] daysOfWeek, boolean[] weeksOfMonth) {
+			boolean[] daysOfWeek, boolean[] weeksOfMonth, int hour, int minute) {
 		this.assignedTaskID = assignedTasksID;
 		this.personID = personID;
 		this.taskID = taskID;
@@ -17,6 +18,8 @@ public class AssignedTasksModel implements Comparable<AssignedTasksModel> {
 		this.taskName = taskName;
 		this.daysOfWeek = daysOfWeek;
 		this.weeksOfMonth = weeksOfMonth;
+		this.hour = hour;
+		this.minute = minute;
 		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
 	}
 
@@ -35,7 +38,7 @@ public class AssignedTasksModel implements Comparable<AssignedTasksModel> {
 	public int getPersonID() {
 		return personID;
 	}
-	
+
 	public void setPersonID(int id) {
 		personID = id;
 	}
@@ -66,6 +69,14 @@ public class AssignedTasksModel implements Comparable<AssignedTasksModel> {
 
 	public boolean[] getWeeksOfMonth() {
 		return weeksOfMonth;
+	}
+
+	public int getHour() {
+		return hour;
+	}
+
+	public int getMinute() {
+		return minute;
 	}
 
 	public ListStatus getElementStatus() {

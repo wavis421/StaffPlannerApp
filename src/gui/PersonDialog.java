@@ -44,6 +44,7 @@ import model.PersonModel;
 import model.ProgramModel;
 import model.SingleInstanceTaskModel;
 import model.TaskModel;
+import model.TimeModel;
 import utilities.Utilities;
 
 public class PersonDialog extends JDialog {
@@ -456,9 +457,11 @@ public class PersonDialog extends JDialog {
 					AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getAssignedTaskID(),
 							personID, eventResponse.getTask().getTaskID(), eventResponse.getProgramName(),
 							eventResponse.getTask().getTaskName(), eventResponse.getDaysOfWeek(),
-							eventResponse.getWeeksOfMonth());
-					updateNodeInAssignedTaskList(lastAssignedTask);
-					selectedNode.setUserObject(eventResponse);
+							eventResponse.getWeeksOfMonth(), eventResponse.getHour(), eventResponse.getMinute());
+					if (!checkConflictsForAssignedTask(lastAssignedTask)) {
+						updateNodeInAssignedTaskList(lastAssignedTask);
+						selectedNode.setUserObject(eventResponse);
+					}
 				}
 				assignedTasksTree.clearSelection();
 				((AssignTaskEvent) (selectedNode.getUserObject())).setIsFocus(false);
@@ -558,17 +561,20 @@ public class PersonDialog extends JDialog {
 				if (eventResponse != null) {
 					AssignedTasksModel lastAssignedTask = new AssignedTasksModel(eventResponse.getAssignedTaskID(),
 							personID, eventResponse.getTask().getTaskID(), selectedNode.getParent().toString(),
-							selectedNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth());
-					lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
-					assignedTasksList.add(lastAssignedTask);
+							selectedNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth(),
+							eventResponse.getHour(), eventResponse.getMinute());
+					if (!checkConflictsForAssignedTask(lastAssignedTask)) {
+						lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
+						assignedTasksList.add(lastAssignedTask);
 
-					// Add to assigned-by-program list
-					addNodeToAssignedTaskByProgList(eventResponse.getProgramName(), lastAssignedTask);
+						// Add to assigned-by-program list
+						addNodeToAssignedTaskByProgList(eventResponse.getProgramName(), lastAssignedTask);
 
-					// Remove node from task tree, add to assigned task tree
-					trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(),
-							eventResponse.getTask().getTaskName());
-					trees.addNodeToTree(assignedTasksTree, eventResponse.getProgramName(), eventResponse);
+						// Remove node from task tree, add to assigned task tree
+						trees.removeNodeFromTree(taskTree, eventResponse.getProgramName(),
+								eventResponse.getTask().getTaskName());
+						trees.addNodeToTree(assignedTasksTree, eventResponse.getProgramName(), eventResponse);
+					}
 				}
 				taskTree.clearSelection();
 				task.setIsFocus(false);
@@ -644,6 +650,37 @@ public class PersonDialog extends JDialog {
 		}
 	}
 
+	private boolean checkConflictsForAssignedTask(AssignedTasksModel newTask) {
+		// Returns TRUE if there is a conflict for this person
+		String person = personName.getText().trim();
+		if (person.equals(""))
+			person = "Person";
+
+		// Check if person already assigned to a task today
+		for (int i = 0; i < assignedTasksList.size(); i++) {
+			AssignedTasksModel assignedTask = assignedTasksList.get(i);
+
+			int dowComparison = Utilities.getDowAsInt(assignedTask.getDaysOfWeek())
+					& Utilities.getDowAsInt(newTask.getDaysOfWeek());
+			int womComparison = Utilities.getWomAsInt(assignedTask.getWeeksOfMonth())
+					& Utilities.getWomAsInt(newTask.getWeeksOfMonth());
+
+			if (dowComparison != 0 && womComparison != 0 && assignedTask.getHour() == newTask.getHour()
+					&& assignedTask.getMinute() == newTask.getMinute()) {
+				// Conflict with another assigned task
+				TimeModel time = new TimeModel(newTask.getHour(), newTask.getMinute());
+				JOptionPane.showMessageDialog(PersonDialog.this,
+						"Failed to assign task due to conflict(s):\n" + assignedTask.getTaskName() + " on "
+								+ Utilities.getDayOfWeekString(newTask.getDaysOfWeek()) + " at "
+								+ Utilities.formatTime(time) + ", weeks "
+								+ Utilities.getWeekOfMonthString(newTask.getWeeksOfMonth()),
+						"Updating Person Info", JOptionPane.INFORMATION_MESSAGE);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private boolean checkConflictsForSingleInstanceTask(SingleInstanceTaskModel newSingleTask) {
 		// Returns TRUE if there is a date/time conflict for this person
 		Calendar thisDay = newSingleTask.getTaskDate();
@@ -658,11 +695,10 @@ public class PersonDialog extends JDialog {
 		if (!isPersonAvailable(person, thisDay, calDay))
 			return true;
 
-		if (checkAssignedTaskConflicts(assignedTasksList, person, newSingleTask.getTaskName(), thisDay, calDay,
-				calDayIdx, calWeekIdx))
+		if (checkAssignedTaskConflicts(assignedTasksList, person, thisDay, calDayIdx, calWeekIdx))
 			return true;
 
-		if (checkSingleInstanceTaskConflicts(person, singleInstanceTaskList, calDay, calDayIdx, calWeekIdx))
+		if (checkSingleInstanceTaskConflicts(person, singleInstanceTaskList, calDay, thisDay, calDayIdx, calWeekIdx))
 			return true;
 
 		return false;
@@ -682,17 +718,19 @@ public class PersonDialog extends JDialog {
 		return true;
 	}
 
-	private boolean checkAssignedTaskConflicts(ArrayList<AssignedTasksModel> taskList, String person, String taskName,
-			Calendar thisDay, Date calDay, int calDayIdx, int calWeekIdx) {
+	private boolean checkAssignedTaskConflicts(ArrayList<AssignedTasksModel> taskList, String person, Calendar thisDay,
+			int calDayIdx, int calWeekIdx) {
 
-		// Check if task is in person's assigned task list for today
+		// Check if person already assigned to a task today
 		for (int i = 0; i < taskList.size(); i++) {
 			AssignedTasksModel assignedTask = taskList.get(i);
-			if (assignedTask.getTaskName().equals(taskName) && assignedTask.getDaysOfWeek()[calDayIdx]
-					&& assignedTask.getWeeksOfMonth()[calWeekIdx]) {
+
+			if (assignedTask.getDaysOfWeek()[calDayIdx] && assignedTask.getWeeksOfMonth()[calWeekIdx]
+					&& thisDay.get(Calendar.HOUR) == assignedTask.getHour()
+					&& thisDay.get(Calendar.MINUTE) == assignedTask.getMinute()) {
 				JOptionPane.showMessageDialog(PersonDialog.this,
 						person + " is already assigned to " + assignedTask.getTaskName() + " on "
-								+ Utilities.getDisplayDate(thisDay),
+								+ Utilities.getDisplayDate(thisDay) + " at " + Utilities.formatTime(thisDay),
 						"Updating Person Info", JOptionPane.INFORMATION_MESSAGE);
 				return true;
 			}
@@ -701,12 +739,15 @@ public class PersonDialog extends JDialog {
 	}
 
 	private boolean checkSingleInstanceTaskConflicts(String person, ArrayList<SingleInstanceTaskModel> taskList,
-			Date thisDay, int dayOfWeekIdx, int dayOfWeekInMonthIdx) {
+			Date thisDay, Calendar calDay, int dayOfWeekIdx, int dayOfWeekInMonthIdx) {
 
 		for (int i = 0; i < taskList.size(); i++) {
 			SingleInstanceTaskModel singleInstanceTask = taskList.get(i);
-			if (Utilities.checkForDateAndTimeMatch(thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx,
-					singleInstanceTask.getTaskDate())) {
+			if (Utilities.checkForDateMatch(thisDay, dayOfWeekIdx, dayOfWeekInMonthIdx,
+					singleInstanceTask.getTaskDate())
+					&& singleInstanceTask.getTaskDate().get(Calendar.HOUR) == calDay.get(Calendar.HOUR)
+					&& singleInstanceTask.getTaskDate().get(Calendar.MINUTE) == calDay.get(Calendar.MINUTE)) {
+
 				if (singleInstanceTask.getTaskName().equals(""))
 					// Date/time conflict with floater
 					JOptionPane.showMessageDialog(PersonDialog.this,

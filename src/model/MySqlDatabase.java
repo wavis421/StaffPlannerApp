@@ -410,8 +410,8 @@ public class MySqlDatabase {
 				addTaskStmt.setString(col++, location);
 				addTaskStmt.setInt(col++, numLeadersReqd);
 				addTaskStmt.setInt(col++, totalPersonsReqd);
-				addTaskStmt.setInt(col++, getDowAsInt(dayOfWeek));
-				addTaskStmt.setInt(col++, getWomAsInt(weekOfMonth));
+				addTaskStmt.setInt(col++, Utilities.getDowAsInt(dayOfWeek));
+				addTaskStmt.setInt(col++, Utilities.getWomAsInt(weekOfMonth));
 				addTaskStmt.setInt(col++, color);
 
 				addTaskStmt.executeUpdate();
@@ -451,8 +451,8 @@ public class MySqlDatabase {
 				updateTaskStmt.setString(col++, location);
 				updateTaskStmt.setInt(col++, numLeadersReqd);
 				updateTaskStmt.setInt(col++, totalPersonsReqd);
-				updateTaskStmt.setInt(col++, getDowAsInt(dayOfWeek));
-				updateTaskStmt.setInt(col++, getWomAsInt(weekOfMonth));
+				updateTaskStmt.setInt(col++, Utilities.getDowAsInt(dayOfWeek));
+				updateTaskStmt.setInt(col++, Utilities.getWomAsInt(weekOfMonth));
 				updateTaskStmt.setInt(col++, time.get24Hour());
 				updateTaskStmt.setInt(col++, time.getMinute());
 				updateTaskStmt.setInt(col++, color);
@@ -1504,8 +1504,8 @@ public class MySqlDatabase {
 				int col = 1;
 				addAssignedTaskStmt.setInt(col++, personID);
 				addAssignedTaskStmt.setInt(col++, taskID);
-				addAssignedTaskStmt.setInt(col++, getDowAsInt(daysOfWeek));
-				addAssignedTaskStmt.setInt(col++, getWomAsInt(weeksOfMonth));
+				addAssignedTaskStmt.setInt(col++, Utilities.getDowAsInt(daysOfWeek));
+				addAssignedTaskStmt.setInt(col++, Utilities.getWomAsInt(weeksOfMonth));
 
 				addAssignedTaskStmt.executeUpdate();
 				ResultSet result = addAssignedTaskStmt.getGeneratedKeys();
@@ -1545,8 +1545,8 @@ public class MySqlDatabase {
 
 				// Update assigned task
 				int col = 1;
-				updateAssignedTaskStmt.setInt(col++, getDowAsInt(daysOfWeek));
-				updateAssignedTaskStmt.setInt(col++, getWomAsInt(weeksOfMonth));
+				updateAssignedTaskStmt.setInt(col++, Utilities.getDowAsInt(daysOfWeek));
+				updateAssignedTaskStmt.setInt(col++, Utilities.getWomAsInt(weeksOfMonth));
 				updateAssignedTaskStmt.setInt(col, assignedTaskID);
 
 				updateAssignedTaskStmt.executeUpdate();
@@ -1655,7 +1655,8 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT ProgramName, "
-						+ "  TaskName, Persons.PersonID AS PersonID, AssignedTasks.AssignedTaskID AS AssignedTaskID, "
+						+ "  TaskName, Tasks.Hour AS Hour, Tasks.Minute AS Minute, Persons.PersonID AS PersonID, "
+						+ "  AssignedTasks.AssignedTaskID AS AssignedTaskID, "
 						+ "  AssignedTasks.DaysOfWeek AS DaysOfWeek, AssignedTasks.DowInMonth AS DowInMonth "
 						+ "FROM AssignedTasks, Persons, Tasks, Programs WHERE Persons.PersonName = ? "
 						+ "  AND Persons.PersonID = AssignedTasks.PersonID "
@@ -1668,7 +1669,8 @@ public class MySqlDatabase {
 					taskList.add(new AssignedTasksModel(result.getInt("AssignedTaskID"), result.getInt("PersonID"), 0,
 							result.getString("ProgramName"), result.getString("TaskName"),
 							createDaysOfWeekArray(result.getInt("DaysOfWeek")),
-							createDowInMonthArray(result.getInt("DowInMonth"))));
+							createDowInMonthArray(result.getInt("DowInMonth")), result.getInt("Hour"),
+							result.getInt("Minute")));
 				}
 				result.close();
 				selectStmt.close();
@@ -2441,7 +2443,8 @@ public class MySqlDatabase {
 							result.getInt("AssignedTasks.PersonID"), result.getInt("AssignedTasks.TaskID"), "",
 							result.getString("TaskName"),
 							createDaysOfWeekArray(result.getInt("AssignedTasks.DaysOfWeek")),
-							createDaysOfWeekArray(result.getInt("AssignedTasks.DowInMonth"))));
+							createDaysOfWeekArray(result.getInt("AssignedTasks.DowInMonth")),
+							result.getInt("Tasks.Hour"), result.getInt("Tasks.Minute")));
 
 					PersonModel p = new PersonModel(result.getInt("Persons.PersonID"), result.getString("PersonName"),
 							result.getString("PhoneNumber"), result.getString("EMail"), result.getBoolean("isLeader"),
@@ -2911,24 +2914,6 @@ public class MySqlDatabase {
 			wom >>= 1;
 		}
 		return womBool;
-	}
-
-	private int getDowAsInt(boolean[] dowArray) {
-		int dow = 0;
-		for (int k = 6; k >= 0; k--) {
-			dow <<= 1;
-			dow = dow | (dowArray[k] ? 1 : 0);
-		}
-		return dow;
-	}
-
-	private int getWomAsInt(boolean[] womArray) {
-		int wom = 0;
-		for (int k = 4; k >= 0; k--) {
-			wom <<= 1;
-			wom = wom | (womArray[k] ? 1 : 0);
-		}
-		return wom;
 	}
 
 	/*

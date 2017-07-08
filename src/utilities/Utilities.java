@@ -82,7 +82,7 @@ public class Utilities {
 		}
 	}
 
-	public static boolean checkForDateAndTimeMatch(Date todayDate, int todayDOW, int todayWOM, Calendar calendar) {
+	public static boolean checkForDateMatch(Date todayDate, int todayDOW, int todayWOM, Calendar calendar) {
 		Date calDay = Utilities.getDateFromCalendar(calendar);
 		int calWeekIdx = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1;
 		int calDayIdx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
@@ -275,6 +275,24 @@ public class Utilities {
 			}
 		}
 		return womString;
+	}
+
+	public static int getDowAsInt(boolean[] dowArray) {
+		int dow = 0;
+		for (int k = 6; k >= 0; k--) {
+			dow <<= 1;
+			dow = dow | (dowArray[k] ? 1 : 0);
+		}
+		return dow;
+	}
+
+	public static int getWomAsInt(boolean[] womArray) {
+		int wom = 0;
+		for (int k = 4; k >= 0; k--) {
+			wom <<= 1;
+			wom = wom | (womArray[k] ? 1 : 0);
+		}
+		return wom;
 	}
 
 	private static JDatePickerImpl setDate(JDatePickerImpl datePickerFrom, JDatePickerImpl datePickerTo) {
