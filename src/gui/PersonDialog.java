@@ -670,9 +670,9 @@ public class PersonDialog extends JDialog {
 				// Conflict with another assigned task
 				TimeModel time = new TimeModel(newTask.getHour(), newTask.getMinute());
 				JOptionPane.showMessageDialog(PersonDialog.this,
-						"Failed to assign task due to conflict(s):\n" + assignedTask.getTaskName() + " on "
+						"Failed to assign task due to conflict(s):\n   " + assignedTask.getTaskName() + " on "
 								+ Utilities.getDayOfWeekString(newTask.getDaysOfWeek()) + " at "
-								+ Utilities.formatTime(time) + ", weeks "
+								+ Utilities.formatTime(time) + ", \n     week(s) "
 								+ Utilities.getWeekOfMonthString(newTask.getWeeksOfMonth()),
 						"Updating Person Info", JOptionPane.INFORMATION_MESSAGE);
 				return true;
@@ -693,6 +693,9 @@ public class PersonDialog extends JDialog {
 			person = "Person";
 
 		if (!isPersonAvailable(person, thisDay, calDay))
+			return true;
+
+		if (!checkTaskAssigned(allTasks, newSingleTask.getTaskName(), thisDay, calDayIdx, calWeekIdx))
 			return true;
 
 		if (checkAssignedTaskConflicts(assignedTasksList, person, thisDay, calDayIdx, calWeekIdx))
@@ -725,9 +728,10 @@ public class PersonDialog extends JDialog {
 		for (int i = 0; i < taskList.size(); i++) {
 			AssignedTasksModel assignedTask = taskList.get(i);
 
+			TimeModel thisTime = new TimeModel(thisDay);
 			if (assignedTask.getDaysOfWeek()[calDayIdx] && assignedTask.getWeeksOfMonth()[calWeekIdx]
-					&& thisDay.get(Calendar.HOUR) == assignedTask.getHour()
-					&& thisDay.get(Calendar.MINUTE) == assignedTask.getMinute()) {
+					&& thisTime.get24Hour() == assignedTask.getHour()
+					&& thisTime.getMinute() == assignedTask.getMinute()) {
 				JOptionPane.showMessageDialog(PersonDialog.this,
 						person + " is already assigned to " + assignedTask.getTaskName() + " on "
 								+ Utilities.getDisplayDate(thisDay) + " at " + Utilities.formatTime(thisDay),
@@ -767,5 +771,28 @@ public class PersonDialog extends JDialog {
 			}
 		}
 		return false;
+	}
+
+	private boolean checkTaskAssigned(ArrayList<TaskModel> taskList, String taskName, Calendar calDay, int dayOfWeekIdx,
+			int dayOfWeekInMonthIdx) {
+
+		for (int i = 0; i < taskList.size(); i++) {
+			TaskModel task = taskList.get(i);
+			if (task.getTaskName().equals(taskName)) {
+				int taskDow = Utilities.getDowAsInt(task.getDayOfWeek());
+				int taskWom = Utilities.getWomAsInt(task.getWeekOfMonth());
+				if ((taskDow & (1 << dayOfWeekIdx)) == 0 || (taskWom & (1 << dayOfWeekInMonthIdx)) == 0) {
+					// Found matching task, but not assigned
+					JOptionPane.showMessageDialog(PersonDialog.this,
+							"Failed to assign substitute: " + taskName + " not active on "
+									+ Utilities.getDisplayDate(calDay),
+							"Updating Person Info", JOptionPane.INFORMATION_MESSAGE);
+					return false; // Failure, do not assign!
+				} else
+					// Found matching task; it is assigned for this day
+					return true;
+			}
+		}
+		return false; // Should never get here!
 	}
 }
