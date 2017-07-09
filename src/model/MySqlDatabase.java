@@ -2255,6 +2255,50 @@ public class MySqlDatabase {
 		return personsByTask;
 	}
 
+	public ArrayList<PersonByTaskModel> getActivePersons() {
+		ArrayList<PersonByTaskModel> personsByTask = new ArrayList<PersonByTaskModel>();
+
+		if (!checkDatabaseConnection())
+			return personsByTask;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Persons "
+								+ "WHERE (SELECT COUNT(*) FROM AssignedTasks " 
+								+ "		WHERE Persons.PersonID = AssignedTasks.PersonID) > 0 "
+								+ "OR (SELECT COUNT(*) FROM SingleInstanceTasks "
+								+ "     WHERE Persons.PersonID = SingleInstanceTasks.PersonID) > 0 "
+								+ "ORDER BY PersonName;");
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					PersonModel p = new PersonModel(result.getInt("PersonID"), result.getString("PersonName"),
+							result.getString("PhoneNumber"), result.getString("EMail"), result.getBoolean("isLeader"),
+							result.getString("Notes"), null, null, null);
+					personsByTask.add(new PersonByTaskModel(p, null, false, 0, null));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e) {
+				if (i == 0) {
+					// First attempt to connect
+					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					connectDatabase();
+				} else
+					// Second try
+					System.out.println("Unable to connect to database: " + e.getMessage());
+
+			} catch (SQLException e) {
+				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				break;
+			}
+		}
+		return personsByTask;
+	}
+
 	public ArrayList<PersonByTaskModel> getAllPersonsWithNotes() {
 		ArrayList<PersonByTaskModel> personsByTask = new ArrayList<PersonByTaskModel>();
 

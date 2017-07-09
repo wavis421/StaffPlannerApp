@@ -184,13 +184,21 @@ public class PersonTableModel extends AbstractTableModel {
 	}
 
 	public boolean isSubstitute(int row) {
-		PersonByTaskModel person = personList.get(row);
-		return person.isSubstitute();
+		if (expansionLevel == PERSON_TABLE_MINIMUM_EXPANSION)
+			return false;
+		else {
+			PersonByTaskModel person = personList.get(row);
+			return person.isSubstitute();
+		}
 	}
 
 	public boolean isFloater(int row) {
-		PersonByTaskModel person = personList.get(row);
-		return (person.getTask() == null);
+		if (expansionLevel == PERSON_TABLE_MINIMUM_EXPANSION)
+			return false;
+		else {
+			PersonByTaskModel person = personList.get(row);
+			return (person.getTask() == null);
+		}
 	}
 
 	public TimeModel getTaskTime(int row) {

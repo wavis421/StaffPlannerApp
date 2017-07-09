@@ -233,6 +233,10 @@ public class Controller {
 		return sqlDb.getAllPersons();
 	}
 
+	public ArrayList<PersonByTaskModel> getActivePersons() {
+		return sqlDb.getActivePersons();
+	}
+
 	public ArrayList<PersonByTaskModel> getAllPersonsWithNotes() {
 		return sqlDb.getAllPersonsWithNotes();
 	}

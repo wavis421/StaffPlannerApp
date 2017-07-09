@@ -175,12 +175,14 @@ public class MainFrame extends JFrame {
 		JMenuItem personAddItem = new JMenuItem("Add person ");
 		JMenu personEditMenu = new JMenu("Edit person ");
 		JMenu personRemoveMenu = new JMenu("Remove person ");
-		JMenuItem personViewAllItem = new JMenuItem("View all persons ");
+		JMenuItem personViewAllItem = new JMenuItem("View complete roster ");
+		JMenuItem personViewActiveItem = new JMenuItem("View active roster ");
 		personMenu.add(personViewNotesItem);
 		personMenu.add(personAddItem);
 		personMenu.add(personEditMenu);
 		personMenu.add(personRemoveMenu);
 		personMenu.add(personViewAllItem);
+		personMenu.add(personViewActiveItem);
 
 		// Add calendar sub-menus
 		JMenu calendarFilterMenu = new JMenu("Filter ");
@@ -209,7 +211,7 @@ public class MainFrame extends JFrame {
 		createTaskMenuListeners(taskCreateItem, taskEditMenu, taskDeleteMenu, taskCloneMenu, taskRosterMenu,
 				taskViewAllItem);
 		createPersonMenuListeners(personViewNotesItem, personAddItem, personEditMenu, personRemoveMenu,
-				personViewAllItem);
+				personViewAllItem, personViewActiveItem);
 		createCalendarMenuListeners(filterNoneItem, filterByProgramMenuItem, filterByPersonMenuItem,
 				filterByIncompleteRosterItem, filterByLocationItem, filterByTimeItem);
 
@@ -601,7 +603,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createPersonMenuListeners(JMenuItem viewNotesItem, JMenuItem addPersonItem, JMenu editPersonMenu,
-			JMenu removePersonMenu, JMenuItem viewAllPersonsItem) {
+			JMenu removePersonMenu, JMenuItem viewAllPersonsItem, JMenuItem viewActivePersonsItem) {
 		// Set up listeners for PERSONS menu
 		viewNotesItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -689,6 +691,19 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+		viewActivePersonsItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (controller.getNumPersons() > 0) {
+					ArrayList<PersonByTaskModel> activePersons = controller.getActivePersons();
+					PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Active Roster",
+							PersonTableModel.getMinimumExpansion(), null, activePersons, "", null, null, null, null);
+
+					do {
+						ev = processViewActivePersonsDialog(ev.getDialogResponse());
+					} while (ev != null);
+				}
+			}
+		});
 	}
 
 	private PersonTableDialog processViewAllPersonsDialog(PersonTableEvent event) {
@@ -724,6 +739,28 @@ public class MainFrame extends JFrame {
 			ArrayList<PersonByTaskModel> allPersons = controller.getAllPersons();
 			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Complete Roster",
 					PersonTableModel.getMinimumExpansion(), null, allPersons, "Add person", null, null, null, null);
+			return ev;
+		}
+		return null;
+	}
+
+	private PersonTableDialog processViewActivePersonsDialog(PersonTableEvent event) {
+		if (event != null && event.getButtonId() != PersonTableDialog.getCloseButtonId()) {
+			if (event.getButtonId() == PersonTableDialog.getEditRowButtonId()) {
+				// Edit person
+				editPerson(event.getPersonName());
+				updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
+				// Remove person from roster
+				if (removePerson(event.getPersonName()))
+					updateMonth((Calendar) calPanel.getCurrentCalendar());
+			}
+
+			// Refresh data and re-open Person Table dialog
+			ArrayList<PersonByTaskModel> activePersons = controller.getActivePersons();
+			PersonTableDialog ev = new PersonTableDialog(MainFrame.this, "Active Roster",
+					PersonTableModel.getMinimumExpansion(), null, activePersons, "", null, null, null, null);
 			return ev;
 		}
 		return null;

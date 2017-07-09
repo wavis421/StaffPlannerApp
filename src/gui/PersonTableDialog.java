@@ -361,7 +361,8 @@ public class PersonTableDialog extends JDialog {
 				removeItem.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent event) {
 						int row = table.convertRowIndexToModel(table.getSelectedRow());
-						Utilities.addTimeToCalendar(calendar, tableModel.getTaskTime(row));
+						if (calendar != null)
+							Utilities.addTimeToCalendar(calendar, tableModel.getTaskTime(row));
 						PersonTableEvent ev = new PersonTableEvent(this, REMOVE_PERSON_ROW_BUTTON,
 								(String) tableModel.getValueAt(row, tableModel.getColumnForPersonName()), calendar,
 								null, 0, (tableModel.isFloater(row) || tableModel.isSubstitute(row)) ? true : false);
