@@ -4,13 +4,13 @@ public class DateRangeModel implements Comparable<DateRangeModel> {
 	private int personID;
 	private String startDate;
 	private String endDate;
-	private ListStatus elementStatus;
+	private int elementStatus;
 
 	public DateRangeModel(int personID, String startDate, String endDate) {
 		this.personID = personID;
 		this.startDate = startDate;
 		this.endDate = endDate;
-		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
+		this.elementStatus = ListStatus.elementAssigned();
 	}
 
 	public int getPersonID() {
@@ -37,11 +37,11 @@ public class DateRangeModel implements Comparable<DateRangeModel> {
 		this.endDate = endDate;
 	}
 
-	public ListStatus getElementStatus() {
+	public int getElementStatus() {
 		return elementStatus;
 	}
 
-	public void setElementStatus(ListStatus elementStatus) {
+	public void setElementStatus(int elementStatus) {
 		this.elementStatus = elementStatus;
 	}
 

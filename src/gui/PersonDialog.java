@@ -209,7 +209,7 @@ public class PersonDialog extends JDialog {
 				if (dateResponse != null) {
 					// Date range valid. Add to Linked List and Combo Box.
 					DateRangeModel dateRangeModel = dateResponse.getSqlDateRange();
-					dateRangeModel.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
+					dateRangeModel.setElementStatus(ListStatus.elementNew());
 					datesUnavailableList.add(dateRangeModel);
 
 					DefaultComboBoxModel<String> dateModel = (DefaultComboBoxModel<String>) dateUnavailCombo.getModel();
@@ -237,7 +237,7 @@ public class PersonDialog extends JDialog {
 					// Check for date/time conflicts
 					if (!checkConflictsForSingleInstanceTask(singleTask)) {
 						// No conflicts; ready to add task
-						singleTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
+						singleTask.setElementStatus(ListStatus.elementNew());
 						singleInstanceTaskList.add(singleTask);
 
 						trees.addExtraTaskNodeToTree(trees.getAssignedTaskTree(), singleTask);
@@ -379,12 +379,12 @@ public class PersonDialog extends JDialog {
 
 				// Remove item from combo box and unavail dates list
 				((DefaultComboBoxModel<String>) dateUnavailCombo.getModel()).removeElement(selectedItem);
-				if (date.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+				if (date.getElementStatus() == ListStatus.elementNew())
 					// Was just added, so remove from list
 					datesUnavailableList.remove(date);
 				else
 					// Mark for deletion
-					date.setElementStatus(ListStatus.LIST_ELEMENT_DELETE);
+					date.setElementStatus(ListStatus.elementDelete());
 			}
 		});
 
@@ -510,12 +510,12 @@ public class PersonDialog extends JDialog {
 					trees.removeExtraTaskNodeFromTree(task);
 
 					// Update status in single instance task list
-					if (task.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+					if (task.getElementStatus() == ListStatus.elementNew())
 						// Was just added, so remove from list
 						singleInstanceTaskList.remove(task);
 					else
 						// Mark for deletion
-						task.setElementStatus(ListStatus.LIST_ELEMENT_DELETE);
+						task.setElementStatus(ListStatus.elementDelete());
 
 					assignedTasksTree.clearSelection();
 					((SingleInstanceTaskModel) (selectedNode.getUserObject())).setIsFocus(false);
@@ -576,7 +576,7 @@ public class PersonDialog extends JDialog {
 							selectedNode.toString(), eventResponse.getDaysOfWeek(), eventResponse.getWeeksOfMonth(),
 							eventResponse.getHour(), eventResponse.getMinute());
 					if (!checkConflictsForAssignedTask(lastAssignedTask)) {
-						lastAssignedTask.setElementStatus(ListStatus.LIST_ELEMENT_NEW);
+						lastAssignedTask.setElementStatus(ListStatus.elementNew());
 						assignedTasksList.add(lastAssignedTask);
 
 						// Add to assigned-by-program list
@@ -638,9 +638,9 @@ public class PersonDialog extends JDialog {
 		for (int i = 0; i < assignedTasksList.size(); i++) {
 			AssignedTasksModel t = assignedTasksList.get(i);
 			if (t.getTaskName().equals(newTaskModel.getTaskName())) {
-				ListStatus status = t.getElementStatus();
-				if (status == ListStatus.LIST_ELEMENT_ASSIGNED)
-					status = ListStatus.LIST_ELEMENT_UPDATE;
+				int status = t.getElementStatus();
+				if (status == ListStatus.elementAssigned())
+					status = ListStatus.elementUpdate();
 				newTaskModel.setElementStatus(status);
 
 				assignedTasksList.set(i, newTaskModel);
@@ -652,12 +652,12 @@ public class PersonDialog extends JDialog {
 		for (int i = 0; i < assignedTasksList.size(); i++) {
 			AssignedTasksModel t = assignedTasksList.get(i);
 			if (t.getTaskName().equals(taskName)) {
-				if (t.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+				if (t.getElementStatus() == ListStatus.elementNew())
 					// Deleting a node that has just been added, so remove
 					assignedTasksList.remove(t);
 				else
 					// Mark element for deletion
-					t.setElementStatus(ListStatus.LIST_ELEMENT_DELETE);
+					t.setElementStatus(ListStatus.elementDelete());
 			}
 		}
 	}

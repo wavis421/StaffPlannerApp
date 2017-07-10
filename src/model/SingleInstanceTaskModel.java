@@ -11,13 +11,13 @@ public class SingleInstanceTaskModel implements Comparable<SingleInstanceTaskMod
 	private Calendar taskDate;
 	private int color;
 	private boolean isFocus = false;
-	private ListStatus elementStatus;
+	private int elementStatus;
 
 	public SingleInstanceTaskModel(int taskID, String programName, String taskName, Calendar taskDate, int color) {
 		this.taskID = taskID;
 		this.programName = programName;
 		this.taskName = taskName;
-		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
+		this.elementStatus = ListStatus.elementAssigned();
 
 		taskDate.set(Calendar.SECOND, 0);
 		taskDate.set(Calendar.MILLISECOND, 0);
@@ -55,11 +55,11 @@ public class SingleInstanceTaskModel implements Comparable<SingleInstanceTaskMod
 		return color;
 	}
 
-	public ListStatus getElementStatus() {
+	public int getElementStatus() {
 		return elementStatus;
 	}
 
-	public void setElementStatus(ListStatus elementStatus) {
+	public void setElementStatus(int elementStatus) {
 		this.elementStatus = elementStatus;
 	}
 

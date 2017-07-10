@@ -55,6 +55,7 @@ public class CalendarPanel extends JPanel {
 	private ArrayList<CalendarDayModel>[] dayBoxTaskList = new ArrayList[31];
 	private JLabel programLabel = new JLabel("   ");
 	private JLabel filterLabel = new JLabel("");
+	private JLabel emptyLabel = new JLabel("");
 	private TableLayout calLayout = new TableLayout();
 	private Locale locale = new Locale("en", "US", "");
 	private DateFormatSymbols symbols = new DateFormatSymbols(locale);
@@ -116,7 +117,6 @@ public class CalendarPanel extends JPanel {
 		dayPanel.setVisible(false);
 		add(dayPanel, 0);
 		add(calPanel, 1);
-
 	}
 
 	public void setProgramName(String name) {
@@ -161,7 +161,7 @@ public class CalendarPanel extends JPanel {
 		// Remove expanded day panel
 		dayPanel.removeAll();
 		dayPanelIdx = -1;
-
+		
 		// Update calendar
 		updateCalendarDisplay(currentCalendar);
 	}
@@ -181,7 +181,7 @@ public class CalendarPanel extends JPanel {
 		calPanel.add(createMonthLabel(calendar), "gridwidth=5 bottom=0");
 		calPanel.add(rightLabel);
 
-		calPanel.add(new JLabel(""), "gridwidth=2 weightx=1 bottom=12");
+		calPanel.add(emptyLabel, "gridwidth=2 weightx=1 bottom=12");
 		calPanel.add(programLabel, "gridwidth=3 weightx=1 bottom=12");
 		calPanel.add(filterLabel, "gridwidth=2 weightx=1 bottom=12");
 
@@ -340,13 +340,14 @@ public class CalendarPanel extends JPanel {
 						if (dayListener != null) {
 							// Check whether a list item has been selected
 							@SuppressWarnings("unchecked")
-							int listIdx = ((JList<CalendarDayModel>) e.getComponent().getComponentAt(e.getPoint())).getSelectedIndex();
-							
+							int listIdx = ((JList<CalendarDayModel>) e.getComponent().getComponentAt(e.getPoint()))
+									.getSelectedIndex();
+
 							if (listIdx != -1) {
 								// Clone the calendar, update with selected day
 								Calendar calendar = (Calendar) currentCalendar.clone();
 								calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(e.getComponent().getName()));
-								
+
 								// Compute location for pop-up menu
 								Point point = new Point();
 								point.setLocation(dayBox.getX() + e.getPoint().getX(),

@@ -750,8 +750,7 @@ public class MainFrame extends JFrame {
 				// Edit person
 				editPerson(event.getPersonName());
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
-			}
-			else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
+			} else if (event.getButtonId() == PersonTableDialog.getRemovePersonRowButtonId()) {
 				// Remove person from roster
 				if (removePerson(event.getPersonName()))
 					updateMonth((Calendar) calPanel.getCurrentCalendar());
@@ -1044,6 +1043,8 @@ public class MainFrame extends JFrame {
 					do {
 						ev = processViewRosterByTaskDialog(ev.getDialogResponse());
 					} while (ev != null);
+
+					selectedTask = null;
 				}
 			}
 		});
@@ -1067,6 +1068,8 @@ public class MainFrame extends JFrame {
 				do {
 					ev = processViewRosterByTimeDialog(ev.getDialogResponse());
 				} while (ev != null);
+
+				selectedTask = null;
 			}
 		});
 		viewRosterByLocationItem.addActionListener(new ActionListener() {
@@ -1092,6 +1095,8 @@ public class MainFrame extends JFrame {
 					} else {
 						JOptionPane.showMessageDialog(MainFrame.this, "Location not provided for this task");
 					}
+
+					selectedTask = null;
 				}
 			}
 		});
@@ -1112,6 +1117,8 @@ public class MainFrame extends JFrame {
 				do {
 					ev = processViewCompleteRosterDialog(ev.getDialogResponse());
 				} while (ev != null);
+
+				selectedTask = null;
 			}
 		});
 	}

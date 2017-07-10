@@ -177,7 +177,7 @@ public class AssignTaskCreateTree {
 			for (int j = 0; j < assignedTaskList.size(); j++) {
 				AssignedTasksModel item = assignedTaskList.get(j);
 
-				if (item.getElementStatus() != ListStatus.LIST_ELEMENT_DELETE) {
+				if (item.getElementStatus() != ListStatus.elementDelete()) {
 					// Create the event to be added to the tree
 					AssignTaskEvent taskEvent = new AssignTaskEvent(this, item.getProgramName(),
 							findNodeInTaskList(getTaskListByProgram(progName), item.getTaskName()),

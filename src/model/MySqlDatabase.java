@@ -1305,15 +1305,15 @@ public class MySqlDatabase {
 		for (int i = 0; i < personAssignedTasks.size(); i++) {
 			// Update Assigned Tasks database for this person
 			AssignedTasksModel assignedTask = personAssignedTasks.get(i);
-			if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+			if (assignedTask.getElementStatus() == ListStatus.elementNew())
 				// Assigned task not already in list, so insert
 				addAssignedTask(assignedTask.getPersonID(), assignedTask.getTaskID(), assignedTask.getDaysOfWeek(),
 						assignedTask.getWeeksOfMonth());
-			else if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_UPDATE)
+			else if (assignedTask.getElementStatus() == ListStatus.elementUpdate())
 				// Assigned task exists, so update fields
 				updateAssignedTask(assignedTask.getAssignedTaskID(), assignedTask.getDaysOfWeek(),
 						assignedTask.getWeeksOfMonth());
-			else if (assignedTask.getElementStatus() == ListStatus.LIST_ELEMENT_DELETE)
+			else if (assignedTask.getElementStatus() == ListStatus.elementDelete())
 				// Assigned task being deleted
 				deleteAssignedTask(assignedTask.getAssignedTaskID());
 		}
@@ -1322,9 +1322,9 @@ public class MySqlDatabase {
 		for (int i = 0; i < extraTasks.size(); i++) {
 			// Add/remove single instance task in database
 			SingleInstanceTaskModel singleTask = extraTasks.get(i);
-			if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_DELETE)
+			if (singleTask.getElementStatus() == ListStatus.elementDelete())
 				removeSingleInstanceTask(personName, singleTask.getTaskDate());
-			else if (singleTask.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+			else if (singleTask.getElementStatus() == ListStatus.elementNew())
 				addSingleInstanceTask(personName, singleTask.getProgramName(), singleTask.getTaskID(),
 						singleTask.getTaskDate(), singleTask.getColor());
 		}
@@ -1333,9 +1333,9 @@ public class MySqlDatabase {
 		for (int i = 0; i < personDatesUnavailable.size(); i++) {
 			// Add/remove unavailable dates if not a duplicate
 			DateRangeModel date = personDatesUnavailable.get(i);
-			if (date.getElementStatus() == ListStatus.LIST_ELEMENT_DELETE)
+			if (date.getElementStatus() == ListStatus.elementDelete())
 				removeUnavailDates(personName, date.getStartDate(), date.getEndDate());
-			else if (date.getElementStatus() == ListStatus.LIST_ELEMENT_NEW)
+			else if (date.getElementStatus() == ListStatus.elementNew())
 				updateUnavailDates(personName, date.getStartDate(), date.getEndDate());
 		}
 	}

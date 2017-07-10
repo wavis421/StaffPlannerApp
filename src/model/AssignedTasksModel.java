@@ -7,7 +7,7 @@ public class AssignedTasksModel implements Comparable<AssignedTasksModel> {
 	private boolean[] daysOfWeek;
 	private boolean[] weeksOfMonth;
 	private int hour, minute;
-	private ListStatus elementStatus;
+	private int elementStatus;
 
 	public AssignedTasksModel(int assignedTasksID, int personID, int taskID, String programName, String taskName,
 			boolean[] daysOfWeek, boolean[] weeksOfMonth, int hour, int minute) {
@@ -20,7 +20,7 @@ public class AssignedTasksModel implements Comparable<AssignedTasksModel> {
 		this.weeksOfMonth = weeksOfMonth;
 		this.hour = hour;
 		this.minute = minute;
-		this.elementStatus = ListStatus.LIST_ELEMENT_ASSIGNED;
+		this.elementStatus = ListStatus.elementAssigned();
 	}
 
 	public int getTaskID() {
@@ -79,11 +79,11 @@ public class AssignedTasksModel implements Comparable<AssignedTasksModel> {
 		return minute;
 	}
 
-	public ListStatus getElementStatus() {
+	public int getElementStatus() {
 		return elementStatus;
 	}
 
-	public void setElementStatus(ListStatus elementStatus) {
+	public void setElementStatus(int elementStatus) {
 		this.elementStatus = elementStatus;
 	}
 
