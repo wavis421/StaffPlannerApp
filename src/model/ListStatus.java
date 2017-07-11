@@ -5,10 +5,10 @@ public class ListStatus {
 	
 	// Previously declared as an enum, but this seemed
 	// to take a lot more memory!!
-	private static final int LIST_ELEMENT_ASSIGNED = 1;
-	private static final int LIST_ELEMENT_NEW = 2;
-	private static final int LIST_ELEMENT_UPDATE = 3;
-	private static final int LIST_ELEMENT_DELETE = 4;
+	private static final int LIST_ELEMENT_ASSIGNED = 0;
+	private static final int LIST_ELEMENT_NEW = 1;
+	private static final int LIST_ELEMENT_UPDATE = 2;
+	private static final int LIST_ELEMENT_DELETE = 3;
 	
 	public static int elementAssigned() {
 		return LIST_ELEMENT_ASSIGNED;

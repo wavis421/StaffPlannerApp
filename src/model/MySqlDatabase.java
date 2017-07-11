@@ -2263,13 +2263,14 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Persons "
-								+ "WHERE (SELECT COUNT(*) FROM AssignedTasks " 
-								+ "		WHERE Persons.PersonID = AssignedTasks.PersonID) > 0 "
-								+ "OR (SELECT COUNT(*) FROM SingleInstanceTasks "
-								+ "     WHERE Persons.PersonID = SingleInstanceTasks.PersonID) > 0 "
-								+ "ORDER BY PersonName;");
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM Persons WHERE "
+
+						+ "(SELECT COUNT(*) FROM AssignedTasks "
+						+ "		WHERE Persons.PersonID = AssignedTasks.PersonID) > 0 "
+						+ "OR (SELECT COUNT(*) FROM SingleInstanceTasks "
+						+ "     WHERE Persons.PersonID = SingleInstanceTasks.PersonID) > 0 "
+
+						+ "ORDER BY PersonName;");
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {

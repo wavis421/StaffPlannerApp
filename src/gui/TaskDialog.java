@@ -11,6 +11,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
@@ -75,14 +76,19 @@ public class TaskDialog extends JDialog {
 	// Track current program and task
 	private String currentProgramName;
 	private TaskModel currentTask;
+	private String origTaskName;
 	private String borderTitle;
+	private ArrayList<TaskModel> tasksList;
+	private JFrame parent;
 
 	// Constructor for creating new task
-	public TaskDialog(JFrame parent, String programName) {
+	public TaskDialog(JFrame parent, String programName, ArrayList<TaskModel> tasksList) {
 		super(parent, programName, true);
 		setLocation(new Point(100, 100));
 
 		currentProgramName = new String(programName);
+		this.tasksList = tasksList;
+		this.parent = parent;
 		currentTask = null;
 		createTimePanel(null);
 		borderTitle = new String("Create new task");
@@ -90,12 +96,15 @@ public class TaskDialog extends JDialog {
 	}
 
 	// Constructor for updating existing task, TaskModel contains task values
-	public TaskDialog(JFrame parent, String programName, TaskModel task) {
+	public TaskDialog(JFrame parent, String programName, TaskModel task, ArrayList<TaskModel> tasksList) {
 		super(parent, programName, true);
 		setLocation(new Point(100, 100));
 
 		currentProgramName = programName;
 		currentTask = task;
+		origTaskName = task.getTaskName();
+		this.parent = parent;
+		this.tasksList = tasksList;
 		taskNameField.setText(currentTask.getTaskName());
 		createTimePanel(currentTask.getTime());
 		locationTextField.setText(currentTask.getLocation());
@@ -106,17 +115,19 @@ public class TaskDialog extends JDialog {
 		setupTaskDialog();
 	}
 
-	// Constructor for re-try of task create, TaskEvent content re-loaded
-	public TaskDialog(JFrame parent, TaskEvent event, int taskID, int programID) {
+	// Constructor for task cloning, TaskEvent content re-loaded
+	public TaskDialog(JFrame parent, TaskEvent event, int taskID, int programID, ArrayList<TaskModel> tasksList) {
 		super(parent, event.getProgramName(), true);
 		setLocation(new Point(100, 100));
 
 		// Set up task, but leave name field empty since it was found to be a
 		// duplicate
 		currentProgramName = event.getProgramName();
-		currentTask = new TaskModel(taskID, programID, event.getTaskName(), event.getLocation(), event.getNumLeadersReqd(),
-				event.getTotalPersonsReqd(), event.getDayOfWeek(), event.getWeekOfMonth(), event.getTime(),
-				event.getColor());
+		this.tasksList = tasksList;
+		this.parent = parent;
+		currentTask = new TaskModel(taskID, programID, event.getTaskName(), event.getLocation(),
+				event.getNumLeadersReqd(), event.getTotalPersonsReqd(), event.getDayOfWeek(), event.getWeekOfMonth(),
+				event.getTime(), event.getColor());
 
 		createTimePanel(currentTask.getTime());
 		locationTextField.setText(currentTask.getLocation());
@@ -135,10 +146,9 @@ public class TaskDialog extends JDialog {
 
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Make sure that task name has been entered
-				if (taskNameField.getText().equals("")) {
-					JOptionPane.showMessageDialog(okButton, "Task name field is required");
-				} else {
+				String taskName = taskNameField.getText().trim();
+
+				if (checkTaskParameters(taskName)) {
 					// Create days of week array
 					int numDaysInWeek = dayOfWeekButtons.length;
 					boolean[] daysOfWeekSelected = new boolean[numDaysInWeek];
@@ -156,11 +166,11 @@ public class TaskDialog extends JDialog {
 					}
 
 					// Create TaskEvent and set response
-					TaskEvent ev = new TaskEvent(this, currentProgramName, taskNameField.getText().trim(),
-							locationTextField.getText().trim(), (Integer) numLeadersSpinner.getValue(),
-							(Integer) totalPersonsSpinner.getValue(), daysOfWeekSelected, weeksOfMonthSelected,
-							getTime(hourSpinner, minuteSpinner),
+					TaskEvent ev = new TaskEvent(this, currentProgramName, taskName, locationTextField.getText().trim(),
+							(Integer) numLeadersSpinner.getValue(), (Integer) totalPersonsSpinner.getValue(),
+							daysOfWeekSelected, weeksOfMonthSelected, getTime(hourSpinner, minuteSpinner),
 							Integer.parseInt(colorGroup.getSelection().getActionCommand()));
+
 					dialogResponse = ev;
 					setVisible(false);
 					dispose();
@@ -389,5 +399,33 @@ public class TaskDialog extends JDialog {
 			newHour += 12;
 
 		return (new TimeModel(newHour, minute.getCurrentValue()));
+	}
+
+	private boolean checkTaskParameters(String taskName) {
+		// Make sure that task name has been entered
+		if (taskName.equals("")) {
+			JOptionPane.showMessageDialog(parent /* okButton */, "Task name field is required");
+			return false;
+
+		} else {
+			// Check if task already exists
+			TaskModel task = findTaskInList(taskName);
+
+			if (task != null && (origTaskName == null || !origTaskName.equals(taskName))) {
+				// Task already exists!
+				JOptionPane.showMessageDialog(parent, "Task '" + taskName + "' already exists");
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private TaskModel findTaskInList(String taskName) {
+		for (int i = 0; i < tasksList.size(); i++) {
+			TaskModel task = tasksList.get(i);
+			if (task.getTaskName().equals(taskName))
+				return task;
+		}
+		return null;
 	}
 }

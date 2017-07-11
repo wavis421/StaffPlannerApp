@@ -829,7 +829,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createTask() {
-		TaskDialog taskEvent = new TaskDialog(MainFrame.this, selectedProgramName);
+		TaskDialog taskEvent = new TaskDialog(MainFrame.this, selectedProgramName, controller.getAllTasks());
 		processCreateTaskDialog(taskEvent, null, null);
 	}
 
@@ -839,7 +839,7 @@ public class MainFrame extends JFrame {
 
 		TaskModel task = controller.getTaskByName(origTaskName);
 		TimeModel origTaskTime = task.getTime();
-		TaskDialog taskEvent = new TaskDialog(MainFrame.this, programName, task);
+		TaskDialog taskEvent = new TaskDialog(MainFrame.this, programName, task, controller.getAllTasks());
 		processCreateTaskDialog(taskEvent, origTaskName, origTaskTime);
 	}
 
@@ -849,7 +849,8 @@ public class MainFrame extends JFrame {
 				task.getNumLeadersReqd(), task.getTotalPersonsReqd(), task.getDayOfWeek(), task.getWeekOfMonth(),
 				task.getTime(), task.getColor());
 
-		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev, task.getTaskID(), task.getProgramID());
+		TaskDialog taskEvent = new TaskDialog(MainFrame.this, ev, task.getTaskID(), task.getProgramID(),
+				controller.getAllTasks());
 		processCreateTaskDialog(taskEvent, null, origTaskTime);
 	}
 
@@ -865,34 +866,14 @@ public class MainFrame extends JFrame {
 
 	private void processCreateTaskDialog(TaskDialog taskEvent, String origTaskName, TimeModel origTaskTime) {
 		// Loop until user enters valid and unique task name OR cancels
-		while (taskEvent.getDialogResponse() != null) {
+		if (taskEvent.getDialogResponse() != null) {
 			TaskEvent dialogResponse = taskEvent.getDialogResponse();
 			TaskModel task = controller.getTaskByName(dialogResponse.getTaskName());
 
-			if (task != null && (origTaskName == null || !origTaskName.equals(dialogResponse.getTaskName()))) {
-				// Task already exists!
-				int confirm = JOptionPane.showConfirmDialog(MainFrame.this,
-						"Task '" + dialogResponse.getTaskName() + "' already Exists.\n"
-								+ "Do you want to switch to editing " + dialogResponse.getTaskName() + "?");
-
-				if (confirm == JOptionPane.OK_OPTION) {
-					// Edit existing task with this name
-					origTaskName = dialogResponse.getTaskName();
-					taskEvent = new TaskDialog(MainFrame.this, dialogResponse.getProgramName(), task);
-
-				} else if (confirm == JOptionPane.NO_OPTION) {
-					// Re-try creating this task
-					taskEvent = new TaskDialog(MainFrame.this, dialogResponse, task.getTaskID(), task.getProgramID());
-
-				} else { // Cancel
-					break;
-				}
-
-			} else if (origTaskName == null) {
+			if (origTaskName == null) {
 				// Add new task and refresh calendar
 				controller.addTask(dialogResponse);
 				updateMonth((Calendar) calPanel.getCurrentCalendar());
-				break;
 
 			} else {
 				// Editing existing task, so update task and refresh calendar
@@ -904,7 +885,6 @@ public class MainFrame extends JFrame {
 					controller.updateTask(task.getTaskID(), dialogResponse, origTaskTime);
 					updateMonth((Calendar) calPanel.getCurrentCalendar());
 				}
-				break;
 			}
 		}
 	}
