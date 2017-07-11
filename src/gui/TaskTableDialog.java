@@ -23,15 +23,16 @@ import javax.swing.table.TableCellRenderer;
 
 import model.TaskModel;
 import model.TimeModel;
+import utilities.Utilities;
 
 public class TaskTableDialog extends JDialog {
 	private static final int PREF_DIALOG_WIDTH = 800;
 	private static final int PREF_DIALOG_HEIGHT = 300;
 
-	private static final int ADD_TASK_BUTTON = 0;
-	private static final int EDIT_ROW_BUTTON = 1;
-	private static final int DELETE_ROW_BUTTON = 2;
-	private static final int CLOSE_BUTTON = 3;
+	private static final int ADD_TASK_BUTTON = 1;
+	private static final int EDIT_ROW_BUTTON = 2;
+	private static final int DELETE_ROW_BUTTON = 3;
+	private static final int CLOSE_BUTTON = 4;
 
 	private static final int ROW_GAP = 5;
 
@@ -42,6 +43,7 @@ public class TaskTableDialog extends JDialog {
 	private JMenuItem removeItem;
 	private JMenuItem editItem;
 	private JList<TaskModel> taskList;
+	private String title;
 
 	private TaskTableEvent dialogResponse;
 
@@ -49,6 +51,7 @@ public class TaskTableDialog extends JDialog {
 		super(parent, true);
 		setLocation(new Point(100, 100));
 		setTitle(title);
+		this.title = title;
 		this.taskList = taskList;
 
 		tablePanel = createTaskTablePanel();
@@ -68,11 +71,19 @@ public class TaskTableDialog extends JDialog {
 	}
 
 	private JPanel createButtonPanel() {
-		JPanel panel = new JPanel();
+		JPanel panel = new JPanel(new BorderLayout());
+		JPanel buttonPanel = new JPanel();
+
+		// Create buttons and add to panel
 		JButton addTaskButton = new JButton("Add task");
 		JButton closeButton = new JButton("Close");
-		panel.add(addTaskButton);
-		panel.add(closeButton);
+		buttonPanel.add(addTaskButton);
+		buttonPanel.add(closeButton);
+		panel.add(buttonPanel, BorderLayout.CENTER);
+
+		// Create print icon and add to panel
+		JLabel iconLabel = Utilities.createPrintTableIcon(getClass().getResource("../images/printIcon_18x18.png"));
+		panel.add(iconLabel, BorderLayout.WEST);
 
 		addTaskButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -90,6 +101,12 @@ public class TaskTableDialog extends JDialog {
 				dispose();
 			}
 		});
+		iconLabel.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				Utilities.printTable(TaskTableDialog.this, table, title);
+			}
+		});
+
 		return panel;
 	}
 
@@ -107,7 +124,7 @@ public class TaskTableDialog extends JDialog {
 		table.setAutoCreateRowSorter(true);
 
 		popup = new JPopupMenu();
-		editItem = new JMenuItem("Edit task");
+		editItem = new JMenuItem("Edit task ");
 		removeItem = new JMenuItem("Delete task ");
 		popup.add(editItem);
 		popup.add(removeItem);
@@ -124,8 +141,7 @@ public class TaskTableDialog extends JDialog {
 			}
 		});
 
-		// When "Delete row" selected, then trigger PersonTableListener action
-		// for this row
+		// "Delete" row selected from popup menu
 		removeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
@@ -137,8 +153,7 @@ public class TaskTableDialog extends JDialog {
 			}
 		});
 
-		// When "Edit row" selected, then trigger PersonTableListener action
-		// for this row
+		// "Edit" row selected from popup menu
 		editItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
@@ -149,6 +164,9 @@ public class TaskTableDialog extends JDialog {
 				dispose();
 			}
 		});
+
+		// TODO: Add clone menu
+		// TODO: Merge 3 listeners into single method
 
 		panel.setLayout(new BorderLayout());
 		panel.add(new JScrollPane(table), BorderLayout.CENTER);

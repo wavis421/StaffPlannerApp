@@ -1,5 +1,9 @@
 package utilities;
 
+import java.awt.Cursor;
+import java.awt.print.PrinterException;
+import java.net.URL;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,7 +12,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
 
 import org.jdatepicker.impl.JDatePickerImpl;
 
@@ -325,6 +334,33 @@ public class Utilities {
 				0x909090 // Grey
 		};
 		return colorSelections;
+	}
+
+	/* <<<<<<<<<< Print Utilities >>>>>>>>>> */
+	public static JLabel createPrintTableIcon(URL url) {
+		ImageIcon printIcon = new ImageIcon(url);
+		JLabel iconLabel = new JLabel(printIcon);
+		iconLabel.setBorder(new EmptyBorder(0, 10, 0, 10));// top,left,bottom,right
+		iconLabel.setToolTipText("Print table");
+
+		return iconLabel;
+	}
+
+	public static void printTable(JDialog parent, JTable table, String title) {
+		// Set cursor to "wait" cursor
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		try {
+			MessageFormat headerFormat = new MessageFormat(title);
+			MessageFormat footerFormat = new MessageFormat("- {0} -");
+			table.print(JTable.PrintMode.FIT_WIDTH, headerFormat, footerFormat);
+
+		} catch (PrinterException e1) {
+			System.out.println("Failed to print: " + e1.getMessage());
+		}
+
+		// Set cursor back to default
+		parent.setCursor(Cursor.getDefaultCursor());
 	}
 
 	/* <<<<<<<<<< Memory Utilities >>>>>>>>>> */

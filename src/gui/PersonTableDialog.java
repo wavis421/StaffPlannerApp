@@ -69,6 +69,7 @@ public class PersonTableDialog extends JDialog {
 	private String taskName;
 	private int activeRow = -1;
 	private int popupHeightCurr = 30, popupHeightAdjust = 20;
+	private String title;
 
 	private String addButtonText;
 
@@ -89,6 +90,7 @@ public class PersonTableDialog extends JDialog {
 		setLocation(new Point(100, 100));
 
 		setTitle(title);
+		this.title = title;
 		this.parent = parent;
 		this.child = this;
 		this.addButtonText = addButtonText;
@@ -136,12 +138,14 @@ public class PersonTableDialog extends JDialog {
 	}
 
 	private JPanel createButtonPanel() {
-		JPanel panel = new JPanel();
+		JPanel panel = new JPanel(new BorderLayout());
+		JPanel buttonPanel = new JPanel();
 
+		// Create buttons and add to buttonPanel
 		if (!addButtonText.equals("")) {
 			// Button used for both adding task sub and floater
 			JButton addPersonButton = new JButton(addButtonText);
-			panel.add(addPersonButton);
+			buttonPanel.add(addPersonButton);
 
 			addPersonButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -223,9 +227,10 @@ public class PersonTableDialog extends JDialog {
 		JButton sendEmailButton = new JButton("Send email");
 		JButton closeButton = new JButton("Close");
 
-		panel.add(selectionButton);
-		panel.add(sendEmailButton);
-		panel.add(closeButton);
+		buttonPanel.add(selectionButton);
+		buttonPanel.add(sendEmailButton);
+		buttonPanel.add(closeButton);
+		panel.add(buttonPanel, BorderLayout.CENTER);
 
 		selectionButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -238,7 +243,6 @@ public class PersonTableDialog extends JDialog {
 				}
 			}
 		});
-
 		sendEmailButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (table.getSelectedRowCount() == 0)
@@ -262,7 +266,6 @@ public class PersonTableDialog extends JDialog {
 				}
 			}
 		});
-
 		closeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (columnExpansionLevel == PersonTableModel.getExpansionWithNotes()) {
@@ -273,6 +276,16 @@ public class PersonTableDialog extends JDialog {
 				}
 				setVisible(false);
 				dispose();
+			}
+		});
+
+		// Create print icon and add to panel
+		JLabel iconLabel = Utilities.createPrintTableIcon(getClass().getResource("../images/printIcon_18x18.png"));
+		panel.add(iconLabel, BorderLayout.WEST);
+
+		iconLabel.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				Utilities.printTable(PersonTableDialog.this, table, title);
 			}
 		});
 
