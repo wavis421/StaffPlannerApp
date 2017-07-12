@@ -373,7 +373,7 @@ public class PersonDialog extends JDialog {
 				DateRangeModel date = findDatesUnavailMatch(selectedItem);
 				if (date == null) {
 					// This SHOULD NOT happen!!
-					System.out.println("Error removing Unavailable Dates: " + selectedItem);
+					JOptionPane.showMessageDialog(null, "Error removing Unavailable Dates: " + selectedItem);
 					return;
 				}
 

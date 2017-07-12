@@ -229,7 +229,7 @@ public class ProgramDialog extends JDialog {
 					enableDateButton.setSelected(true);
 
 			} catch (ParseException ex) {
-				System.out.println("Exception in ProgramDialog: " + ex);
+				JOptionPane.showMessageDialog(null, "Exception in ProgramDialog: " + ex);
 			}
 		}
 

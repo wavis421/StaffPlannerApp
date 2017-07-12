@@ -233,7 +233,7 @@ public class MainFrame extends JFrame {
 							controller.saveProgramToFile(dialogResponse, fileChooser.getSelectedFile());
 
 						} catch (IOException e1) {
-							System.out.println("Export program error: " + e1.getMessage());
+							JOptionPane.showMessageDialog(null, "Export program error: " + e1.getMessage());
 						}
 					}
 				}
@@ -254,7 +254,7 @@ public class MainFrame extends JFrame {
 						initializeProgram();
 
 					} catch (IOException e1) {
-						System.out.println("Import Program error: " + e1.getMessage());
+						JOptionPane.showMessageDialog(null, "Import Program error: " + e1.getMessage());
 					}
 				}
 			}
@@ -266,7 +266,7 @@ public class MainFrame extends JFrame {
 						controller.saveRosterToFile(fileChooser.getSelectedFile());
 
 					} catch (IOException e1) {
-						System.out.println("Export Roster error: " + e1.getMessage());
+						JOptionPane.showMessageDialog(null, "Export Roster error: " + e1.getMessage());
 					}
 				}
 			}
@@ -286,7 +286,7 @@ public class MainFrame extends JFrame {
 						initializeRoster();
 
 					} catch (IOException e1) {
-						System.out.println("Import Roster error: " + e1.getMessage());
+						JOptionPane.showMessageDialog(null, "Import Roster error: " + e1.getMessage());
 					}
 				}
 			}

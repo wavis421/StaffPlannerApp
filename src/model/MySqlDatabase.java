@@ -35,7 +35,7 @@ public class MySqlDatabase {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-			System.out.println("Unable to connect to database: " + e.getMessage());
+			JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 			return;
 		}
 
@@ -45,7 +45,7 @@ public class MySqlDatabase {
 			return;
 
 		} catch (SQLException e) {
-			System.out.println("Unable to connect to database: " + e.getMessage());
+			JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 			return;
 		}
 	}
@@ -56,7 +56,7 @@ public class MySqlDatabase {
 				dbConnection.close();
 				dbConnection = null;
 			} catch (SQLException e) {
-				System.out.println("Failure closing database connection: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure closing database connection: " + e.getMessage());
 			}
 		}
 	}
@@ -109,14 +109,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding program to databae: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding program to databae: " + e.getMessage());
 				break;
 			}
 		}
@@ -166,14 +167,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure updating Program Dates in database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure updating Program Dates in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -198,14 +200,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure renaming " + oldName + " program in database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure renaming " + oldName + " program in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -229,14 +233,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure deleting " + programName + ": " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure deleting " + programName + ": " + e.getMessage());
 				break;
 			}
 		}
@@ -266,14 +271,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving " + programName + " program from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure retreiving " + programName + " program from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -302,14 +309,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retrieving Programs from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retrieving Programs from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -340,14 +348,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving program list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving program list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -373,14 +382,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure accessing Program database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure accessing Program database: " + e.getMessage());
 				break;
 			}
 		}
@@ -421,14 +431,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding " + taskName + " task to database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure adding " + taskName + " task to database: " + e.getMessage());
 				break;
 			}
 		}
@@ -470,14 +482,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure updating " + taskName + " task in database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure updating " + taskName + " task in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -518,14 +532,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure switching sub & floater in database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure switching sub & floater in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -551,14 +566,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure updating task time in database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure updating task time in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -587,14 +603,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure updating " + oldName + " task in database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure updating " + oldName + " task in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -618,14 +636,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure deleting " + taskName + ": " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure deleting " + taskName + ": " + e.getMessage());
 				break;
 			}
 		}
@@ -656,14 +675,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving " + taskName + " task from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure retreiving " + taskName + " task from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -692,14 +713,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving " + taskName + " task from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure retreiving " + taskName + " task from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -769,14 +792,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure loading Calendar month from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure loading Calendar month from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -854,14 +878,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure loading Calendar month from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure loading Calendar month from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -923,14 +948,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure loading Calendar month from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure loading Calendar month from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -984,14 +1010,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure loading Calendar month from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure loading Calendar month from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1026,14 +1053,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving task list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving task list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1066,14 +1094,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving task list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving task list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1122,14 +1151,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving task list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving task list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1158,14 +1188,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving task locations from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure retreiving task locations from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1194,14 +1226,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving task times from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving task times from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1253,14 +1286,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving time list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving time list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1360,14 +1394,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure updating " + personName + " notes to database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure updating " + personName + " notes to database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1392,14 +1428,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure deleting " + personName + ": " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure deleting " + personName + ": " + e.getMessage());
 				break;
 			}
 		}
@@ -1436,14 +1473,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding " + personName + " to database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding " + personName + " to database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1474,14 +1512,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure updating " + personName + " info to database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure updating " + personName + " info to database: " + e.getMessage());
 				break;
 			}
 		}
@@ -1521,14 +1561,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding task assignment: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding task assignment: " + e.getMessage());
 				break;
 			}
 		}
@@ -1559,14 +1600,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure updating task assignment: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure updating task assignment: " + e.getMessage());
 				break;
 			}
 		}
@@ -1590,14 +1632,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure deleting task assignment: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure deleting task assignment: " + e.getMessage());
 				break;
 			}
 		}
@@ -1633,14 +1676,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure removing sub/floater conflicts: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure removing sub/floater conflicts: " + e.getMessage());
 				break;
 			}
 		}
@@ -1679,14 +1723,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println(
+				JOptionPane.showMessageDialog(null,
 						"Failure retreiving task list for " + personName + " from database: " + e.getMessage());
 				break;
 			}
@@ -1734,14 +1779,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding single instance task: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding single instance task: " + e.getMessage());
 				break;
 			}
 		}
@@ -1768,14 +1814,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure deleting extra task: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure deleting extra task: " + e.getMessage());
 				break;
 			}
 		}
@@ -1818,14 +1865,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding single instance task: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding single instance task: " + e.getMessage());
 				break;
 			}
 		}
@@ -1867,14 +1915,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println(
+				JOptionPane.showMessageDialog(null,
 						"Failure retreiving sub/floater list for " + personName + " from database: " + e.getMessage());
 				break;
 			}
@@ -1903,14 +1952,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding unavailable dates: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding unavailable dates: " + e.getMessage());
 				break;
 			}
 		}
@@ -1938,14 +1988,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding unavailable dates: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding unavailable dates: " + e.getMessage());
 				break;
 			}
 		}
@@ -1972,7 +2023,8 @@ public class MySqlDatabase {
 					// No match for start/end dates, so add date range
 					addUnavailDates(personName, startDate, endDate);
 				} else {
-					System.out.println("Date(s) for " + personName + " already marked as unavailable.");
+					JOptionPane.showMessageDialog(null,
+							"Date(s) for " + personName + " already marked as unavailable.");
 				}
 
 				result.close();
@@ -1982,14 +2034,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding unavailable dates: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding unavailable dates: " + e.getMessage());
 				break;
 			}
 		}
@@ -2016,14 +2069,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure deleting " + personName + ": " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure deleting " + personName + ": " + e.getMessage());
 				break;
 			}
 		}
@@ -2055,15 +2109,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving Unavail Dates list for " + personName + " from database: "
-						+ e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving Unavail Dates list for " + personName
+						+ " from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2093,14 +2148,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving Unavail Dates list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure retreiving Unavail Dates list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2126,14 +2183,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure renaming " + oldName + " in database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure renaming " + oldName + " in database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2158,7 +2216,8 @@ public class MySqlDatabase {
 					// No match for start/end dates, so add date range
 					addUnavailDates(personName, displayDate, displayDate);
 				} else
-					System.out.println(displayDate + " for " + personName + " already marked as unavailable.");
+					JOptionPane.showMessageDialog(null,
+							displayDate + " for " + personName + " already marked as unavailable.");
 
 				result.close();
 				prepStmt.close();
@@ -2167,14 +2226,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure adding unavailable dates: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding unavailable dates: " + e.getMessage());
 				break;
 			}
 		}
@@ -2202,14 +2262,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2241,14 +2302,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2286,14 +2348,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2325,14 +2388,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2372,14 +2436,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2409,14 +2474,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving " + personName + " info from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure retreiving " + personName + " info from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2450,14 +2517,16 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving " + personName + " from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"Failure retreiving " + personName + " from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2503,14 +2572,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2628,14 +2698,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2767,14 +2838,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2892,14 +2964,15 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else
 					// Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure retreiving person list from database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure retreiving person list from database: " + e.getMessage());
 				break;
 			}
 		}
@@ -2925,13 +2998,14 @@ public class MySqlDatabase {
 			} catch (CommunicationsException e) {
 				if (i == 0) {
 					// First attempt to connect
-					System.out.println(Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					JOptionPane.showMessageDialog(null,
+							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
 					connectDatabase();
 				} else // Second try
-					System.out.println("Unable to connect to database: " + e.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				System.out.println("Failure accessing Persons database: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure accessing Persons database: " + e.getMessage());
 				break;
 			}
 		}

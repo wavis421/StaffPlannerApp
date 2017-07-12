@@ -71,7 +71,7 @@ public class Utilities {
 
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
-			System.out.println("Unable to parse time " + time + ": " + e.getMessage());
+			JOptionPane.showMessageDialog(null, "Unable to parse time " + time + ": " + e.getMessage());
 			return null;
 		}
 	}
@@ -356,7 +356,7 @@ public class Utilities {
 			table.print(JTable.PrintMode.FIT_WIDTH, headerFormat, footerFormat);
 
 		} catch (PrinterException e1) {
-			System.out.println("Failed to print: " + e1.getMessage());
+			JOptionPane.showMessageDialog(null, "Failed to print: " + e1.getMessage());
 		}
 
 		// Set cursor back to default
@@ -370,7 +370,7 @@ public class Utilities {
 		runtime.gc();
 
 		long memory = runtime.totalMemory() - runtime.freeMemory();
-		System.out.println("Used memory in bytes (" + codeLocation + "): " + memory);
+		JOptionPane.showMessageDialog(null, "Used memory in bytes (" + codeLocation + "): " + memory);
 
 	}
 }
