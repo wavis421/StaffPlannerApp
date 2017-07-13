@@ -77,8 +77,8 @@ public class MainFrame extends JFrame {
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
 
-		ImageIcon img = new ImageIcon(getClass().getResource("../images/PPicon24.png"));
-		setIconImage(img.getImage());
+		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24.png"));
+		setIconImage(icon.getImage());
 
 		// Create components
 		controller = new Controller();

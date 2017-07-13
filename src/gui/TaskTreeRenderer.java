@@ -3,7 +3,6 @@ package gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
@@ -35,10 +34,8 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 		setOpaque(true);
 		setPreferredSize(new Dimension(treeWidth, 16));
 
-		URL url = getClass().getResource("../images/calendar_16x16.png");
-		calIcon = new ImageIcon(url);
-		url = getClass().getResource("../images/calendar_plus_16x16.png");
-		calPlusIcon = new ImageIcon(url);
+		calIcon = new ImageIcon(getClass().getResource("calendar_16x16.png"));
+		calPlusIcon = new ImageIcon(getClass().getResource("calendar_plus_16x16.png"));
 
 		setClosedIcon(calPlusIcon);
 		setOpenIcon(calPlusIcon);

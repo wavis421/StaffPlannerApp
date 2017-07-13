@@ -338,8 +338,7 @@ public class Utilities {
 
 	/* <<<<<<<<<< Print Utilities >>>>>>>>>> */
 	public static JLabel createPrintTableIcon(URL url) {
-		ImageIcon printIcon = new ImageIcon(url);
-		JLabel iconLabel = new JLabel(printIcon);
+		JLabel iconLabel = new JLabel(new ImageIcon(url));
 		iconLabel.setBorder(new EmptyBorder(0, 10, 0, 10));// top,left,bottom,right
 		iconLabel.setToolTipText("Print table");
 
