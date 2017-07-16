@@ -32,16 +32,17 @@ public class MySqlDatabase {
 	 */
 	private void connectDatabase() {
 		try {
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.jdbc.Driver");
 
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		} catch (ClassNotFoundException e) {
 			JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 			return;
 		}
 
 		try {
 			String url = "jdbc:mysql://www.programplanner.org:3306/TestDb421";
-			dbConnection = DriverManager.getConnection(url, "wavisTester1", "ImGladToBeTesting555&");
+			// dbConnection = DriverManager.getConnection(url, "wavisTester1", "ImGladToBeTesting555&");
+			dbConnection = DriverManager.getConnection(url, "tester421", "Rwarwe310");
 			return;
 
 		} catch (SQLException e) {
@@ -108,9 +109,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -166,9 +165,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -199,9 +196,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -232,9 +227,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -270,9 +263,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -308,9 +299,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -347,9 +336,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -381,9 +368,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -430,9 +415,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -481,9 +464,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -531,9 +512,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -565,9 +544,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -602,9 +579,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -635,9 +610,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -674,9 +647,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -712,9 +683,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -791,9 +760,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -877,9 +844,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -947,9 +912,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1009,9 +972,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1052,9 +1013,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1093,9 +1052,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1150,9 +1107,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1187,9 +1142,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1225,9 +1178,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1285,9 +1236,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1393,9 +1342,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1427,9 +1374,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1472,9 +1417,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1511,9 +1454,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1560,9 +1501,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1599,9 +1538,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1631,9 +1568,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1675,9 +1610,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1722,9 +1655,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1778,9 +1709,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1813,9 +1742,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1864,9 +1791,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1914,9 +1839,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1951,9 +1874,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -1987,9 +1908,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2033,9 +1952,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2068,9 +1985,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2108,9 +2023,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2147,9 +2060,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2182,9 +2093,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2225,9 +2134,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2261,9 +2168,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2301,9 +2206,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2347,9 +2250,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2387,9 +2288,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2435,9 +2334,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2473,9 +2370,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2516,9 +2411,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2571,9 +2464,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2697,9 +2588,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2837,9 +2726,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2963,9 +2850,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else
 					// Second try
@@ -2997,9 +2882,7 @@ public class MySqlDatabase {
 
 			} catch (CommunicationsException e) {
 				if (i == 0) {
-					// First attempt to connect
-					JOptionPane.showMessageDialog(null,
-							Utilities.getCurrTime() + " - Attempting to re-connect to database...");
+					// First attempt to re-connect
 					connectDatabase();
 				} else // Second try
 					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
