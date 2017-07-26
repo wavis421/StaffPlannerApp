@@ -3,7 +3,6 @@ package model;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +19,8 @@ import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import utilities.Utilities;
 
 public class MySqlDatabase {
-	private static Connection dbConnection;
+	private static final long serialVersionUID = 1L;
+	private static Connection dbConnection = null;
 
 	public MySqlDatabase() {
 		// Make initial connection to database
@@ -32,33 +32,16 @@ public class MySqlDatabase {
 	 */
 	private void connectDatabase() {
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-
-		} catch (ClassNotFoundException e) {
-			JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
-			return;
-		}
-
-		try {
-			String url = "jdbc:mysql://www.programplanner.org:3306/TestDb421";
-			// dbConnection = DriverManager.getConnection(url, "wavisTester1", "ImGladToBeTesting555&");
-			dbConnection = DriverManager.getConnection(url, "tester421", "Rwarwe310");
-			return;
-
+			dbConnection = MySqlConnection.connectToServer("ProgramPlanner");
 		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
-			return;
+			// TODO: Make sure error handling performed in connectToServer
 		}
 	}
 
 	public void disconnectDatabase() {
 		if (dbConnection != null) {
-			try {
-				dbConnection.close();
-				dbConnection = null;
-			} catch (SQLException e) {
-				JOptionPane.showMessageDialog(null, "Failure closing database connection: " + e.getMessage());
-			}
+			MySqlConnection.closeConnections();
+			dbConnection = null;
 		}
 	}
 
