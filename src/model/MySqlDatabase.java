@@ -14,12 +14,11 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+import com.mysql.jdbc.CommunicationsException;
 
 import utilities.Utilities;
 
 public class MySqlDatabase {
-	private static final long serialVersionUID = 1L;
 	private static Connection dbConnection = null;
 
 	public MySqlDatabase() {
