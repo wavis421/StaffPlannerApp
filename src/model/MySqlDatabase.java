@@ -30,10 +30,31 @@ public class MySqlDatabase {
 	 * ------- Database Connections -------
 	 */
 	private void connectDatabase() {
-		try {
-			dbConnection = MySqlConnection.connectToServer("ProgramPlanner");
-		} catch (SQLException e) {
-			// TODO: Make sure error handling performed in connectToServer
+		int connectAttempts = 0;
+		while (true) {
+			connectAttempts++;
+			try {
+				dbConnection = MySqlConnection.connectToServer("ProgramPlanner");
+			} catch (SQLException e) {
+				// Error handling performed in connectToServer
+			}
+
+			if (dbConnection == null) {
+				int answer = JOptionPane.showConfirmDialog(null, "Do you want to retry?",
+						"Failure connecting to database", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+				if (answer != JOptionPane.YES_OPTION) {
+					// Exit program
+					// TODO: Figure out how to dispose of MainFrame
+					System.exit(0);
+				} else if (connectAttempts > 10) {
+					JOptionPane.showMessageDialog(null,
+							"Exceeded maximum connection attempts.\nPlease try again later.");
+					// Exit program
+					// TODO: Figure out how to dispose of MainFrame
+					System.exit(0);
+				}
+			}
+			else break;
 		}
 	}
 
@@ -98,7 +119,7 @@ public class MySqlDatabase {
 					JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage());
 
 			} catch (SQLException e) {
-				JOptionPane.showMessageDialog(null, "Failure adding program to databae: " + e.getMessage());
+				JOptionPane.showMessageDialog(null, "Failure adding program to database: " + e.getMessage());
 				break;
 			}
 		}
