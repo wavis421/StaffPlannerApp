@@ -29,32 +29,34 @@ public class MySqlDatabase {
 	/*
 	 * ------- Database Connections -------
 	 */
+	private static final int MAX_CONNECTION_ATTEMPTS = 3;
+
 	private void connectDatabase() {
 		int connectAttempts = 0;
 		while (true) {
 			connectAttempts++;
 			try {
-				dbConnection = MySqlConnection.connectToServer("ProgramPlanner");
+				dbConnection = MySqlConnection.connectToServer("TestDb421", "tester421", "Rwarwe310");
 			} catch (SQLException e) {
 				// Error handling performed in connectToServer
 			}
 
 			if (dbConnection == null) {
 				int answer = JOptionPane.showConfirmDialog(null, "Do you want to retry?",
-						"Failure connecting to database", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-				if (answer != JOptionPane.YES_OPTION) {
+						"Failure connecting to database", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+				if (answer == JOptionPane.NO_OPTION) {
 					// Exit program
 					// TODO: Figure out how to dispose of MainFrame
 					System.exit(0);
-				} else if (connectAttempts > 10) {
+				} else if (connectAttempts >= MAX_CONNECTION_ATTEMPTS) {
 					JOptionPane.showMessageDialog(null,
 							"Exceeded maximum connection attempts.\nPlease try again later.");
 					// Exit program
 					// TODO: Figure out how to dispose of MainFrame
 					System.exit(0);
 				}
-			}
-			else break;
+			} else
+				break;
 		}
 	}
 
