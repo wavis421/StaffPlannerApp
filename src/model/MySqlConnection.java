@@ -30,13 +30,12 @@ public class MySqlConnection {
 		closeConnections();
 
 		// Create new SSH and database connections
-		if (connectSSH()) {
-			connectToDataBase(dataBaseName, user, password);
-		}
+		connectSSH();
+		connectToDataBase(dataBaseName, user, password);
 		return connection;
 	}
 
-	private static boolean connectSSH() {
+	private static void connectSSH() {
 		try {
 			java.util.Properties config = new java.util.Properties();
 			JSch jsch = new JSch();
@@ -48,25 +47,36 @@ public class MySqlConnection {
 			session.setConfig(config);
 			session.connect();
 			session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
-			return true;
 
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null,
-					"Failure connecting to website.\n" + "Check your internet connection and make sure "
-							+ "Program Planner not already running on this machine.\n(" + e.getMessage() + ")");
+			// TODO: Figure out how to exit cleanly (maybe in Utilities?)
+			if (JOptionPane.showOptionDialog(null,
+					"Failed to establish a secure SSH tunnel.\n(" + e.getMessage() + ")\n"
+							+ "Please make sure Program Planner is not already running.\n\nDo you want to continue?\n",
+					"Failed to create secure connection", 0, JOptionPane.PLAIN_MESSAGE, null,
+					new String[] { "Yes", "Exit Program" }, 0) != JOptionPane.YES_OPTION) {
+				System.exit(0);
+			}
 		}
-		return false;
+		closeConnections();
 	}
 
 	private static void connectToDataBase(String dataBaseName, String user, String password) throws SQLException {
 		try {
 			String driverName = "com.mysql.jdbc.Driver";
 			Class.forName(driverName).newInstance();
-			
-			// Connecting through SSH tunnel
 			MysqlDataSource dataSource = new MysqlDataSource();
-			dataSource.setServerName("localhost");
-			dataSource.setPortNumber(LOCAL_PORT);
+
+			if (session == null) {
+				// Connecting directly to database using port 3306
+				dataSource.setServerName("www.ProgramPlanner.org");
+				dataSource.setPortNumber(REMOTE_PORT);
+			} else {
+				// Connecting through SSH tunnel
+				dataSource.setServerName("localhost");
+				dataSource.setPortNumber(LOCAL_PORT);
+			}
+
 			dataSource.setDatabaseName(dataBaseName);
 			dataSource.setUser(user);
 			dataSource.setPassword(password);
@@ -85,8 +95,9 @@ public class MySqlConnection {
 
 	private static void CloseDataBaseConnection() {
 		try {
-			if (connection != null && !connection.isClosed()) {
+			if (connection != null) {
 				connection.close();
+				System.out.println("Closed connection");
 			}
 		} catch (SQLException e) {
 			JOptionPane.showMessageDialog(null, "Error closing database connection: " + e.getMessage());
@@ -95,8 +106,9 @@ public class MySqlConnection {
 	}
 
 	private static void CloseSSHConnection() {
-		if (session != null && session.isConnected()) {
+		if (session != null) {
 			session.disconnect();
+			System.out.println("Closed session");
 			session = null;
 		}
 	}

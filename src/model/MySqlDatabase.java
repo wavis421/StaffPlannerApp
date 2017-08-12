@@ -781,17 +781,17 @@ public class MySqlDatabase {
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByLocationByMonth(Calendar calendar,
 			ArrayList<String> locations) {
-		return getTasksByFilterByMonth(calendar, locations, "MonthlyCalendarByLocation", true);
+		return getTasksByFilterByMonth(calendar, locations, "ProgramPlanner.MonthlyCalendarByLocation", true);
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByPersonsByMonth(Calendar calendar,
 			ArrayList<String> personList) {
-		return getTasksByFilterByMonth(calendar, personList, "MonthlyCalendarByPersons", false);
+		return getTasksByFilterByMonth(calendar, personList, "ProgramPlanner.MonthlyCalendarByPersons", false);
 	}
 
 	public ArrayList<ArrayList<CalendarDayModel>> getTasksByProgramByMonth(Calendar calendar,
 			ArrayList<String> programList) {
-		return getTasksByFilterByMonth(calendar, programList, "MonthlyCalendarByProgram", true);
+		return getTasksByFilterByMonth(calendar, programList, "ProgramPlanner.MonthlyCalendarByProgram", true);
 	}
 
 	private ArrayList<ArrayList<CalendarDayModel>> getTasksByFilterByMonth(Calendar calendar,
@@ -891,7 +891,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement updateMonthStmt = dbConnection
-						.prepareStatement("CALL MonthlyCalendarByTime('" + date + "', '" + timeFilter + "');");
+						.prepareStatement("CALL ProgramPlanner.MonthlyCalendarByTime('" + date + "', '" + timeFilter + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
 				while (results.next()) {
@@ -951,7 +951,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement updateMonthStmt = dbConnection
-						.prepareStatement("CALL MonthlyCalendarByRoster('" + date + "');");
+						.prepareStatement("CALL ProgramPlanner.MonthlyCalendarByRoster('" + date + "');");
 				ResultSet results = updateMonthStmt.executeQuery();
 
 				while (results.next()) {
