@@ -50,7 +50,6 @@ Temporary Items
 # Build and Launch Files (added by Wendy)
 # =========================
 *.class
-launcher/
-bin/images/
+*.exe
+launch/
 lib/
-classes/

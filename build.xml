@@ -1,85 +1,81 @@
-<project name="StaffPlannerApp" default="package.StaffPlannerApp">
-
-    <property name="src.dir" location="${basedir}/src"/>
-    <property name="build.dir" location="${basedir}/build"/>
-	<property name="launcher.dir" location="${basedir}/launcher"/>
-	<property name="7zip.exe.dir" location="${basedir}/7zip"/>
-	<property name="sfx.dir" location="${basedir}/sfx"/>
-    <property name="dist.dir" location="${basedir}/dist"/>
-	<property name="classpath.dir" location="${basedir}/Referenced Libraries"/>
-	<property name="images.dir" location="${basedir}/src/images"/>
-	<property name="lib.dir" location="${basedir}/lib"/>
-    
-	<path id="project.class.path">
-		<pathelement location="src.dir"/>
-		<fileset dir="images">
-			<include name="*.png" />
-		</fileset>
-	</path>
-
-    <target name="clean.StaffPlannerApp" depends="clean.build.StaffPlannerApp, clean.dist.StaffPlannerApp" />
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_Program_Planner" name="Create Runnable Jar for Project ProgramPlannerApp">
+    <!--ANT 1.7 is required-->
 	
-	<target name="clean.build.StaffPlannerApp">
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.jarfile" value="${dir.buildfile}/launch"/>
+	<property name="dir.7zip" value="${dir.buildfile}/7zip"/>
+	<property name="dir.sfx" value="${dir.buildfile}/sfx"/>
+	
+    <target name="clean.ProgramPlannerApp" depends="clean.build.ProgramPlannerApp, clean.dist.ProgramPlannerApp" />
+	
+	<target name="clean.build.ProgramPlannerApp">
       <delete includeemptydirs="true">
-        <fileset dir="${build.dir}" includes="**/*" />
+        <fileset dir="${dir.buildfile}/classes" includes="**/*" />
       </delete>
     </target>
 	
-	<target name="clean.dist.StaffPlannerApp">
+	<target name="clean.dist.ProgramPlannerApp">
       <delete includeemptydirs="true">
-        <fileset dir="${dist.dir}" includes="**/*" />
-      	<fileset dir="${launcher.dir}" includes="progplan.jar" />
-      	<fileset dir="${launcher.dir}" includes="progplan.7z" />
+        <fileset dir="${dir.buildfile}/dist" includes="**/*" />
+      	<fileset dir="${dir.jarfile}" includes="ProgramPlanner.jar" />
+      	<fileset dir="${dir.jarfile}" includes="ProgramPlanner.7z" />
       </delete>
     </target>
- 
-    <target name="package.StaffPlannerApp" depends="clean.StaffPlannerApp">
+	
+    <target name="create_Program_Planner" depends="clean.ProgramPlannerApp">
     	
     	<!-- compile the source -->
-        <javac destdir="${build.dir}" srcdir="${src.dir}" includeAntRuntime="false">
-        	<classpath>
-        		<pathelement path="${classpath.dir}" />
-        		<fileset dir=".">
-        			<include name="**/*.jar"/>
-        		</fileset>
-        		<pathelement path="${images.dir}" />
-        		<fileset dir=".">
-        			<include name="**"/>
-        		</fileset>
-        	</classpath>
-        	<include name="**/*.java"/>
-		</javac>
+    	<javac destdir="${dir.buildfile}/classes" srcdir="${dir.buildfile}/src" includeAntRuntime="false">
+    	    <classpath>
+    	    	<pathelement path="${dir.buildfile}/lib" />
+    	    	<fileset dir=".">
+    	    		<include name="**/*.jar"/>
+    	   	 	</fileset>
+    	    </classpath>
+    	    <include name="**/*.java"/>
+    	</javac>
     	
-    	<!-- create a runnable jar -->
-    	<jar destfile="${launcher.dir}/progplan.jar" manifest="Manifest.mf">
-    		<zipgroupfileset dir="${lib.dir}">
-    			<include name="**/*.jar" />
-    		</zipgroupfileset>
-    		<fileset dir="${build.dir}">
-				<include name="**/*.class" />
-			</fileset>
-    		<fileset dir="${src.dir}">
-    			<include name="images/**/*.png" />
-    		</fileset>
-		</jar>
+    	<manifestclasspath property="ProgramPlanner.manifest.classpath" jarfile="ProgramPlanner.jar">
+    		<classpath>
+    			<fileset dir="lib" includes="*.jar" />
+    		</classpath>
+    	</manifestclasspath>
+    	
+    	<!-- Create jar file -->
+        <jar destfile="${dir.jarfile}/ProgramPlanner.jar" basedir="classes">
+            <manifest>
+                <attribute name="Main-Class" value="gui.App"/>
+                <attribute name="Class-Path" value="${ProgramPlanner.manifest.classpath}"/>
+            	<attribute name="Permissions" value="all-permissions"/>
+            	<attribute name="Codebase" value="*"/>
+            	<attribute name="Caller-Allowable-Codebase" value="*"/>
+            	<attribute name="Application-Library-Allowable-Codebase" value="*"/>
+            	<attribute name="Application-Name" value="ProgramPlanner"/>
+            </manifest>
+        	
+            <fileset dir="${dir.buildfile}/classes"/>
+        	<fileset dir="${dir.buildfile}/src/images" />
+        </jar>
     	
     	<!-- compress all of the files we need to down with 7zip -->
-		<exec executable="${7zip.exe.dir}/7z.exe" failonerror="true">
-			<arg value="a" />
-			<arg value="-t7z" />
-			<arg value="-r" />
-			<arg value="${launcher.dir}\progplan.7z" />
-			<arg value="${launcher.dir}" />
-		</exec>
-    	
-    	<!-- concat the files we need together to produce a binary
-    			launcher -->
-    	<concat destfile="${dist.dir}/StaffPlannerApp.sfx" binary="yes">
-			<fileset file="${sfx.dir}/7zSD.sfx" />
-			<fileset file="${sfx.dir}/progplan.tag" />
-			<fileset file="${launcher.dir}/progplan.7z" />
-		</concat>
+    	<echo message="Compressing..." />
+    	<exec executable="${dir.7zip}/7z.exe" failonerror="true">
+    		<arg value="a" />
+    		<arg value="-t7z" />
+    		<arg value="-r" />
+    		<arg value="${dir.jarfile}/ProgramPlanner.7z" />
+    		<arg value="${dir.jarfile}" />
+    	</exec>
+    	    	
+    	<!-- concat the files we need together to produce a binary launcher -->
+    	<echo message="Concatenating..." />
+    	<concat destfile="${dir.buildfile}/dist/ProgramPlannerApp2.exe" binary="yes">
+    		<fileset file="${dir.sfx}/7zS.sfx" />
+    		<fileset file="${dir.sfx}/ProgramPlanner.cfg" />
+    		<fileset file="${dir.jarfile}/ProgramPlanner.7z" />
+    	</concat>
     	
     </target>
-    
 </project>

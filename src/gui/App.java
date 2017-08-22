@@ -20,7 +20,7 @@ public class App {
 			try {
 				// create a file for re-directing errors
 				// TODO: Append to end of file; if file size is too large, create new file
-				FileOutputStream f = new FileOutputStream("PP_error.log");
+				FileOutputStream f = new FileOutputStream("C:/temp/PP_error.log");
 				PrintStream p = new PrintStream(f);
 
 				System.setOut(p);

@@ -34,8 +34,8 @@ public class TaskTreeRenderer extends DefaultTreeCellRenderer {
 		setOpaque(true);
 		setPreferredSize(new Dimension(treeWidth, 16));
 
-		calIcon = new ImageIcon(getClass().getResource("/images/calendar_16x16.png"));
-		calPlusIcon = new ImageIcon(getClass().getResource("/images/calendar_plus_16x16.png"));
+		calIcon = new ImageIcon(getClass().getResource("/calendar_16x16.png"));
+		calPlusIcon = new ImageIcon(getClass().getResource("/calendar_plus_16x16.png"));
 
 		setClosedIcon(calPlusIcon);
 		setOpenIcon(calPlusIcon);

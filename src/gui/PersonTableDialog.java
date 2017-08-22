@@ -280,7 +280,7 @@ public class PersonTableDialog extends JDialog {
 		});
 
 		// Create print icon and add to panel
-		JLabel iconLabel = Utilities.createPrintTableIcon(getClass().getResource("/images/printIcon_18x18.png"));
+		JLabel iconLabel = Utilities.createPrintTableIcon(getClass().getResource("/printIcon_18x18.png"));
 		panel.add(iconLabel, BorderLayout.WEST);
 
 		iconLabel.addMouseListener(new MouseAdapter() {
