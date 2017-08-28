@@ -7,6 +7,8 @@ import acm.util.JTFTools;
 
 public class CustomFonts {
 	// Color selections
+	public static final Color ICON_COLOR = new Color(0x196F3D);
+	public static final Color DAYBOX_HIGHLIGHT_COLOR = new Color(0xF00000);
 	public static final Color EMPTY_BACKGROUND_COLOR = new Color(0xDDDDDD);
 	public static final Color SELECTED_BACKGROUND_COLOR = new Color(0xDDDDDD);
 	public static final Color UNSELECTED_BACKGROUND_COLOR = Color.WHITE;

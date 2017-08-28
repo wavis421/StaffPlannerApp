@@ -42,9 +42,13 @@ public class MySqlConnection {
 			session = jsch.getSession(SSH_USER, SSH_HOST, 22);
 			jsch.addIdentity(SSH_KEY_FILE_PATH);
 			config.put("StrictHostKeyChecking", "no");
-			config.put("ConnectionAttempts", "1");
-
+			config.put("ConnectionAttempts", "2");
 			session.setConfig(config);
+			
+			session.setServerAliveInterval(60 * 1000); // in milliseconds
+			session.setServerAliveCountMax(20);
+			session.setConfig("TCPKeepAlive", "yes");
+			
 			session.connect();
 			session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
 
@@ -80,6 +84,7 @@ public class MySqlConnection {
 			dataSource.setDatabaseName(dataBaseName);
 			dataSource.setUser(user);
 			dataSource.setPassword(password);
+			dataSource.setAutoReconnect(true);
 
 			connection = dataSource.getConnection();
 

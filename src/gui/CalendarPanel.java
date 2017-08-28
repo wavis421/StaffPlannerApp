@@ -31,6 +31,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 
 import acm.gui.TableLayout;
 import model.CalendarDayModel;
@@ -66,7 +67,7 @@ public class CalendarPanel extends JPanel {
 	private Calendar currentCalendar;
 	private String[] monthNames = symbols.getMonths();
 	private String[] weekdayNames = symbols.getWeekdays();
-	private Border innerDayBorder, outerDayBorder;
+	private Border innerDayLabelBorder, outerDayLabelBorder;
 	private JLabel[] weekdayLabels = new JLabel[7];
 
 	public CalendarPanel(Dimension calPanelSize) {
@@ -85,12 +86,12 @@ public class CalendarPanel extends JPanel {
 
 		/***** Set up CALENDAR panel *****/
 		// Create borders
-		Border innerBorder = BorderFactory.createEtchedBorder();
-		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.ICON_COLOR, 2, true);
+		Border outerBorder = BorderFactory.createEmptyBorder(0, 2, 4, 2);
 		calPanel.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 
-		innerDayBorder = BorderFactory.createLineBorder(Color.decode(Integer.toString(0xF00000)), 2);
-		outerDayBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+		innerDayLabelBorder = BorderFactory.createLineBorder(CustomFonts.DAYBOX_HIGHLIGHT_COLOR, 2, true);
+		outerDayLabelBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
 		// Set up header label
 		programLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -161,7 +162,7 @@ public class CalendarPanel extends JPanel {
 		// Remove expanded day panel
 		dayPanel.removeAll();
 		dayPanelIdx = -1;
-		
+
 		// Update calendar
 		updateCalendarDisplay(currentCalendar);
 	}
@@ -193,19 +194,34 @@ public class CalendarPanel extends JPanel {
 		// Add null boxes for first week until first day
 		int weekday = getFirstWeekdayIndex(calendar);
 		for (int i = 0; i < weekday; i++) {
-			calPanel.add(createDayBox(null), "weighty=1");
+			if (i == 0)
+				calPanel.add(createDayBox(null), "weighty=1 left=1");
+			else
+				calPanel.add(createDayBox(null), "weighty=1");
 		}
 
 		// Add day box for each day of the month
 		int nDays = getDaysInMonth(calendar);
+		int finalWeekStartDay = nDays - ((nDays + weekday + 6) % 7);
+		String bottomString = "";
 		for (int day = 1; day <= nDays; day++) {
-			calPanel.add(createDayBox("" + day), "weighty=1");
+			if (day >= finalWeekStartDay)
+				bottomString = " bottom=1";
+			if (weekday == 0)
+				calPanel.add(createDayBox("" + day), "weighty=1 left=1" + bottomString);
+			else if (weekday == 6)
+				calPanel.add(createDayBox("" + day), "weighty=1 right=1" + bottomString);
+			else
+				calPanel.add(createDayBox("" + day), "weighty=1" + bottomString);
 			weekday = (weekday + 1) % 7;
 		}
 
 		// Add null boxes for the rest of the last week
 		while (weekday != 0) {
-			calPanel.add(createDayBox(null), "weighty=1");
+			if (weekday == 6)
+				calPanel.add(createDayBox(null), "weighty=1 right=1 bottom=1");
+			else
+				calPanel.add(createDayBox(null), "weighty=1 bottom=1");
 			weekday = (weekday + 1) % 7;
 		}
 		validate();
@@ -312,7 +328,9 @@ public class CalendarPanel extends JPanel {
 				}
 			}
 			if (highlight)
-				label.setBorder(BorderFactory.createCompoundBorder(outerDayBorder, innerDayBorder));
+				label.setBorder(BorderFactory.createCompoundBorder(outerDayLabelBorder, innerDayLabelBorder));
+			else
+				label.setBorder(new MatteBorder(0, 0, 1, 0, Color.BLACK));
 
 			JList<CalendarDayModel> taskList = new JList<>(taskListModel);
 			taskList.setCellRenderer(new CalendarDayRenderer());
@@ -323,6 +341,7 @@ public class CalendarPanel extends JPanel {
 			scrollPane.setPreferredSize(
 					new Dimension((int) dayBox.getMinimumSize().getWidth(), (int) dayBox.getMinimumSize().getHeight()));
 			scrollPane.setBackground(Color.WHITE);
+			scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
 			dayBox.add(scrollPane, BorderLayout.CENTER);
 
 			label.addMouseListener(new MouseAdapter() {
@@ -369,7 +388,7 @@ public class CalendarPanel extends JPanel {
 			});
 		}
 		dayBox.setOpaque(true);
-		dayBox.setBorder(new LineBorder(Color.BLACK));
+		dayBox.setBorder(new LineBorder(Color.BLACK, 1, true));
 		return dayBox;
 	}
 
@@ -385,7 +404,7 @@ public class CalendarPanel extends JPanel {
 			// Expand selected day
 			dayPanelIdx = dayIdx;
 			dayPanel.setLayout(new BorderLayout());
-			dayPanel.setBorder(new LineBorder(Color.BLACK));
+			dayPanel.setBorder(new LineBorder(Color.BLACK, 1, true));
 			localScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 			// Calculate position, adjust for panel edges
