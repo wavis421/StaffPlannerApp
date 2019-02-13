@@ -51,7 +51,7 @@ public class EmailDialog extends JDialog {
 	// Private instance variables
 	private static String userName = "";
 	private static char[] password;
-	private static int port;
+	private static Integer port;
 	private ArrayList<String> emailRecipients;
 
 	// Dialog panels
@@ -98,8 +98,6 @@ public class EmailDialog extends JDialog {
 		sendButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				generateAndSendEmail();
-
-				// TODO: determine whether email EVENT needed??
 				setVisible(false);
 				dispose();
 			}
@@ -191,9 +189,9 @@ public class EmailDialog extends JDialog {
 		Properties properties = System.getProperties();
 		properties.put("mail.smtp.auth", "true");
 		properties.put("mail.smtp.host", "smtp.gmail.com");
-		properties.put("mail.smtp.socketFactory.port", "465");
+		properties.put("mail.smtp.socketFactory.port", port.toString());
 		properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-		properties.put("mail.smtp.port", "465");
+		properties.put("mail.smtp.port", port.toString());
 
 		// Session session = Session.getDefaultInstance(properties, null);
 		Session session = Session.getDefaultInstance(properties, new javax.mail.Authenticator() {

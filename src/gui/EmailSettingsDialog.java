@@ -44,7 +44,7 @@ public class EmailSettingsDialog extends JDialog {
 	public EmailSettingsDialog(JDialog parent) {
 		super(parent, "Configure Email SENDER...", true);
 		
-		portSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
+		portSpinner = new JSpinner(new SpinnerNumberModel(465, 0, 9999, 1));
 		userName = new JTextField(30);
 		password = new JPasswordField(30);
 		password.setEchoChar('*');
