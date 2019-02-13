@@ -232,6 +232,8 @@ public class CalendarPanel extends JPanel {
 		leftLabel = new JLabel("<<", SwingConstants.RIGHT);
 		rightLabel = new JLabel(">>");
 
+		leftLabel.setForeground(CustomFonts.ICON_COLOR);
+		rightLabel.setForeground(CustomFonts.ICON_COLOR);
 		leftLabel.setFont(CustomFonts.CAL_TITLE_BOLD_FONT);
 		rightLabel.setFont(CustomFonts.CAL_TITLE_BOLD_FONT);
 
@@ -259,6 +261,7 @@ public class CalendarPanel extends JPanel {
 		String monthName = capitalize(monthNames[month]);
 
 		JLabel label = new JLabel(monthName + " " + year);
+		label.setForeground(CustomFonts.ICON_COLOR);
 		label.setFont(CustomFonts.CAL_TITLE_FONT);
 		label.setHorizontalAlignment(JLabel.CENTER);
 		return label;
