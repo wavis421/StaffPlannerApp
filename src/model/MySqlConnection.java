@@ -17,7 +17,7 @@ public class MySqlConnection {
 	private static final String SSH_HOST = "www.ProgramPlanner.org";
 	private static final String SSH_USER = "wavis421";
 	// TODO: This should be on server??
-	private static final String SSH_KEY_FILE_PATH = "C:\\Users\\Wendy\\Documents\\AppDevelopment\\keystore\\wavisadmin-keypair-ncal.pem";
+	private static final String SSH_KEY_FILE_PATH = "C:\\Users\\wavis\\Documents\\AppDevelopment\\keystore\\wavisadmin-keypair-ncal.pem";
 	private static final String REMOTE_HOST = "127.0.0.1";
 	private static final int REMOTE_PORT = 3306;
 
@@ -50,7 +50,9 @@ public class MySqlConnection {
 			session.setConfig("TCPKeepAlive", "yes");
 			
 			session.connect();
+			System.out.println("Session connected: " + session);
 			session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
+			System.out.println("Port forwarding OK");
 
 		} catch (Exception e) {
 			// TODO: Figure out how to exit cleanly (maybe in Utilities?)
@@ -86,7 +88,9 @@ public class MySqlConnection {
 			dataSource.setPassword(password);
 			dataSource.setAutoReconnect(true);
 
+			System.out.println("Attempting connection to database; user " + user + ", pw " + password);
 			connection = dataSource.getConnection();
+			System.out.println("Connected: " + connection);
 
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Failed to connect to Database: " + e.getMessage());

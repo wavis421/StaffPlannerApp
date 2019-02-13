@@ -77,7 +77,7 @@ public class MainFrame extends JFrame {
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
 
-		ImageIcon icon = new ImageIcon(getClass().getResource("/PPicon24.png"));
+		ImageIcon icon = new ImageIcon(getClass().getResource("../images/PPicon24.png"));
 		setIconImage(icon.getImage());
 
 		// Create components
@@ -108,6 +108,7 @@ public class MainFrame extends JFrame {
 		setVisible(true);
 
 		// Initialize program and roster
+		System.out.println("Starting initializtion of Program & Roster");
 		initializeProgram();
 		initializeRoster();
 
