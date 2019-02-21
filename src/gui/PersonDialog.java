@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -111,7 +110,7 @@ public class PersonDialog extends JDialog {
 		// super(parent, "Add person...", true);
 		super(parent, "Add person...");
 		setLocation(new Point(100, 100));
-		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
+		setModalityType(ModalityType.APPLICATION_MODAL);
 		this.currentProgramName = currentProgram;
 
 		// Save copy of lists used to build tree
@@ -143,7 +142,7 @@ public class PersonDialog extends JDialog {
 			ArrayList<ArrayList<AssignedTasksModel>> assignedTaskListByProgram) {
 		super(parent, "Edit person...", true);
 		setLocation(new Point(100, 100));
-		setModalityType(Dialog.DEFAULT_MODALITY_TYPE.APPLICATION_MODAL);
+		setModalityType(ModalityType.APPLICATION_MODAL);
 		this.currentProgramName = currentProgram;
 
 		// Save copy of lists used to build tree
